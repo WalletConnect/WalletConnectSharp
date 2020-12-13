@@ -1,0 +1,1095 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a29e7d07-325c-4804-b9b2-03cbd092f819" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/indexLayout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Events/EventManager.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Events/JsonRpcResponseEvent.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/ClientMeta.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/EncryptedPayload.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/IEventSource.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/InternalEvent.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/JsonRpcRequest.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/JsonRpcResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/NetworkMessage.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/WCSessionRequestRequest.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Models/WCSessionRequestResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Network/AESCipher.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Network/ICipher.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Network/ITransport.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Network/MessageReceivedEventArgs.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Network/WebsocketTransport.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Utils/Hex.cs" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/WalletConnect.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="304">
+              <caret line="174" column="46" lean-forward="true" selection-start-line="174" selection-start-column="46" selection-end-line="174" selection-end-column="46" />
+              <folding>
+                <marker date="1607880506949" expanded="true" signature="6:348" ph="..." />
+                <marker date="1607880506949" expanded="true" signature="378:6199" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="425:6197" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="504:815" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="1598:2484" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="2520:2894" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="2921:3395" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="2947:3385" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="3458:4137" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="4235:4798" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="4836:5009" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="5143:6006" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="5447:5531" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="5548:5691" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="5752:5933" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="6037:6191" ph="{...}" />
+                <marker date="1607880506949" expanded="true" signature="6082:6181" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Models/WCSessionRequestRequest.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="220">
+              <caret line="14" column="15" selection-start-line="14" selection-start-column="15" selection-end-line="14" selection-end-column="15" />
+              <folding>
+                <marker date="1607880506966" expanded="true" signature="59:905" ph="{...}" />
+                <marker date="1607880506966" expanded="true" signature="119:903" ph="{...}" />
+                <marker date="1607880506966" expanded="true" signature="163:231" ph="{...}" />
+                <marker date="1607880506966" expanded="true" signature="425:718" ph="{...}" />
+                <marker date="1607880506966" expanded="true" signature="484:707" ph="{...}" />
+                <marker date="1607880506966" expanded="true" signature="554:693" ph="{...}" />
+                <marker date="1607880506966" expanded="true" signature="770:897" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Network/WebsocketTransport.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
+              <folding>
+                <marker date="1607831740345" expanded="false" signature="6:152" ph="..." />
+                <marker date="1607831740345" expanded="true" signature="190:1689" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="241:1687" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="318:404" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="525:783" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="864:1358" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="1054:1194" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="1393:1484" ph="{...}" />
+                <marker date="1607831740345" expanded="true" signature="1541:1681" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Network/ITransport.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="264">
+              <caret line="14" column="28" lean-forward="true" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
+              <folding>
+                <marker date="1607831530107" expanded="false" signature="6:76" ph="..." />
+                <marker date="1607831530107" expanded="true" signature="114:366" ph="{...}" />
+                <marker date="1607831530107" expanded="true" signature="162:364" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/b8/acbbaf5e/AsyncMethodBuilderCore.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="248">
+              <caret line="179" column="8" selection-start-line="179" selection-start-column="8" selection-end-line="179" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Network/ICipher.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="132">
+              <caret line="8" column="31" selection-start-line="8" selection-start-column="31" selection-end-line="8" selection-end-column="31" />
+              <folding>
+                <marker date="1607834481845" expanded="false" signature="6:81" ph="..." />
+                <marker date="1607834481845" expanded="true" signature="119:373" ph="{...}" />
+                <marker date="1607834481845" expanded="true" signature="150:371" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Network/AESCipher.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="176">
+              <caret line="14" column="12" selection-start-line="14" selection-start-column="12" selection-end-line="14" selection-end-column="12" />
+              <folding>
+                <marker date="1607879962011" expanded="false" signature="6:180" ph="..." />
+                <marker date="1607879962011" expanded="true" signature="218:3668" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="257:3666" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="376:2398" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="635:2388" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="710:2374" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="1113:1224" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="1352:2356" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="2179:2333" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="2512:3660" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="2838:3650" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="3266:3636" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="3385:3618" ph="{...}" />
+                <marker date="1607879962011" expanded="true" signature="3488:3596" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/f1/945d0b09/ExceptionDispatchInfo.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="511">
+              <caret line="101" column="6" selection-start-line="101" selection-start-column="6" selection-end-line="101" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/a9/edb874c0/ExecutionContext.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="248">
+              <caret line="339" column="6" selection-start-line="339" selection-start-column="6" selection-end-line="339" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/WalletConnectSharpTest/Program.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="484">
+              <caret line="22" column="49" selection-start-line="22" selection-start-column="49" selection-end-line="22" selection-end-column="49" />
+              <folding>
+                <marker date="1607880595059" expanded="true" signature="6:135" ph="..." />
+                <marker date="1607880595059" expanded="true" signature="169:890" ph="{...}" />
+                <marker date="1607880595059" expanded="true" signature="198:888" ph="{...}" />
+                <marker date="1607880595059" expanded="true" signature="257:882" ph="{...}" />
+                <marker date="1607880595059" expanded="true" signature="326:597" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>clientId =</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Models/ClientMeta.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/62/a9848447/EventArgs.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/WCSessionRequestResponse.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/d1/f646d5df/__DynamicallyInvokableAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Network/AESCipher.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/.babun/cygwin/home/hyper/Projects/New Arc/Assets/Scripts/Inventory/IInventory.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Network/WebsocketTransport.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Network/ICipher.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Utils/Hex.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/IEventSource.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/InternalEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/94/7593a3ad/Encoding.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Events/JsonRpcResponseEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Events/EventManager.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WalletConnectSharpTest/Program.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/cf/4dfcaca0/Dictionary`2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/8e/eae7ea2c/ObjectEqualityComparer`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/.babun/cygwin/home/hyper/Projects/New Arc/Assets/Scripts/Item/ItemData/ModifierItemData.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/92D104CA-2142-4D04-9869-D1F4824E1972/2/Observable.Extensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Dummy.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7BE06C63-6E04-42F8-B66A-D297A8E8705B/7d/ce584066/WebsocketClient.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/WalletConnect.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/75/f2d20def/RuntimeType.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/NetworkMessage.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/21/ccf7d9c8/AsyncVoidMethodBuilder.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/EncryptedPayload.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/78/2457d0c2/IObservable`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/packages.config" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/a9/edb874c0/ExecutionContext.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/92D104CA-2142-4D04-9869-D1F4824E1972/4E/Observable.Single.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/JsonRpcRequest.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/JsonRpcResponse.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/f1/945d0b09/ExceptionDispatchInfo.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/WCSessionRequestRequest.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/92D104CA-2142-4D04-9869-D1F4824E1972/37/Subject.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Network/ITransport.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Network/MessageReceivedEventArgs.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/b8/acbbaf5e/AsyncMethodBuilderCore.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Class1.cs" />
+        <option value="$PROJECT_DIR$/Test.cs" />
+        <option value="$PROJECT_DIR$/Models/InternalEvent.cs" />
+        <option value="$PROJECT_DIR$/Models/WCSessionRequestRequest .cs" />
+        <option value="$PROJECT_DIR$/Models/ClientMeta.cs" />
+        <option value="$PROJECT_DIR$/Models/WcSessionRequestResponse.cs" />
+        <option value="$PROJECT_DIR$/Models/EncryptedPayload.cs" />
+        <option value="$PROJECT_DIR$/Models/SocketMessage.cs" />
+        <option value="$PROJECT_DIR$/Models/NetworkMessage.cs" />
+        <option value="$PROJECT_DIR$/Network/MessageReceivedEventArgs.cs" />
+        <option value="$PROJECT_DIR$/Network/ITransport.cs" />
+        <option value="$PROJECT_DIR$/Network/WebsocketTransport.cs" />
+        <option value="$PROJECT_DIR$/Utils/Hex.cs" />
+        <option value="$PROJECT_DIR$/Network/AesEngineCipher.cs" />
+        <option value="$PROJECT_DIR$/Network/ICipher.cs" />
+        <option value="$PROJECT_DIR$/Models/IEventSource.cs" />
+        <option value="$PROJECT_DIR$/Models/JsonRpcRequest.cs" />
+        <option value="$PROJECT_DIR$/Models/JsonRpcResponse.cs" />
+        <option value="$PROJECT_DIR$/Models/WCCSessionRequestResponse.cs" />
+        <option value="$PROJECT_DIR$/Models/WCSessionRequestResponse.cs" />
+        <option value="$PROJECT_DIR$/Events/EventHandler.cs" />
+        <option value="$PROJECT_DIR$/Events/JsonRpcResponseEvent.cs" />
+        <option value="$PROJECT_DIR$/Events/EventManager.cs" />
+        <option value="$PROJECT_DIR$/Network/AESCipher.cs" />
+        <option value="$PROJECT_DIR$/Models/WCSessionRequestRequest.cs" />
+        <option value="$PROJECT_DIR$/WalletConnect.cs" />
+        <option value="$PROJECT_DIR$/WalletConnectSharpTest/Program.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1040" />
+    <option name="height" value="784" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="SolutionExplorer" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="AssemblyExplorer" />
+      <pane id="SolutionExplorer">
+        <subPane>
+          <expand>
+            <path>
+              <item name="Project" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="WalletConnectSharp" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+            <path>
+              <item name="Project" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="WalletConnectSharp" type="24d0babc:SolutionExplorerModelNode" />
+              <item name="WalletConnectSharp" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+            <path>
+              <item name="Project" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="WalletConnectSharp" type="24d0babc:SolutionExplorerModelNode" />
+              <item name="WalletConnectSharp" type="24d0babc:SolutionExplorerModelNode" />
+              <item name="Network" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+            <path>
+              <item name="Project" type="784c90a0:SolutionExplorerRootNode" />
+              <item name="WalletConnectSharp" type="24d0babc:SolutionExplorerModelNode" />
+              <item name="WalletConnectSharpTest" type="24d0babc:SolutionExplorerModelNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <option name="show-all-files" value="false" />
+      </pane>
+      <pane id="FileSystemExplorer" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration name="Default" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="$PROJECT_DIR$/WalletConnectSharpTest/bin/Debug/WalletConnectSharpTest.exe" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/WalletConnectSharpTest/bin/Debug" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/WalletConnectSharpTest/WalletConnectSharpTest.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="Console" />
+      <option name="PROJECT_TFM" value=".NETFramework,Version=v4.7.2" />
+      <method v="2">
+        <option name="Build" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a29e7d07-325c-4804-b9b2-03cbd092f819" name="Default Changelist" comment="" />
+      <created>1607805529905</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1607805529905</updated>
+      <workItem from="1607805532422" duration="18365000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="18365000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="2576" height="1416" extended-state="6" />
+    <layout>
+      <window_info id="Favorites" side_tool="true" />
+      <window_info id="Image Layers" />
+      <window_info id="Capture Tool" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="NuGet" weight="0.32969603" />
+      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" />
+      <window_info anchor="bottom" id="Unit Tests" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="bottom" id="Database Changes" />
+      <window_info anchor="bottom" id="Performance Profiler" />
+      <window_info anchor="bottom" id="Build" weight="0.32969603" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32969603" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32969603" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.3998441" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="right" id="Capture Analysis" />
+      <window_info anchor="right" id="Errors In Solution" />
+      <window_info anchor="right" id="Database" />
+      <window_info anchor="right" id="Unit Tests Coverage" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="null" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Events/EventManager.cs</url>
+          <line>30</line>
+          <properties documentPath="$PROJECT_DIR$/Events/EventManager.cs" initialLine="28">
+            <startOffsets>
+              <option value="1252" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1312" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Events/EventManager.cs</url>
+          <line>28</line>
+          <properties documentPath="$PROJECT_DIR$/Events/EventManager.cs" initialLine="27">
+            <startOffsets>
+              <option value="1140" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1210" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>112</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="111">
+            <startOffsets>
+              <option value="3481" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3537" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>116</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="115">
+            <startOffsets>
+              <option value="3627" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3643" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>127</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="126">
+            <startOffsets>
+              <option value="4111" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4127" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>122</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="121">
+            <startOffsets>
+              <option value="3966" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4015" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>132</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="131">
+            <startOffsets>
+              <option value="4258" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4321" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>145</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="144">
+            <startOffsets>
+              <option value="4754" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4788" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Network/AESCipher.cs</url>
+          <line>14</line>
+          <properties documentPath="$PROJECT_DIR$/Network/AESCipher.cs" initialLine="14">
+            <startOffsets>
+              <option value="399" />
+            </startOffsets>
+            <endOffsets>
+              <option value="420" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Network/WebsocketTransport.cs</url>
+          <line>34</line>
+          <properties documentPath="$PROJECT_DIR$/Network/WebsocketTransport.cs" initialLine="34">
+            <startOffsets>
+              <option value="887" />
+            </startOffsets>
+            <endOffsets>
+              <option value="919" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Network/WebsocketTransport.cs</url>
+          <line>58</line>
+          <properties documentPath="$PROJECT_DIR$/Network/WebsocketTransport.cs" initialLine="58">
+            <startOffsets>
+              <option value="1564" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1617" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Network/WebsocketTransport.cs</url>
+          <line>25</line>
+          <properties documentPath="$PROJECT_DIR$/Network/WebsocketTransport.cs" initialLine="25">
+            <startOffsets>
+              <option value="617" />
+            </startOffsets>
+            <endOffsets>
+              <option value="660" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/WalletConnect.cs</url>
+          <line>159</line>
+          <properties documentPath="$PROJECT_DIR$/WalletConnect.cs" initialLine="159">
+            <startOffsets>
+              <option value="5237" />
+            </startOffsets>
+            <endOffsets>
+              <option value="5296" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>emType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetFields(BindingFlags.NonPublic)</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance |                                )</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance |                                  BindingFlags.Default)</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |                                  BindingFlags.Default)</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetFields()</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetField(@event.Name, BindingFlags.Public | BindingFlags.Static);</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetField(@event.Name, BindingFlags.Public);</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>emType.GetField(@event.Name);</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Test.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="6" column="12" selection-start-line="6" selection-start-column="12" selection-end-line="6" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/InternalEvent.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="7" column="29" lean-forward="true" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
+          <folding>
+            <marker date="1607808114976" expanded="true" signature="59:168" ph="{...}" />
+            <marker date="1607808114976" expanded="true" signature="92:166" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/ClientMeta.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="4" column="27" lean-forward="true" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="27" />
+          <folding>
+            <marker date="1607809080172" expanded="true" signature="59:358" ph="{...}" />
+            <marker date="1607809080172" expanded="true" signature="89:356" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/EncryptedPayload.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+          <folding>
+            <marker date="1607812272446" expanded="true" signature="35:169" ph="{...}" />
+            <marker date="1607812272446" expanded="true" signature="71:167" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/78/2457d0c2/IObservable`1.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/92D104CA-2142-4D04-9869-D1F4824E1972/2/Observable.Extensions.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="47" column="78" selection-start-line="47" selection-start-column="78" selection-end-line="47" selection-end-column="78" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/92D104CA-2142-4D04-9869-D1F4824E1972/4E/Observable.Single.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1430">
+          <caret line="66" column="43" selection-start-line="66" selection-start-column="43" selection-end-line="66" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/92D104CA-2142-4D04-9869-D1F4824E1972/37/Subject.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="14" column="24" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7BE06C63-6E04-42F8-B66A-D297A8E8705B/7d/ce584066/WebsocketClient.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="507">
+          <caret line="148" column="30" lean-forward="true" selection-start-line="148" selection-start-column="30" selection-end-line="148" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/d1/f646d5df/__DynamicallyInvokableAttribute.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="9" column="22" selection-start-line="9" selection-start-column="22" selection-end-line="9" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/62/a9848447/EventArgs.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="17" column="16" selection-start-line="17" selection-start-column="16" selection-end-line="17" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/NetworkMessage.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="4" column="27" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="27" />
+          <folding>
+            <marker date="1607830491743" expanded="true" signature="59:356" ph="{...}" />
+            <marker date="1607830491743" expanded="true" signature="93:354" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.babun/cygwin/home/hyper/Projects/New Arc/Assets/Scripts/Inventory/IInventory.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="21" column="4" lean-forward="true" selection-start-line="21" selection-start-column="4" selection-end-line="21" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#104#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/MessageReceivedEventArgs.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="6" lean-forward="true" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
+          <folding>
+            <marker date="1607830802639" expanded="true" signature="6:46" ph="..." />
+            <marker date="1607830802639" expanded="true" signature="84:442" ph="{...}" />
+            <marker date="1607830802639" expanded="true" signature="140:440" ph="{...}" />
+            <marker date="1607830802639" expanded="true" signature="354:434" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Utils/Hex.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="12" column="36" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="36" />
+          <folding>
+            <marker date="1607833445855" expanded="true" signature="49:1157" ph="{...}" />
+            <marker date="1607833445855" expanded="true" signature="79:1155" ph="{...}" />
+            <marker date="1607833445855" expanded="true" signature="166:294" ph="{...}" />
+            <marker date="1607833445855" expanded="true" signature="358:755" ph="{...}" />
+            <marker date="1607833445855" expanded="true" signature="595:720" ph="{...}" />
+            <marker date="1607833445855" expanded="true" signature="808:1149" ph="{...}" />
+            <marker date="1607833445855" expanded="true" signature="854:1074" ph="/* For uppercase A-F letters: ... */" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/AesEngineCipher.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="39" selection-start-line="8" selection-start-column="39" selection-end-line="8" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/63DD8BF9-8CFA-4BA9-85AF-735EF1A56BA9/94/7593a3ad/Encoding.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="278">
+          <caret line="1305" column="23" lean-forward="true" selection-start-line="1305" selection-start-column="23" selection-end-line="1305" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/IEventSource.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="88">
+          <caret line="4" column="27" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="27" />
+          <folding>
+            <marker date="1607876483096" expanded="true" signature="35:115" ph="{...}" />
+            <marker date="1607876483096" expanded="true" signature="71:113" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/JsonRpcRequest.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="572">
+          <caret line="27" column="32" selection-start-line="27" selection-start-column="32" selection-end-line="27" selection-end-column="32" />
+          <folding>
+            <marker date="1607876483112" expanded="false" signature="6:59" ph="..." />
+            <marker date="1607876483112" expanded="true" signature="96:620" ph="{...}" />
+            <marker date="1607876483112" expanded="true" signature="154:618" ph="{...}" />
+            <marker date="1607876483112" expanded="true" signature="390:441" ph="{...}" />
+            <marker date="1607876483112" expanded="true" signature="472:528" ph="{...}" />
+            <marker date="1607876483112" expanded="true" signature="557:612" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/JsonRpcResponse.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="13" column="21" selection-start-line="13" selection-start-column="21" selection-end-line="13" selection-end-column="21" />
+          <folding>
+            <marker date="1607876573420" expanded="true" signature="6:39" ph="..." />
+            <marker date="1607876573420" expanded="true" signature="76:1141" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="126:1139" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="346:400" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="429:491" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="514:565" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="596:652" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="687:1039" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="861:926" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="961:1029" ph="{...}" />
+            <marker date="1607876573420" expanded="true" signature="1068:1133" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/packages.config">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/WCSessionRequestResponse.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22">
+          <caret line="2" column="19" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
+          <folding>
+            <marker date="1607876915798" expanded="true" signature="35:416" ph="{...}" />
+            <marker date="1607876915798" expanded="true" signature="97:414" ph="{...}" />
+            <marker date="1607876915798" expanded="true" signature="210:408" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/8e/eae7ea2c/ObjectEqualityComparer`1.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="26" column="6" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.babun/cygwin/home/hyper/Projects/New Arc/Assets/Scripts/Item/ItemData/ModifierItemData.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="24" column="41" selection-start-line="24" selection-start-column="41" selection-end-line="24" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#174#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/cf/4dfcaca0/Dictionary`2.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="221" column="10" selection-start-line="221" selection-start-column="10" selection-end-line="221" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Events/JsonRpcResponseEvent.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="18" column="16" selection-start-line="18" selection-start-column="16" selection-end-line="18" selection-end-column="16" />
+          <folding>
+            <marker date="1607879571103" expanded="true" signature="6:46" ph="..." />
+            <marker date="1607879571103" expanded="true" signature="83:464" ph="{...}" />
+            <marker date="1607879571103" expanded="true" signature="164:462" ph="{...}" />
+            <marker date="1607879571103" expanded="true" signature="267:320" ph="{...}" />
+            <marker date="1607879571103" expanded="true" signature="365:456" ph="{...}" />
+            <marker date="1607879571103" expanded="true" signature="400:445" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/75/f2d20def/RuntimeType.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="239">
+          <caret line="2331" column="8" selection-start-line="2331" selection-start-column="8" selection-end-line="2331" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Events/EventManager.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="16" column="12" selection-start-line="16" selection-start-column="12" selection-end-line="16" selection-end-column="12" />
+          <folding>
+            <marker date="1607879658779" expanded="false" signature="6:124" ph="..." />
+            <marker date="1607879658779" expanded="true" signature="161:1856" ph="{...}" />
+            <marker date="1607879658779" expanded="true" signature="193:1854" ph="{...}" />
+            <marker date="1607879658779" expanded="true" signature="446:1604" ph="{...}" />
+            <marker date="1607879658779" expanded="true" signature="601:1594" ph="{...}" />
+            <marker date="1607879658779" expanded="true" signature="1391:1502" ph="{...}" />
+            <marker date="1607879658779" expanded="true" signature="1676:1848" ph="{...}" />
+            <marker date="1607879658779" expanded="true" signature="1765:1838" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/21/ccf7d9c8/AsyncVoidMethodBuilder.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="30" column="6" selection-start-line="30" selection-start-column="6" selection-end-line="30" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/a9/edb874c0/ExecutionContext.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="339" column="6" selection-start-line="339" selection-start-column="6" selection-end-line="339" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/f1/945d0b09/ExceptionDispatchInfo.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="511">
+          <caret line="101" column="6" selection-start-line="101" selection-start-column="6" selection-end-line="101" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/ICipher.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="8" column="31" selection-start-line="8" selection-start-column="31" selection-end-line="8" selection-end-column="31" />
+          <folding>
+            <marker date="1607834481845" expanded="false" signature="6:81" ph="..." />
+            <marker date="1607834481845" expanded="true" signature="119:373" ph="{...}" />
+            <marker date="1607834481845" expanded="true" signature="150:371" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/D6D3AC03-BF86-4882-89C2-EBF3A45CE0A1/b8/acbbaf5e/AsyncMethodBuilderCore.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="179" column="8" selection-start-line="179" selection-start-column="8" selection-end-line="179" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/ITransport.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="14" column="28" lean-forward="true" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
+          <folding>
+            <marker date="1607831530107" expanded="false" signature="6:76" ph="..." />
+            <marker date="1607831530107" expanded="true" signature="114:366" ph="{...}" />
+            <marker date="1607831530107" expanded="true" signature="162:364" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/WCSessionRequestRequest.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="14" column="15" selection-start-line="14" selection-start-column="15" selection-end-line="14" selection-end-column="15" />
+          <folding>
+            <marker date="1607880506966" expanded="true" signature="59:905" ph="{...}" />
+            <marker date="1607880506966" expanded="true" signature="119:903" ph="{...}" />
+            <marker date="1607880506966" expanded="true" signature="163:231" ph="{...}" />
+            <marker date="1607880506966" expanded="true" signature="425:718" ph="{...}" />
+            <marker date="1607880506966" expanded="true" signature="484:707" ph="{...}" />
+            <marker date="1607880506966" expanded="true" signature="554:693" ph="{...}" />
+            <marker date="1607880506966" expanded="true" signature="770:897" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/AESCipher.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="14" column="12" selection-start-line="14" selection-start-column="12" selection-end-line="14" selection-end-column="12" />
+          <folding>
+            <marker date="1607879962011" expanded="false" signature="6:180" ph="..." />
+            <marker date="1607879962011" expanded="true" signature="218:3668" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="257:3666" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="376:2398" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="635:2388" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="710:2374" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="1113:1224" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="1352:2356" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="2179:2333" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="2512:3660" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="2838:3650" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="3266:3636" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="3385:3618" ph="{...}" />
+            <marker date="1607879962011" expanded="true" signature="3488:3596" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WalletConnect.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="174" column="46" lean-forward="true" selection-start-line="174" selection-start-column="46" selection-end-line="174" selection-end-column="46" />
+          <folding>
+            <marker date="1607880506949" expanded="true" signature="6:348" ph="..." />
+            <marker date="1607880506949" expanded="true" signature="378:6199" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="425:6197" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="504:815" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="1598:2484" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="2520:2894" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="2921:3395" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="2947:3385" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="3458:4137" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="4235:4798" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="4836:5009" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="5143:6006" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="5447:5531" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="5548:5691" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="5752:5933" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="6037:6191" ph="{...}" />
+            <marker date="1607880506949" expanded="true" signature="6082:6181" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/WebsocketTransport.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="25" column="12" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
+          <folding>
+            <marker date="1607831740345" expanded="false" signature="6:152" ph="..." />
+            <marker date="1607831740345" expanded="true" signature="190:1689" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="241:1687" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="318:404" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="525:783" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="864:1358" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="1054:1194" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="1393:1484" ph="{...}" />
+            <marker date="1607831740345" expanded="true" signature="1541:1681" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WalletConnectSharpTest/Program.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="484">
+          <caret line="22" column="49" selection-start-line="22" selection-start-column="49" selection-end-line="22" selection-end-column="49" />
+          <folding>
+            <marker date="1607880595059" expanded="true" signature="6:135" ph="..." />
+            <marker date="1607880595059" expanded="true" signature="169:890" ph="{...}" />
+            <marker date="1607880595059" expanded="true" signature="198:888" ph="{...}" />
+            <marker date="1607880595059" expanded="true" signature="257:882" ph="{...}" />
+            <marker date="1607880595059" expanded="true" signature="326:597" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
