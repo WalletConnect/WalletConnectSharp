@@ -3,11 +3,11 @@ using WalletConnectSharp.Models;
 
 namespace WalletConnectSharp.Events
 {
-    public class JsonRpcResponseEvent<T> : EventArgs where T : JsonRpcResponse
+    public class JsonRpcRequestEvent<T> : EventArgs where T : JsonRpcRequest
     {
         public T Response { get; private set; }
 
-        public JsonRpcResponseEvent(T response)
+        public JsonRpcRequestEvent(T response)
         {
             Response = response;
         }

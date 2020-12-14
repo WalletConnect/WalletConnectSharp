@@ -31,13 +31,12 @@ namespace WalletConnectSharp
 
         private string clientId = "";
         private readonly string _handshakeTopic;
+        private long _handshakeId;
         private const string Version = "1";
         private readonly string _bridgeUrl;
         private string _key;
         private byte[] _keyRaw;
         private string peerId;
-        
-        public EventManager Events { get; private set; }
         
         public int? ChainId { get; }
 
@@ -49,11 +48,9 @@ namespace WalletConnectSharp
 
         public WalletConnect(ClientMeta clientMeta, ITransport transport = null,
             ICipher cipher = null,
-            int? chainId = null, 
+            int? chainId = 1, 
             string bridgeUrl = "https://bridge.walletconnect.org")
         {
-            Events = new EventManager();
-            
             this.ClientMetadata = clientMeta;
             this.ChainId = chainId;
             
@@ -62,11 +59,6 @@ namespace WalletConnectSharp
             _handshakeTopic = topicGuid.ToString();
 
             clientId = Guid.NewGuid().ToString();
-
-            if (bridgeUrl.StartsWith("https"))
-                bridgeUrl = bridgeUrl.Replace("https", "wss");
-            else if (bridgeUrl.StartsWith("http"))
-                bridgeUrl = bridgeUrl.Replace("http", "ws");
             
             if (transport == null)
                 transport = new WebsocketTransport();
@@ -108,24 +100,26 @@ namespace WalletConnectSharp
             }
         }
 
+        private void SubscribeToInternalEvents()
+        {
+            Transport.ListenFor("wc_sessionRequest",
+                delegate(object sender, JsonRpcRequestEvent<WcSessionRequestRequest> payload)
+                {
+                    Console.WriteLine(payload);
+                });
+        }
+
         public async Task<WCSessionRequestResponse> Connect()
         {
             Transport.MessageReceived += TransportOnMessageReceived;
             
             await Transport.Open(this._bridgeUrl);
-            
-            CreateSession();
-            
-            TaskCompletionSource<WCSessionRequestResponse> eventCompleted = new TaskCompletionSource<WCSessionRequestResponse>(TaskCreationOptions.None);
 
-            Events.SessionResponse += delegate(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> eventResponse)
-            {
-                eventCompleted.SetResult(eventResponse.Response);
-            };
+            await Transport.Subscribe(this.clientId);
             
-            var response = await eventCompleted.Task;
-
-            return response;
+            SubscribeToInternalEvents();
+            
+            return await CreateSession();
         }
 
         private async void TransportOnMessageReceived(object sender, MessageReceivedEventArgs e)
@@ -141,19 +135,43 @@ namespace WalletConnectSharp
 
             var json = await Cipher.DecryptWithKey(_keyRaw, encryptedPayload);
 
-            var jsonResponse = JsonConvert.DeserializeObject<JsonRpcResponse>(json);
+            var response = JsonConvert.DeserializeObject<JsonRpcResponse>(json);
             
-            Events.ExecuteEvent(jsonResponse);
+            //TODO Handle this case better, how to differentiate between Response and Request Object?
+            if (response.Event != null)
+                Transport.Trigger(response.Event, json);
+            else
+            {
+                var request = JsonConvert.DeserializeObject<JsonRpcRequest>(json);
+                
+                if (request.ID != 0)
+                    Transport.Trigger("request:" + request.ID, json);
+            }
         }
 
-        private void CreateSession()
+        private async Task<WCSessionRequestResponse> CreateSession()
         {
             var data = new WcSessionRequestRequest(ClientMetadata, clientId, ChainId);
+
+            this._handshakeId = data.ID;
             
-            SendRequest(data, this._handshakeTopic);
+            await SendRequest(data, this._handshakeTopic);
+            
+            TaskCompletionSource<WCSessionRequestResponse> eventCompleted = new TaskCompletionSource<WCSessionRequestResponse>(TaskCreationOptions.None);
+
+            //Subscribe and provide a delegate for the event
+            Transport.ListenFor(this._handshakeId.ToString(), 
+                delegate(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> eventResponse)
+                {
+                    eventCompleted.SetResult(eventResponse.Response);
+                });
+            
+            var response = await eventCompleted.Task;
+
+            return response;
         }
 
-        private async void SendRequest(JsonRpcRequest requestObject, string sendingTopic = null, bool? forcePushNotification = null)
+        private async Task SendRequest(JsonRpcRequest requestObject, string sendingTopic = null, bool? forcePushNotification = null)
         {
             string json = JsonConvert.SerializeObject(requestObject);
 
@@ -180,7 +198,7 @@ namespace WalletConnectSharp
                 Type = "pub"
             };
             
-            this.Transport.SendMessage(message);
+            await this.Transport.SendMessage(message);
         }
 
         public void Dispose()

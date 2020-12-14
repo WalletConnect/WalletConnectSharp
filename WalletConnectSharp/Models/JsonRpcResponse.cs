@@ -6,7 +6,7 @@ namespace WalletConnectSharp.Models
     public class JsonRpcResponse : IEventSource
     {
         [JsonProperty]
-        private int id;
+        private long id;
         
         [JsonProperty]
         private string jsonrpc = "2.0";
@@ -14,21 +14,25 @@ namespace WalletConnectSharp.Models
         [JsonProperty]
         private JsonRpcError error;
 
+        [JsonIgnore]
         public JsonRpcError Error
         {
             get { return error; }
         }
 
+        [JsonIgnore]
         public bool IsError
         {
             get { return error != null; }
         }
 
-        public int ID
+        [JsonIgnore]
+        public long ID
         {
             get { return id; }
         }
 
+        [JsonIgnore]
         public string JsonRPC
         {
             get { return jsonrpc; }
@@ -42,17 +46,20 @@ namespace WalletConnectSharp.Models
             [JsonProperty]
             private string message;
 
+            [JsonIgnore]
             public int? Code
             {
                 get { return code; }
             }
 
+            [JsonIgnore]
             public string Message
             {
                 get { return message; }
             }
         }
 
+        [JsonIgnore]
         public string Event
         {
             get { return "response:" + ID; }

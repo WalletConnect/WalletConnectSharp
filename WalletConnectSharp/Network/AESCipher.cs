@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,6 @@ namespace WalletConnectSharp.Network
                     ciphor.Mode = CipherMode.CBC;
                     ciphor.Padding = PaddingMode.PKCS7;
                     ciphor.KeySize = 256;
-                    ciphor.BlockSize = 128;
 
                     byte[] iv = ciphor.IV;
 
@@ -39,18 +39,20 @@ namespace WalletConnectSharp.Network
 
                     using (HMACSHA256 hmac = new HMACSHA256(key))
                     {
+                        hmac.Initialize();
+                        
                         byte[] toSign = new byte[iv.Length + encryptedContent.Length];
                         
                         //copy our 2 array into one
-                        System.Buffer.BlockCopy(iv, 0, toSign, 0, iv.Length);
-                        System.Buffer.BlockCopy(encryptedContent, 0, toSign, iv.Length, encryptedContent.Length);
-
+                        Buffer.BlockCopy(encryptedContent, 0, toSign, 0,encryptedContent.Length);
+                        Buffer.BlockCopy(iv, 0, toSign, encryptedContent.Length, iv.Length);
+                        
                         byte[] signature = hmac.ComputeHash(toSign);
                         
-                        string ivHex = BitConverter.ToString(iv).Replace("-", "");
-                        string dataHex = BitConverter.ToString(encryptedContent).Replace("-", "");
-                        string hmacHex = BitConverter.ToString(signature).Replace("-", "");
-
+                        string ivHex = iv.ToHex();
+                        string dataHex = encryptedContent.ToHex();
+                        string hmacHex = signature.ToHex();
+                        
                         return new EncryptedPayload()
                         {
                             data = dataHex,
@@ -62,22 +64,36 @@ namespace WalletConnectSharp.Network
             }
         }
 
-        public Task<string> DecryptWithKey(byte[] key, EncryptedPayload encryptedData, Encoding encoding = null)
+        public async Task<string> DecryptWithKey(byte[] key, EncryptedPayload encryptedData, Encoding encoding = null)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;
             
             byte[] rawData = encryptedData.data.FromHex();
             byte[] iv = encryptedData.iv.FromHex();
-            byte[] hmac = encryptedData.hmac.FromHex();
+            byte[] hmacReceived = encryptedData.hmac.FromHex();
 
+            using (HMACSHA256 hmac = new HMACSHA256(key))
+            {
+                hmac.Initialize();
+
+                byte[] toSign = new byte[iv.Length + rawData.Length];
+                        
+                //copy our 2 array into one
+                Buffer.BlockCopy(rawData, 0, toSign, 0,rawData.Length);
+                Buffer.BlockCopy(iv, 0, toSign, rawData.Length, iv.Length);
+                
+                byte[] signature = hmac.ComputeHash(toSign);
+
+                if (!signature.SequenceEqual(hmacReceived))
+                    throw new InvalidDataException("HMAC Provided does not match expected"); //Ignore
+            }
 
             using (AesManaged cryptor = new AesManaged())
             {
                 cryptor.Mode = CipherMode.CBC;
                 cryptor.Padding = PaddingMode.PKCS7;
                 cryptor.KeySize = 256;
-                cryptor.BlockSize = 128;
 
                 cryptor.IV = iv;
                 cryptor.Key = key;
@@ -86,11 +102,23 @@ namespace WalletConnectSharp.Network
 
                 using (MemoryStream ms = new MemoryStream(rawData))
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    using (MemoryStream sink = new MemoryStream())
                     {
-                        using (StreamReader sr = new StreamReader(cs, encoding))
+                        using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
                         {
-                            return sr.ReadToEndAsync();
+                            int read = 0;
+                            byte[] buffer = new byte[1024];
+                            do
+                            {
+                                read = await cs.ReadAsync(buffer, 0, buffer.Length);
+                                
+                                if (read > 0)
+                                    await sink.WriteAsync(buffer, 0, read);
+                            } while (read > 0);
+
+                            await cs.FlushAsync();
+
+                            return encoding.GetString(sink.ToArray());
                         }
                     }
                 }

@@ -1,5 +1,8 @@
+using WalletConnectSharp.Events;
+
 namespace WalletConnectSharp.Models
 {
+    [RegisterMethod("wc_sessionRequest")]
     public class WCSessionRequestResponse : JsonRpcResponse
     {
         public WcSessionRequestResponseResult result;

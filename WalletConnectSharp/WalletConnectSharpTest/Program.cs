@@ -24,7 +24,7 @@ namespace WalletConnectSharpTest
 
             var result = await walletConnect.Connect();
             
-            Console.WriteLine(result.result.peerMeta);
+            Console.WriteLine(result.result.accounts[0]);
         }
     }
 }

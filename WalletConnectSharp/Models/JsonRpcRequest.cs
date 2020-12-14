@@ -1,28 +1,40 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using WalletConnectSharp.Utils;
 
 namespace WalletConnectSharp.Models
 {
-    public abstract class JsonRpcRequest : IEventSource
+    public class JsonRpcRequest : IEventSource
     {
         [JsonProperty]
-        private int id;
+        private long id;
         [JsonProperty]
         private string jsonrpc = "2.0";
         
         [JsonProperty("method")]
-        public abstract string Method { get; }
+        public virtual string Method { get; private set; }
+
+        public JsonRpcRequest()
+        {
+            if (this.id == 0)
+            {
+                this.id = RpcPayloadId.Generate();
+            }
+        }
         
-        public int ID
+        [JsonIgnore]
+        public long ID
         {
             get { return id; }
         }
 
+        [JsonIgnore]
         public string JsonRPC
         {
             get { return jsonrpc; }
         }
 
+        [JsonIgnore]
         public string Event
         {
             get { return Method; }
