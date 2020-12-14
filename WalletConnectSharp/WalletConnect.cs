@@ -140,13 +140,6 @@ namespace WalletConnectSharp
             //TODO Handle this case better, how to differentiate between Response and Request Object?
             if (response.Event != null)
                 Transport.Trigger(response.Event, json);
-            else
-            {
-                var request = JsonConvert.DeserializeObject<JsonRpcRequest>(json);
-                
-                if (request.ID != 0)
-                    Transport.Trigger("request:" + request.ID, json);
-            }
         }
 
         private async Task<WCSessionRequestResponse> CreateSession()
