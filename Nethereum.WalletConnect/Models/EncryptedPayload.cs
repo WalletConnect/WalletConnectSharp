@@ -1,0 +1,11 @@
+namespace Nethereum.WalletConnect.Models
+{
+    public class EncryptedPayload
+    {
+        public string iv;
+
+        public string hmac;
+
+        public string data;
+    }
+}
