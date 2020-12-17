@@ -6,11 +6,7 @@ namespace WalletConnectSharp.Client.Nethereum
 {
     public class FallbackProvider : IClient
     {
-        private static readonly string[] validMethods = new[]
-        {
-            "eth_signTransaction",
-            "eth_sendTransaction"
-        };
+        public static readonly string[] ValidMethods = WalletConnect.SigningMethods;
         
         private readonly IClient _fallback;
         private readonly IClient _signer;
@@ -23,23 +19,23 @@ namespace WalletConnectSharp.Client.Nethereum
         
         public Task SendRequestAsync(RpcRequest request, string route = null)
         {
-            return validMethods.Contains(request.Method) ? _signer.SendRequestAsync(request, route) : _fallback.SendRequestAsync(request, route);
+            return ValidMethods.Contains(request.Method) ? _signer.SendRequestAsync(request, route) : _fallback.SendRequestAsync(request, route);
         }
 
         public Task SendRequestAsync(string method, string route = null, params object[] paramList)
         {
-            return validMethods.Contains(method) ? _signer.SendRequestAsync(method, route, paramList) : _fallback.SendRequestAsync(method, route, paramList);
+            return ValidMethods.Contains(method) ? _signer.SendRequestAsync(method, route, paramList) : _fallback.SendRequestAsync(method, route, paramList);
         }
 
         public RequestInterceptor OverridingRequestInterceptor { get; set; }
         public Task<T> SendRequestAsync<T>(RpcRequest request, string route = null)
         {
-            return validMethods.Contains(request.Method) ? _signer.SendRequestAsync<T>(request, route) : _fallback.SendRequestAsync<T>(request, route);
+            return ValidMethods.Contains(request.Method) ? _signer.SendRequestAsync<T>(request, route) : _fallback.SendRequestAsync<T>(request, route);
         }
 
         public Task<T> SendRequestAsync<T>(string method, string route = null, params object[] paramList)
         {
-            return validMethods.Contains(method) ? _signer.SendRequestAsync<T>(method, route, paramList) : _fallback.SendRequestAsync<T>(method, route, paramList);
+            return ValidMethods.Contains(method) ? _signer.SendRequestAsync<T>(method, route, paramList) : _fallback.SendRequestAsync<T>(method, route, paramList);
         }
     }
 }

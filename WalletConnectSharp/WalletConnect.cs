@@ -18,7 +18,7 @@ namespace WalletConnectSharp
 {
     public class WalletConnect : IDisposable
     {
-        private static readonly string[] SigningMethods = new[]
+        public static readonly string[] SigningMethods = new[]
         {
             "eth_sendTransaction",
             "eth_signTransaction",
