@@ -40,7 +40,7 @@ Console.WriteLine(walletConnectData.chainId);
 
 ## Connecting with NEthereum
 
-With the above, you have enough to use the base WalletConnect protocol. However, this library comes with an NEthereum provider implementation. To use it, you simply invoke `CreateProvider(url)` or `CreateProvider(IClient)`. This is because the `WalletConnect` protocol does not perform read operations, so you must provide either an `Infura Project ID`, a node HTTP url for `HttpProvider` or a custom `IClient`.
+With the above, you have enough to use the base WalletConnect protocol. However, this library comes with an NEthereum provider implementation. To use it, you simply invoke `CreateProvider(url)` or `CreateProvider(IClient)`. You are required to specify an additional RPC URL or a custom `IClient` because the `WalletConnect` protocol does not perform read operations (`eth_call`, `eth_estimateGas`, etc..), so you must provide either an `Infura Project ID`, a node's HTTP url for `HttpProvider` or a custom `IClient`.
 
 Here is an example
 ```csharp
