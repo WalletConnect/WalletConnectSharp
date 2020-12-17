@@ -1,64 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a29e7d07-325c-4804-b9b2-03cbd092f819" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Client/Nethereum/FallbackProvider.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/indexLayout.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.Nethereum.WalletConnect/riderModule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/riderModule.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/indexLayout.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Nethereum.WalletConnect/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/.idea/.idea.WalletConnectSharp/riderModule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.WalletConnectSharp/riderModule.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Client/WalletConnect.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WalletConnect.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Client/WalletConnectClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Client/Nethereum/WalletConnectClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/EventDelegator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/EventDelegator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/EventFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/EventFactory.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/EventManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/EventManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/GenericEventArgs.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/GenericEventArgs.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/IEventProvider.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/IEventProvider.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/Request/JsonRpcResponseEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/Request/JsonRpcResponseEvent.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/Request/JsonRpcResponseEventManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/Request/JsonRpcResponseEventManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/Response/JsonRpcRequestEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/Response/JsonRpcRequestEvent.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Events/Response/JsonRpcRequestEventManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Events/Response/JsonRpcRequestEventManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/ClientMeta.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/ClientMeta.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/EncryptedPayload.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/EncryptedPayload.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/ErrorResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/ErrorResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/IEventSource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/IEventSource.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/InternalEvent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/InternalEvent.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/JsonRpcRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/JsonRpcRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/JsonRpcResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/JsonRpcResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/NetworkMessage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/NetworkMessage.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/WCSessionData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/WCSessionData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/WCSessionRequestRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/WCSessionRequestRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/WCSessionRequestResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/WCSessionRequestResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Models/WCSessionUpdate.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/WCSessionUpdate.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Nethereum.WalletConnect.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/WalletConnectSharp.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/NethereumTest/Program.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Network/AESCipher.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Network/AESCipher.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Network/ICipher.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Network/ICipher.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Network/ITransport.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Network/ITransport.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Network/MessageReceivedEventArgs.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Network/MessageReceivedEventArgs.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Network/WebsocketTransport.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Network/WebsocketTransport.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Utils/Hex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Utils/Hex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/Utils/RpcPayloadId.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Utils/RpcPayloadId.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Nethereum.WalletConnect/packages.config" beforeDir="false" afterPath="$PROJECT_DIR$/packages.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Nethereum.WalletConnect.sln" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/NethereumTest/NethereumTest.csproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/NethereumTest/Properties/AssemblyInfo.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/NethereumTest/packages.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/NethereumTest/test.json" beforeDir="false" />
-    </list>
+    <list default="true" id="a29e7d07-325c-4804-b9b2-03cbd092f819" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,18 +107,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Client/Nethereum/FallbackProvider.cs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="44">
-              <caret line="4" column="10" lean-forward="true" selection-start-line="4" selection-start-column="10" selection-end-line="4" selection-end-column="45" />
+            <state relative-caret-position="329">
+              <caret line="29" column="2" lean-forward="true" selection-start-line="29" selection-start-column="2" selection-end-line="29" selection-end-column="2" />
               <folding>
-                <marker date="1608181547485" expanded="false" signature="6:80" ph="..." />
-                <marker date="1608181547485" expanded="true" signature="127:1754" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="173:1752" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="250:330" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="494:589" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="676:842" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="943:1121" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="1283:1455" ph="{...}" />
-                <marker date="1608181547485" expanded="true" signature="1562:1746" ph="{...}" />
+                <marker date="1608181804763" expanded="false" signature="6:80" ph="..." />
+                <marker date="1608181804763" expanded="true" signature="127:1687" ph="{...}" />
+                <marker date="1608181804763" expanded="true" signature="173:1685" ph="{...}" />
+                <marker date="1608181804763" expanded="true" signature="427:522" ph="{...}" />
+                <marker date="1608181804763" expanded="true" signature="609:775" ph="{...}" />
+                <marker date="1608181804763" expanded="true" signature="876:1054" ph="{...}" />
+                <marker date="1608181804763" expanded="true" signature="1216:1388" ph="{...}" />
+                <marker date="1608181804763" expanded="true" signature="1495:1679" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -198,54 +140,67 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/WalletConnect.cs">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="6" selection-start-column="6" selection-end-column="6" />
+            <state relative-caret-position="26">
+              <caret line="281" column="75" lean-forward="true" selection-start-line="281" selection-start-column="26" selection-end-line="281" selection-end-column="75" />
               <folding>
-                <marker date="1608181668860" expanded="false" signature="6:431" ph="..." />
-                <marker date="1608181668860" expanded="true" signature="461:9917" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="508:9915" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="587:898" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="1850:2787" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="2823:3185" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="3212:3670" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="3238:3660" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="3722:3961" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="4050:4296" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="4355:5305" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="4717:4823" ph="/* Listen for the _handshakeId response ... */" />
-                <marker date="1608181668860" expanded="true" signature="4943:5070" ph="/* Listen for the &quot;connect&quot; event triggered by 'HandleSessionResponse' above ... */" />
-                <marker date="1608181668860" expanded="true" signature="5425:6413" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="5548:6143" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="5811:6008" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="6029:6129" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="6195:6301" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="6318:6403" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="6471:6621" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="6719:7415" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="7523:8063" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="7815:7996" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="8209:8614" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="8291:8375" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="8392:8535" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="8645:8799" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="8690:8789" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="8955:9129" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="9363:9554" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="9613:9909" ph="{...}" />
-                <marker date="1608181668860" expanded="true" signature="9651:9752" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="6:431" ph="..." />
+                <marker date="1608181804776" expanded="true" signature="461:9916" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="508:9914" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="586:897" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="1849:2786" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="2822:3184" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="3211:3669" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="3237:3659" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="3721:3960" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="4049:4295" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="4354:5304" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="4716:4822" ph="/* Listen for the _handshakeId response ... */" />
+                <marker date="1608181804776" expanded="true" signature="4942:5069" ph="/* Listen for the &quot;connect&quot; event triggered by 'HandleSessionResponse' above ... */" />
+                <marker date="1608181804776" expanded="true" signature="5424:6412" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="5547:6142" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="5810:6007" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="6028:6128" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="6194:6300" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="6317:6402" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="6470:6620" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="6718:7414" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="7522:8062" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="7814:7995" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="8208:8613" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="8290:8374" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="8391:8534" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="8644:8798" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="8689:8788" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="8954:9128" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="9362:9553" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="9612:9908" ph="{...}" />
+                <marker date="1608181804776" expanded="true" signature="9650:9751" ph="{...}" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Models/WCSessionData.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="44">
+              <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+              <folding>
+                <marker date="1608177783166" expanded="true" signature="35:240" ph="{...}" />
+                <marker date="1608177783166" expanded="true" signature="68:238" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/WalletConnectTest/Program.cs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="461">
-              <caret line="60" column="19" selection-start-line="60" selection-start-column="19" selection-end-line="60" selection-end-column="19" />
+            <state relative-caret-position="109">
+              <caret line="46" column="49" lean-forward="true" selection-start-line="46" selection-start-column="49" selection-end-line="46" selection-end-column="49" />
               <folding>
                 <marker date="1608181668879" expanded="true" signature="6:223" ph="..." />
                 <marker date="1608181668879" expanded="true" signature="252:2400" ph="{...}" />
@@ -383,20 +338,20 @@
         <option value="$PROJECT_DIR$/Network/WebsocketTransport.cs" />
         <option value="$PROJECT_DIR$/Models/EncryptedPayload.cs" />
         <option value="$PROJECT_DIR$/Client/FallbackProvider.cs" />
-        <option value="$PROJECT_DIR$/Client/Nethereum/FallbackProvider.cs" />
         <option value="$PROJECT_DIR$/Client/WalletConnectClient.cs" />
         <option value="$PROJECT_DIR$/Client/Nethereum/WalletConnectClient.cs" />
         <option value="$PROJECT_DIR$/Client/TypeProviderFactory.cs" />
         <option value="$PROJECT_DIR$/Client/IProvider.cs" />
-        <option value="$PROJECT_DIR$/WalletConnect.cs" />
         <option value="$PROJECT_DIR$/WalletConnectTest/Program.cs" />
+        <option value="$PROJECT_DIR$/WalletConnect.cs" />
+        <option value="$PROJECT_DIR$/Client/Nethereum/FallbackProvider.cs" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="417" />
-    <option name="y" value="286" />
-    <option name="width" value="1040" />
+    <option name="x" value="952" />
+    <option name="y" value="352" />
+    <option name="width" value="1769" />
     <option name="height" value="784" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -498,12 +453,12 @@
       <workItem from="1607805532422" duration="32472000" />
       <workItem from="1607965250956" duration="6904000" />
       <workItem from="1608180053646" duration="601000" />
-      <workItem from="1608181368605" duration="299000" />
+      <workItem from="1608181368605" duration="1385000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="40276000" />
+    <option name="totallyTimeSpent" value="41362000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -516,9 +471,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="2576" height="1416" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25953895" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25397456" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Capture Tool" order="3" />
@@ -530,7 +484,7 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="NuGet" order="7" visible="true" weight="0.32969603" />
+      <window_info anchor="bottom" id="NuGet" order="7" weight="0.6497696" />
       <window_info anchor="bottom" id="Performance Profiler" order="8" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="10" />
@@ -543,7 +497,7 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
-      <window_info anchor="right" id="Errors In Solution" order="4" />
+      <window_info anchor="right" id="Errors In Solution" order="4" visible="true" weight="0.12837838" />
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="right" id="Unit Tests Coverage" order="6" />
     </layout>
@@ -859,17 +813,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Models/WCSessionData.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="22">
-          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-          <folding>
-            <marker date="1608177783166" expanded="true" signature="35:240" ph="{...}" />
-            <marker date="1608177783166" expanded="true" signature="68:238" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Models/WCSessionRequestRequest.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="66">
@@ -1056,24 +999,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Client/Nethereum/FallbackProvider.cs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="44">
-          <caret line="4" column="10" lean-forward="true" selection-start-line="4" selection-start-column="10" selection-end-line="4" selection-end-column="45" />
-          <folding>
-            <marker date="1608181547485" expanded="false" signature="6:80" ph="..." />
-            <marker date="1608181547485" expanded="true" signature="127:1754" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="173:1752" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="250:330" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="494:589" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="676:842" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="943:1121" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="1283:1455" ph="{...}" />
-            <marker date="1608181547485" expanded="true" signature="1562:1746" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Client/Nethereum/WalletConnectClient.cs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="44">
@@ -1103,51 +1028,38 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/WalletConnect.cs">
+    <entry file="file://$PROJECT_DIR$/Client/Nethereum/FallbackProvider.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="6" selection-start-column="6" selection-end-column="6" />
+        <state relative-caret-position="329">
+          <caret line="29" column="2" lean-forward="true" selection-start-line="29" selection-start-column="2" selection-end-line="29" selection-end-column="2" />
           <folding>
-            <marker date="1608181668860" expanded="false" signature="6:431" ph="..." />
-            <marker date="1608181668860" expanded="true" signature="461:9917" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="508:9915" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="587:898" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="1850:2787" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="2823:3185" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="3212:3670" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="3238:3660" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="3722:3961" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="4050:4296" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="4355:5305" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="4717:4823" ph="/* Listen for the _handshakeId response ... */" />
-            <marker date="1608181668860" expanded="true" signature="4943:5070" ph="/* Listen for the &quot;connect&quot; event triggered by 'HandleSessionResponse' above ... */" />
-            <marker date="1608181668860" expanded="true" signature="5425:6413" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="5548:6143" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="5811:6008" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="6029:6129" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="6195:6301" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="6318:6403" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="6471:6621" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="6719:7415" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="7523:8063" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="7815:7996" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="8209:8614" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="8291:8375" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="8392:8535" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="8645:8799" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="8690:8789" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="8955:9129" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="9363:9554" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="9613:9909" ph="{...}" />
-            <marker date="1608181668860" expanded="true" signature="9651:9752" ph="{...}" />
+            <marker date="1608181804763" expanded="false" signature="6:80" ph="..." />
+            <marker date="1608181804763" expanded="true" signature="127:1687" ph="{...}" />
+            <marker date="1608181804763" expanded="true" signature="173:1685" ph="{...}" />
+            <marker date="1608181804763" expanded="true" signature="427:522" ph="{...}" />
+            <marker date="1608181804763" expanded="true" signature="609:775" ph="{...}" />
+            <marker date="1608181804763" expanded="true" signature="876:1054" ph="{...}" />
+            <marker date="1608181804763" expanded="true" signature="1216:1388" ph="{...}" />
+            <marker date="1608181804763" expanded="true" signature="1495:1679" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Models/WCSessionData.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+          <folding>
+            <marker date="1608177783166" expanded="true" signature="35:240" ph="{...}" />
+            <marker date="1608177783166" expanded="true" signature="68:238" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/WalletConnectTest/Program.cs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="461">
-          <caret line="60" column="19" selection-start-line="60" selection-start-column="19" selection-end-line="60" selection-end-column="19" />
+        <state relative-caret-position="109">
+          <caret line="46" column="49" lean-forward="true" selection-start-line="46" selection-start-column="49" selection-end-line="46" selection-end-column="49" />
           <folding>
             <marker date="1608181668879" expanded="true" signature="6:223" ph="..." />
             <marker date="1608181668879" expanded="true" signature="252:2400" ph="{...}" />
@@ -1158,6 +1070,47 @@
             <marker date="1608181668879" expanded="true" signature="950:1220" ph="{...}" />
             <marker date="1608181668879" expanded="true" signature="1775:1852" ph="{...}" />
             <marker date="1608181668879" expanded="true" signature="2074:2291" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WalletConnect.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="26">
+          <caret line="281" column="75" lean-forward="true" selection-start-line="281" selection-start-column="26" selection-end-line="281" selection-end-column="75" />
+          <folding>
+            <marker date="1608181804776" expanded="true" signature="6:431" ph="..." />
+            <marker date="1608181804776" expanded="true" signature="461:9916" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="508:9914" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="586:897" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="1849:2786" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="2822:3184" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="3211:3669" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="3237:3659" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="3721:3960" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="4049:4295" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="4354:5304" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="4716:4822" ph="/* Listen for the _handshakeId response ... */" />
+            <marker date="1608181804776" expanded="true" signature="4942:5069" ph="/* Listen for the &quot;connect&quot; event triggered by 'HandleSessionResponse' above ... */" />
+            <marker date="1608181804776" expanded="true" signature="5424:6412" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="5547:6142" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="5810:6007" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="6028:6128" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="6194:6300" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="6317:6402" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="6470:6620" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="6718:7414" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="7522:8062" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="7814:7995" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="8208:8613" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="8290:8374" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="8391:8534" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="8644:8798" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="8689:8788" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="8954:9128" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="9362:9553" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="9612:9908" ph="{...}" />
+            <marker date="1608181804776" expanded="true" signature="9650:9751" ph="{...}" />
           </folding>
         </state>
       </provider>

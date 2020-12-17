@@ -117,6 +117,10 @@
         <Project>{ddb41690-8c71-4be2-ae28-e63fd934910d}</Project>
         <Name>Nethereum.WalletConnect</Name>
       </ProjectReference>
+      <ProjectReference Include="..\WalletConnectSharp.csproj">
+        <Project>{ddb41690-8c71-4be2-ae28-e63fd934910d}</Project>
+        <Name>WalletConnectSharp</Name>
+      </ProjectReference>
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />
