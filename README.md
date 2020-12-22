@@ -1,6 +1,6 @@
 # WalletConnectSharp
 
-WalletConnect sharp is an implementation of the [WalletConnect](https://walletconnect.org/) protocol using .NET and NEthereum. This library implements the [WalletConnect Technical Specification](https://docs.walletconnect.org/tech-spec) in .NET to allow C# dApps makers add support for the open [WalletConnect](https://walletconnect.org/) protocol
+WalletConnect sharp is an implementation of the [WalletConnect](https://walletconnect.org/) protocol using .NET and (optinoally) NEthereum. This library implements the [WalletConnect Technical Specification](https://docs.walletconnect.org/tech-spec) in .NET to allow C# dApps makers to add support for the open [WalletConnect](https://walletconnect.org/) protocol
 
 Tested and working in Unity 2020.1.14f1
 
@@ -25,7 +25,7 @@ var walletConnect = new WalletConnect(metadata);
 Console.WriteLine(walletConnect.URI);
 ```
 
-This will print the `wc` connect code into the console. You can transform this text into a QR code or use it for deep linking. Once you have it displayed and setup, you can then call `connect()`
+This will print the `wc` connect code into the console. You can transform this text into a QR code or use it for deep linking. Once you have the `wc` link displayed to the user, you can then call `Connect()`. The `Connect()` function will block until either a successful or rejected session response
 
 ```csharp
 var walletConnectData = await walletConnect.Connect();
@@ -40,7 +40,7 @@ Console.WriteLine(walletConnectData.chainId);
 
 ## Connecting with NEthereum
 
-With the above, you have enough to use the base WalletConnect protocol. However, this library comes with an NEthereum provider implementation. To use it, you simply invoke `CreateProvider(url)` or `CreateProvider(IClient)`. This is because the `WalletConnect` protocol does not perform read operations, so you must provide either an `Infura Project ID`, a node HTTP url for `HttpProvider` or a custom `IClient`.
+With the above, you have enough to use the base WalletConnect protocol. However, this library comes with an NEthereum provider implementation. To use it, you simply invoke `CreateProvider(url)` or `CreateProvider(IClient)`. You are required to specify an additional RPC URL or a custom `IClient` because the `WalletConnect` protocol does not perform read operations (`eth_call`, `eth_estimateGas`, etc..), so you must provide either an `Infura Project ID`, a node's HTTP url for `HttpProvider` or a custom `IClient`.
 
 Here is an example
 ```csharp
