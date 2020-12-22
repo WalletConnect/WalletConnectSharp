@@ -34,12 +34,18 @@ namespace WalletConnectSharp
         private string clientId = "";
         private readonly string _handshakeTopic;
         public readonly EventDelegator Events;
+
+        public event EventHandler<WalletConnect> OnConnect;
+        public event EventHandler<WalletConnect> OnDisconnect;
+        
         private long _handshakeId;
         private const string Version = "1";
         private readonly string _bridgeUrl;
         private string _key;
         private byte[] _keyRaw;
         private string peerId;
+        
+        public int? NetworkId { get; private set; }
 
         public bool Connected { get; private set; }
 
@@ -127,7 +133,12 @@ namespace WalletConnectSharp
 
             await Transport.Subscribe(this.clientId);
 
-            return await CreateSession();
+            var result = await CreateSession();
+            
+            if (OnConnect != null)
+                OnConnect(this, this);
+
+            return result;
         }
 
         public async void Disconnect(string disconnectMessage = "Session Disconnected")
@@ -305,6 +316,24 @@ namespace WalletConnectSharp
                 new WalletConnectClient(this),
                 readClient
                 );
+        }
+
+        public async Task Disconnect()
+        {
+            var request = new WCSessionUpdate(new WCSessionData()
+            {
+                approved = false,
+                chainId = null,
+                accounts = null,
+                networkId = null
+            });
+
+            await SendRequest(request);
+
+            await Transport.Close();
+            
+            if (OnDisconnect != null)
+                OnDisconnect(this, this);
         }
     }
 }
