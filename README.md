@@ -6,7 +6,7 @@ Tested and working in Unity 2020.1.14f1
 
 ## Usage
 
-First you must define the `ClientMeta` you would like to send along with your connect request. This is what is shwon in the Wallet UI
+First you must define the `ClientMeta` you would like to send along with your connect request. This is what is shown in the Wallet UI
 
 ```csharp
 var metadata = new ClientMeta()
