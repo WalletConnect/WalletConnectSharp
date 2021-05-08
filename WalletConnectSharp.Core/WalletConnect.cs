@@ -111,7 +111,7 @@ namespace WalletConnectSharp.Core
             clientId = Guid.NewGuid().ToString();
 
             if (transport == null)
-                transport = new WebsocketTransport(eventDelegator);
+                transport = TransportFactory.Instance.BuildDefaultTransport(eventDelegator);
 
             this._bridgeUrl = bridgeUrl;
             this.Transport = transport;

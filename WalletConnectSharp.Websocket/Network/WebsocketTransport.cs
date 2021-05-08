@@ -6,10 +6,11 @@ using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Network;
 using Websocket.Client;
 using Websocket.Client.Models;
 
-namespace WalletConnectSharp.Core.Network
+namespace WalletConnectSharp.Websocket.Network
 {
     public class WebsocketTransport : ITransport
     {
