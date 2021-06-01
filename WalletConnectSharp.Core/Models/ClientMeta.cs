@@ -1,7 +1,9 @@
+using System;
 using Newtonsoft.Json;
 
 namespace WalletConnectSharp.Core.Models
 {
+    [Serializable]
     public class ClientMeta
     {
         [JsonProperty("description")]

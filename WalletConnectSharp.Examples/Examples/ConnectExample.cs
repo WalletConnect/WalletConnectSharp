@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
-using QRCoder;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
 
