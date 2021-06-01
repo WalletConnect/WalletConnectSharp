@@ -6,7 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
+      <ProjectReference Include="..\..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
+      <ProjectReference Include="..\..\WalletConnectSharp.Desktop\WalletConnectSharp.Desktop.csproj" />
     </ItemGroup>
 
     <ItemGroup>
