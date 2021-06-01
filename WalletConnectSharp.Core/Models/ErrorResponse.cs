@@ -2,11 +2,11 @@ namespace WalletConnectSharp.Core.Models
 {
     public class ErrorResponse
     {
-        public string message;
+        //keep for json deserialization
+        private string message;
 
-        public ErrorResponse(string message)
-        {
-            this.message = message;
-        }
+        public ErrorResponse(string message) => this.message = message;
+
+        public string Message => message;
     }
 }
