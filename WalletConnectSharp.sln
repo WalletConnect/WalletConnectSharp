@@ -2,13 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Core", "WalletConnectSharp.Core\WalletConnectSharp.Core.csproj", "{9388999D-22A0-492A-ADB6-6C5D6347CFC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Examples", "WalletConnectSharp.Examples\WalletConnectSharp.Examples.csproj", "{F27F0CAE-64C7-4C37-A61C-590043D9706C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Websocket", "WalletConnectSharp.Websocket\WalletConnectSharp.Websocket.csproj", "{DA4B9C5F-7B95-43C8-93EA-B2850D677DD5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Unity", "WalletConnectSharp.Unity\WalletConnectSharp.Unity.csproj", "{22B57D07-0081-43D5-8FF0-E1AE875C4A44}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Desktop", "WalletConnectSharp.Desktop\WalletConnectSharp.Desktop.csproj", "{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Examples", "Examples\Desktop\WalletConnectSharp.Examples\WalletConnectSharp.Examples.csproj", "{9E2B90E9-22F0-4004-993B-2FE0CEE3CD92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,14 +22,6 @@ Global
 		{9388999D-22A0-492A-ADB6-6C5D6347CFC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9388999D-22A0-492A-ADB6-6C5D6347CFC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9388999D-22A0-492A-ADB6-6C5D6347CFC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F27F0CAE-64C7-4C37-A61C-590043D9706C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F27F0CAE-64C7-4C37-A61C-590043D9706C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F27F0CAE-64C7-4C37-A61C-590043D9706C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F27F0CAE-64C7-4C37-A61C-590043D9706C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DA4B9C5F-7B95-43C8-93EA-B2850D677DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA4B9C5F-7B95-43C8-93EA-B2850D677DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA4B9C5F-7B95-43C8-93EA-B2850D677DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA4B9C5F-7B95-43C8-93EA-B2850D677DD5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{22B57D07-0081-43D5-8FF0-E1AE875C4A44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{22B57D07-0081-43D5-8FF0-E1AE875C4A44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22B57D07-0081-43D5-8FF0-E1AE875C4A44}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,6 +30,10 @@ Global
 		{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E2B90E9-22F0-4004-993B-2FE0CEE3CD92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E2B90E9-22F0-4004-993B-2FE0CEE3CD92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E2B90E9-22F0-4004-993B-2FE0CEE3CD92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E2B90E9-22F0-4004-993B-2FE0CEE3CD92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

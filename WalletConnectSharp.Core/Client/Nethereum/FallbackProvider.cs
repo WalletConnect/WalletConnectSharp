@@ -6,7 +6,7 @@ namespace WalletConnectSharp.Core.Client.Nethereum
 {
     public class FallbackProvider : IClient
     {
-        public static readonly string[] ValidMethods = WalletConnect.SigningMethods;
+        public static readonly string[] ValidMethods = WalletConnectProtocol.SigningMethods;
         
         private readonly IClient _fallback;
         private readonly IClient _signer;

@@ -32,12 +32,51 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Reference Include="BouncyCastle.Crypto, Version=1.8.2.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+          <HintPath>..\packages\BouncyCastle.1.8.2\lib\BouncyCastle.Crypto.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Common.Logging.Core, Version=3.4.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e">
+          <HintPath>..\packages\Common.Logging.Core.3.4.1\lib\net40\Common.Logging.Core.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="Nethereum.Hex, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.Hex.3.8.0\lib\net451\Nethereum.Hex.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Nethereum.JsonRpc.Client, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.JsonRpc.Client.3.8.0\lib\net451\Nethereum.JsonRpc.Client.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Nethereum.JsonRpc.RpcClient, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.JsonRpc.RpcClient.3.8.0\lib\net451\Nethereum.JsonRpc.RpcClient.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Nethereum.Model, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.Model.3.8.0\lib\net451\Nethereum.Model.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Nethereum.RLP, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.RLP.3.8.0\lib\net451\Nethereum.RLP.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Nethereum.RPC, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.RPC.3.8.0\lib\net451\Nethereum.RPC.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Nethereum.Util, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
+          <HintPath>..\packages\Nethereum.Util.3.8.0\lib\net451\Nethereum.Util.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
         <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
           <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="System" />
         <Reference Include="System.Core" />
+        <Reference Include="System.Net.Http" />
+        <Reference Include="System.Numerics" />
         <Reference Include="System.Xml" />
         <Reference Include="UnityEngine">
             <HintPath>D:\Program Files\Unity\2020.1.14f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
@@ -48,6 +87,8 @@
         <Compile Include="Network\NativeWebSocketTransport.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Utils\UnityBinder.cs" />
+        <Compile Include="Utils\WaitForTask.cs" />
+        <Compile Include="Utils\WaitForTaskResult.cs" />
         <Compile Include="WalletConnectManager.cs" />
     </ItemGroup>
     <ItemGroup>

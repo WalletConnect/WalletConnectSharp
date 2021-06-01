@@ -1,9 +1,9 @@
-using System;
+using System.Collections;
+using DefaultNamespace;
 using UnityEngine;
+using UnityEngine.Events;
 using WalletConnectSharp.Core;
-using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Models;
-using WalletConnectSharp.Core.Network;
 using WalletConnectSharp.Unity.Network;
 using WalletConnectSharp.Unity.Utils;
 
@@ -14,29 +14,70 @@ namespace WalletConnectSharp.Unity
     {
         [BindComponent]
         private NativeWebSocketTransport _transport;
+
+        private static WalletConnectManager _instance;
+
+        public static WalletConnectManager Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
+
+        public string ConnectURL
+        {
+            get
+            {
+                return Provider.URI;
+            }
+        }
+
+        public bool dontDestroyOnLoad;
         
-        public WalletConnect Provider { get; private set; }
+        public WalletConnectProtocol Provider { get; private set; }
 
         [SerializeField]
         public ClientMeta AppData;
 
         public override void Awake()
         {
+            if (dontDestroyOnLoad)
+            {
+                if (_instance != null)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+
+                DontDestroyOnLoad(gameObject);
+            }
+            
+            _instance = this;
+            
             base.Awake();
-
-            TransportFactory.Instance.RegisterDefaultTransport(BuildDefaultTransport);
+            
+            Provider = new WalletConnectProtocol(AppData, _transport);
         }
 
-        private void Start()
+        public void WaitForWalletConnection(UnityAction<WCSessionData> onConnected)
         {
-            Provider = new WalletConnect(AppData);
+            StartCoroutine(ConnectAsync(onConnected));
         }
 
-        private ITransport BuildDefaultTransport(EventDelegator delegator)
+        private IEnumerator ConnectAsync(UnityAction<WCSessionData> onConnected)
         {
-            _transport.AttachEventDelegator(delegator);
+            var coroutineInstruction = new WaitForTaskResult<WCSessionData>(Provider.Connect());
+            yield return coroutineInstruction;
 
-            return _transport;
+            var task = coroutineInstruction.Source;
+
+            if (task.Exception != null)
+            {
+                throw task.Exception;
+            }
+
+            onConnected(task.Result);
         }
     }
 }
