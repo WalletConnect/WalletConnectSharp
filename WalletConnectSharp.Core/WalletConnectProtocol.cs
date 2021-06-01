@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Common.Logging;
 using Nethereum.JsonRpc.Client;
@@ -59,6 +62,72 @@ namespace WalletConnectSharp.Core
 
         public ICipher Cipher { get; private set; }
 
+        /// <summary>
+        /// Create a new WalletConnectProtocol object using a SavedSession as the session data. This will effectively resume
+        /// the session, as long as the session data is valid
+        /// </summary>
+        /// <param name="savedSession">The SavedSession data to use. Cannot be null</param>
+        /// <param name="transport">The transport interface to use for sending/receiving messages, null will result in the default transport being used</param>
+        /// <param name="cipher">The cipher to use for encrypting and decrypting payload data, null will result in AESCipher being used</param>
+        /// <param name="eventDelegator">The EventDelegator class to use, null will result in the default being used</param>
+        /// <exception cref="ArgumentException">If a null SavedSession object was given</exception>
+        public WalletConnectProtocol(SavedSession savedSession, ITransport transport = null, 
+                                    ICipher cipher = null, EventDelegator eventDelegator = null)
+        {
+            if (savedSession == null)
+                throw new ArgumentException("savedSession cannot be null");
+            
+            if (eventDelegator == null)
+                eventDelegator = new EventDelegator();
+
+            this.Events = eventDelegator;
+
+            this.ClientMetadata = savedSession.ClientMeta;
+            this.ChainId = savedSession.ChainID;
+            
+            //TODO Do we need this for resuming?
+            //_handshakeTopic = topicGuid.ToString();
+
+            clientId = savedSession.ClientID;
+
+            if (transport == null)
+                transport = TransportFactory.Instance.BuildDefaultTransport(eventDelegator);
+
+            this._bridgeUrl = savedSession.BridgeURL;
+            this.Transport = transport;
+
+            if (cipher == null)
+                cipher = new AESCipher();
+
+            this.Cipher = cipher;
+            
+            this._keyRaw = savedSession.KeyRaw;
+
+            //Convert hex 
+            this._key = savedSession.Key;
+
+            this.Accounts = savedSession.Accounts;
+            this.NetworkId = savedSession.NetworkID;
+            this.peerId = savedSession.PeerID;
+
+            Transport.Open(this._bridgeUrl).ContinueWith(delegate(Task task)
+            {
+                Transport.Subscribe(savedSession.ClientID);
+            });
+
+            this.Connected = true;
+        }
+
+        /// <summary>
+        /// Create a new WalletConnectProtocol object and create a new dApp session.
+        /// </summary>
+        /// <param name="clientMeta">The metadata to send to wallets</param>
+        /// <param name="transport">The transport interface to use for sending/receiving messages, null will result in the default transport being used</param>
+        /// <param name="cipher">The cipher to use for encrypting and decrypting payload data, null will result in AESCipher being used</param>
+        /// <param name="chainId">The chainId this dApp is using</param>
+        /// <param name="bridgeUrl">The bridgeURL to use to communicate with the wallet</param>
+        /// <param name="eventDelegator">The EventDelegator class to use, null will result in the default being used</param>
+        /// <exception cref="ArgumentException">If an invalid ClientMeta object was given</exception>
         public WalletConnectProtocol(ClientMeta clientMeta, ITransport transport = null,
             ICipher cipher = null,
             int? chainId = 1,
@@ -356,9 +425,84 @@ namespace WalletConnectSharp.Core
             await SendRequest(request);
 
             await Transport.Close();
-            
+
+            Connected = false;
+
             if (OnDisconnect != null)
                 OnDisconnect(this, this);
+        }
+
+        /// <summary>
+        /// Creates and returns a serializable class that holds all session data required to resume later
+        /// </summary>
+        /// <returns></returns>
+        public SavedSession SaveSession()
+        {
+            if (!Connected)
+            {
+                return null;
+            }
+            
+            return new SavedSession(clientId, _bridgeUrl, _key, _keyRaw, peerId, NetworkId, Accounts, ChainId, ClientMetadata);
+        }
+
+        /// <summary>
+        /// Save the current session to a Stream. This function will write a GZIP Compressed JSON blob
+        /// of the contents of SaveSession()
+        /// </summary>
+        /// <param name="stream">The stream to write to</param>
+        /// <param name="leaveStreamOpen">Whether to leave the stream open</param>
+        /// <exception cref="IOException">If there is currently no session active, or if writing to the stream fails</exception>
+        public void SaveSession(Stream stream, bool leaveStreamOpen = true)
+        {
+            //We'll save the current session as a GZIP compressed JSON blob
+            var data = SaveSession();
+
+            if (data == null)
+            {
+                throw new IOException("No session is active to save");
+            }
+
+            var json = JsonConvert.SerializeObject(data);
+
+            byte[] encodedJson = Encoding.UTF8.GetBytes(json);
+            
+            using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Compress, leaveStreamOpen))
+            {
+                byte[] sizeEncoded = BitConverter.GetBytes(encodedJson.Length);
+                
+                gZipStream.Write(sizeEncoded, 0, sizeEncoded.Length);
+                gZipStream.Write(encodedJson, 0, encodedJson.Length);
+            }
+        }
+
+        /// <summary>
+        /// Reads a GZIP Compressed JSON blob of a SavedSession object from a given Stream. This is the reverse of
+        /// SaveSession(Stream)
+        /// </summary>
+        /// <param name="stream">The stream to write to</param>
+        /// <param name="leaveStreamOpen">Whether to leave the stream open</param>
+        /// <exception cref="IOException">If reading from the stream fails</exception>
+        /// <returns>A SavedSession object</returns>
+        public static SavedSession ReadSession(Stream stream, bool leaveStreamOpen = true)
+        {
+            string json;
+            using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress, leaveStreamOpen))
+            {
+                byte[] sizeEncoded = new byte[4];
+
+                gZipStream.Read(sizeEncoded, 0, 4);
+
+                int size = BitConverter.ToInt32(sizeEncoded, 0);
+
+                byte[] jsonEncoded = new byte[size];
+
+                gZipStream.Read(jsonEncoded, 0, size);
+
+                json = Encoding.UTF8.GetString(jsonEncoded);
+            }
+
+            return JsonConvert.DeserializeObject<SavedSession>(json);
         }
     }
 }
