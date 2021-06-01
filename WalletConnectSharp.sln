@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Unity", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Desktop", "WalletConnectSharp.Desktop\WalletConnectSharp.Desktop.csproj", "{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Examples", "Examples\console\WalletConnectSharp.Examples.csproj", "{3B11A7DB-D8D8-4E09-8AA3-BB58FB26F900}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93AB88B6-D3C8-47D0-A3F8-25229025D5FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B11A7DB-D8D8-4E09-8AA3-BB58FB26F900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B11A7DB-D8D8-4E09-8AA3-BB58FB26F900}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B11A7DB-D8D8-4E09-8AA3-BB58FB26F900}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B11A7DB-D8D8-4E09-8AA3-BB58FB26F900}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
