@@ -10,7 +10,7 @@ using WalletConnectSharp.Core.Network;
 using Websocket.Client;
 using Websocket.Client.Models;
 
-namespace WalletConnectSharp.Websocket.Network
+namespace WalletConnectSharp.Desktop.Network
 {
     public class WebsocketTransport : ITransport
     {

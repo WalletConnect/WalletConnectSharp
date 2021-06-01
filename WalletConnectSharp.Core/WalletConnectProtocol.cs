@@ -16,7 +16,7 @@ using WalletConnectSharp.Core.Network;
 
 namespace WalletConnectSharp.Core
 {
-    public class WalletConnect : IDisposable
+    public class WalletConnectProtocol : IDisposable
     {
         public static readonly string[] SigningMethods = new[]
         {
@@ -35,8 +35,8 @@ namespace WalletConnectSharp.Core
         private readonly string _handshakeTopic;
         public readonly EventDelegator Events;
 
-        public event EventHandler<WalletConnect> OnConnect;
-        public event EventHandler<WalletConnect> OnDisconnect;
+        public event EventHandler<WalletConnectProtocol> OnConnect;
+        public event EventHandler<WalletConnectProtocol> OnDisconnect;
         
         private long _handshakeId;
         private const string Version = "1";
@@ -59,7 +59,7 @@ namespace WalletConnectSharp.Core
 
         public ICipher Cipher { get; private set; }
 
-        public WalletConnect(ClientMeta clientMeta, ITransport transport = null,
+        public WalletConnectProtocol(ClientMeta clientMeta, ITransport transport = null,
             ICipher cipher = null,
             int? chainId = 1,
             string bridgeUrl = "https://bridge.walletconnect.org",

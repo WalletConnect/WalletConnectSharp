@@ -3,8 +3,8 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
-using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Desktop;
 
 namespace WalletConnectSharp.Examples.Examples
 {

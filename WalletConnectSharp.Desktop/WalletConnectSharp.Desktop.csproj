@@ -6,7 +6,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
-      <ProjectReference Include="..\WalletConnectSharp.Websocket\WalletConnectSharp.Websocket.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Websocket.Client" Version="4.3.30" />
     </ItemGroup>
 
 </Project>

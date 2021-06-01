@@ -8,9 +8,9 @@ namespace WalletConnectSharp.Core.Client.Nethereum
     public class WalletConnectClient : ClientBase
     {
         private long _id;
-        public WalletConnect Provider { get; }
+        public WalletConnectProtocol Provider { get; }
 
-        public WalletConnectClient(WalletConnect provider)
+        public WalletConnectClient(WalletConnectProtocol provider)
         {
             this.Provider = provider;
         }
