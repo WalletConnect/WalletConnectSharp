@@ -1,6 +1,6 @@
 # WalletConnectSharp
 
-WalletConnect sharp is an implementation of the [WalletConnect](https://walletconnect.org/) protocol using .NET and (optinoally) NEthereum. This library implements the [WalletConnect Technical Specification](https://docs.walletconnect.org/tech-spec) in .NET to allow C# dApps makers to add support for the open [WalletConnect](https://walletconnect.org/) protocol
+WalletConnectSharp is an implementation of the [WalletConnect](https://walletconnect.org/) protocol (currently only v1) using .NET and (optinoally) NEthereum. This library implements the [WalletConnect Technical Specification](https://docs.walletconnect.org/tech-spec) in .NET to allow C# dApps makers to add support for the open [WalletConnect](https://walletconnect.org/) protocol.
 
 Tested and working in Unity 2020.1.14f1
 
