@@ -25,28 +25,28 @@ namespace WalletConnectSharp.Core.Events
 
         public void ListenFor<T>(string eventId, EventHandler<GenericEvent<T>> callback)
         {
-            Console.WriteLine("Adding GenericEvent callback to event " + eventId);
+            //Console.WriteLine("Adding GenericEvent callback to event " + eventId);
             EventManager<T, GenericEvent<T>>.Instance.EventTriggers[eventId] += callback;
             
-            Console.WriteLine("Subscribing Event Provider to " + eventId);
+            //Console.WriteLine("Subscribing Event Provider to " + eventId);
             SubscribeProvider(eventId, EventFactory.Instance.ProviderFor<T>());
         }
         
         public void ListenFor<T>(string eventId, EventHandler<JsonRpcResponseEvent<T>> callback) where T : JsonRpcResponse
         {
-            Console.WriteLine("Adding JsonRpcResponse callback to event " + eventId);
+            //Console.WriteLine("Adding JsonRpcResponse callback to event " + eventId);
             EventManager<T, JsonRpcResponseEvent<T>>.Instance.EventTriggers[eventId] += callback;
 
-            Console.WriteLine("Subscribing Event Provider to " + eventId);
+            //Console.WriteLine("Subscribing Event Provider to " + eventId);
             SubscribeProvider(eventId, EventFactory.Instance.ProviderFor<T>());
         }
 
         public void ListenFor<T>(string eventId, EventHandler<JsonRpcRequestEvent<T>> callback) where T : JsonRpcRequest
         {
-            Console.WriteLine("Adding JsonRpcRequest callback to event " + eventId);
+            //Console.WriteLine("Adding JsonRpcRequest callback to event " + eventId);
             EventManager<T, JsonRpcRequestEvent<T>>.Instance.EventTriggers[eventId] += callback;
             
-            Console.WriteLine("Subscribing Event Provider to " + eventId);
+            //Console.WriteLine("Subscribing Event Provider to " + eventId);
             SubscribeProvider(eventId, EventFactory.Instance.ProviderFor<T>());
         }
 
@@ -55,7 +55,7 @@ namespace WalletConnectSharp.Core.Events
             List<IEventProvider> listProvider;
             if (!Listeners.ContainsKey(eventId))
             {
-                Console.WriteLine("Adding new EventProvider list for " + eventId);
+                //Console.WriteLine("Adding new EventProvider list for " + eventId);
                 listProvider = new List<IEventProvider>();
                 Listeners.Add(eventId, listProvider);
             }
@@ -64,7 +64,7 @@ namespace WalletConnectSharp.Core.Events
                 listProvider = Listeners[eventId];
             }
             
-            Console.WriteLine("Adding listener to EventProvider list. New count: " + (listProvider.Count + 1));
+            //Console.WriteLine("Adding listener to EventProvider list. New count: " + (listProvider.Count + 1));
             listProvider.Add(provider);
         }
         
@@ -80,7 +80,7 @@ namespace WalletConnectSharp.Core.Events
             {
                 var providerList = Listeners[topic];
                 
-                Console.WriteLine("Triggering " + providerList.Count + " EventProviders for topic " + topic);
+                //Console.WriteLine("Triggering " + providerList.Count + " EventProviders for topic " + topic);
 
                 for (int i = 0; i < providerList.Count; i++)
                 {

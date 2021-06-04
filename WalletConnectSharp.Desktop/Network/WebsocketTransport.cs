@@ -44,10 +44,11 @@ namespace WalletConnectSharp.Desktop.Network
             client.MessageReceived.Subscribe(OnMessageReceived);
             client.DisconnectionHappened.Subscribe(delegate(DisconnectionInfo info) { client.Reconnect(); });
 
-            client.ReconnectionHappened.Subscribe(delegate(ReconnectionInfo info)
+            //TODO Log this
+            /*client.ReconnectionHappened.Subscribe(delegate(ReconnectionInfo info)
             {
                 Console.WriteLine(info.Type);
-            });
+            });*/
 
             await client.Start();
         }
