@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client;
 using Nethereum.JsonRpc.Client.RpcMessages;
+using WalletConnectSharp.Core;
 
-namespace WalletConnectSharp.Core.Client.Nethereum
+namespace WalletConnectSharp.NEthereum.Client
 {
     public class WalletConnectClient : ClientBase
     {

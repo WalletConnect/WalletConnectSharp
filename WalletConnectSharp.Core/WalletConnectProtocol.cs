@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Common.Logging;
-using Nethereum.JsonRpc.Client;
 using Newtonsoft.Json;
-using WalletConnectSharp.Core.Client.Nethereum;
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Models;
@@ -311,36 +306,6 @@ namespace WalletConnectSharp.Core
                 Transport.Dispose();
                 Transport = null;
             }
-        }
-
-        public IClient CreateProvider(string infruaId, string network = "mainnet", ILog log = null, AuthenticationHeaderValue authenticationHeader = null)
-        {
-            string url = "https://" + network + ".infura.io/v3/" + infruaId;
-
-            return CreateProvider(new Uri(url), log, authenticationHeader);
-        }
-
-        public IClient CreateProvider(Uri url, ILog log = null,
-            AuthenticationHeaderValue authenticationHeader = null, JsonSerializerSettings serializerSettings = null,
-            HttpClientHandler clientHandler = null)
-        {
-            return CreateProvider(
-                new RpcClient(url, authenticationHeader, serializerSettings,
-                    clientHandler, log)
-                );
-        }
-
-        public IClient CreateProvider(IClient readClient)
-        {
-            if (!Connected)
-            {
-                throw new Exception("No connection has been made yet!");
-            }
-            
-            return new FallbackProvider(
-                new WalletConnectClient(this),
-                readClient
-                );
         }
 
         public async Task Disconnect()

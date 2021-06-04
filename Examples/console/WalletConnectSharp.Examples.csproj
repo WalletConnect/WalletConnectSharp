@@ -8,6 +8,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
       <ProjectReference Include="..\..\WalletConnectSharp.Desktop\WalletConnectSharp.Desktop.csproj" />
+      <ProjectReference Include="..\..\WalletConnectSharp.NEthereum\WalletConnectSharp.NEthereum.csproj" />
     </ItemGroup>
 
     <ItemGroup>

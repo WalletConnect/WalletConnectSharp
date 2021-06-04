@@ -5,6 +5,7 @@ using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Desktop;
+using WalletConnectSharp.NEthereum;
 
 namespace WalletConnectSharp.Examples.Examples
 {

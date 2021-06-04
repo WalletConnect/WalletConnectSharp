@@ -1,8 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client;
+using WalletConnectSharp.Core;
 
-namespace WalletConnectSharp.Core.Client.Nethereum
+namespace WalletConnectSharp.NEthereum.Client
 {
     public class FallbackProvider : IClient
     {
