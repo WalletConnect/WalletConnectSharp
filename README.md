@@ -4,6 +4,8 @@ WalletConnect sharp is an implementation of the [WalletConnect](https://walletco
 
 Tested and working in Unity 2020.1.14f1
 
+> :warning: **This is beta software**: This software is currently in beta and under development. Please proceed with caution, and open a new issue if you encounter a bug
+
 ## Usage
 
 First you must define the `ClientMeta` you would like to send along with your connect request. This is what is shown in the Wallet UI
