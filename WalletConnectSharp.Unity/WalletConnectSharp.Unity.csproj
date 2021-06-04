@@ -32,45 +32,9 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="BouncyCastle.Crypto, Version=1.8.2.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
-          <HintPath>..\packages\BouncyCastle.1.8.2\lib\BouncyCastle.Crypto.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Common.Logging.Core, Version=3.4.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e">
-          <HintPath>..\packages\Common.Logging.Core.3.4.1\lib\net40\Common.Logging.Core.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
         <Reference Include="Microsoft.CSharp" />
-        <Reference Include="Nethereum.Hex, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.Hex.3.8.0\lib\net451\Nethereum.Hex.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Nethereum.JsonRpc.Client, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.JsonRpc.Client.3.8.0\lib\net451\Nethereum.JsonRpc.Client.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Nethereum.JsonRpc.RpcClient, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.JsonRpc.RpcClient.3.8.0\lib\net451\Nethereum.JsonRpc.RpcClient.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Nethereum.Model, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.Model.3.8.0\lib\net451\Nethereum.Model.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Nethereum.RLP, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.RLP.3.8.0\lib\net451\Nethereum.RLP.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Nethereum.RPC, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.RPC.3.8.0\lib\net451\Nethereum.RPC.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Nethereum.Util, Version=3.8.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e">
-          <HintPath>..\packages\Nethereum.Util.3.8.0\lib\net451\Nethereum.Util.dll</HintPath>
-          <Private>True</Private>
-        </Reference>
-        <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-          <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+        <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+          <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="System" />
@@ -92,17 +56,13 @@
         <Compile Include="WalletConnectManager.cs" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\NativeWebSocket\NativeWebSocket.csproj">
-        <Project>{d751f5a6-af5d-4297-90ea-7a852a33c164}</Project>
-        <Name>NativeWebSocket</Name>
-      </ProjectReference>
+      <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
       <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj">
         <Project>{9388999d-22a0-492a-adb6-6c5d6347cfc4}</Project>
         <Name>WalletConnectSharp.Core</Name>
       </ProjectReference>
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="packages.config" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
