@@ -42,7 +42,11 @@ namespace WalletConnectSharp.Core.Events
         {
             if (EventTriggers.Contains(topic))
             {
-                Debug.Log("Event Provider " + this.ToString() + " has listeners for topic " + topic);
+                #if UNITY_EDITOR
+                    Debug.Log("Event Provider " + this.ToString() + " has listeners for topic " + topic);
+                #endif
+
+                Console.WriteLine("Event Provider " + this.ToString() + " has listeners for topic " + topic);
                 var eventTrigger = EventTriggers[topic];
 
                 if (eventTrigger != null)
