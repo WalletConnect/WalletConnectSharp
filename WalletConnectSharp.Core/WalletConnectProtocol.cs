@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
+using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Network;
 
@@ -171,6 +173,10 @@ namespace WalletConnectSharp.Core
             HandleSessionDisconnect(disconnectMessage);
         }
 
+        /// <summary>
+        /// Create a new WalletConnect session with a Wallet.
+        /// </summary>
+        /// <returns></returns>
         private async Task<WCSessionData> CreateSession()
         {
             var data = new WcSessionRequestRequest(ClientMetadata, clientId, ChainId);
@@ -189,7 +195,26 @@ namespace WalletConnectSharp.Core
             //Listen for the "connect" event triggered by 'HandleSessionResponse' above
             //This will have the type WCSessionData
             Events.ListenFor<WCSessionData>("connect",
-                (sender, @event) => { eventCompleted.SetResult(@event.Response); });
+                (sender, @event) =>
+                {
+                    eventCompleted.TrySetResult(@event.Response);
+                });
+            
+            //Listen for the "session_failed" event triggered by 'HandleSessionResponse' above
+            //This will have the type failure reason
+            Events.ListenFor<ErrorResponse>("session_failed",
+                delegate(object sender, GenericEvent<ErrorResponse> @event)
+                {
+                    if (@event.Response.Message == "Not Approved" || @event.Response.Message == "Session Rejected")
+                    {
+                        eventCompleted.TrySetCanceled();
+                    }
+                    else
+                    {
+                        eventCompleted.TrySetException(
+                            new IOException("WalletConnect: Session Failed: " + @event.Response.Message));
+                    }
+                });
 
             var response = await eventCompleted.Task;
 
@@ -226,19 +251,19 @@ namespace WalletConnectSharp.Core
             }
             else if (jsonresponse.Response.IsError)
             {
-                HandleSessionDisconnect(jsonresponse.Response.Error.Message);
+                HandleSessionDisconnect(jsonresponse.Response.Error.Message, "session_failed");
             }
             else
             {
-                HandleSessionDisconnect("Not Approved");
+                HandleSessionDisconnect("Not Approved", "session_failed");
             }
         }
 
-        private void HandleSessionDisconnect(string msg)
+        private void HandleSessionDisconnect(string msg, string topic = "disconnect")
         {
             Connected = false;
 
-            Events.Trigger("disconnect", new ErrorResponse(msg));
+            Events.Trigger(topic, new ErrorResponse(msg));
 
             Transport.Close();
         }
