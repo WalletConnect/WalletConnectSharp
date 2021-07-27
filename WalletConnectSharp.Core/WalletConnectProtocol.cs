@@ -59,7 +59,7 @@ namespace WalletConnectSharp.Core
         public WalletConnectProtocol(ClientMeta clientMeta, ITransport transport = null,
             ICipher cipher = null,
             int? chainId = 1,
-            string bridgeUrl = "https://bridge.walletconnect.org",
+            string bridgeUrl = null,
             EventDelegator eventDelegator = null
         )
         {
@@ -86,6 +86,11 @@ namespace WalletConnectSharp.Core
             if (clientMeta.Icons == null || clientMeta.Icons.Length == 0)
             {
                 throw new ArgumentException("clientMeta must include an array of Icons the Wallet app can use. These Icons must be URLs to images. You must include at least one image URL to use");
+            }
+
+            if (bridgeUrl == null)
+            {
+                bridgeUrl = DefaultBridge.ChooseRandomBridge();
             }
             
             if (eventDelegator == null)
