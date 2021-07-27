@@ -3,17 +3,13 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Common.Logging;
-using Nethereum.JsonRpc.Client;
 using Newtonsoft.Json;
-using WalletConnectSharp.Core.Client.Nethereum;
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
+using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Network;
 
@@ -131,7 +127,7 @@ namespace WalletConnectSharp.Core
         public WalletConnectProtocol(ClientMeta clientMeta, ITransport transport = null,
             ICipher cipher = null,
             int? chainId = 1,
-            string bridgeUrl = "https://bridge.walletconnect.org",
+            string bridgeUrl = null,
             EventDelegator eventDelegator = null
         )
         {
@@ -158,6 +154,11 @@ namespace WalletConnectSharp.Core
             if (clientMeta.Icons == null || clientMeta.Icons.Length == 0)
             {
                 throw new ArgumentException("clientMeta must include an array of Icons the Wallet app can use. These Icons must be URLs to images. You must include at least one image URL to use");
+            }
+
+            if (bridgeUrl == null)
+            {
+                bridgeUrl = DefaultBridge.ChooseRandomBridge();
             }
             
             if (eventDelegator == null)
@@ -245,6 +246,10 @@ namespace WalletConnectSharp.Core
             HandleSessionDisconnect(disconnectMessage);
         }
 
+        /// <summary>
+        /// Create a new WalletConnect session with a Wallet.
+        /// </summary>
+        /// <returns></returns>
         private async Task<WCSessionData> CreateSession()
         {
             var data = new WcSessionRequestRequest(ClientMetadata, clientId, ChainId);
@@ -263,7 +268,26 @@ namespace WalletConnectSharp.Core
             //Listen for the "connect" event triggered by 'HandleSessionResponse' above
             //This will have the type WCSessionData
             Events.ListenFor<WCSessionData>("connect",
-                (sender, @event) => { eventCompleted.SetResult(@event.Response); });
+                (sender, @event) =>
+                {
+                    eventCompleted.TrySetResult(@event.Response);
+                });
+            
+            //Listen for the "session_failed" event triggered by 'HandleSessionResponse' above
+            //This will have the type failure reason
+            Events.ListenFor<ErrorResponse>("session_failed",
+                delegate(object sender, GenericEvent<ErrorResponse> @event)
+                {
+                    if (@event.Response.Message == "Not Approved" || @event.Response.Message == "Session Rejected")
+                    {
+                        eventCompleted.TrySetCanceled();
+                    }
+                    else
+                    {
+                        eventCompleted.TrySetException(
+                            new IOException("WalletConnect: Session Failed: " + @event.Response.Message));
+                    }
+                });
 
             var response = await eventCompleted.Task;
 
@@ -300,19 +324,19 @@ namespace WalletConnectSharp.Core
             }
             else if (jsonresponse.Response.IsError)
             {
-                HandleSessionDisconnect(jsonresponse.Response.Error.Message);
+                HandleSessionDisconnect(jsonresponse.Response.Error.Message, "session_failed");
             }
             else
             {
-                HandleSessionDisconnect("Not Approved");
+                HandleSessionDisconnect("Not Approved", "session_failed");
             }
         }
 
-        private void HandleSessionDisconnect(string msg)
+        private void HandleSessionDisconnect(string msg, string topic = "disconnect")
         {
             Connected = false;
 
-            Events.Trigger("disconnect", new ErrorResponse(msg));
+            Events.Trigger(topic, new ErrorResponse(msg));
 
             Transport.Close();
         }
@@ -380,36 +404,6 @@ namespace WalletConnectSharp.Core
                 Transport.Dispose();
                 Transport = null;
             }
-        }
-
-        public IClient CreateProvider(string infruaId, string network = "mainnet", ILog log = null, AuthenticationHeaderValue authenticationHeader = null)
-        {
-            string url = "https://" + network + ".infura.io/v3/" + infruaId;
-
-            return CreateProvider(new Uri(url), log, authenticationHeader);
-        }
-
-        public IClient CreateProvider(Uri url, ILog log = null,
-            AuthenticationHeaderValue authenticationHeader = null, JsonSerializerSettings serializerSettings = null,
-            HttpClientHandler clientHandler = null)
-        {
-            return CreateProvider(
-                new RpcClient(url, authenticationHeader, serializerSettings,
-                    clientHandler, log)
-                );
-        }
-
-        public IClient CreateProvider(IClient readClient)
-        {
-            if (!Connected)
-            {
-                throw new Exception("No connection has been made yet!");
-            }
-            
-            return new FallbackProvider(
-                new WalletConnectClient(this),
-                readClient
-                );
         }
 
         public async Task Disconnect()
