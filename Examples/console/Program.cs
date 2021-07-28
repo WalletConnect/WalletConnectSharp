@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using WalletConnectSharp.Examples.Examples;
 
@@ -20,7 +21,7 @@ namespace WalletConnectSharp.Examples
                 Console.WriteLine("    - " + e.Name);
             }
         }
-        
+
         static async Task Main(string[] args)
         {
             if (args.Length == 0)
