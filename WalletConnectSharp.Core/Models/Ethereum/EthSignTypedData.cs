@@ -6,15 +6,19 @@ using WalletConnectSharp.Core.Models.Ethereum.Types;
 
 namespace WalletConnectSharp.Core.Models.Ethereum
 {
-    public class EthSignTypedData<T> : JsonRpcRequest
+    public sealed class EthSignTypedData<T> : JsonRpcRequest
     {
         [JsonProperty("params")] 
-        private object[] _parameters;
+        private string[] _parameters;
         
         public EthSignTypedData(string address, T data, EIP712Domain domain)
         {
             this.Method = "eth_signTypedData";
-            this._parameters = new object[] {address, new EvmTypedData<T>(data, domain)};
+
+            var typeData = new EvmTypedData<T>(data, domain);
+            var encodedTypeData = JsonConvert.SerializeObject(typeData);
+            
+            this._parameters = new string[] {address, encodedTypeData};
         }
     }
 }

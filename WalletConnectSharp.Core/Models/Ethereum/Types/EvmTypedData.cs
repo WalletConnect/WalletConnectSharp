@@ -53,7 +53,12 @@ namespace WalletConnectSharp.Core.Models.Ethereum.Types
                 string name = field.Name;
                 var fieldType = field.FieldType;
                 var evmType = (EvmTypeAttribute)field.GetCustomAttribute(typeof(EvmTypeAttribute), true);
+                var shouldIgnore = (EvmIgnoreAttribute) field.GetCustomAttribute(typeof(EvmIgnoreAttribute), true);
 
+                if (shouldIgnore != null)
+                    continue;
+                
+                
                 string typeName;
                 if (evmType != null)
                 {

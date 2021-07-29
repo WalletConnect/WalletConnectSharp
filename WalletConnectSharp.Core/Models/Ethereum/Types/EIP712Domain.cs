@@ -1,3 +1,4 @@
+using System;
 using WalletConnectSharp.Core.Models.Ethereum.Types;
 
 namespace WalletConnectSharp.Core.Models
@@ -7,7 +8,7 @@ namespace WalletConnectSharp.Core.Models
         public string name;
         public string version;
         
-        [EvmType("uint256")]
+        [EvmIgnore]
         public int chainId;
         
         [EvmType("address")]

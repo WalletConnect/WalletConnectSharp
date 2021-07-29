@@ -47,11 +47,6 @@ namespace WalletConnectSharp.Examples.Examples
             var from = new Person("Cow", "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826");
             var to = new Person("Bob", "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB");
             var mail = new Mail(from, to, "Hello, Bob!");
-
-            var json = JsonConvert.SerializeObject(new EthSignTypedData<Mail>(session.Accounts[0], mail, domain));
-            
-            Console.WriteLine(json);
-            
             
             var result = await session.EthSignTypedData(session.Accounts[0], mail, domain);
             
@@ -76,12 +71,12 @@ namespace WalletConnectSharp.Examples.Examples
                 URL = "https://app.warriders.com/"
             };
 
-            var client = new WalletConnect(clientMeta);
+            var client = new WalletConnect(clientMeta, "https://f.bridge.walletconnect.org");
             
             Console.WriteLine("Connect using the following URL");
             Console.WriteLine(client.URI);
 
-            await client.Connect();
+            await client.ConnectSession();
             
             Console.WriteLine("The account " + client.Accounts[0] + " has connected!");
 
