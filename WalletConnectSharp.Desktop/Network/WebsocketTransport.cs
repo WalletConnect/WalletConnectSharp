@@ -80,7 +80,7 @@ namespace WalletConnectSharp.Desktop.Network
         public async Task SendMessage(NetworkMessage message)
         {
             var finalJson = JsonConvert.SerializeObject(message);
-            
+
             await this.client.SendInstant(finalJson);
         }
 

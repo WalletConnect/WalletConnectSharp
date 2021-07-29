@@ -9,13 +9,13 @@ using WalletConnectSharp.NEthereum;
 
 namespace WalletConnectSharp.Examples.Examples
 {
-    public class ConnectExample : IExample
+    public class ConnectNEthereumExample : IExample
     {
         public string Name
         {
             get
             {
-                return "connect_example";
+                return "nethereum_example";
             }
         }
 

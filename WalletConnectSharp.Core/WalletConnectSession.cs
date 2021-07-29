@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.Core.Network;
 using WalletConnectSharp.Core.Utils;
 
@@ -128,9 +129,9 @@ namespace WalletConnectSharp.Core
                 await base.SetupTransport();
             }
             
-            ListenToTopic(_handshakeTopic);
-            
             await SubscribeAndListenToTopic(this.clientId);
+            
+            ListenToTopic(this._handshakeTopic);
 
             var result = await CreateSession();
             
@@ -167,6 +168,87 @@ namespace WalletConnectSharp.Core
         public override async Task Disconnect()
         {
             await DisconnectSession();
+        }
+        
+        public async Task<string> EthSign(string address, string message, Encoding messageEncoding = null)
+        {
+            if (!message.IsHex())
+            {
+                var encoding = messageEncoding;
+                if (encoding == null)
+                {
+                    encoding = Encoding.UTF8;
+                }
+                
+                message = "0x" + encoding.GetBytes(message).ToHex();
+            }
+            
+            var request = new EthPersonalSign(address, message);
+
+            var response = await Send<EthPersonalSign, EthResponse>(request);
+
+            return response.Result;
+        }
+
+        public async Task<string> EthPersonalSign(string address, string message, Encoding messageEncoding = null)
+        {
+            if (!message.IsHex())
+            {
+                var encoding = messageEncoding;
+                if (encoding == null)
+                {
+                    encoding = Encoding.UTF8;
+                }
+                
+                message = "0x" + encoding.GetBytes(message).ToHex();
+            }
+            
+            var request = new EthPersonalSign(address, message);
+
+            var response = await Send<EthPersonalSign, EthResponse>(request);
+
+            return response.Result;
+        }
+
+        public async Task<string> EthSignTypedData<T>(string address, T data, EIP712Domain eip712Domain)
+        {
+            var request = new EthSignTypedData<T>(address, data, eip712Domain);
+
+            var response = await Send<EthSignTypedData<T>, EthResponse>(request);
+
+            return response.Result;
+        }
+
+        public async Task<string> EthSignTransaction(params TransactionData[] transaction)
+        {
+            var request = new EthSignTransaction(transaction);
+            
+            var response = await Send<EthSignTransaction, EthResponse>(request);
+
+            return response.Result;
+        }
+
+        public async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
+        {
+            TaskCompletionSource<R> eventCompleted = new TaskCompletionSource<R>(TaskCreationOptions.None);
+            
+            Events.ListenForResponse<R>(data.ID, (sender, @event) =>
+            {
+                var response = @event.Response;
+                if (response.IsError)
+                {
+                    eventCompleted.SetException(new IOException(response.Error.Message));
+                }
+                else
+                {
+                    eventCompleted.SetResult(@event.Response);
+                }
+                
+            });
+
+            await SendRequest(data);
+
+            return await eventCompleted.Task;
         }
 
         /// <summary>
@@ -263,6 +345,8 @@ namespace WalletConnectSharp.Core
 
             Transport.Close();
         }
+        
+        
         
         /// <summary>
         /// Creates and returns a serializable class that holds all session data required to resume later

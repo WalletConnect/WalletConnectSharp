@@ -124,8 +124,6 @@ namespace WalletConnectSharp.Core
             EventDelegator eventDelegator = null
         )
         {
-            
-            
             if (eventDelegator == null)
                 eventDelegator = new EventDelegator();
 

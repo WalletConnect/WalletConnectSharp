@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Common.Logging;
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Events.Response;
@@ -12,7 +11,7 @@ namespace WalletConnectSharp.Core.Events
     {
         private Dictionary<string, List<IEventProvider>> Listeners = new Dictionary<string, List<IEventProvider>>();
 
-        public void ListenForResponse<T>(object id, EventHandler<GenericEvent<T>> callback)
+        public void ListenForGenericResponse<T>(object id, EventHandler<GenericEvent<T>> callback)
         {
             ListenFor("response:" + id, callback);
         }
