@@ -219,11 +219,11 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public async Task<string> EthSignTransaction(params TransactionData[] transaction)
+        public async Task<string> EthSendTransaction(params TransactionData[] transaction)
         {
-            var request = new EthSignTransaction(transaction);
+            var request = new EthSendTransaction(transaction);
             
-            var response = await Send<EthSignTransaction, EthResponse>(request);
+            var response = await Send<EthSendTransaction, EthResponse>(request);
 
             return response.Result;
         }

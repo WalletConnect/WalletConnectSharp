@@ -10,6 +10,7 @@ namespace WalletConnectSharp.Core.Models
         [EvmType("uint256")]
         public int chainId;
         
+        [EvmType("address")]
         public string verifyingContract;
 
         public EIP712Domain(string name, string version, int chainId, string verifyingContract)
