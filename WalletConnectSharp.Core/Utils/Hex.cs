@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace WalletConnectSharp.Core.Utils
 {
@@ -8,6 +9,23 @@ namespace WalletConnectSharp.Core.Utils
         {
             var b = BitConverter.ToString(data);
             return includeDashes ? b : b.Replace("-", "");
+        }
+
+        public static bool IsHex(this string str, int? length = null)
+        {
+            string pattern = @"/^0x[0-9A-Fa-f]*$/";
+
+            if (!Regex.Match(str, pattern).Success)
+            {
+                return false;
+            }
+
+            if (length != null && str.Length != 2 + 2 * length)
+            {
+                return false;
+            }
+
+            return true;
         }
         
         public static byte[] FromHex(this string hex)

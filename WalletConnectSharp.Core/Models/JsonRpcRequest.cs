@@ -11,7 +11,7 @@ namespace WalletConnectSharp.Core.Models
         private string jsonrpc = "2.0";
         
         [JsonProperty("method")]
-        public virtual string Method { get; private set; }
+        public virtual string Method { get; protected set; }
 
         public JsonRpcRequest()
         {

@@ -23,10 +23,6 @@ namespace WalletConnectSharp.Core.Events
             }
         }
 
-        //private Dictionary<string, Type> MethodLookup = new Dictionary<string, Type>();
-
-        //private Dictionary<Type, Action<JsonRpcResponse>> lookup = new Dictionary<Type, Action<JsonRpcResponse>>();
-
         private EventManager()
         {
             EventTriggers = new EventHandlerMap<TEventArgs>(CallbackBeforeExecuted);
@@ -42,7 +38,6 @@ namespace WalletConnectSharp.Core.Events
         {
             if (EventTriggers.Contains(topic))
             {
-                //Console.WriteLine("Event Provider " + this.ToString() + " has listeners for topic " + topic);
                 var eventTrigger = EventTriggers[topic];
 
                 if (eventTrigger != null)

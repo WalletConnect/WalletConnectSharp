@@ -1,13 +1,11 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Events;
-using WalletConnectSharp.Core.Events.Request;
-using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Network;
 
@@ -28,253 +26,162 @@ namespace WalletConnectSharp.Core
             "personal_sign",
         };
 
-        private string clientId = "";
-        private readonly string _handshakeTopic;
         public readonly EventDelegator Events;
-
-        public event EventHandler<WalletConnectProtocol> OnConnect;
-        public event EventHandler<WalletConnectProtocol> OnDisconnect;
         
-        private long _handshakeId;
-        private const string Version = "1";
-        private readonly string _bridgeUrl;
-        private string _key;
-        private byte[] _keyRaw;
-        private string peerId;
-        
-        public int? NetworkId { get; private set; }
+        protected string Version = "1";
+        protected string _bridgeUrl;
+        protected string _key;
+        protected byte[] _keyRaw;
+        private List<string> _activeTopics = new List<string>();
 
-        public bool Connected { get; private set; }
+        public event EventHandler<WalletConnectProtocol> OnTransportConnect;
+        public event EventHandler<WalletConnectProtocol> OnTransportDisconnect;
 
-        public string[] Accounts { get; private set; }
+        public bool Connected { get; protected set; }
 
-        public int? ChainId { get; private set; }
-
-        public ClientMeta ClientMetadata { get; set; }
+        public bool TransportConnected { get; private set; }
 
         public ITransport Transport { get; private set; }
 
         public ICipher Cipher { get; private set; }
 
-        public WalletConnectProtocol(ClientMeta clientMeta, ITransport transport = null,
-            ICipher cipher = null,
-            int? chainId = 1,
-            string bridgeUrl = "https://bridge.walletconnect.org",
-            EventDelegator eventDelegator = null
-        )
+        public ReadOnlyCollection<string> ActiveTopics
         {
-            if (clientMeta == null)
+            get
             {
-                throw new ArgumentException("clientMeta cannot be null!");
+                return _activeTopics.AsReadOnly();
             }
+        }
 
-            if (string.IsNullOrWhiteSpace(clientMeta.Description))
-            {
-                throw new ArgumentException("clientMeta must include a valid Description");
-            }
-            
-            if (string.IsNullOrWhiteSpace(clientMeta.Name))
-            {
-                throw new ArgumentException("clientMeta must include a valid Name");
-            }
-            
-            if (string.IsNullOrWhiteSpace(clientMeta.URL))
-            {
-                throw new ArgumentException("clientMeta must include a valid URL");
-            }
-            
-            if (clientMeta.Icons == null || clientMeta.Icons.Length == 0)
-            {
-                throw new ArgumentException("clientMeta must include an array of Icons the Wallet app can use. These Icons must be URLs to images. You must include at least one image URL to use");
-            }
+        public string PeerId
+        {
+            get;
+            protected set;
+        }
+
+
+        /// <summary>
+        /// Create a new WalletConnectProtocol object using a SavedSession as the session data. This will effectively resume
+        /// the session, as long as the session data is valid
+        /// </summary>
+        /// <param name="savedSession">The SavedSession data to use. Cannot be null</param>
+        /// <param name="transport">The transport interface to use for sending/receiving messages, null will result in the default transport being used</param>
+        /// <param name="cipher">The cipher to use for encrypting and decrypting payload data, null will result in AESCipher being used</param>
+        /// <param name="eventDelegator">The EventDelegator class to use, null will result in the default being used</param>
+        /// <exception cref="ArgumentException">If a null SavedSession object was given</exception>
+        public WalletConnectProtocol(SavedSession savedSession, ITransport transport = null, 
+                                    ICipher cipher = null, EventDelegator eventDelegator = null)
+        {
+            if (savedSession == null)
+                throw new ArgumentException("savedSession cannot be null");
             
             if (eventDelegator == null)
                 eventDelegator = new EventDelegator();
 
             this.Events = eventDelegator;
 
-            this.ClientMetadata = clientMeta;
-            this.ChainId = chainId;
-
-            if (bridgeUrl.StartsWith("https"))
-                bridgeUrl = bridgeUrl.Replace("https", "wss");
-            else if (bridgeUrl.StartsWith("http"))
-                bridgeUrl = bridgeUrl.Replace("http", "ws");
-
-            var topicGuid = Guid.NewGuid();
-
-            _handshakeTopic = topicGuid.ToString();
-
-            clientId = Guid.NewGuid().ToString();
+            //TODO Do we need this for resuming?
+            //_handshakeTopic = topicGuid.ToString();
 
             if (transport == null)
                 transport = TransportFactory.Instance.BuildDefaultTransport(eventDelegator);
 
-            this._bridgeUrl = bridgeUrl;
+            this._bridgeUrl = savedSession.BridgeURL;
             this.Transport = transport;
 
             if (cipher == null)
                 cipher = new AESCipher();
 
             this.Cipher = cipher;
-
-            GenerateKey();
-        }
-
-        private void GenerateKey()
-        {
-            //Generate a random secret
-            byte[] secret = new byte[32];
-            RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
-            rngCsp.GetBytes(secret);
-
-            this._keyRaw = secret;
+            
+            this._keyRaw = savedSession.KeyRaw;
 
             //Convert hex 
-            this._key = BitConverter.ToString(secret).Replace("-", "").ToLower();
-        }
+            this._key = savedSession.Key;
+            
+            this.PeerId = savedSession.PeerID;
 
-        public string URI
-        {
-            get
+            /*Transport.Open(this._bridgeUrl).ContinueWith(delegate(Task task)
             {
-                var topicEncode = WebUtility.UrlEncode(_handshakeTopic);
-                var versionEncode = WebUtility.UrlEncode(Version);
-                var bridgeUrlEncode = WebUtility.UrlEncode(_bridgeUrl);
-                var keyEncoded = WebUtility.UrlEncode(_key);
+                Transport.Subscribe(savedSession.ClientID);
+            });
 
-                return "wc:" + topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded;
-            }
+            this.Connected = true;*/
         }
 
-        public async Task<WCSessionData> Connect()
+        /// <summary>
+        /// Create a new WalletConnectProtocol object and create a new dApp session.
+        /// </summary>
+        /// <param name="clientMeta">The metadata to send to wallets</param>
+        /// <param name="transport">The transport interface to use for sending/receiving messages, null will result in the default transport being used</param>
+        /// <param name="cipher">The cipher to use for encrypting and decrypting payload data, null will result in AESCipher being used</param>
+        /// <param name="chainId">The chainId this dApp is using</param>
+        /// <param name="bridgeUrl">The bridgeURL to use to communicate with the wallet</param>
+        /// <param name="eventDelegator">The EventDelegator class to use, null will result in the default being used</param>
+        /// <exception cref="ArgumentException">If an invalid ClientMeta object was given</exception>
+        public WalletConnectProtocol(ITransport transport = null,
+            ICipher cipher = null,
+            EventDelegator eventDelegator = null
+        )
+        {
+            if (eventDelegator == null)
+                eventDelegator = new EventDelegator();
+
+            this.Events = eventDelegator;
+
+            if (transport == null)
+                transport = TransportFactory.Instance.BuildDefaultTransport(eventDelegator);
+            
+            this.Transport = transport;
+
+            if (cipher == null)
+                cipher = new AESCipher();
+
+            this.Cipher = cipher;
+        }
+
+        protected async Task SetupTransport()
         {
             Transport.MessageReceived += TransportOnMessageReceived;
 
             await Transport.Open(this._bridgeUrl);
 
-            await Transport.Subscribe(this.clientId);
-
-            var result = await CreateSession();
+            TransportConnected = true;
             
-            if (OnConnect != null)
-                OnConnect(this, this);
-
-            return result;
+            TriggerOnTransportConnect();
         }
 
-        public async void Disconnect(string disconnectMessage = "Session Disconnected")
+        protected virtual void TriggerOnTransportConnect()
         {
-            //A blank WCSessionData will make a fields null
-            var request = new WCSessionUpdate(new WCSessionData());
-
-            await SendRequest(request);
-
-            HandleSessionDisconnect(disconnectMessage);
+            if (OnTransportConnect != null)
+                OnTransportConnect(this, this);
         }
-
-        /// <summary>
-        /// Create a new WalletConnect session with a Wallet.
-        /// </summary>
-        /// <returns></returns>
-        private async Task<WCSessionData> CreateSession()
+        
+        public virtual async Task Connect()
         {
-            var data = new WcSessionRequestRequest(ClientMetadata, clientId, ChainId);
-
-            this._handshakeId = data.ID;
-
-            await SendRequest(data, this._handshakeTopic);
-
-            TaskCompletionSource<WCSessionData> eventCompleted =
-                new TaskCompletionSource<WCSessionData>(TaskCreationOptions.None);
-
-            //Listen for the _handshakeId response
-            //The response will be of type WCSessionRequestResponse
-            Events.ListenForResponse<WCSessionRequestResponse>(this._handshakeId, HandleSessionResponse);
-
-            //Listen for the "connect" event triggered by 'HandleSessionResponse' above
-            //This will have the type WCSessionData
-            Events.ListenFor<WCSessionData>("connect",
-                (sender, @event) =>
-                {
-                    eventCompleted.TrySetResult(@event.Response);
-                });
+            await SetupTransport();
+        }
+        
+        public async Task SubscribeAndListenToTopic(string topic)
+        {
+            await Transport.Subscribe(topic);
             
-            //Listen for the "session_failed" event triggered by 'HandleSessionResponse' above
-            //This will have the type failure reason
-            Events.ListenFor<ErrorResponse>("session_failed",
-                delegate(object sender, GenericEvent<ErrorResponse> @event)
-                {
-                    if (@event.Response.Message == "Not Approved" || @event.Response.Message == "Session Rejected")
-                    {
-                        eventCompleted.TrySetCanceled();
-                    }
-                    else
-                    {
-                        eventCompleted.TrySetException(
-                            new IOException("WalletConnect: Session Failed: " + @event.Response.Message));
-                    }
-                });
-
-            var response = await eventCompleted.Task;
-
-            return response;
+            ListenToTopic(topic);
         }
 
-        private void HandleSessionResponse(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> jsonresponse)
+        public void ListenToTopic(string topic)
         {
-            var response = jsonresponse.Response.result;
-
-            if (response != null && response.approved)
+            if (!_activeTopics.Contains(topic))
             {
-                bool wasConnected = Connected;
-
-                //We are now connected
-                Connected = true;
-
-                ChainId = response.chainId;
-
-                Accounts = response.accounts;
-
-                if (!wasConnected)
-                {
-                    peerId = response.peerId;
-
-                    ClientMetadata = response.peerMeta;
-
-                    Events.Trigger("connect", response);
-                }
-                else
-                {
-                    Events.Trigger("session_update", response);
-                }
+                _activeTopics.Add(topic);
             }
-            else if (jsonresponse.Response.IsError)
-            {
-                HandleSessionDisconnect(jsonresponse.Response.Error.Message, "session_failed");
-            }
-            else
-            {
-                HandleSessionDisconnect("Not Approved", "session_failed");
-            }
-        }
-
-        private void HandleSessionDisconnect(string msg, string topic = "disconnect")
-        {
-            Connected = false;
-
-            Events.Trigger(topic, new ErrorResponse(msg));
-
-            Transport.Close();
         }
 
         private async void TransportOnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            string[] activeTopics = new[] {this.clientId, _handshakeTopic};
-
             var networkMessage = e.Message;
 
-            if (!activeTopics.Contains(networkMessage.Topic))
+            if (!_activeTopics.Contains(networkMessage.Topic))
                 return;
 
             var encryptedPayload = JsonConvert.DeserializeObject<EncryptedPayload>(networkMessage.Payload);
@@ -288,14 +195,28 @@ namespace WalletConnectSharp.Core
                 Events.Trigger(response.Event, json);
         }
 
-        public async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool silent = false)
+        public async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)
         {
+            bool silent;
+            if (forcePushNotification != null)
+            {
+                silent = (bool) !forcePushNotification;
+            }
+            else if (requestObject is JsonRpcRequest request)
+            {
+                silent = request.Method.StartsWith("wc_") || !SigningMethods.Contains(request.Method);
+            }
+            else
+            {
+                silent = false;
+            }
+            
             string json = JsonConvert.SerializeObject(requestObject);
 
             var encrypted = await Cipher.EncryptWithKey(_keyRaw, json);
 
             if (sendingTopic == null)
-                sendingTopic = peerId;
+                sendingTopic = PeerId;
 
             var message = new NetworkMessage()
             {
@@ -307,23 +228,7 @@ namespace WalletConnectSharp.Core
 
             await this.Transport.SendMessage(message);
         }
-
-        private async Task SendRequest(JsonRpcRequest requestObject, string sendingTopic = null,
-            bool? forcePushNotification = null)
-        {
-            bool silent;
-            if (forcePushNotification != null)
-            {
-                silent = (bool) !forcePushNotification;
-            }
-            else
-            {
-                silent = requestObject.Method.StartsWith("wc_") || !SigningMethods.Contains(requestObject.Method);
-            }
-
-            await SendRequest(requestObject, sendingTopic, silent);
-        }
-
+        
         public void Dispose()
         {
             if (Transport != null)
@@ -333,22 +238,14 @@ namespace WalletConnectSharp.Core
             }
         }
 
-        public async Task Disconnect()
+        public virtual async Task Disconnect()
         {
-            var request = new WCSessionUpdate(new WCSessionData()
-            {
-                approved = false,
-                chainId = null,
-                accounts = null,
-                networkId = null
-            });
-
-            await SendRequest(request);
-
             await Transport.Close();
-            
-            if (OnDisconnect != null)
-                OnDisconnect(this, this);
+
+            TransportConnected = false;
+
+            if (OnTransportDisconnect != null)
+                OnTransportDisconnect(this, this);
         }
     }
 }
