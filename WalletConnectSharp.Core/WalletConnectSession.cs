@@ -22,7 +22,8 @@ namespace WalletConnectSharp.Core
         
         private long _handshakeId;
         
-        public event EventHandler<WalletConnectProtocol> OnProviderConnect;
+        public event EventHandler<WalletConnectSession> OnSessionConnect;
+        public event EventHandler<WalletConnectSession> OnSend;
 
         public int? NetworkId { get; private set; }
         
@@ -135,8 +136,8 @@ namespace WalletConnectSharp.Core
 
             var result = await CreateSession();
             
-            if (OnProviderConnect != null)
-                OnProviderConnect(this, this);
+            if (OnSessionConnect != null)
+                OnSessionConnect(this, this);
 
             return result;
         }
@@ -247,6 +248,11 @@ namespace WalletConnectSharp.Core
             });
 
             await SendRequest(data);
+
+            if (OnSend != null)
+            {
+                OnSend(this, this);
+            }
 
             return await eventCompleted.Task;
         }
