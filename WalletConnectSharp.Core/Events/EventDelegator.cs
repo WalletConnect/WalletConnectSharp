@@ -9,68 +9,36 @@ namespace WalletConnectSharp.Core.Events
 {
     public class EventDelegator : IDisposable
     {
-        
         private Dictionary<string, List<IEventProvider>> Listeners = new Dictionary<string, List<IEventProvider>>();
 
-        public void ListenForResponse<T>(object id, EventHandler<GenericEvent<T>> callback)
+        public void ListenForGenericResponse<T>(object id, EventHandler<GenericEvent<T>> callback)
         {
             ListenFor("response:" + id, callback);
         }
-        
-        
+
         public void ListenForResponse<T>(object id, EventHandler<JsonRpcResponseEvent<T>> callback) where T : JsonRpcResponse
         {
             ListenFor("response:" + id, callback);
         }
 
         public void ListenFor<T>(string eventId, EventHandler<GenericEvent<T>> callback)
-        {
-            #if UNITY_EDITOR
-                Debug.Log("Adding GenericEvent callback to event " + eventId);
-            #endif
-
-            Console.WriteLine("Adding GenericEvent callback to event " + eventId);   
+        {  
             EventManager<T, GenericEvent<T>>.Instance.EventTriggers[eventId] += callback;
 
-            #if UNITY_EDITOR
-                Debug.Log("Subscribing Event Provider to " + eventId);
-            #endif
-
-            Console.WriteLine("Subscribing Event Provider to " + eventId);
             SubscribeProvider(eventId, EventFactory.Instance.ProviderFor<T>());
         }
         
         public void ListenFor<T>(string eventId, EventHandler<JsonRpcResponseEvent<T>> callback) where T : JsonRpcResponse
         {
-            #if UNITY_EDITOR
-                Debug.Log("Adding JsonRpcResponse callback to event " + eventId);
-            #endif
-
             EventManager<T, JsonRpcResponseEvent<T>>.Instance.EventTriggers[eventId] += callback;
-            Console.WriteLine("Adding JsonRpcResponse callback to event " + eventId);
-
-            #if UNITY_EDITOR
-                Debug.Log("Subscribing Event Provider to " + eventId);
-            #endif    
-
-            Console.WriteLine("Subscribing Event Provider to " + eventId);
+            
             SubscribeProvider(eventId, EventFactory.Instance.ProviderFor<T>());
         }
 
         public void ListenFor<T>(string eventId, EventHandler<JsonRpcRequestEvent<T>> callback) where T : JsonRpcRequest
         {
-            #if UNITY_EDITOR
-                Debug.Log("Adding JsonRpcRequest callback to event " + eventId);
-            #endif
-
-            Console.WriteLine("Adding JsonRpcRequest callback to event " + eventId);
             EventManager<T, JsonRpcRequestEvent<T>>.Instance.EventTriggers[eventId] += callback;
-            
-            #if UNITY_EDITOR
-                Debug.Log("Subscribing Event Provider to " + eventId);
-            #endif
 
-            Console.WriteLine("Subscribing Event Provider to " + eventId);    
             SubscribeProvider(eventId, EventFactory.Instance.ProviderFor<T>());
         }
 
@@ -87,12 +55,6 @@ namespace WalletConnectSharp.Core.Events
             {
                 listProvider = Listeners[eventId];
             }
-
-            #if UNITY_EDITOR
-                Debug.Log("Adding listener to EventProvider list. New count: " + (listProvider.Count + 1));
-            #endif    
-
-            Console.WriteLine("Adding listener to EventProvider list. New count: " + (listProvider.Count + 1));
             listProvider.Add(provider);
         }
         
@@ -108,12 +70,6 @@ namespace WalletConnectSharp.Core.Events
             {
                 var providerList = Listeners[topic];
 
-                #IF UNITY_EDITOR
-                    Debug.Log("Adding listener to EventProvider list. New count: " + (listProvider.Count + 1));
-                #endif    
-
-                Console.WriteLine("Triggering " + providerList.Count + " EventProviders for topic " + topic);
-                
                 for (int i = 0; i < providerList.Count; i++)
                 {
                     var provider = providerList[i];

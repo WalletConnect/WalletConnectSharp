@@ -33,7 +33,7 @@ namespace WalletConnectSharp.NEthereum.Client
             
             TaskCompletionSource<RpcResponseMessage> eventCompleted = new TaskCompletionSource<RpcResponseMessage>(TaskCreationOptions.None);
             
-            Provider.Events.ListenForResponse<RpcResponseMessage>(rpcRequestMessage.Id, (sender, args) =>
+            Provider.Events.ListenForGenericResponse<RpcResponseMessage>(rpcRequestMessage.Id, (sender, args) =>
             {
                 eventCompleted.SetResult(args.Response);
             });

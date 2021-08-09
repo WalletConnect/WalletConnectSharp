@@ -6,14 +6,14 @@ using WalletConnectSharp.Desktop.Network;
 
 namespace WalletConnectSharp.Desktop
 {
-    public class WalletConnect : WalletConnectProtocol
+    public class WalletConnect : WalletConnectSession
     {
         static WalletConnect()
         {
             TransportFactory.Instance.RegisterDefaultTransport((eventDelegator) => new WebsocketTransport(eventDelegator));
         }
         
-        public WalletConnect(ClientMeta clientMeta, ITransport transport = null, ICipher cipher = null, int? chainId = null, string bridgeUrl = "https://bridge.walletconnect.org", EventDelegator eventDelegator = null) : base(clientMeta, transport, cipher, chainId, bridgeUrl, eventDelegator)
+        public WalletConnect(ClientMeta clientMeta, string bridgeUrl = null, ITransport transport = null, ICipher cipher = null, int? chainId = null, EventDelegator eventDelegator = null) : base(clientMeta, bridgeUrl, transport, cipher, chainId, eventDelegator)
         {
         }
     }
