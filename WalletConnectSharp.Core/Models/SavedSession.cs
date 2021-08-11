@@ -12,7 +12,7 @@ namespace WalletConnectSharp.Core.Models
         public int ChainID { get; }
         public ClientMeta ClientMeta { get; }
 
-        public SavedSession(string clientID, string bridgeURL, string key, byte[] keyRaw, string peerID, int? networkID, string[] accounts, int chainID, ClientMeta clientMeta)
+        public SavedSession(string clientID, string bridgeURL, string key, byte[] keyRaw, string peerID, int networkID, string[] accounts, int chainID, ClientMeta clientMeta)
         {
             ClientID = clientID;
             BridgeURL = bridgeURL;

@@ -154,9 +154,9 @@ namespace WalletConnectSharp.Core
             var request = new WCSessionUpdate(new WCSessionData()
             {
                 approved = false,
-                chainId = null,
+                chainId = 0,
                 accounts = null,
-                networkId = null
+                networkId = 0
             });
 
             await SendRequest(request);
