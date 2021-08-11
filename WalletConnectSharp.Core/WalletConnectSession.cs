@@ -318,6 +318,8 @@ namespace WalletConnectSharp.Core
 
                 ChainId = response.chainId;
 
+                NetworkId = response.networkId;
+
                 Accounts = response.accounts;
 
                 if (!wasConnected)
