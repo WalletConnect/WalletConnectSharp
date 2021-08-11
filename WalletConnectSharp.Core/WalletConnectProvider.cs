@@ -20,7 +20,7 @@ namespace WalletConnectSharp.Core
         
         public string[] Accounts { get; private set; }
 
-        public int? ChainId { get; private set; }
+        public int ChainId { get; private set; }
 
         public ClientMeta ClientMetadata { get; set; }
         
@@ -44,7 +44,7 @@ namespace WalletConnectSharp.Core
             this.NetworkId = savedSession.NetworkID;
         }
 
-        public WalletConnectProvider(string url, ITransport transport = null, ICipher cipher = null, int? chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
+        public WalletConnectProvider(string url, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
         {
             this.ChainId = chainId;
             this.URI = url;

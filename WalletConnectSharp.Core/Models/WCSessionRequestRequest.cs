@@ -12,7 +12,7 @@ namespace WalletConnectSharp.Core.Models
         [JsonProperty("params")]
         public WcSessionRequestRequestParams[] parameters;
 
-        public WcSessionRequestRequest(ClientMeta clientMeta, string clientId, int? chainId = 1)
+        public WcSessionRequestRequest(ClientMeta clientMeta, string clientId, int chainId = 1)
         {
             this.parameters = new[]
             {
@@ -29,7 +29,7 @@ namespace WalletConnectSharp.Core.Models
         {
             public string peerId;
             public ClientMeta peerMeta;
-            public int? chainId;
+            public int chainId;
         }
     }
 }
