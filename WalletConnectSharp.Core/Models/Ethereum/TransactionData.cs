@@ -9,5 +9,6 @@ namespace WalletConnectSharp.Core.Models.Ethereum
         public string gasPrice;
         public string value;
         public string nonce;
+        public int chainId;
     }
 }

@@ -229,6 +229,15 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
+        public async Task<string> EthSignTransaction(params TransactionData[] transaction)
+        {
+            var request = new EthSignTransaction(transaction);
+            
+            var response = await Send<EthSignTransaction, EthResponse>(request);
+
+            return response.Result;
+        }
+
         public async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
         {
             TaskCompletionSource<R> eventCompleted = new TaskCompletionSource<R>(TaskCreationOptions.None);
