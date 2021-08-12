@@ -237,6 +237,27 @@ namespace WalletConnectSharp.Core
 
             return response.Result;
         }
+        
+        
+        public async Task<string> EthSendRawTransaction(string data, Encoding messageEncoding = null)
+        {
+            if (!data.IsHex())
+            {
+                var encoding = messageEncoding;
+                if (encoding == null)
+                {
+                    encoding = Encoding.UTF8;
+                }
+                
+                data = "0x" + encoding.GetBytes(data).ToHex();
+            }
+            
+            var request = new EthGenericRequest<string>("eth_sendRawTransaction", data);
+            
+            var response = await Send<EthGenericRequest<string>, EthResponse>(request);
+
+            return response.Result;
+        }
 
         public async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
         {
