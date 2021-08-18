@@ -170,6 +170,42 @@ namespace WalletConnectSharp.Core
         {
             await DisconnectSession();
         }
+
+        public async Task<string> AddEthereumChain(EthChainData newChainData)
+        {
+            var request = new WalletAddEthChain(newChainData);
+
+            var response = await Send<WalletAddEthChain, EthResponse>(request);
+
+            return response.Result;
+        }
+        
+        public Task<string> SwitchEthereumChain(EthChainData chainData)
+        {
+            return SwitchEthereumChain(chainData.chainId);
+        }
+        
+        public Task<string> SwitchEthereumChain(int chainId)
+        {
+            return SwitchEthereumChain(chainId.ToString());
+        }
+        
+        public Task<string> SwitchEthereumChain(string chainId)
+        {
+            return SwitchEthereumChain(new EthChain()
+            {
+                chainId = chainId
+            });
+        }
+        
+        public async Task<string> SwitchEthereumChain(EthChain chainId)
+        {
+            var request = new EthGenericRequest<EthChain>("wallet_switchEthereumChain", chainId);
+
+            var response = await Send<EthGenericRequest<EthChain>, EthResponse>(request);
+
+            return response.Result;
+        }
         
         public async Task<string> EthSign(string address, string message, Encoding messageEncoding = null)
         {

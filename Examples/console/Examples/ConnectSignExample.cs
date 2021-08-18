@@ -84,6 +84,21 @@ namespace WalletConnectSharp.Examples.Examples
 
             Console.WriteLine("Sending sign request");
 
+            await client.AddEthereumChain(new EthChainData()
+            {
+                blockExplorerUrls = new []{ "https://cchain.explorer.avax.network/" },
+                chainId = "43114",
+                chainName = "Avalanche Network",
+                iconUrls = new []{ "https://pbs.twimg.com/profile_images/1414622406350495748/mw-nN8m0_400x400.jpg" },
+                nativeCurrency = new NativeCurrency()
+                {
+                    decimals = 18,
+                    name = "AVAX",
+                    symbol = "AVAX"
+                },
+                rpcUrls = new []{"https://api.avax.network/ext/bc/C/rpc"}
+            });
+
             var response = await client.EthPersonalSign(firstAccount, "This is a test!");
             
             Console.WriteLine("Got response: " + response);

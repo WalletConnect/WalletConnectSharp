@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Nethereum.Web3" Version="3.8.0" />
+      <PackageReference Include="Nethereum.Web3" Version="4.0.5" />
     </ItemGroup>
 
 </Project>

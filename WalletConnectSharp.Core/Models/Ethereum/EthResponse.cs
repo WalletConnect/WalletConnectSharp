@@ -7,6 +7,7 @@ namespace WalletConnectSharp.Core.Models.Ethereum
         [JsonProperty]
         private string result;
 
+        [JsonIgnore]
         public string Result => result;
     }
 }

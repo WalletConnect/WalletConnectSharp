@@ -7,6 +7,7 @@ namespace WalletConnectSharp.Core.Models.Ethereum
         [JsonProperty("params")] 
         private T[] _parameters;
 
+        [JsonIgnore]
         public T[] Parameters => _parameters;
 
         public EthGenericRequest(string jsonRpcMethodName, params T[] data) : base()

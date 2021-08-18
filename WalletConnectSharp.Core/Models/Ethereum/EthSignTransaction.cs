@@ -7,6 +7,7 @@ namespace WalletConnectSharp.Core.Models.Ethereum
         [JsonProperty("params")] 
         private TransactionData[] _parameters;
 
+        [JsonIgnore]
         public TransactionData[] Parameters => _parameters;
 
         public EthSignTransaction(params TransactionData[] transactionDatas) : base()

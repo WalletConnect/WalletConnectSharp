@@ -3,10 +3,22 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>WalletConnectSharp.Core</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>1.6.0</PackageVersion>
+        <Title>WalletConnectSharp.Core</Title>
+        <Authors>pedrouid, edkek</Authors>
+        <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
+        <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/WalletConnect/WalletConnectSharp/blob/main/LICENSE</PackageLicenseUrl>
+        <PackageIconUrl>icon.png</PackageIconUrl>
+        <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <None Include="..\resources\icon.png" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
