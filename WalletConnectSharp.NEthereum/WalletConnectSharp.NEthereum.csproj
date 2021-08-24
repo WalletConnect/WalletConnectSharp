@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.6.1</PackageVersion>
+        <PackageVersion>1.6.2</PackageVersion>
         <Title>WalletConnectSharp.NEthereum</Title>
         <Authors>pedrouid, edkek</Authors>
         <Description>An NEthereum extension to access the WalletConnect protocol through a Web3 Provider. A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
@@ -16,6 +16,8 @@
         <PackageTags>nethereum walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
         <Copyright>Copyright (c) WalletConnect 2021</Copyright>
         <PackageId>WalletConnect.NEthereum</PackageId>
+        <AssemblyVersion>1.6.2</AssemblyVersion>
+        <FileVersion>1.6.2</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>

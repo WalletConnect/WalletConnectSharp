@@ -4,6 +4,8 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <IsPackable>false</IsPackable>
+        <AssemblyVersion>1.6.2</AssemblyVersion>
+        <FileVersion>1.6.2</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
