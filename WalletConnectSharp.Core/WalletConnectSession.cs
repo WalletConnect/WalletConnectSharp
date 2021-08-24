@@ -92,6 +92,8 @@ namespace WalletConnectSharp.Core
             {
                 bridgeUrl = DefaultBridge.ChooseRandomBridge();
             }
+
+            bridgeUrl = DefaultBridge.GetBridgeUrl(bridgeUrl);
             
             if (bridgeUrl.StartsWith("https"))
                 bridgeUrl = bridgeUrl.Replace("https", "wss");
