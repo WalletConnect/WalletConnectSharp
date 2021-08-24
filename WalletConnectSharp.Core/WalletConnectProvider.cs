@@ -34,7 +34,8 @@ namespace WalletConnectSharp.Core
         
         public WalletConnectProvider(SavedSession savedSession, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
         {
-            this.ClientMetadata = savedSession.ClientMeta;
+            this.ClientMetadata = savedSession.DappMeta;
+            this.WalletMetadata = savedSession.WalletMeta;
             this.ChainId = savedSession.ChainID;
             
             clientId = savedSession.ClientID;

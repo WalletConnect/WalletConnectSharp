@@ -24,8 +24,6 @@ namespace WalletConnectSharp.Core
             "eth_signTypedData_v3",
             "eth_signTypedData_v4",
             "personal_sign",
-            "wallet_addEthereumChain",
-            "wallet_switchEthereumChain"
         };
 
         public readonly EventDelegator Events;
@@ -34,7 +32,7 @@ namespace WalletConnectSharp.Core
         protected string _bridgeUrl;
         protected string _key;
         protected byte[] _keyRaw;
-        private List<string> _activeTopics = new List<string>();
+        protected List<string> _activeTopics = new List<string>();
 
         public event EventHandler<WalletConnectProtocol> OnTransportConnect;
         public event EventHandler<WalletConnectProtocol> OnTransportDisconnect;
@@ -46,6 +44,10 @@ namespace WalletConnectSharp.Core
         public ITransport Transport { get; private set; }
 
         public ICipher Cipher { get; private set; }
+        
+        public ClientMeta DappMetadata { get; set; }
+        
+        public ClientMeta WalletMetadata { get; set; }
 
         public ReadOnlyCollection<string> ActiveTopics
         {
@@ -153,6 +155,18 @@ namespace WalletConnectSharp.Core
             TriggerOnTransportConnect();
         }
 
+        protected async Task DisconnectTransport()
+        {
+            await Transport.Close();
+            
+            Transport.MessageReceived -= TransportOnMessageReceived;
+            
+            TransportConnected = false;
+            
+            if (OnTransportDisconnect != null)
+                OnTransportDisconnect(this, this);
+        }
+
         protected virtual void TriggerOnTransportConnect()
         {
             if (OnTransportConnect != null)
@@ -242,12 +256,7 @@ namespace WalletConnectSharp.Core
 
         public virtual async Task Disconnect()
         {
-            await Transport.Close();
-
-            TransportConnected = false;
-
-            if (OnTransportDisconnect != null)
-                OnTransportDisconnect(this, this);
+            await DisconnectTransport();
         }
     }
 }

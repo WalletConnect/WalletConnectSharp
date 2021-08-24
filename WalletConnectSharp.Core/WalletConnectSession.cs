@@ -18,11 +18,12 @@ namespace WalletConnectSharp.Core
     public class WalletConnectSession : WalletConnectProtocol
     {
         
-        private readonly string _handshakeTopic;
+        private string _handshakeTopic;
         
         private long _handshakeId;
         
         public event EventHandler<WalletConnectSession> OnSessionConnect;
+        public event EventHandler OnSessionDisconnect;
         public event EventHandler<WalletConnectSession> OnSend;
 
         public int NetworkId { get; private set; }
@@ -31,8 +32,6 @@ namespace WalletConnectSharp.Core
 
         public int ChainId { get; private set; }
 
-        public ClientMeta ClientMetadata { get; set; }
-        
         private string clientId = "";
 
         public string URI
@@ -50,7 +49,8 @@ namespace WalletConnectSharp.Core
         
         public WalletConnectSession(SavedSession savedSession, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
         {
-            this.ClientMetadata = savedSession.ClientMeta;
+            this.DappMetadata = savedSession.DappMeta;
+            this.WalletMetadata = savedSession.WalletMeta;
             this.ChainId = savedSession.ChainID;
             
             clientId = savedSession.ClientID;
@@ -97,9 +97,19 @@ namespace WalletConnectSharp.Core
             else if (bridgeUrl.StartsWith("http"))
                 bridgeUrl = bridgeUrl.Replace("http", "ws");
             
-            this.ClientMetadata = clientMeta;
+            this.DappMetadata = clientMeta;
             this.ChainId = chainId;
             this._bridgeUrl = bridgeUrl;
+            
+            CreateNewSession();
+        }
+
+        public void CreateNewSession(bool force = false)
+        {
+            if (Connected && !force)
+            {
+                throw new IOException("You must disconnect the current session before you can create a new one");
+            }
 
             var topicGuid = Guid.NewGuid();
 
@@ -108,6 +118,7 @@ namespace WalletConnectSharp.Core
             clientId = Guid.NewGuid().ToString();
             
             GenerateKey();
+            
         }
         
         private void GenerateKey()
@@ -123,7 +134,7 @@ namespace WalletConnectSharp.Core
             this._key = this._keyRaw.ToHex().ToLower();
         }
 
-        public async Task<WCSessionData> ConnectSession()
+        public virtual async Task<WCSessionData> ConnectSession()
         {
             if (!base.TransportConnected)
             {
@@ -149,7 +160,7 @@ namespace WalletConnectSharp.Core
             await ConnectSession();
         }
 
-        public async Task DisconnectSession(string disconnectMessage = "Session Disconnected")
+        public async Task DisconnectSession(string disconnectMessage = "Session Disconnected", bool createNewSession = true)
         {
             var request = new WCSessionUpdate(new WCSessionData()
             {
@@ -163,48 +174,12 @@ namespace WalletConnectSharp.Core
             
             await base.Disconnect();
             
-            HandleSessionDisconnect(disconnectMessage);
+            HandleSessionDisconnect(disconnectMessage, "disconnect", createNewSession);
         }
 
         public override async Task Disconnect()
         {
             await DisconnectSession();
-        }
-
-        public async Task<string> AddEthereumChain(EthChainData newChainData)
-        {
-            var request = new WalletAddEthChain(newChainData);
-
-            var response = await Send<WalletAddEthChain, EthResponse>(request);
-
-            return response.Result;
-        }
-        
-        public Task<string> SwitchEthereumChain(EthChainData chainData)
-        {
-            return SwitchEthereumChain(chainData.chainId);
-        }
-        
-        public Task<string> SwitchEthereumChain(int chainId)
-        {
-            return SwitchEthereumChain(chainId.ToString());
-        }
-        
-        public Task<string> SwitchEthereumChain(string chainId)
-        {
-            return SwitchEthereumChain(new EthChain()
-            {
-                chainId = chainId
-            });
-        }
-        
-        public async Task<string> SwitchEthereumChain(EthChain chainId)
-        {
-            var request = new EthGenericRequest<EthChain>("wallet_switchEthereumChain", chainId);
-
-            var response = await Send<EthGenericRequest<EthChain>, EthResponse>(request);
-
-            return response.Result;
         }
         
         public async Task<string> EthSign(string address, string message, Encoding messageEncoding = null)
@@ -329,7 +304,7 @@ namespace WalletConnectSharp.Core
         /// <returns></returns>
         private async Task<WCSessionData> CreateSession()
         {
-            var data = new WcSessionRequestRequest(ClientMetadata, clientId, ChainId);
+            var data = new WcSessionRequestRequest(DappMetadata, clientId, ChainId);
 
             this._handshakeId = data.ID;
 
@@ -392,7 +367,7 @@ namespace WalletConnectSharp.Core
                 {
                     PeerId = response.peerId;
 
-                    ClientMetadata = response.peerMeta;
+                    WalletMetadata = response.peerMeta;
 
                     Events.Trigger("connect", response);
                 }
@@ -411,13 +386,25 @@ namespace WalletConnectSharp.Core
             }
         }
 
-        private void HandleSessionDisconnect(string msg, string topic = "disconnect")
+        private void HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)
         {
             Connected = false;
 
             Events.Trigger(topic, new ErrorResponse(msg));
 
-            Transport.Close();
+            if (TransportConnected)
+            {
+                DisconnectTransport();
+            }
+
+            CreateNewSession();
+            
+            _activeTopics.Clear();
+            
+            Events.Clear();
+
+            if (OnSessionDisconnect != null)
+                OnSessionDisconnect(this, EventArgs.Empty);
         }
         
         
@@ -433,7 +420,7 @@ namespace WalletConnectSharp.Core
                 return null;
             }
             
-            return new SavedSession(clientId, _bridgeUrl, _key, _keyRaw, PeerId, NetworkId, Accounts, ChainId, ClientMetadata);
+            return new SavedSession(clientId, _bridgeUrl, _key, _keyRaw, PeerId, NetworkId, Accounts, ChainId, DappMetadata, WalletMetadata);
         }
 
         /// <summary>
