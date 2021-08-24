@@ -206,9 +206,17 @@ namespace WalletConnectSharp.Core
 
             var response = JsonConvert.DeserializeObject<JsonRpcResponse>(json);
 
-            //TODO Handle this case better, how to differentiate between Response and Request Object?
-            if (response.Event != null)
-                Events.Trigger(response.Event, json);
+            bool wasResponse = false;
+            if (response != null && response.Event != null)
+                wasResponse = Events.Trigger(response.Event, json);
+
+            if (!wasResponse)
+            {
+                var request = JsonConvert.DeserializeObject<JsonRpcRequest>(json);
+
+                if (request != null && request.Method != null)
+                    Events.Trigger(request.Method, json);
+            }
         }
 
         public async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)

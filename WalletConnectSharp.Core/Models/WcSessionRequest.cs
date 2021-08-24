@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace WalletConnectSharp.Core.Models
 {
-    public class WcSessionRequestRequest : JsonRpcRequest
+    public class WcSessionRequest : JsonRpcRequest
     {
         public override string Method
         {
@@ -12,7 +12,7 @@ namespace WalletConnectSharp.Core.Models
         [JsonProperty("params")]
         public WcSessionRequestRequestParams[] parameters;
 
-        public WcSessionRequestRequest(ClientMeta clientMeta, string clientId, int chainId = 1)
+        public WcSessionRequest(ClientMeta clientMeta, string clientId, int chainId = 1)
         {
             this.parameters = new[]
             {

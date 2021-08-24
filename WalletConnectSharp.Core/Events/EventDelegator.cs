@@ -58,13 +58,13 @@ namespace WalletConnectSharp.Core.Events
             listProvider.Add(provider);
         }
         
-        public void Trigger<T>(string topic, T obj)
+        public bool Trigger<T>(string topic, T obj)
         {
-            Trigger(topic, JsonConvert.SerializeObject(obj));
+            return Trigger(topic, JsonConvert.SerializeObject(obj));
         }
 
 
-        public void Trigger(string topic, string json)
+        public bool Trigger(string topic, string json)
         {
             if (Listeners.ContainsKey(topic))
             {
@@ -76,10 +76,19 @@ namespace WalletConnectSharp.Core.Events
                     
                     provider.PropagateEvent(topic, json);
                 }
+
+                return providerList.Count > 0;
             }
+
+            return false;
         }
 
         public void Dispose()
+        {
+            Clear();
+        }
+
+        public void Clear()
         {
             Listeners.Clear();
         }

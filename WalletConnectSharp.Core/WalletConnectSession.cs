@@ -25,6 +25,7 @@ namespace WalletConnectSharp.Core
         public event EventHandler<WalletConnectSession> OnSessionConnect;
         public event EventHandler OnSessionDisconnect;
         public event EventHandler<WalletConnectSession> OnSend;
+        public event EventHandler<WCSessionData> SessionUpdate;
 
         public int NetworkId { get; private set; }
         
@@ -304,7 +305,7 @@ namespace WalletConnectSharp.Core
         /// <returns></returns>
         private async Task<WCSessionData> CreateSession()
         {
-            var data = new WcSessionRequestRequest(DappMetadata, clientId, ChainId);
+            var data = new WcSessionRequest(DappMetadata, clientId, ChainId);
 
             this._handshakeId = data.ID;
 
@@ -316,6 +317,11 @@ namespace WalletConnectSharp.Core
             //Listen for the _handshakeId response
             //The response will be of type WCSessionRequestResponse
             Events.ListenForResponse<WCSessionRequestResponse>(this._handshakeId, HandleSessionResponse);
+            
+            //Listen for wc_sessionUpdate requests
+            Events.ListenFor("wc_sessionUpdate",
+                (object sender, GenericEvent<WCSessionUpdate> @event) =>
+                    HandleSessionUpdate(@event.Response.parameters[0]));
 
             //Listen for the "connect" event triggered by 'HandleSessionResponse' above
             //This will have the type WCSessionData
@@ -352,29 +358,7 @@ namespace WalletConnectSharp.Core
 
             if (response != null && response.approved)
             {
-                bool wasConnected = Connected;
-
-                //We are now connected
-                Connected = true;
-
-                ChainId = response.chainId;
-
-                NetworkId = response.networkId;
-
-                Accounts = response.accounts;
-
-                if (!wasConnected)
-                {
-                    PeerId = response.peerId;
-
-                    WalletMetadata = response.peerMeta;
-
-                    Events.Trigger("connect", response);
-                }
-                else
-                {
-                    Events.Trigger("session_update", response);
-                }
+                HandleSessionUpdate(response);
             }
             else if (jsonresponse.Response.IsError)
             {
@@ -384,6 +368,38 @@ namespace WalletConnectSharp.Core
             {
                 HandleSessionDisconnect("Not Approved", "session_failed");
             }
+        }
+
+        private void HandleSessionUpdate(WCSessionData data)
+        {
+            if (data == null) return;
+
+            bool wasConnected = Connected;
+
+            //We are connected if we are approved
+            Connected = data.approved;
+
+            ChainId = data.chainId;
+
+            NetworkId = data.networkId;
+
+            Accounts = data.accounts;
+
+            if (!wasConnected)
+            {
+                PeerId = data.peerId;
+
+                WalletMetadata = data.peerMeta;
+
+                Events.Trigger("connect", data);
+            }
+            else
+            {
+                Events.Trigger("session_update", data);
+            }
+
+            if (SessionUpdate != null)
+                SessionUpdate(this, data);
         }
 
         private void HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)

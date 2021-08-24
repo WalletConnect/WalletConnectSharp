@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Core;
@@ -82,6 +83,7 @@ namespace WalletConnectSharp.Examples.Examples
 
             var firstAccount = client.Accounts[0];
 
+            /*
             Console.WriteLine("Sending sign request");
 
             await client.AddEthereumChain(new EthChainData()
@@ -104,6 +106,9 @@ namespace WalletConnectSharp.Examples.Examples
             Console.WriteLine("Got response: " + response);
 
             await TestTypedSign(client);
+            */
+            
+            Thread.Sleep(50000);
 
             await client.Disconnect();
             

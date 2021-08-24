@@ -4,21 +4,24 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>WalletConnectSharp.Core</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.6.0</PackageVersion>
+        <PackageVersion>1.6.1</PackageVersion>
         <Title>WalletConnectSharp.Core</Title>
         <Authors>pedrouid, edkek</Authors>
         <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
         <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/WalletConnect/WalletConnectSharp/blob/main/LICENSE</PackageLicenseUrl>
-        <PackageIconUrl>icon.png</PackageIconUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIconUrl>https://walletconnect.org/walletconnect-logo.svg</PackageIconUrl>
+        <PackageIcon>icon.png</PackageIcon>
         <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
+        <Copyright>Copyright (c) WalletConnect 2021</Copyright>
+        <PackageId>WalletConnect.Core</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-      <None Include="..\resources\icon.png" Pack="true" PackagePath="\"/>
+      <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
