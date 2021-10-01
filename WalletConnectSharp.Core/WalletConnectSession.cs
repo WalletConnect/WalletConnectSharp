@@ -59,6 +59,8 @@ namespace WalletConnectSharp.Core
             this.Accounts = savedSession.Accounts;
                         
             this.NetworkId = savedSession.NetworkID;
+
+            this.SessionConnected = true;
         }
 
         public WalletConnectSession(ClientMeta clientMeta, string bridgeUrl = null, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
@@ -103,13 +105,15 @@ namespace WalletConnectSharp.Core
             this.DappMetadata = clientMeta;
             this.ChainId = chainId;
             this._bridgeUrl = bridgeUrl;
+
+            this.SessionConnected = false;
             
             CreateNewSession();
         }
 
         public void CreateNewSession(bool force = false)
         {
-            if (Connected && !force)
+            if (SessionConnected && !force)
             {
                 throw new IOException("You must disconnect the current session before you can create a new one");
             }
@@ -119,9 +123,8 @@ namespace WalletConnectSharp.Core
             _handshakeTopic = topicGuid.ToString();
 
             clientId = Guid.NewGuid().ToString();
-            
+
             GenerateKey();
-            
         }
         
         private void GenerateKey()
@@ -148,7 +151,23 @@ namespace WalletConnectSharp.Core
             
             ListenToTopic(this._handshakeTopic);
 
-            var result = await CreateSession();
+            WCSessionData result;
+            if (!SessionConnected)
+            {
+                result = await CreateSession();
+            }
+            else
+            {
+                result = new WCSessionData()
+                {
+                    accounts = Accounts,
+                    approved = true,
+                    chainId = ChainId,
+                    networkId = NetworkId,
+                    peerId = PeerId,
+                    peerMeta = WalletMetadata
+                };
+            }
             
             if (OnSessionConnect != null)
                 OnSessionConnect(this, this);
@@ -376,10 +395,10 @@ namespace WalletConnectSharp.Core
         {
             if (data == null) return;
 
-            bool wasConnected = Connected;
+            bool wasConnected = SessionConnected;
 
             //We are connected if we are approved
-            Connected = data.approved;
+            SessionConnected = data.approved;
 
             ChainId = data.chainId;
 
@@ -406,7 +425,7 @@ namespace WalletConnectSharp.Core
 
         private void HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)
         {
-            Connected = false;
+            SessionConnected = false;
 
             Events.Trigger(topic, new ErrorResponse(msg));
 
@@ -433,7 +452,7 @@ namespace WalletConnectSharp.Core
         /// <returns></returns>
         public SavedSession SaveSession()
         {
-            if (!Connected)
+            if (!SessionConnected)
             {
                 return null;
             }

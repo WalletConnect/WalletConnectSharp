@@ -8,6 +8,8 @@ namespace WalletConnectSharp.Core.Network
 {
     public interface ITransport : IDisposable
     {
+        bool Connected { get; }
+        
         event EventHandler<MessageReceivedEventArgs> MessageReceived;
         
         Task Open(string bridgeURL);

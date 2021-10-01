@@ -37,9 +37,23 @@ namespace WalletConnectSharp.Core
         public event EventHandler<WalletConnectProtocol> OnTransportConnect;
         public event EventHandler<WalletConnectProtocol> OnTransportDisconnect;
 
-        public bool Connected { get; protected set; }
+        public bool SessionConnected { get; protected set; }
 
-        public bool TransportConnected { get; private set; }
+        public bool Connected
+        {
+            get
+            {
+                return SessionConnected && TransportConnected;
+            }
+        }
+
+        public bool TransportConnected
+        {
+            get
+            {
+                return Transport != null && Transport.Connected;
+            }
+        }
 
         public ITransport Transport { get; private set; }
 
@@ -150,8 +164,6 @@ namespace WalletConnectSharp.Core
 
             await Transport.Open(this._bridgeUrl);
 
-            TransportConnected = true;
-            
             TriggerOnTransportConnect();
         }
 
@@ -160,9 +172,7 @@ namespace WalletConnectSharp.Core
             await Transport.Close();
             
             Transport.MessageReceived -= TransportOnMessageReceived;
-            
-            TransportConnected = false;
-            
+
             if (OnTransportDisconnect != null)
                 OnTransportDisconnect(this, this);
         }
