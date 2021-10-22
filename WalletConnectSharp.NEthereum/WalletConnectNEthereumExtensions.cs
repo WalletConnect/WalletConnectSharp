@@ -1,9 +1,6 @@
 using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using Common.Logging;
 using Nethereum.JsonRpc.Client;
-using Newtonsoft.Json;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.NEthereum.Client;
 
@@ -20,17 +17,16 @@ namespace WalletConnectSharp.NEthereum
         /// <param name="protocol">The WalletConnectProtocol to use</param>
         /// <param name="infruaId">The project ID of the Infura instance to connect to for read calls</param>
         /// <param name="network">An optional network name to use. Used in the Infura URL</param>
-        /// <param name="log">A ILog object to use in the returned Provider</param>
-        /// <param name="authenticationHeader">An authentication header to provide to the endpoint</param>
+        /// <param name="authenticationHeader">An optional authentication header to provide to the endpoint</param>
         /// <returns>
         /// A new NEtehereum IClient instance that uses Infura as the read client and the WalletConnectProtocol
         /// for write client. The returned IClient instance can be used as a Provider in an NEthereum Web3 instance
         /// </returns>
-        public static IClient CreateProviderWithInfura(this WalletConnectProtocol protocol, string infruaId, string network = "mainnet", ILog log = null, AuthenticationHeaderValue authenticationHeader = null)
+        public static IClient CreateProviderWithInfura(this WalletConnectProtocol protocol, string infruaId, string network = "mainnet", AuthenticationHeaderValue authenticationHeader = null)
         {
             string url = "https://" + network + ".infura.io/v3/" + infruaId;
 
-            return CreateProvider(protocol, new Uri(url), log, authenticationHeader);
+            return CreateProvider(protocol, new Uri(url), authenticationHeader);
         }
 
         /// <summary>
@@ -41,20 +37,16 @@ namespace WalletConnectSharp.NEthereum
         /// </summary>
         /// <param name="protocol">The WalletConnectProtocol to use</param>
         /// <param name="url">The URL of the JSON-RPC endpoint (i.e geth)</param>
-        /// <param name="log">A ILog object to use in the returned Provider</param>
-        /// <param name="authenticationHeader">An authentication header to provide to the endpoint</param>
+        /// <param name="authenticationHeader">An optional authentication header to provide to the endpoint</param>
         /// <returns>
         /// A new NEtehereum IClient instance that uses a JSON-RPC endpoint as the read client and the
         /// WalletConnectProtocol for write client. The returned IClient instance can be used as a
         /// Provider in an NEthereum Web3 instance
         /// </returns>
-        public static IClient CreateProvider(this WalletConnectProtocol protocol, Uri url, ILog log = null,
-            AuthenticationHeaderValue authenticationHeader = null, JsonSerializerSettings serializerSettings = null,
-            HttpClientHandler clientHandler = null)
+        public static IClient CreateProvider(this WalletConnectProtocol protocol, Uri url, AuthenticationHeaderValue authenticationHeader = null)
         {
             return CreateProvider(protocol,
-                new RpcClient(url, authenticationHeader, serializerSettings,
-                    clientHandler, log)
+                new RpcClient(url, authenticationHeader)
             );
         }
 
