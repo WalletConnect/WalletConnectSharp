@@ -30,6 +30,8 @@ namespace WalletConnectSharp.Core
         public int NetworkId { get; private set; }
         
         public string[] Accounts { get; private set; }
+        
+        public bool ReadyForUserPrompt { get; private set; }
 
         public int ChainId { get; private set; }
 
@@ -146,7 +148,8 @@ namespace WalletConnectSharp.Core
             {
                 await base.SetupTransport();
             }
-            
+
+            ReadyForUserPrompt = false;
             await SubscribeAndListenToTopic(this.clientId);
             
             ListenToTopic(this._handshakeTopic);
@@ -155,6 +158,9 @@ namespace WalletConnectSharp.Core
             if (!SessionConnected)
             {
                 result = await CreateSession();
+                //Reset this back after we have established a session
+                ReadyForUserPrompt = false;
+                
             }
             else
             {
@@ -367,6 +373,8 @@ namespace WalletConnectSharp.Core
                             new IOException("WalletConnect: Session Failed: " + @event.Response.Message));
                     }
                 });
+            
+            ReadyForUserPrompt = true;
 
             var response = await eventCompleted.Task;
 
