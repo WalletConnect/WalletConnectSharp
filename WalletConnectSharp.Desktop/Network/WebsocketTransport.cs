@@ -8,7 +8,6 @@ using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Network;
 using Websocket.Client;
-using Websocket.Client.Models;
 
 namespace WalletConnectSharp.Desktop.Network
 {
@@ -26,6 +25,14 @@ namespace WalletConnectSharp.Desktop.Network
         {
             if (client != null)
                 client.Dispose();
+        }
+
+        public bool Connected
+        {
+            get
+            {
+                return client.NativeClient.State == WebSocketState.Open;
+            }
         }
 
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
