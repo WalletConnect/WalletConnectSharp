@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using UnityEngine;
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Models;
@@ -309,8 +308,6 @@ namespace WalletConnectSharp.Core
 
                 message = "0x" + hash.ToHex();
             }
-
-            Debug.Log(message);
             
             var request = new EthSign(address, message);
 

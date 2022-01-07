@@ -36,7 +36,9 @@ namespace WalletConnectSharp.Desktop.Network
         }
 
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-        public async Task Open(string url)
+        public string URL { get; private set; }
+
+        public async Task Open(string url, bool clearSubscriptions = true)
         {
             if (url.StartsWith("https"))
                 url = url.Replace("https", "wss");
@@ -45,6 +47,8 @@ namespace WalletConnectSharp.Desktop.Network
             
             if (client != null)
                 return;
+
+            this.URL = url;
             
             client = new WebsocketClient(new Uri(url));
             
@@ -114,6 +118,11 @@ namespace WalletConnectSharp.Desktop.Network
             await Subscribe(topic);
 
             _eventDelegator.ListenFor(topic, callback);
+        }
+
+        public void ClearSubscriptions()
+        {
+            
         }
     }
 }
