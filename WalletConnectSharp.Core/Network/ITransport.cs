@@ -12,7 +12,9 @@ namespace WalletConnectSharp.Core.Network
         
         event EventHandler<MessageReceivedEventArgs> MessageReceived;
         
-        Task Open(string bridgeURL);
+        string URL { get; }
+        
+        Task Open(string bridgeURL, bool clearSubscriptions = true);
 
         Task Close();
 
@@ -23,5 +25,7 @@ namespace WalletConnectSharp.Core.Network
         Task Subscribe<T>(string topic, EventHandler<JsonRpcResponseEvent<T>> callback) where T : JsonRpcResponse;
 
         Task Subscribe<T>(string topic, EventHandler<JsonRpcRequestEvent<T>> callback) where T : JsonRpcRequest;
+
+        void ClearSubscriptions();
     }
 }
