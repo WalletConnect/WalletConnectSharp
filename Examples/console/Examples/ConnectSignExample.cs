@@ -117,7 +117,7 @@ namespace WalletConnectSharp.Examples.Examples
                 from = client.Accounts[0],
                 to = "0x5033d0D9b04Cca3E856e0b24887c366066C52E96",
                 value = "1",
-                data = "0xd0e30db0"
+                data = "deposit(address,uint256)"
             };
             var sig = await client.EthSignTransaction(td);
             

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Nethereum.RLP;
 using WalletConnectSharp.Core;
@@ -43,6 +44,14 @@ namespace WalletConnectSharp.Desktop
                     {
                         throw new ArgumentException(
                             "The following fields in the TransactionData are required: (nonce, gasPrice, gas, value, to, data)");
+                    }
+
+                    string funcTest =
+                        @"[a-zA-Z0-9_]+\(((address|uint256|uint|uint8|bool|string|bytes|uint16|uint32|uint64|uint128),?)*\)";
+                    Regex r = new Regex(funcTest, RegexOptions.Singleline);
+                    if (r.IsMatch(t.data))
+                    {
+                        t.data = "0x" + Sha3Keccack.Current.CalculateHash(t.data).Substring(0, 8);
                     }
                     
                     byte[] nonce = t.nonce.ToBytesForRLPEncoding();
