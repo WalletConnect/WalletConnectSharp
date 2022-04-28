@@ -107,7 +107,22 @@ namespace WalletConnectSharp.Examples.Examples
 
             await TestTypedSign(client);
             */
+            Thread.Sleep(1000);
+            var td = new TransactionData()
+            {
+                chainId = 1,
+                nonce = "0",
+                gas = "10000",
+                gasPrice = "1000000",
+                from = client.Accounts[0],
+                to = "0x5033d0D9b04Cca3E856e0b24887c366066C52E96",
+                value = "1",
+                data = "0xd0e30db0"
+            };
+            var sig = await client.EthSignTransaction(td);
             
+            Console.WriteLine("Got sig: " + sig);
+
             Thread.Sleep(50000);
 
             await client.Disconnect();

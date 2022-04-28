@@ -288,25 +288,13 @@ namespace WalletConnectSharp.Core
             await DisconnectSession();
         }
         
-        public async Task<string> EthSign(string address, string message)
+        public virtual async Task<string> EthSign(string address, string message)
         {
             EnsureNotDisconnected();
             
             if (!message.IsHex())
             {
-                var rawMessage = Encoding.UTF8.GetBytes(message);
-                
-                var byteList = new List<byte>();
-                var bytePrefix = "0x19".HexToByteArray();
-                var textBytePrefix = Encoding.UTF8.GetBytes("Ethereum Signed Message:\n" + rawMessage.Length);
-
-                byteList.AddRange(bytePrefix);
-                byteList.AddRange(textBytePrefix);
-                byteList.AddRange(rawMessage);
-                
-                var hash = new Sha3Keccack().CalculateHash(byteList.ToArray());
-
-                message = "0x" + hash.ToHex();
+                message = "0x" + Encoding.UTF8.GetBytes(message).ToHex();
             }
             
             var request = new EthSign(address, message);
@@ -316,7 +304,7 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public async Task<string> EthPersonalSign(string address, string message)
+        public virtual async Task<string> EthPersonalSign(string address, string message)
         {
             EnsureNotDisconnected();
             
@@ -347,7 +335,7 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public async Task<string> EthSignTypedData<T>(string address, T data, EIP712Domain eip712Domain)
+        public virtual async Task<string> EthSignTypedData<T>(string address, T data, EIP712Domain eip712Domain)
         {
             EnsureNotDisconnected();
             
@@ -358,7 +346,7 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public async Task<string> EthSendTransaction(params TransactionData[] transaction)
+        public virtual async Task<string> EthSendTransaction(params TransactionData[] transaction)
         {
             EnsureNotDisconnected();
             
@@ -369,7 +357,7 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public async Task<string> EthSignTransaction(params TransactionData[] transaction)
+        public virtual async Task<string> EthSignTransaction(params TransactionData[] transaction)
         {
             EnsureNotDisconnected();
             
@@ -381,7 +369,7 @@ namespace WalletConnectSharp.Core
         }
         
         
-        public async Task<string> EthSendRawTransaction(string data, Encoding messageEncoding = null)
+        public virtual async Task<string> EthSendRawTransaction(string data, Encoding messageEncoding = null)
         {
             EnsureNotDisconnected();
             
@@ -403,7 +391,7 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
+        public virtual async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
         {
             EnsureNotDisconnected();
             
@@ -414,7 +402,7 @@ namespace WalletConnectSharp.Core
                 var response = @event.Response;
                 if (response.IsError)
                 {
-                    eventCompleted.SetException(new IOException(response.Error.Message));
+                    eventCompleted.SetException(new WalletException(response.Error));
                 }
                 else
                 {

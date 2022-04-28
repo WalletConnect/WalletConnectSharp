@@ -31,7 +31,7 @@ namespace WalletConnectSharp.Desktop.Network
         {
             get
             {
-                return client.NativeClient.State == WebSocketState.Open;
+                return client != null && client.NativeClient != null && client.NativeClient.State == WebSocketState.Open;
             }
         }
 
