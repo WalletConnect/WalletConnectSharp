@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>WalletConnectSharp.Core</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.6.7</PackageVersion>
+        <PackageVersion>1.6.9</PackageVersion>
         <Title>WalletConnectSharp.Core</Title>
         <Authors>pedrouid, edkek</Authors>
         <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>

@@ -79,6 +79,8 @@ namespace WalletConnectSharp.Examples.Examples
 
             await client.ConnectSession();
             
+            Console.WriteLine(client.Connected);
+            
             Console.WriteLine("The account " + client.Accounts[0] + " has connected!");
 
             var firstAccount = client.Accounts[0];
