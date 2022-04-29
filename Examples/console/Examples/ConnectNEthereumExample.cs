@@ -71,7 +71,7 @@ namespace WalletConnectSharp.Examples.Examples
                 To = secondAccount,
                 TokenAmount = 100
             };
-            var transactionReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(firstAccount, transfer);
+            var transactionReceipt = await transferHandler.SignTransactionAsync(firstAccount, transfer);
             
             Console.WriteLine(transactionReceipt);
 
