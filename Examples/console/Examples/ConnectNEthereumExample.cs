@@ -1,6 +1,8 @@
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
 using WalletConnectSharp.Core.Models;
@@ -11,6 +13,18 @@ namespace WalletConnectSharp.Examples.Examples
 {
     public class ConnectNEthereumExample : IExample
     {
+        public static readonly string PROJECT_ID = "";
+        
+        [Function("transfer", "bool")]
+        public class TransferFunction : FunctionMessage
+        {
+            [Parameter("address", "_to", 1)]
+            public string To { get; set; }
+
+            [Parameter("uint256", "_value", 2)]
+            public BigInteger TokenAmount { get; set; }
+        }
+        
         public string Name
         {
             get
@@ -30,6 +44,8 @@ namespace WalletConnectSharp.Examples.Examples
             };
 
             var client = new WalletConnect(clientMeta);
+
+            var rpcEndpoint = "https://eth-mainnet.alchemyapi.io/v2/" + PROJECT_ID;
             
             Console.WriteLine("Connect using the following URL");
             Console.WriteLine(client.URI);
@@ -38,34 +54,26 @@ namespace WalletConnectSharp.Examples.Examples
             
             Console.WriteLine("The account " + client.Accounts[0] + " has connected!");
 
-            Console.WriteLine("Using RPC endpoint " + args[0] + " as the fallback RPC endpoint");
-            var web3 = new Web3(client.CreateProvider(new Uri(args[0])));
+            Console.WriteLine("Using RPC endpoint " + rpcEndpoint + " as the fallback RPC endpoint");
+            
+            //We use an External Account so we can sign transactions
+            var web3 = client.BuildWeb3(new Uri(rpcEndpoint)).AsExternalSigner();
 
             var firstAccount = client.Accounts[0];
 
-            var secondAccount = args[1];
-            
+            var secondAccount = "0x78F7911996e6803f26e180d21d78949f0fa386EA";
+
             Console.WriteLine("Sending test transactions from " + firstAccount + " to " + secondAccount);
             
-            try
+            var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+            var transfer = new TransferFunction()
             {
-                await web3.Eth.TransactionManager.SendTransactionAsync(firstAccount, secondAccount,
-                    new BigInteger(50).ToHexBigInteger());
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
-            try
-            {
-                await web3.Eth.TransactionManager.SendTransactionAsync(firstAccount, secondAccount,
-                    new BigInteger(50).ToHexBigInteger());
-            } 
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-            }
+                To = secondAccount,
+                TokenAmount = 100
+            };
+            var transactionReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(firstAccount, transfer);
+            
+            Console.WriteLine(transactionReceipt);
 
 
             await client.Disconnect();

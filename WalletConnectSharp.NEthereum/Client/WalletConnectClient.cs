@@ -9,11 +9,11 @@ namespace WalletConnectSharp.NEthereum.Client
     public class WalletConnectClient : ClientBase
     {
         private long _id;
-        public WalletConnectProtocol Provider { get; }
+        public WalletConnectSession Session { get; }
 
-        public WalletConnectClient(WalletConnectProtocol provider)
+        public WalletConnectClient(WalletConnectSession provider)
         {
-            this.Provider = provider;
+            this.Session = provider;
         }
 
         protected override async Task<RpcResponseMessage> SendAsync(RpcRequestMessage message, string route = null)
@@ -30,15 +30,15 @@ namespace WalletConnectSharp.NEthereum.Client
                 rpcRequestMessage = new RpcRequestMessage(_id, message.Method, arrayParameters);
             else
                 rpcRequestMessage = new RpcRequestMessage(_id, message.Method, rawParameters);
-            
+
             TaskCompletionSource<RpcResponseMessage> eventCompleted = new TaskCompletionSource<RpcResponseMessage>(TaskCreationOptions.None);
             
-            Provider.Events.ListenForGenericResponse<RpcResponseMessage>(rpcRequestMessage.Id, (sender, args) =>
+            Session.Events.ListenForGenericResponse<RpcResponseMessage>(rpcRequestMessage.Id, (sender, args) =>
             {
                 eventCompleted.SetResult(args.Response);
             });
             
-            await Provider.SendRequest(rpcRequestMessage);
+            await Session.SendRequest(rpcRequestMessage);
 
             return await eventCompleted.Task;
         }

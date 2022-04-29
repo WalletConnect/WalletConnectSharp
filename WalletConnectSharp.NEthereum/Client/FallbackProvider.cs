@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client;
+using Nethereum.RPC.Eth.DTOs;
 using WalletConnectSharp.Core;
 
 namespace WalletConnectSharp.NEthereum.Client
@@ -31,6 +33,34 @@ namespace WalletConnectSharp.NEthereum.Client
         public RequestInterceptor OverridingRequestInterceptor { get; set; }
         public Task<T> SendRequestAsync<T>(RpcRequest request, string route = null)
         {
+            if (request.Method == "eth_feeHistory")
+            {
+                //convert a null 3rd parameter to an empty array
+                if (request.RawParameters[2] == null)
+                {
+                    request.RawParameters[2] = Array.Empty<object>();
+                }
+            }
+
+            if (request.Method == "eth_sendTransaction")
+            {
+                //Convert a null from address to the current session's address
+                if (request.RawParameters[0] is TransactionInput)
+                {
+                    var input = request.RawParameters[0] as TransactionInput;
+
+                    if (input.From == null)
+                    {
+                        var wcClient = _signer as WalletConnectClient;
+                        if (wcClient != null)
+                        {
+                            input.From = wcClient.Session.Accounts[0];
+                            request.RawParameters[0] = input;
+                        }
+                    }
+                }
+            }
+            
             return ValidMethods.Contains(request.Method) ? _signer.SendRequestAsync<T>(request, route) : _fallback.SendRequestAsync<T>(request, route);
         }
 
