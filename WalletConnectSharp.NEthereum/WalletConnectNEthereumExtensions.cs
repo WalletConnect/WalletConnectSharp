@@ -27,9 +27,10 @@ namespace WalletConnectSharp.NEthereum
         /// <summary>
         /// Build a Web3 instance using the ExternalAccountSignerTransactionManager. This will allow you to sign
         /// transactions, however sending transactions is not supported.
-        /// To send transactions, use either the AsUnmanagedAccount() or AsLegacyAccount().
+        /// To send transactions, use either the AsUnmanagedAccount() or AsWalletAccount().
         /// </summary>
         /// <returns>A new Web3 instance with an ExternalAccount attached representing the WalletConnect session</returns>
+        [Obsolete(message: "WalletConnect as an external signer uses eth_sign (obsolete) exclusively")]
         public Web3 AsExternalSigner()
         {
             WalletConnectExternalAccount externalWC = new WalletConnectExternalAccount(session, client);
@@ -42,12 +43,16 @@ namespace WalletConnectSharp.NEthereum
 
         /// <summary>
         /// Build a Web3 instance using the WalletConnectAccount and WalletConnectTransactionManager. This will
-        /// allow you to sign legacy transactions and send any form of transactions (both legacy and EIP-1559)
+        /// allow you to send any form of transactions directly on-chain (both legacy and EIP-1559)
+        /// Signing transactions is limited by support from the connected wallet in the given WalletConnect session.
+        /// To force signing transaction support, set allowEthSign to true. allowEthSign will fallback to eth_sign
+        /// if eth_signTransaction is not supported by the wallet. This only supports legacy transactions
+        /// <para name="allowEthSign">Whether the eth_sign endpoint should be used if eth_signTransaction is not supported by the connected wallet</para>
         /// </summary>
         /// <returns>A new Web3 instance with an WalletConnectAccount attached representing the WalletConnect session</returns>
-        public Web3 AsWalletAccount()
+        public Web3 AsWalletAccount(bool allowEthSign = false)
         {
-            WalletConnectAccount account = new WalletConnectAccount(session, client);
+            WalletConnectAccount account = new WalletConnectAccount(session, client, allowEthSign);
 
             return new Web3(account, client);
         }
@@ -132,6 +137,7 @@ namespace WalletConnectSharp.NEthereum
         /// A new NEtehereum IClient instance that uses Infura as the read client and the WalletConnectSession
         /// for write client. The returned IClient instance can be used as a Provider in an NEthereum Web3 instance
         /// </returns>
+        [Obsolete("Use BuildWeb3(infruaId).AsUnmanagedAccount() instead. Will be removed in v2")]
         public static IClient CreateProviderWithInfura(this WalletConnectSession session, string infruaId, string network = "mainnet", AuthenticationHeaderValue authenticationHeader = null)
         {
             string url = "https://" + network + ".infura.io/v3/" + infruaId;
@@ -153,6 +159,7 @@ namespace WalletConnectSharp.NEthereum
         /// WalletConnectSession for write client. The returned IClient instance can be used as a
         /// Provider in an NEthereum Web3 instance
         /// </returns>
+        [Obsolete("Use BuildWeb3(url).AsUnmanagedAccount() instead. Will be removed in v2")]
         public static IClient CreateProvider(this WalletConnectSession session, Uri url, AuthenticationHeaderValue authenticationHeader = null)
         {
             return CreateProvider(session,
@@ -173,6 +180,7 @@ namespace WalletConnectSharp.NEthereum
         /// WalletConnectSession for write client. The returned IClient instance can be used as a
         /// Provider in an NEthereum Web3 instance
         /// </returns>
+        [Obsolete("Use BuildWeb3(readClient).AsUnmanagedAccount() instead. Will be removed in v2")]
         public static IClient CreateProvider(this WalletConnectSession session, IClient readClient)
         {
             if (!session.Connected)

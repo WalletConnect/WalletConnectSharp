@@ -8,6 +8,7 @@ using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.TransactionManagers;
 using Nethereum.Util;
 using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.NEthereum.Model;
 
@@ -15,28 +16,30 @@ namespace WalletConnectSharp.NEthereum.Account
 {
     public class WalletConnectTransactionManager : TransactionManager
     {
-        public static readonly string[] EthSignWallets = new[]
-        {
-            "metamask",
-            "trust"
-        };
-
-        
         private WalletConnectSession _session;
         private IAccount _account;
-        public WalletConnectTransactionManager(IClient client, WalletConnectSession session, IAccount account) : base(client)
+        private bool allowEthSign;
+        public WalletConnectTransactionManager(IClient client, WalletConnectSession session, IAccount account, bool allowEthSign) : base(client)
         {
             _session = session;
             _account = account;
+            this.allowEthSign = allowEthSign;
         }
 
         public override async Task<string> SignTransactionAsync(TransactionInput transaction)
         {
-            if (EthSignWallets.Contains(_session.WalletMetadata.Name.ToLower()))
+            try
             {
-                //MetaMask does not support eth_signTransaction
-                //Therefore, we'll use eth_sign for now
+                var request = new NEthSignTransaction(transaction);
 
+                var response = await _session.Send<NEthSignTransaction, EthResponse>(request);
+
+                return response.Result;
+            }
+            catch (WalletException e)
+            {
+                if (!e.Message.ToLower().Contains("method not supported") || !allowEthSign) throw;
+                
                 if (transaction.Nonce == null)
                 {
                     var nextNonce = await _account.NonceService.GetNextNonceAsync();
@@ -79,14 +82,7 @@ namespace WalletConnectSharp.NEthereum.Account
                 var response = await _session.Send<EthSign, EthResponse>(request);
 
                 return response.Result;
-            }
-            else
-            {
-                var request = new NEthSignTransaction(transaction);
 
-                var response = await _session.Send<NEthSignTransaction, EthResponse>(request);
-
-                return response.Result;
             }
         }
     }

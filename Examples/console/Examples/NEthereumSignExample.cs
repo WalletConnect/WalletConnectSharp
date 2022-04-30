@@ -15,21 +15,23 @@ namespace WalletConnectSharp.Examples.Examples
     {
         public static readonly string PROJECT_ID = "";
         
-        [Function("transfer", "bool")]
-        public class TransferFunction : FunctionMessage
+        [Function("deposit", "bool")]
+        public class WEthDepositFunction : FunctionMessage
         {
-            [Parameter("address", "_to", 1)]
-            public string To { get; set; }
-
-            [Parameter("uint256", "_value", 2)]
-            public BigInteger TokenAmount { get; set; }
+            [Parameter("uint256", "payableAmount")]
+            public BigInteger EthAmount { get; set; }
+        }
+        
+        [Function("deposit", "bool")]
+        public class DepositFunction : FunctionMessage
+        {
         }
         
         public string Name
         {
             get
             {
-                return "nethereum_example";
+                return "nethereum_sign_tx_example";
             }
         }
 
@@ -65,11 +67,10 @@ namespace WalletConnectSharp.Examples.Examples
 
             Console.WriteLine("Sending test transactions from " + firstAccount + " to " + secondAccount);
             
-            var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
-            var transfer = new TransferFunction()
+            var transferHandler = web3.Eth.GetContractTransactionHandler<WEthDepositFunction>();
+            var transfer = new WEthDepositFunction()
             {
-                To = secondAccount,
-                TokenAmount = 100
+                EthAmount = 1
             };
             var transactionReceipt = await transferHandler.SignTransactionAsync(firstAccount, transfer);
             

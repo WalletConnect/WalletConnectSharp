@@ -21,10 +21,10 @@ namespace WalletConnectSharp.NEthereum.Account
         public ITransactionManager TransactionManager { get; }
         public INonceService NonceService { get; set; }
 
-        public WalletConnectAccount(WalletConnectSession session, IClient client)
+        public WalletConnectAccount(WalletConnectSession session, IClient client, bool allowEthSign = false)
         {
             this.session = session;
-            this.TransactionManager = new WalletConnectTransactionManager(client, session, this);
+            this.TransactionManager = new WalletConnectTransactionManager(client, session, this, allowEthSign);
             this.NonceService = new InMemoryNonceService(session.Accounts[0], client);
         }
     }
