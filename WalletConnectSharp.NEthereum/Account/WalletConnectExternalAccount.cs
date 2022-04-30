@@ -59,13 +59,7 @@ namespace WalletConnectSharp.NEthereum.Account
 
         public override bool CalculatesV { get; protected set; } = true;
 
-        public override bool Supported1559
-        {
-            get
-            {
-                return _session.ChainId == 1;
-            }
-        }
+        public override bool Supported1559 { get; } = true;
 
         public override ExternalSignerTransactionFormat ExternalSignerTransactionFormat { get; protected set; } =
             ExternalSignerTransactionFormat.Hash;
