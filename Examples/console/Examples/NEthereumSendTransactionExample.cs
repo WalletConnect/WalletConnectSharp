@@ -59,7 +59,7 @@ namespace WalletConnectSharp.Examples.Examples
             Console.WriteLine("Using RPC endpoint " + rpcEndpoint + " as the fallback RPC endpoint");
             
             //We use an External Account so we can sign transactions
-            var web3 = client.BuildWeb3(new Uri(rpcEndpoint)).AsWalletAccount(true);
+            var web3 = client.BuildWeb3(new Uri(rpcEndpoint)).AsExternalSigner();
 
             var firstAccount = client.Accounts[0];
 
@@ -68,11 +68,16 @@ namespace WalletConnectSharp.Examples.Examples
             Console.WriteLine("Sending test transactions from " + firstAccount + " to " + secondAccount);
             
             var transferHandler = web3.Eth.GetContractTransactionHandler<WEthDepositFunction>();
+
             var transfer = new WEthDepositFunction()
             {
                 EthAmount = 1
             };
             var transactionReceipt = await transferHandler.SignTransactionAsync(firstAccount, transfer);
+            
+            Console.WriteLine(transactionReceipt);
+
+            await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync(transactionReceipt);
             
             Console.WriteLine(transactionReceipt);
 
