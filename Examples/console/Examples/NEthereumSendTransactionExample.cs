@@ -59,7 +59,7 @@ namespace WalletConnectSharp.Examples.Examples
             Console.WriteLine("Using RPC endpoint " + rpcEndpoint + " as the fallback RPC endpoint");
             
             //We use an External Account so we can sign transactions
-            var web3 = client.BuildWeb3(new Uri(rpcEndpoint)).AsExternalSigner();
+            var web3 = client.BuildWeb3(new Uri(rpcEndpoint)).AsWalletAccount(true);
 
             var firstAccount = client.Accounts[0];
 
