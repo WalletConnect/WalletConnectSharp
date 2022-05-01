@@ -102,7 +102,7 @@ namespace WalletConnectSharp.NEthereum.Account
                 if (!SupportsEIP1559)
                 {
                     signedTx = new LegacyTransactionChainId(transaction.To, transaction.Value,
-                        transaction.Nonce, transaction.GasPrice, transaction.Gas, transaction.ChainId);
+                        transaction.Nonce, transaction.GasPrice, transaction.Gas, transaction.Data, transaction.ChainId);
                     hash = "0x" + signedTx.RawHash.ToHex();
                 }
                 else
