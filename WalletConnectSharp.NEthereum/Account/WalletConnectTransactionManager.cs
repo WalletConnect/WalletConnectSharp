@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Nethereum.RPC.Accounts;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.TransactionManagers;
 using Nethereum.Signer;
+using Nethereum.Signer.Crypto;
 using Nethereum.Util;
 using Nethereum.Web3.Accounts;
 using WalletConnectSharp.Core;
@@ -119,7 +121,53 @@ namespace WalletConnectSharp.NEthereum.Account
 
                 var signature = response.Result;
                 
-                signedTx.SetSignature(EthECDSASignatureFactory.ExtractECDSASignature(signature));
+                //Setup some NEthereum signature objects
+                var ecdsaSignature = ECDSASignatureFactory.ExtractECDSASignature(signature);
+                var ethSignature = EthECDSASignatureFactory.ExtractECDSASignature(signature);
+
+                // Recover EthECKey + Public Key
+                var key = EthECKey.RecoverFromSignature(ethSignature, hash.HexToByteArray());
+                var pubKey = key.GetPubKey(false);
+
+                // Calculate Rec ID (needed for both EIP1559 and Legacy)
+                var recId = -1;
+
+                for (var i = 0; i < 4; i++)
+                {
+                    var rec = ECKey.RecoverFromSignature(i, ecdsaSignature, signedTx.RawHash, false);
+                    if (rec != null)
+                    {
+                        var k = rec.GetPubKey(false);
+                        if (k != null && k.SequenceEqual(pubKey))
+                        {
+                            recId = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (recId == -1)
+                    throw new Exception("Could not construct a recoverable key. This should never happen.");
+
+                if (!SupportsEIP1559)
+                {
+                    //We must sign the legacy transaction
+                    //But also update the V value to include
+                    //The chainId
+
+                    //Calculate V
+                    var v = transaction.ChainId * new BigInteger(2) + recId + 35;
+
+                    //Update signature to use new V
+                    ecdsaSignature.V = v.ToBytesForRLPEncoding();
+                }
+                else
+                {
+                    //We must sign and calculate Y Parity V
+                    ecdsaSignature.V = new[] {(byte) recId};
+                }
+                
+                signedTx.SetSignature(new EthECDSASignature(ecdsaSignature.R, ecdsaSignature.S, ecdsaSignature.V));
 
                 return "0x" + signedTx.GetRLPEncoded().ToHex();
             }
