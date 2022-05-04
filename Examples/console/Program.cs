@@ -10,7 +10,6 @@ namespace WalletConnectSharp.Examples
     {
         private static readonly IExample[] Examples = new IExample[]
         {
-            new ConnectNEthereumExample(),
             new ConnectSignExample(),
             new NEthereumSendTransactionExample()
         };

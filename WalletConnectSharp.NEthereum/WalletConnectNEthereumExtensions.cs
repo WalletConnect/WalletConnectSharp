@@ -25,34 +25,17 @@ namespace WalletConnectSharp.NEthereum
         }
 
         /// <summary>
-        /// Build a Web3 instance using the ExternalAccountSignerTransactionManager. This will allow you to sign
-        /// transactions, however sending transactions is not supported.
-        /// To send transactions, use either the AsUnmanagedAccount() or AsWalletAccount().
-        /// </summary>
-        /// <returns>A new Web3 instance with an ExternalAccount attached representing the WalletConnect session</returns>
-        [Obsolete(message: "WalletConnect as an external signer uses eth_sign (obsolete) exclusively")]
-        public Web3 AsExternalSigner()
-        {
-            WalletConnectExternalAccount externalWC = new WalletConnectExternalAccount(session, client);
-
-            ExternalAccount externalAccount = new ExternalAccount(session.Accounts[0], externalWC, session.ChainId);
-            externalAccount.InitialiseDefaultTransactionManager(client);
-
-            return new Web3(externalAccount, client);
-        }
-
-        /// <summary>
         /// Build a Web3 instance using the WalletConnectAccount and WalletConnectTransactionManager. This will
         /// allow you to send any form of transactions directly on-chain (both legacy and EIP-1559)
         /// Signing transactions is limited by support from the connected wallet in the given WalletConnect session.
         /// To force signing transaction support, set allowEthSign to true. allowEthSign will fallback to eth_sign
         /// if eth_signTransaction is not supported by the wallet. This only supports legacy transactions
-        /// <para name="allowEthSign">Whether the eth_sign endpoint should be used if eth_signTransaction is not supported by the connected wallet</para>
+        /// <para name="useEthSignForTransactionSigning">Whether the eth_sign endpoint should be used if eth_signTransaction is not supported by the connected wallet</para>
         /// </summary>
         /// <returns>A new Web3 instance with an WalletConnectAccount attached representing the WalletConnect session</returns>
-        public Web3 AsWalletAccount(bool allowEthSign = false)
+        public Web3 AsWalletAccount(bool useEthSignForTransactionSigning = false)
         {
-            WalletConnectAccount account = new WalletConnectAccount(session, client, allowEthSign);
+            WalletConnectAccount account = new WalletConnectAccount(session, client, useEthSignForTransactionSigning);
 
             return new Web3(account, client);
         }

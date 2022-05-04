@@ -73,15 +73,10 @@ namespace WalletConnectSharp.Examples.Examples
             {
                 EthAmount = 1
             };
-            var transactionReceipt = await transferHandler.SignTransactionAsync(firstAccount, transfer);
+            var transactionReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(firstAccount, transfer);
             
             Console.WriteLine(transactionReceipt);
-
-            await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync(transactionReceipt);
             
-            Console.WriteLine(transactionReceipt);
-
-
             await client.Disconnect();
         }
     }

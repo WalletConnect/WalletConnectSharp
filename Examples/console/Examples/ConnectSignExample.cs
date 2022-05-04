@@ -121,7 +121,6 @@ namespace WalletConnectSharp.Examples.Examples
                 value = "1",
                 data = "deposit()"
             };
-            client.UseEthSignFallback = true;
             var sig = await client.EthSignTransaction(td);
             
             Console.WriteLine("Got sig: " + sig);
