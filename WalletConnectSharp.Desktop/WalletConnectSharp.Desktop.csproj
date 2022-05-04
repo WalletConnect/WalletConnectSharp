@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.6.9</PackageVersion>
+        <PackageVersion>1.6.10</PackageVersion>
         <Title>WalletConnectSharp.Desktop</Title>
         <Authors>pedrouid, edkek</Authors>
         <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp. Use this package for desktop applications</Description>
