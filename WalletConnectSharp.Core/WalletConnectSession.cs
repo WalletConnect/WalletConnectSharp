@@ -198,7 +198,18 @@ namespace WalletConnectSharp.Core
                 WCSessionData result;
                 if (!SessionConnected)
                 {
-                    result = await CreateSession();
+                    //result = await CreateSession();
+                    
+                    //throw timeout exception after two minutes
+                    int timeout = 120000;
+                    var task = CreateSession();
+                    if (await Task.WhenAny(task, Task.Delay(timeout)) == task) {
+                        // task completed within timeout
+                        result = task.Result;
+                    } else { 
+                        // timeout logic
+                        throw new TimeoutException();
+                    }
                     //Reset this back after we have established a session
                     ReadyForUserPrompt = false;
                     Connecting = false;
