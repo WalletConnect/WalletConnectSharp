@@ -3,8 +3,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
-using Nethereum.Hex.HexTypes;
-using Nethereum.Web3;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Desktop;
 using WalletConnectSharp.NEthereum;
@@ -13,7 +11,7 @@ namespace WalletConnectSharp.Examples.Examples
 {
     public class NEthereumSendTransactionExample : IExample
     {
-        public static readonly string PROJECT_ID = "r84TUAUGeuaW5xbzrivZfxqmhAkuMUQl";
+        public static readonly string PROJECT_ID = "";
         
         [Function("deposit", "bool")]
         public class WEthDepositFunction : FunctionMessage
