@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.6.6</PackageVersion>
+        <PackageVersion>1.7.0</PackageVersion>
         <Title>WalletConnectSharp.NEthereum</Title>
         <Authors>pedrouid, edkek</Authors>
         <Description>An NEthereum extension to access the WalletConnect protocol through a Web3 Provider. A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
@@ -21,9 +21,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Nethereum.JsonRpc.RpcClient" Version="4.0.5" />
-      <PackageReference Include="Nethereum.RPC" Version="4.0.5" />
+      <PackageReference Include="Nethereum.JsonRpc.RpcClient" Version="4.4.1" />
+      <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
+      <PackageReference Include="Nethereum.RPC" Version="4.4.1" />
       <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
+      <PackageReference Include="Nethereum.Web3" Version="4.4.1" />
     </ItemGroup>
 
     <ItemGroup>

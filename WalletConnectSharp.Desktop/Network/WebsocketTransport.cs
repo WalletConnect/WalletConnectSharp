@@ -1,5 +1,6 @@
 using System;
 using System.Net.WebSockets;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Events;
@@ -31,7 +32,7 @@ namespace WalletConnectSharp.Desktop.Network
         {
             get
             {
-                return client.NativeClient.State == WebSocketState.Open;
+                return client != null && client.NativeClient != null && client.NativeClient.State == WebSocketState.Open;
             }
         }
 
@@ -51,7 +52,12 @@ namespace WalletConnectSharp.Desktop.Network
             this.URL = url;
             
             client = new WebsocketClient(new Uri(url));
-            
+
+            client.MessageReceived.Select(msg => Observable.FromAsync(() =>
+            {
+                OnMessageReceived(msg);
+                return Task.CompletedTask;
+            })).Subscribe();
             client.MessageReceived.Subscribe(OnMessageReceived);
             client.DisconnectionHappened.Subscribe(delegate(DisconnectionInfo info) { client.Reconnect(); });
 

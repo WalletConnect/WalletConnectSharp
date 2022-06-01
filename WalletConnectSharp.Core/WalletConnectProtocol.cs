@@ -54,7 +54,9 @@ namespace WalletConnectSharp.Core
         {
             get
             {
-                return Transport != null && Transport.Connected && Transport.URL == _bridgeUrl;
+                return Transport != null &&
+                       Transport.Connected &&
+                       Transport.URL.Replace("https://", "").Replace("wss://", "") == _bridgeUrl.Replace("https://", "").Replace("wss://", "");
             }
         }
 
