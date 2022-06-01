@@ -1,6 +1,5 @@
 using System;
 using System.Net.WebSockets;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -53,9 +52,14 @@ namespace WalletConnectSharp.Desktop.Network
             this.URL = url;
             
             client = new WebsocketClient(new Uri(url));
-            
-            client.MessageReceived.ObserveOn(TaskPoolScheduler.Default).Subscribe(OnMessageReceived);
-            client.DisconnectionHappened.ObserveOn(TaskPoolScheduler.Default).Subscribe(delegate(DisconnectionInfo info) { client.Reconnect(); });
+
+            client.MessageReceived.Select(msg => Observable.FromAsync(() =>
+            {
+                OnMessageReceived(msg);
+                return Task.CompletedTask;
+            })).Subscribe();
+            client.MessageReceived.Subscribe(OnMessageReceived);
+            client.DisconnectionHappened.Subscribe(delegate(DisconnectionInfo info) { client.Reconnect(); });
 
             //TODO Log this
             /*client.ReconnectionHappened.Subscribe(delegate(ReconnectionInfo info)
