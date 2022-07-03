@@ -1,12 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <TargetFramework>netstandard2.1</TargetFramework>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageVersion>1.7.1</PackageVersion>
         <Title>WalletConnectSharp.NEthereum</Title>
         <Authors>pedrouid, edkek</Authors>
-        <Description>An NEthereum extension to access the WalletConnect protocol through a Web3 Provider. A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
+        <Description>Ported to NetStandard 2.0
+An NEthereum extension to access the WalletConnect protocol through a Web3 Provider. A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
         <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageIconUrl>https://walletconnect.org/walletconnect-logo.svg</PackageIconUrl>
@@ -15,9 +16,10 @@
         <RepositoryType> git</RepositoryType>
         <PackageTags>nethereum walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
         <Copyright>Copyright (c) WalletConnect 2022</Copyright>
-        <PackageId>WalletConnect.NEthereum</PackageId>
+        <PackageId>WalletConnect.NEthereum.Heraldz</PackageId>
         <AssemblyVersion>1.7.1</AssemblyVersion>
         <FileVersion>1.7.1</FileVersion>
+        <Version>1.7.1</Version>
     </PropertyGroup>
 
     <ItemGroup>

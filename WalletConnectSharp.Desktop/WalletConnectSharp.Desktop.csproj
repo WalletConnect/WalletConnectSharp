@@ -28,6 +28,7 @@
     <ItemGroup>
       <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
       <PackageReference Include="Websocket.Client" Version="4.3.36" />
+      <PackageReference Include="WebsocketClientLite.PCL" Version="7.3.0" />
     </ItemGroup>
 
 </Project>

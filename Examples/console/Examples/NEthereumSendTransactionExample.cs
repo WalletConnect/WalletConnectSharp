@@ -45,7 +45,7 @@ namespace WalletConnectSharp.Examples.Examples
 
             var client = new WalletConnect(clientMeta);
 
-            var rpcEndpoint = "https://eth-mainnet.alchemyapi.io/v2/" + PROJECT_ID;
+            var rpcEndpoint = "https://cloudflare-eth.com" + PROJECT_ID;
             
             Console.WriteLine("Connect using the following URL");
             Console.WriteLine(client.URI);

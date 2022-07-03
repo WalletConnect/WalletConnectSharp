@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <PackageReference Include="Nethereum.Web3" Version="4.4.1" />
+      <PackageReference Include="WebsocketClientLite.PCL" Version="7.3.0" />
     </ItemGroup>
 
 </Project>

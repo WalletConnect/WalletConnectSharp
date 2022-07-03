@@ -24,13 +24,13 @@ namespace WalletConnectSharp.Examples
 
         static async Task Main(string[] args)
         {
-            if (args.Length == 0)
-            {
-                ShowHelp();
-                return;
-            }
+            //if (args.Length == 0)
+            //{
+            //    ShowHelp();
+            //    return;
+            //}
 
-            string name = args[0];
+            string name = "nethereum_send_tx_example";
             string[] exampleArgs = args.Skip(1).ToArray();
 
             var example = Examples.FirstOrDefault(e => e.Name.ToLower() == name);
