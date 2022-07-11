@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client;
 using Nethereum.JsonRpc.Client.RpcMessages;
 using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Utils;
 
 namespace WalletConnectSharp.NEthereum.Client
 {
@@ -18,7 +19,7 @@ namespace WalletConnectSharp.NEthereum.Client
 
         protected override async Task<RpcResponseMessage> SendAsync(RpcRequestMessage message, string route = null)
         {
-            _id += 1;
+            _id = RpcPayloadId.Generate();
             var mapParameters = message.RawParameters as Dictionary<string, object>;
             var arrayParameters = message.RawParameters as object[];
             var rawParameters = message.RawParameters;
