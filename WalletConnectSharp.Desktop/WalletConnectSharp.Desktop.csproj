@@ -1,33 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.7.1</PackageVersion>
-        <Title>WalletConnectSharp.Desktop</Title>
-        <Authors>pedrouid, edkek</Authors>
-        <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp. Use this package for desktop applications</Description>
-        <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageIconUrl>https://walletconnect.org/walletconnect-logo.svg</PackageIconUrl>
-        <PackageIcon>icon.png</PackageIcon>
-        <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm desktop</PackageTags>
-        <Copyright>Copyright (c) WalletConnect 2022</Copyright>
-        <PackageId>WalletConnect.Desktop</PackageId>
-        <AssemblyVersion>1.7.1</AssemblyVersion>
-        <FileVersion>1.7.1</FileVersion>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageVersion>$(DefaultPackageVersion)</PackageVersion>
+    <Title>WalletConnectSharp.Desktop</Title>
+    <Authors>pedrouid, edkek</Authors>
+    <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp. Use this package for desktop applications</Description>
+    <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIconUrl>https://walletconnect.org/walletconnect-logo.svg</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm desktop</PackageTags>
+    <Copyright>Copyright (c) WalletConnect 2022</Copyright>
+    <PackageId>WalletConnect.Desktop</PackageId>
+    <AssemblyVersion>$(DefaultAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(DefaultFileVersion)</FileVersion>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
-      <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
+    <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
-      <PackageReference Include="Websocket.Client" Version="4.3.36" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
+    <PackageReference Include="Websocket.Client" Version="4.3.36" />
+  </ItemGroup>
 
 </Project>
