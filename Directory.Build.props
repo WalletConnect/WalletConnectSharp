@@ -8,6 +8,7 @@
     <PropertyGroup Label="C#">
         <LangVersion>latest</LangVersion>
         <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <PropertyGroup>
