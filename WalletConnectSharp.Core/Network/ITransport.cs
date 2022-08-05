@@ -1,31 +1,28 @@
-using System;
-using System.Threading.Tasks;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
 
-namespace WalletConnectSharp.Core.Network
+namespace WalletConnectSharp.Core.Network;
+
+public interface ITransport : IDisposable
 {
-    public interface ITransport : IDisposable
-    {
-        bool Connected { get; }
-        
-        event EventHandler<MessageReceivedEventArgs> MessageReceived;
-        
-        string URL { get; }
-        
-        Task Open(string bridgeURL, bool clearSubscriptions = true);
+    bool Connected { get; }
 
-        Task Close();
+    event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        Task SendMessage(NetworkMessage message);
+    string URL { get; }
 
-        Task Subscribe(string topic);
+    Task Open(string bridgeURL, bool clearSubscriptions = true);
 
-        Task Subscribe<T>(string topic, EventHandler<JsonRpcResponseEvent<T>> callback) where T : JsonRpcResponse;
+    Task Close();
 
-        Task Subscribe<T>(string topic, EventHandler<JsonRpcRequestEvent<T>> callback) where T : JsonRpcRequest;
+    Task SendMessage(NetworkMessage message);
 
-        void ClearSubscriptions();
-    }
+    Task Subscribe(string topic);
+
+    Task Subscribe<T>(string topic, EventHandler<JsonRpcResponseEvent<T>> callback) where T : JsonRpcResponse;
+
+    Task Subscribe<T>(string topic, EventHandler<JsonRpcRequestEvent<T>> callback) where T : JsonRpcRequest;
+
+    void ClearSubscriptions();
 }

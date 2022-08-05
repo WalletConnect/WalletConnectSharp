@@ -1,7 +1,6 @@
-namespace WalletConnectSharp.Core.Models.Ethereum
+namespace WalletConnectSharp.Core.Models.Ethereum;
+
+public class EthChain
 {
-    public class EthChain
-    {
-        public string chainId;
-    }
+    public string chainId;
 }
