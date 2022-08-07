@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultLibraryVersion)</TargetFramework>
+    <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageVersion>$(DefaultPackageVersion)</PackageVersion>
     <Title>WalletConnectSharp.NEthereum</Title>
