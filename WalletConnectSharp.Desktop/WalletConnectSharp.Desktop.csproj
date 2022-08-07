@@ -26,6 +26,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Remove="System.Collections.Generic" />
+    <Using Remove="System.IO" />
+    <Using Remove="System.Net.Http" />
+    <Using Remove="System.Threading" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
     <PackageReference Include="Websocket.Client" Version="4.3.36" />
   </ItemGroup>

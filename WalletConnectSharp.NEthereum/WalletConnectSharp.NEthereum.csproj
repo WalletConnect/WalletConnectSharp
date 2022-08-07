@@ -29,6 +29,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Remove="System.IO" />
+    <Using Remove="System.Net.Http" />
+    <Using Remove="System.Threading" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
   </ItemGroup>
 

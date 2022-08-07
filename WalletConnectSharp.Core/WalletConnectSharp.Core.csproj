@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <Using Include="Newtonsoft.Json" />
+    <Using Remove="System.Net.Http" />
+    <Using Remove="System.Threading" />
   </ItemGroup>
 
   <ItemGroup>
