@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultLibraryVersion)</TargetFramework>
+    <TargetFrameworks>$(DefaultLibraryVersion)</TargetFrameworks>
     <RootNamespace>WalletConnectSharp.Core</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageVersion>$(DefaultPackageVersion)</PackageVersion>
