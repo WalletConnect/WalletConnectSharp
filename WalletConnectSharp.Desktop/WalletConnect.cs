@@ -5,8 +5,8 @@ using WalletConnectSharp.Core.Network;
 using WalletConnectSharp.Desktop.Network;
 
 
-namespace WalletConnectSharp.Desktop
-{
+namespace WalletConnectSharp.Desktop;
+
     public class WalletConnect : WalletConnectSession
     {
         static WalletConnect()
@@ -23,4 +23,3 @@ namespace WalletConnectSharp.Desktop
         {
         }
     }
-}

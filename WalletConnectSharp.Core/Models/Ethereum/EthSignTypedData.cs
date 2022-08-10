@@ -1,7 +1,7 @@
 using WalletConnectSharp.Core.Models.Ethereum.Types;
 
-namespace WalletConnectSharp.Core.Models.Ethereum
-{
+namespace WalletConnectSharp.Core.Models.Ethereum;
+
     public sealed class EthSignTypedData<T> : JsonRpcRequest
     {
         [JsonProperty("params")]
@@ -17,4 +17,3 @@ namespace WalletConnectSharp.Core.Models.Ethereum
             this._parameters = new string[] { address, encodedTypeData };
         }
     }
-}
