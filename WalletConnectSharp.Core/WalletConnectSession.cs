@@ -279,7 +279,7 @@ namespace WalletConnectSharp.Core
             await ConnectSession();
         }
 
-        public async Task DisconnectSession(string disconnectMessage = "Session Disconnected", bool createNewSession = true)
+        public virtual async Task DisconnectSession(string disconnectMessage = "Session Disconnected", bool createNewSession = true)
         {
             EnsureNotDisconnected();
             
@@ -599,7 +599,7 @@ namespace WalletConnectSharp.Core
         /// Creates and returns a serializable class that holds all session data required to resume later
         /// </summary>
         /// <returns></returns>
-        public SavedSession SaveSession()
+        public virtual SavedSession SaveSession()
         {
             if (!SessionConnected || Disconnected)
             {
