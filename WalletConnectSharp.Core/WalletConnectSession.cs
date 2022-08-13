@@ -55,6 +55,9 @@ namespace WalletConnectSharp.Core
             }
         }
         
+        /// <summary>
+        /// Create a WalletConnect Session from a SavedSession
+        /// </summary>
         public WalletConnectSession(SavedSession savedSession, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
         {
             this.DappMetadata = savedSession.DappMeta;
@@ -72,6 +75,9 @@ namespace WalletConnectSharp.Core
             this.SessionConnected = true;
         }
 
+        /// <summary>
+        /// Create a new WalletConnect Session
+        /// </summary>
         public WalletConnectSession(ClientMeta clientMeta, string bridgeUrl = null, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
         {
             if (clientMeta == null)
@@ -120,7 +126,7 @@ namespace WalletConnectSharp.Core
             CreateNewSession();
         }
 
-        private void CreateNewSession()
+        protected void CreateNewSession()
         {
             if (SessionConnected)
             {
@@ -146,7 +152,7 @@ namespace WalletConnectSharp.Core
             ReadyForUserPrompt = false;
         }
 
-        private void EnsureNotDisconnected()
+        protected void EnsureNotDisconnected()
         {
             if (Disconnected)
             {
@@ -155,7 +161,7 @@ namespace WalletConnectSharp.Core
             }
         }
         
-        private void GenerateKey()
+        protected void GenerateKey()
         {
             //Generate a random secret
             byte[] secret = new byte[32];
@@ -273,7 +279,7 @@ namespace WalletConnectSharp.Core
             await ConnectSession();
         }
 
-        public async Task DisconnectSession(string disconnectMessage = "Session Disconnected", bool createNewSession = true)
+        public virtual async Task DisconnectSession(string disconnectMessage = "Session Disconnected", bool createNewSession = true)
         {
             EnsureNotDisconnected();
             
@@ -450,7 +456,7 @@ namespace WalletConnectSharp.Core
         /// Create a new WalletConnect session with a Wallet.
         /// </summary>
         /// <returns></returns>
-        private async Task<WCSessionData> CreateSession()
+        protected async Task<WCSessionData> CreateSession()
         {
             EnsureNotDisconnected();
             
@@ -511,7 +517,7 @@ namespace WalletConnectSharp.Core
             return response;
         }
 
-        private void HandleSessionResponse(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> jsonresponse)
+        protected void HandleSessionResponse(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> jsonresponse)
         {
             var response = jsonresponse.Response.result;
 
@@ -529,7 +535,7 @@ namespace WalletConnectSharp.Core
             }
         }
 
-        private void HandleSessionUpdate(WCSessionData data)
+        protected void HandleSessionUpdate(WCSessionData data)
         {
             if (data == null) return;
 
@@ -567,7 +573,7 @@ namespace WalletConnectSharp.Core
                 SessionUpdate(this, data);
         }
 
-        private void HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)
+        protected void HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)
         {
             SessionConnected = false;
             Disconnected = true;
@@ -593,7 +599,7 @@ namespace WalletConnectSharp.Core
         /// Creates and returns a serializable class that holds all session data required to resume later
         /// </summary>
         /// <returns></returns>
-        public SavedSession SaveSession()
+        public virtual SavedSession SaveSession()
         {
             if (!SessionConnected || Disconnected)
             {

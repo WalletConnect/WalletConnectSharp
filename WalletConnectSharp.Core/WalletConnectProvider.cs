@@ -53,7 +53,7 @@ namespace WalletConnectSharp.Core
             this.ParseUrl();
         }
 
-        private void ParseUrl()
+        protected void ParseUrl()
         {
             /*
              *  var topicEncode = WebUtility.UrlEncode(_handshakeTopic);
