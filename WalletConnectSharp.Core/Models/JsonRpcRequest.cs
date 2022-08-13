@@ -5,12 +5,12 @@ namespace WalletConnectSharp.Core.Models
 {
     public class JsonRpcRequest : IEventSource
     {
-        [JsonProperty]
+        [JsonProperty(Order = 1)]
         private long id;
-        [JsonProperty]
+        [JsonProperty(Order = 2)]
         private string jsonrpc = "2.0";
         
-        [JsonProperty("method")]
+        [JsonProperty("method", Order = 3)]
         public virtual string Method { get; protected set; }
 
         public JsonRpcRequest()
