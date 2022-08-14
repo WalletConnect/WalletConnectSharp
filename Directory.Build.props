@@ -3,7 +3,7 @@
     <PropertyGroup>
         <DefaultVersion>1.7.1</DefaultVersion>
         <DefaultTargetFramework>net6.0</DefaultTargetFramework>
-        <DefaultLibraryVersion>netstandard2.0</DefaultLibraryVersion>
+        <DefaultLibraryVersion>netstandard2.1</DefaultLibraryVersion>
     </PropertyGroup>
     <PropertyGroup Label="C#">
         <LangVersion>latest</LangVersion>
