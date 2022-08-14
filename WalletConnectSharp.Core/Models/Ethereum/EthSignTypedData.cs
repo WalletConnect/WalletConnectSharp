@@ -4,7 +4,7 @@ namespace WalletConnectSharp.Core.Models.Ethereum;
 
     public sealed class EthSignTypedData<T> : JsonRpcRequest
     {
-        [JsonProperty("params")]
+        [JsonProperty("params", Order = 4)]
         private string[] _parameters;
 
         public EthSignTypedData(string address, T data, EIP712Domain domain)

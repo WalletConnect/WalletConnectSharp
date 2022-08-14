@@ -55,9 +55,9 @@ public class WalletConnectProtocol : IDisposable
         }
     }
 
-    public ITransport Transport { get; private set; }
+    public ITransport Transport { get; protected set; }
 
-    public ICipher Cipher { get; private set; }
+    public ICipher Cipher { get; protected set; }
 
     public ClientMeta DappMetadata { get; set; }
 
@@ -190,14 +190,14 @@ public class WalletConnectProtocol : IDisposable
         await SetupTransport();
     }
 
-    public async Task SubscribeAndListenToTopic(string topic)
+    public virtual async Task SubscribeAndListenToTopic(string topic)
     {
         await Transport.Subscribe(topic);
 
         ListenToTopic(topic);
     }
 
-    public void ListenToTopic(string topic)
+    public virtual void ListenToTopic(string topic)
     {
         if (!_activeTopics.Contains(topic))
         {
@@ -205,7 +205,7 @@ public class WalletConnectProtocol : IDisposable
         }
     }
 
-    private async void TransportOnMessageReceived(object sender, MessageReceivedEventArgs e)
+    protected async void TransportOnMessageReceived(object sender, MessageReceivedEventArgs e)
     {
         var networkMessage = e.Message;
 
@@ -231,7 +231,7 @@ public class WalletConnectProtocol : IDisposable
         }
     }
 
-    public async Task<TR> SendRequestAwaitResponse<T, TR>(T requestObject, object requestId, string sendingTopic = null,
+    public virtual async Task<TR> SendRequestAwaitResponse<T, TR>(T requestObject, object requestId, string sendingTopic = null,
         bool? forcePushNotification = null)
     {
         TaskCompletionSource<TR> response = new TaskCompletionSource<TR>(TaskCreationOptions.None);
@@ -246,7 +246,7 @@ public class WalletConnectProtocol : IDisposable
         return await response.Task;
     }
 
-    public async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)
+    public virtual async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)
     {
         bool silent;
         if (forcePushNotification != null)
