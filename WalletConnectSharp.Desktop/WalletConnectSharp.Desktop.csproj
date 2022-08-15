@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
-    <PackageReference Include="Websocket.Client" Version="4.3.36" />
+    <PackageReference Include="Websocket.Client" Version="4.4.43" />
   </ItemGroup>
 
 </Project>
