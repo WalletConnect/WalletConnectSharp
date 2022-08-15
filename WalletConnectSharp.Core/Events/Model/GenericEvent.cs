@@ -1,19 +1,16 @@
-using System;
+namespace WalletConnectSharp.Core.Events;
 
-namespace WalletConnectSharp.Core.Events
+public class GenericEvent<T> : IEvent<T>
 {
-    public class GenericEvent<T> : IEvent<T>
-    {
-        public T Response { get; private set; }
+    public T Response { get; private set; }
 
-        public void SetData(T response)
+    public void SetData(T response)
+    {
+        if (Response != null)
         {
-            if (Response != null)
-            {
-                throw new ArgumentException("Response was already set");
-            }
-            
-            Response = response;
+            throw new ArgumentException("Response was already set");
         }
+
+        Response = response;
     }
 }

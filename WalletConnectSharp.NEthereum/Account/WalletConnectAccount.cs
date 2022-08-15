@@ -4,28 +4,27 @@ using Nethereum.RPC.NonceServices;
 using Nethereum.RPC.TransactionManagers;
 using WalletConnectSharp.Core;
 
-namespace WalletConnectSharp.NEthereum.Account
+namespace WalletConnectSharp.NEthereum.Account;
+
+public class WalletConnectAccount : IAccount
 {
-    public class WalletConnectAccount : IAccount
+    private WalletConnectSession session;
+
+    public string Address
     {
-        private WalletConnectSession session;
-
-        public string Address
+        get
         {
-            get
-            {
-                return session.Accounts[0];
-            }
+            return session.Accounts[0];
         }
+    }
 
-        public ITransactionManager TransactionManager { get; }
-        public INonceService NonceService { get; set; }
+    public ITransactionManager TransactionManager { get; }
+    public INonceService NonceService { get; set; }
 
-        public WalletConnectAccount(WalletConnectSession session, IClient client, bool allowEthSign = false)
-        {
-            this.session = session;
-            this.TransactionManager = new WalletConnectTransactionManager(client, session, this, allowEthSign);
-            this.NonceService = new InMemoryNonceService(session.Accounts[0], client);
-        }
+    public WalletConnectAccount(WalletConnectSession session, IClient client, bool allowEthSign = false)
+    {
+        this.session = session;
+        this.TransactionManager = new WalletConnectTransactionManager(client, session, this, allowEthSign);
+        this.NonceService = new InMemoryNonceService(session.Accounts[0], client);
     }
 }

@@ -1,9 +1,8 @@
-namespace WalletConnectSharp.Core.Models.Ethereum
+namespace WalletConnectSharp.Core.Models.Ethereum;
+
+public class NativeCurrency
 {
-    public class NativeCurrency
-    {
-        public string name;
-        public string symbol;
-        public int decimals;
-    }
+    public string name;
+    public string symbol;
+    public int decimals;
 }

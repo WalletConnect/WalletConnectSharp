@@ -1,9 +1,6 @@
-using System;
+namespace WalletConnectSharp.Core.Models.Ethereum.Types;
 
-namespace WalletConnectSharp.Core.Models.Ethereum.Types
+public class EvmIgnoreAttribute : Attribute
 {
-    public class EvmIgnoreAttribute : Attribute
-    {
-        
-    }
+
 }

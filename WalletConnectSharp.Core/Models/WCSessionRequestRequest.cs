@@ -1,21 +1,19 @@
-using Newtonsoft.Json;
+namespace WalletConnectSharp.Core.Models;
 
-namespace WalletConnectSharp.Core.Models
+public class WcSessionRequestRequest : JsonRpcRequest
 {
-    public class WcSessionRequestRequest : JsonRpcRequest
+    public override string Method
     {
-        public override string Method
-        {
-            get { return "wc_sessionRequest"; }
-        }
+        get { return "wc_sessionRequest"; }
+    }
 
-        [JsonProperty("params")]
-        public WcSessionRequestRequestParams[] parameters;
+    [JsonProperty("params")]
+    public WcSessionRequestRequestParams[] parameters;
 
-        public WcSessionRequestRequest(ClientMeta clientMeta, string clientId, int chainId = 1)
+    public WcSessionRequestRequest(ClientMeta clientMeta, string clientId, int chainId = 1)
+    {
+        this.parameters = new[]
         {
-            this.parameters = new[]
-            {
                 new WcSessionRequestRequestParams()
                 {
                     peerId = clientId,
@@ -23,13 +21,12 @@ namespace WalletConnectSharp.Core.Models
                     peerMeta = clientMeta
                 }
             };
-        }
+    }
 
-        public class WcSessionRequestRequestParams
-        {
-            public string peerId;
-            public ClientMeta peerMeta;
-            public int chainId;
-        }
+    public class WcSessionRequestRequestParams
+    {
+        public string peerId;
+        public ClientMeta peerMeta;
+        public int chainId;
     }
 }

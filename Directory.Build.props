@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <DefaultVersion>1.7.2</DefaultVersion>
+        <DefaultTargetFramework>net6.0</DefaultTargetFramework>
+        <DefaultLibraryVersion>netstandard2.1</DefaultLibraryVersion>
+    </PropertyGroup>
+    <PropertyGroup Label="C#">
+        <LangVersion>latest</LangVersion>
+        <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <DefaultAssemblyVersion>$(DefaultVersion)</DefaultAssemblyVersion>
+        <DefaultPackageVersion>$(DefaultVersion)</DefaultPackageVersion>
+        <DefaultFileVersion>$(DefaultVersion)</DefaultFileVersion>
+    </PropertyGroup>
+</Project>

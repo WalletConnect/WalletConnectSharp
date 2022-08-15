@@ -1,7 +1,6 @@
-namespace WalletConnectSharp.Core.Models
+namespace WalletConnectSharp.Core.Models;
+
+public class WCSessionRequestResponse : JsonRpcResponse
 {
-    public class WCSessionRequestResponse : JsonRpcResponse
-    {
-        public WCSessionData result;
-    }
+    public WCSessionData result;
 }
