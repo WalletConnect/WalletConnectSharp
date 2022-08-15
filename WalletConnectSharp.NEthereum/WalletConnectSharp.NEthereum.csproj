@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nethereum.JsonRpc.RpcClient" Version="4.4.1" />
+    <PackageReference Include="Nethereum.JsonRpc.RpcClient" Version="4.7.0" />
     <PackageReference Include="Nethereum.RLP" Version="4.4.1" />
     <PackageReference Include="Nethereum.RPC" Version="4.4.1" />
     <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
