@@ -63,6 +63,7 @@ public static class WalletConnectNEthereumExtensions
     /// <param name="network">An optional network name to use. Used in the Infura URL</param>
     /// <param name="authenticationHeader">An optional authentication header to provide to the endpoint</param>
     /// <returns>A new Web3Builder that can be used to build the NEthereum Web3 object</returns>
+#pragma warning disable 612, 618 // disable obsolete warning. These are fine for the current use case
     public static Web3Builder BuildWeb3(this WalletConnectSession session, string infruaId,
         string network = "mainnet", AuthenticationHeaderValue authenticationHeader = null)
     {
@@ -103,6 +104,7 @@ public static class WalletConnectNEthereumExtensions
 
         return new Web3Builder(session, client);
     }
+#pragma warning restore 612,618
 
     /// <summary>
     /// Create a new NEtehereum IClient instance that uses Infura as the read client. You must specify your

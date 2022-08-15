@@ -97,7 +97,7 @@ public class WalletConnectProvider : WalletConnectProtocol
                     break;
                 case "key":
                     base._key = WebUtility.UrlDecode(value);
-                    base._keyRaw = base._key.FromHex();
+                    base._keyRaw = base._key.HexToByteArray();
                     break;
             }
         }

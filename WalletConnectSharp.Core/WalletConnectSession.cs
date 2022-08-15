@@ -46,64 +46,64 @@ public class WalletConnectSession : WalletConnectProtocol
             var bridgeUrlEncode = WebUtility.UrlEncode(_bridgeUrl);
             var keyEncoded = WebUtility.UrlEncode(_key);
 
-                return "wc:" + topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded;
-            }
+            return "wc:" + topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded;
         }
-        
-        /// <summary>
-        /// Create a WalletConnect Session from a SavedSession
-        /// </summary>
-        public WalletConnectSession(SavedSession savedSession, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
-        {
-            this.DappMetadata = savedSession.DappMeta;
-            this.WalletMetadata = savedSession.WalletMeta;
-            this.ChainId = savedSession.ChainID;
-            
-            clientId = savedSession.ClientID;
-            
-            this.Accounts = savedSession.Accounts;
-                        
-            this.NetworkId = savedSession.NetworkID;
+    }
+
+    /// <summary>
+    /// Create a WalletConnect Session from a SavedSession
+    /// </summary>
+    public WalletConnectSession(SavedSession savedSession, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
+    {
+        this.DappMetadata = savedSession.DappMeta;
+        this.WalletMetadata = savedSession.WalletMeta;
+        this.ChainId = savedSession.ChainID;
+
+        clientId = savedSession.ClientID;
+
+        this.Accounts = savedSession.Accounts;
+
+        this.NetworkId = savedSession.NetworkID;
 
         this._handshakeId = savedSession.HandshakeID;
 
         this.SessionConnected = true;
     }
 
-        /// <summary>
-        /// Create a new WalletConnect Session
-        /// </summary>
-        public WalletConnectSession(ClientMeta clientMeta, string bridgeUrl = null, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
+    /// <summary>
+    /// Create a new WalletConnect Session
+    /// </summary>
+    public WalletConnectSession(ClientMeta clientMeta, string bridgeUrl = null, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
+    {
+        if (clientMeta == null)
         {
-            if (clientMeta == null)
-            {
-                throw new ArgumentException("clientMeta cannot be null!");
-            }
+            throw new ArgumentException("clientMeta cannot be null!");
+        }
 
-            if (string.IsNullOrWhiteSpace(clientMeta.Description))
-            {
-                throw new ArgumentException("clientMeta must include a valid Description");
-            }
-            
-            if (string.IsNullOrWhiteSpace(clientMeta.Name))
-            {
-                throw new ArgumentException("clientMeta must include a valid Name");
-            }
-            
-            if (string.IsNullOrWhiteSpace(clientMeta.URL))
-            {
-                throw new ArgumentException("clientMeta must include a valid URL");
-            }
-            
-            if (clientMeta.Icons == null || clientMeta.Icons.Length == 0)
-            {
-                throw new ArgumentException("clientMeta must include an array of Icons the Wallet app can use. These Icons must be URLs to images. You must include at least one image URL to use");
-            }
-            
-            if (bridgeUrl == null)
-            {
-                bridgeUrl = DefaultBridge.ChooseRandomBridge();
-            }
+        if (string.IsNullOrWhiteSpace(clientMeta.Description))
+        {
+            throw new ArgumentException("clientMeta must include a valid Description");
+        }
+
+        if (string.IsNullOrWhiteSpace(clientMeta.Name))
+        {
+            throw new ArgumentException("clientMeta must include a valid Name");
+        }
+
+        if (string.IsNullOrWhiteSpace(clientMeta.URL))
+        {
+            throw new ArgumentException("clientMeta must include a valid URL");
+        }
+
+        if (clientMeta.Icons == null || clientMeta.Icons.Length == 0)
+        {
+            throw new ArgumentException("clientMeta must include an array of Icons the Wallet app can use. These Icons must be URLs to images. You must include at least one image URL to use");
+        }
+
+        if (bridgeUrl == null)
+        {
+            bridgeUrl = DefaultBridge.ChooseRandomBridge();
+        }
 
         bridgeUrl = DefaultBridge.GetBridgeUrl(bridgeUrl);
 
@@ -128,7 +128,7 @@ public class WalletConnectSession : WalletConnectProtocol
             throw new IOException("You cannot create a new session after connecting the session. Create a new WalletConnectSession object to create a new session");
         }
 
-            this._bridgeUrl = DefaultBridge.GetBridgeUrl(this._bridgeUrl);
+        this._bridgeUrl = DefaultBridge.GetBridgeUrl(this._bridgeUrl);
 
         var topicGuid = Guid.NewGuid();
 
@@ -138,10 +138,10 @@ public class WalletConnectSession : WalletConnectProtocol
 
         GenerateKey();
 
-            if (Transport != null)
-            {
-                Transport.ClearSubscriptions();
-            }
+        if (Transport != null)
+        {
+            Transport.ClearSubscriptions();
+        }
 
         SessionUsed = false;
         ReadyForUserPrompt = false;
@@ -240,23 +240,23 @@ public class WalletConnectSession : WalletConnectProtocol
             }
 
 
-                if (OnSessionConnect != null)
-                    OnSessionConnect(this, this);
+            if (OnSessionConnect != null)
+                OnSessionConnect(this, this);
 
-                return result;
-            }
-            catch (IOException e)
+            return result;
+        }
+        catch (IOException e)
+        {
+            //If the transport is connected, then disconnect that
+            //we tried our best, they can try again
+            if (TransportConnected)
             {
-                //If the transport is connected, then disconnect that
-                //we tried our best, they can try again
-                if (TransportConnected)
-                {
-                    await DisconnectTransport();
-                }
-                else
-                {
-                    throw new IOException("Transport Connection failed", e);
-                }
+                await DisconnectTransport();
+            }
+            else
+            {
+                throw new IOException("Transport Connection failed", e);
+            }
 
             throw new IOException("Session Connection failed", e);
         }
@@ -510,7 +510,7 @@ public class WalletConnectSession : WalletConnectProtocol
 
         var response = await eventCompleted.Task;
 
-            ReadyForUserPrompt = false;
+        ReadyForUserPrompt = false;
 
         return response;
     }
@@ -550,22 +550,22 @@ public class WalletConnectSession : WalletConnectProtocol
 
         Accounts = data.accounts;
 
-            if (!wasConnected)
-            {
-                PeerId = data.peerId;
+        if (!wasConnected)
+        {
+            PeerId = data.peerId;
 
             WalletMetadata = data.peerMeta;
 
-                Events.Trigger("connect", data);
-            }
-            else if (wasConnected && !SessionConnected)
-            {
-                HandleSessionDisconnect("Wallet Disconnected");
-            }
-            else
-            {
-                Events.Trigger("session_update", data);
-            }
+            Events.Trigger("connect", data);
+        }
+        else if (wasConnected && !SessionConnected)
+        {
+            HandleSessionDisconnect("Wallet Disconnected");
+        }
+        else
+        {
+            Events.Trigger("session_update", data);
+        }
 
         if (SessionUpdate != null)
             SessionUpdate(this, data);
@@ -580,32 +580,33 @@ public class WalletConnectSession : WalletConnectProtocol
 
         if (TransportConnected)
         {
-            DisconnectTransport();
+            // TODO: this is a hack to get the transport to disconnect syncronously.
+            Task.WhenAll(DisconnectTransport());
         }
 
         _activeTopics.Clear();
 
         Events.Clear();
 
-            if (OnSessionDisconnect != null)
-                OnSessionDisconnect(this, EventArgs.Empty);
-        }
-        
-        
-        
-        /// <summary>
-        /// Creates and returns a serializable class that holds all session data required to resume later
-        /// </summary>
-        /// <returns></returns>
-        public virtual SavedSession SaveSession()
+        if (OnSessionDisconnect != null)
+            OnSessionDisconnect(this, EventArgs.Empty);
+    }
+
+
+
+    /// <summary>
+    /// Creates and returns a serializable class that holds all session data required to resume later
+    /// </summary>
+    /// <returns></returns>
+    public virtual SavedSession SaveSession()
+    {
+        if (!SessionConnected || Disconnected)
         {
-            if (!SessionConnected || Disconnected)
-            {
-                return null;
-            }
-            
-            return new SavedSession(clientId, _handshakeId, _bridgeUrl, _key, _keyRaw, PeerId, NetworkId, Accounts, ChainId, DappMetadata, WalletMetadata);
+            return null;
         }
+
+        return new SavedSession(clientId, _handshakeId, _bridgeUrl, _key, _keyRaw, PeerId, NetworkId, Accounts, ChainId, DappMetadata, WalletMetadata);
+    }
 
     /// <summary>
     /// Save the current session to a Stream. This function will write a GZIP Compressed JSON blob
@@ -619,10 +620,10 @@ public class WalletConnectSession : WalletConnectProtocol
         //We'll save the current session as a GZIP compressed JSON blob
         var data = SaveSession();
 
-            if (data == null)
-            {
-                throw new IOException("No session is active to save");
-            }
+        if (data == null)
+        {
+            throw new IOException("No session is active to save");
+        }
 
         var json = JsonConvert.SerializeObject(data);
 

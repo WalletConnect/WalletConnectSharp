@@ -64,9 +64,9 @@ public class AESCipher : ICipher
         if (encoding == null)
             encoding = Encoding.UTF8;
 
-        byte[] rawData = encryptedData.data.FromHex();
-        byte[] iv = encryptedData.iv.FromHex();
-        byte[] hmacReceived = encryptedData.hmac.FromHex();
+        byte[] rawData = encryptedData.data.HexToByteArray();
+        byte[] iv = encryptedData.iv.HexToByteArray();
+        byte[] hmacReceived = encryptedData.hmac.HexToByteArray();
 
         using (HMACSHA256 hmac = new HMACSHA256(key))
         {
