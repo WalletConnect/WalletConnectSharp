@@ -59,7 +59,14 @@ public static class DefaultBridge
     public static string GetBridgeUrl(string url)
     {
         if (ExtractRootDomain(url) == Domain)
-            return ChooseRandomBridge();
+        {
+            var chosen = ChooseRandomBridge();
+            if (url.StartsWith("wss"))
+                chosen = chosen.Replace("https", "wss");
+            else if (url.StartsWith("ws"))
+                chosen = chosen.Replace("http", "ws");
+            return chosen;
+        }
         return url;
     }
 }
