@@ -1,10 +1,12 @@
+using System.Threading.Tasks.Sources;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Utils;
 
 namespace WalletConnectSharp.Core.Events;
 
-public class EventDelegator : IDisposable
+public class EventDelegator : DisposableBase
 {
     private Dictionary<string, List<IEventProvider>> Listeners = new Dictionary<string, List<IEventProvider>>();
 
@@ -80,7 +82,7 @@ public class EventDelegator : IDisposable
         return false;
     }
 
-    public void Dispose()
+    protected override void DisposeManaged()
     {
         Clear();
     }
