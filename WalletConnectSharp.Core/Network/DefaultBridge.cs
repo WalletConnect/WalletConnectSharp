@@ -1,3 +1,5 @@
+using WalletConnectSharp.Core.Utils;
+
 namespace WalletConnectSharp.Core.Network;
 
 public static class DefaultBridge
@@ -61,10 +63,10 @@ public static class DefaultBridge
         if (ExtractRootDomain(url) == Domain)
         {
             var chosen = ChooseRandomBridge();
-            if (url.StartsWith("wss"))
-                chosen = chosen.Replace("https", "wss");
-            else if (url.StartsWith("ws"))
-                chosen = chosen.Replace("http", "ws");
+            if (url.StartsWith(UriSchemes.UriSchemeWss))
+                chosen = chosen.Replace(Uri.UriSchemeHttps, UriSchemes.UriSchemeWss);
+            else if (url.StartsWith(UriSchemes.UriSchemeWs))
+                chosen = chosen.Replace(Uri.UriSchemeHttp, UriSchemes.UriSchemeWs);
             return chosen;
         }
         return url;
