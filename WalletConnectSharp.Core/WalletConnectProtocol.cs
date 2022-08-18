@@ -18,6 +18,8 @@ public class WalletConnectProtocol : IDisposable
             "eth_signTypedData_v3",
             "eth_signTypedData_v4",
             "personal_sign",
+            "wallet_addEthereumChain",
+            "wallet_switchEthereumChain",
         };
 
     public readonly EventDelegator Events;
