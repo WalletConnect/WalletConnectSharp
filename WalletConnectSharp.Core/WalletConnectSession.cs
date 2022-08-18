@@ -183,7 +183,8 @@ public class WalletConnectSession : WalletConnectProtocol
                 //We do this now before subscribing
                 //This is in case we need to respond to a session disconnect and this is a
                 //resume session
-                Events.ListenForResponse<WCSessionRequestResponse>(this._handshakeId, HandleSessionResponse);
+                Events.ListenForResponse<WCSessionRequestResponse>(this._handshakeId, async (sender, @event) => 
+                    await HandleSessionResponse(sender, @event));
             }
 
             if (!base.TransportConnected)
@@ -293,7 +294,7 @@ public class WalletConnectSession : WalletConnectProtocol
 
         await base.Disconnect();
 
-        HandleSessionDisconnect(disconnectMessage, "disconnect", createNewSession);
+        await HandleSessionDisconnect(disconnectMessage, "disconnect", createNewSession);
     }
 
     public override async Task Disconnect()
@@ -379,9 +380,6 @@ public class WalletConnectSession : WalletConnectProtocol
         var request = new EthPersonalSign(address, message);
 
         var response = await Send<EthPersonalSign, EthResponse>(request);
-
-
-
 
         return response.Result;
     }
@@ -495,12 +493,13 @@ public class WalletConnectSession : WalletConnectProtocol
 
         //Listen for the _handshakeId response
         //The response will be of type WCSessionRequestResponse
-        Events.ListenForResponse<WCSessionRequestResponse>(this._handshakeId, HandleSessionResponse);
+        Events.ListenForResponse<WCSessionRequestResponse>(this._handshakeId, async (sender, @event) =>  
+            await HandleSessionResponse(sender, @event));
 
         //Listen for wc_sessionUpdate requests
         Events.ListenFor("wc_sessionUpdate",
-            (object sender, GenericEvent<WCSessionUpdate> @event) =>
-                HandleSessionUpdate(@event.Response.parameters[0]));
+            async (object sender, GenericEvent<WCSessionUpdate> @event) =>
+                await HandleSessionUpdate(@event.Response.parameters[0]));
 
         //Listen for the "connect" event triggered by 'HandleSessionResponse' above
         //This will have the type WCSessionData
@@ -537,25 +536,25 @@ public class WalletConnectSession : WalletConnectProtocol
         return response;
     }
 
-    protected void HandleSessionResponse(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> jsonresponse)
+    protected async Task HandleSessionResponse(object sender, JsonRpcResponseEvent<WCSessionRequestResponse> jsonresponse)
     {
         var response = jsonresponse.Response.result;
 
         if (response != null && response.approved)
         {
-            HandleSessionUpdate(response);
+            await HandleSessionUpdate(response);
         }
         else if (jsonresponse.Response.IsError)
         {
-            HandleSessionDisconnect(jsonresponse.Response.Error.Message, "session_failed");
+            await HandleSessionDisconnect(jsonresponse.Response.Error.Message, "session_failed");
         }
         else
         {
-            HandleSessionDisconnect("Not Approved", "session_failed");
+            await HandleSessionDisconnect("Not Approved", "session_failed");
         }
     }
 
-    protected void HandleSessionUpdate(WCSessionData data)
+    protected async Task HandleSessionUpdate(WCSessionData data)
     {
         if (data == null) return;
 
@@ -582,7 +581,7 @@ public class WalletConnectSession : WalletConnectProtocol
             }
             else if (wasConnected && !SessionConnected)
             {
-                HandleSessionDisconnect("Wallet Disconnected");
+                await HandleSessionDisconnect("Wallet Disconnected");
             }
             else
             {
@@ -593,7 +592,7 @@ public class WalletConnectSession : WalletConnectProtocol
             SessionUpdate(this, data);
     }
 
-    protected void HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)
+    protected async Task HandleSessionDisconnect(string msg, string topic = "disconnect", bool createNewSession = true)
     {
         SessionConnected = false;
         Disconnected = true;
@@ -602,7 +601,7 @@ public class WalletConnectSession : WalletConnectProtocol
 
         if (TransportConnected)
         {
-            DisconnectTransport();
+            await DisconnectTransport();
         }
 
         _activeTopics.Clear();
@@ -687,5 +686,18 @@ public class WalletConnectSession : WalletConnectProtocol
 
         return JsonConvert.DeserializeObject<SavedSession>(json);
     }
-}
 
+    protected override void DisposeManaged()
+    {
+        Events.Clear();
+        SessionConnected = false;
+        Disconnected = true;
+
+        if (TransportConnected)
+        {
+            DisconnectTransport().Wait();
+        }
+
+        base.DisposeManaged();
+    }
+}

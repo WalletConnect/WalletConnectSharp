@@ -2,10 +2,11 @@
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Network;
+using WalletConnectSharp.Core.Utils;
 
 namespace WalletConnectSharp.Core;
 
-public class WalletConnectProtocol : IDisposable
+public class WalletConnectProtocol : DisposableBase
 {
     public static readonly string[] SigningMethods = new[]
     {
@@ -282,7 +283,7 @@ public class WalletConnectProtocol : IDisposable
         await this.Transport.SendMessage(message);
     }
 
-    public void Dispose()
+    protected override void DisposeManaged()
     {
         if (Transport != null)
         {
