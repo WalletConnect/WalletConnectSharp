@@ -1,0 +1,16 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion Include="Nethereum.JsonRpc.RpcClient" Version="4.7.0" />
+        <PackageVersion Include="Nethereum.RLP"               Version="4.7.0" />
+        <PackageVersion Include="Nethereum.RPC"               Version="4.7.0" />
+        <PackageVersion Include="Nethereum.Web3"              Version="4.7.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageVersion Include="Newtonsoft.Json"             Version="13.0.1" />
+        <PackageVersion Include="Portable.BouncyCastle"       Version="1.9.0" />
+        <PackageVersion Include="Websocket.Client"            Version="4.4.43" />
+    </ItemGroup>
+</Project>
