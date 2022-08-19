@@ -1,3 +1,5 @@
+using WalletConnectSharp.Core.Utils;
+
 namespace WalletConnectSharp.Core.Network;
 
 public static class DefaultBridge
@@ -59,7 +61,14 @@ public static class DefaultBridge
     public static string GetBridgeUrl(string url)
     {
         if (ExtractRootDomain(url) == Domain)
-            return ChooseRandomBridge();
+        {
+            var chosen = ChooseRandomBridge();
+            if (url.StartsWith(UriSchemes.UriSchemeWss))
+                chosen = chosen.Replace(Uri.UriSchemeHttps, UriSchemes.UriSchemeWss);
+            else if (url.StartsWith(UriSchemes.UriSchemeWs))
+                chosen = chosen.Replace(Uri.UriSchemeHttp, UriSchemes.UriSchemeWs);
+            return chosen;
+        }
         return url;
     }
 }

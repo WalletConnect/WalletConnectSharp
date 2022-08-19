@@ -107,11 +107,6 @@ public class WalletConnectSession : WalletConnectProtocol
 
         bridgeUrl = DefaultBridge.GetBridgeUrl(bridgeUrl);
 
-        if (bridgeUrl.StartsWith("https"))
-            bridgeUrl = bridgeUrl.Replace("https", "wss");
-        else if (bridgeUrl.StartsWith("http"))
-            bridgeUrl = bridgeUrl.Replace("http", "ws");
-
         this.DappMetadata = clientMeta;
         this.ChainId = chainId;
         this._bridgeUrl = bridgeUrl;
@@ -128,7 +123,7 @@ public class WalletConnectSession : WalletConnectProtocol
             throw new IOException("You cannot create a new session after connecting the session. Create a new WalletConnectSession object to create a new session");
         }
 
-            this._bridgeUrl = DefaultBridge.GetBridgeUrl(this._bridgeUrl);
+        this._bridgeUrl = DefaultBridge.GetBridgeUrl(this._bridgeUrl);
 
         var topicGuid = Guid.NewGuid();
 

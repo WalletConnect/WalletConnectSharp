@@ -144,7 +144,7 @@ public static class HexByteConvertorExtensions
         return value;
     }
 
-    [Obsolete]
+    [Obsolete("use the builtin string.HexToByteArray. This method will be removed in a future release.")]
     public static byte[] FromHex(this string value)
     {
         return value.HexToByteArray();
