@@ -1,20 +1,19 @@
 using Nethereum.JsonRpc.Client;
 using Nethereum.RPC.Eth.DTOs;
-using WalletConnectSharp.Core;
-
+using WalletConnectSharp.Core.Models;
 namespace WalletConnectSharp.NEthereum.Client;
 
 public class FallbackProvider : IClient
 {
-    public static readonly string[] ValidMethods = WalletConnectProtocol.SigningMethods;
+    public static readonly string[] ValidMethods = JsonRpcRequestMethods.SigningMethods.ToStringArray();
 
     private readonly IClient _fallback;
     private readonly IClient _signer;
 
     public FallbackProvider(IClient primary, IClient fallback)
     {
-        this._signer = primary;
-        this._fallback = fallback;
+        _signer = primary;
+        _fallback = fallback;
     }
 
     public Task SendRequestAsync(RpcRequest request, string route = null)
@@ -48,8 +47,7 @@ public class FallbackProvider : IClient
 
                 if (input.From == null)
                 {
-                    var wcClient = _signer as WalletConnectClient;
-                    if (wcClient != null)
+                    if (_signer is WalletConnectClient wcClient)
                     {
                         input.From = wcClient.Session.Accounts[0];
                         request.RawParameters[0] = input;

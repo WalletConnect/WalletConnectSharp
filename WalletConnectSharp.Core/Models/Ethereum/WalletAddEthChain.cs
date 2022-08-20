@@ -10,7 +10,7 @@ public class WalletAddEthChain : JsonRpcRequest
 
     public WalletAddEthChain(EthChainData chainData) : base()
     {
-        this.Method = "wallet_addEthereumChain";
-        this._parameters = new[] { chainData };
+        Method = ValidJsonRpcRequestMethods.WalletAddEthereumChain;
+        _parameters = new[] { chainData };
     }
 }

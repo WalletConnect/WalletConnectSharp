@@ -8,21 +8,6 @@ namespace WalletConnectSharp.Core;
 
 public class WalletConnectProtocol : DisposableBase
 {
-    public static readonly string[] SigningMethods = new[]
-    {
-            "eth_sendTransaction",
-            "eth_signTransaction",
-            "eth_sign",
-            "eth_signTypedData",
-            "eth_signTypedData_v1",
-            "eth_signTypedData_v2",
-            "eth_signTypedData_v3",
-            "eth_signTypedData_v4",
-            "personal_sign",
-            "wallet_addEthereumChain",
-            "wallet_switchEthereumChain",
-        };
-
     public readonly EventDelegator Events;
 
     protected string Version = "1";
@@ -251,21 +236,8 @@ public class WalletConnectProtocol : DisposableBase
 
     public virtual async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)
     {
-        bool silent;
-        if (forcePushNotification != null)
-        {
-            silent = (bool)!forcePushNotification;
-        }
-        else if (requestObject is JsonRpcRequest request)
-        {
-            silent = request.Method.StartsWith("wc_") || !SigningMethods.Contains(request.Method);
-        }
-        else
-        {
-            silent = false;
-        }
-
-        string json = JsonConvert.SerializeObject(requestObject);
+        var silent = isRequestSilent(forcePushNotification, requestObject);
+        var json = JsonConvert.SerializeObject(requestObject);
 
         var encrypted = await Cipher.EncryptWithKey(_keyRaw, json);
 
@@ -283,6 +255,11 @@ public class WalletConnectProtocol : DisposableBase
         await this.Transport.SendMessage(message);
     }
 
+    public virtual async Task Disconnect()
+    {
+        await DisconnectTransport();
+    }
+
     protected override void DisposeManaged()
     {
         if (Transport != null)
@@ -292,8 +269,14 @@ public class WalletConnectProtocol : DisposableBase
         }
     }
 
-    public virtual async Task Disconnect()
+    private bool isRequestSilent<T>(bool? forcePushNotification, T requestObject)
     {
-        await DisconnectTransport();
+        if (forcePushNotification.HasValue)
+        {
+            return !forcePushNotification.Value;
+        }
+
+        return requestObject is JsonRpcRequest request
+            && (JsonRpcRequestMethods.IsWalletConnectMethod(request.Method) || !JsonRpcRequestMethods.IsSigningMethod(request.Method));
     }
 }

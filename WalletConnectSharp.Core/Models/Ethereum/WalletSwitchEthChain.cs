@@ -2,7 +2,7 @@ namespace WalletConnectSharp.Core.Models.Ethereum;
 
 public class WalletSwitchEthChain : JsonRpcRequest
 {
-    [JsonProperty("params")] 
+    [JsonProperty("params")]
     private EthChain[] _parameters;
 
     [JsonIgnore]
@@ -10,7 +10,7 @@ public class WalletSwitchEthChain : JsonRpcRequest
 
     public WalletSwitchEthChain(params EthChain[] chainId) : base()
     {
-        this.Method = "wallet_switchEthereumChain";
-        this._parameters = chainId;
+        Method = ValidJsonRpcRequestMethods.WalletSwitchEthereumChain;
+        _parameters = chainId;
     }
 }

@@ -10,7 +10,7 @@ public sealed class EthSendTransaction : JsonRpcRequest
 
     public EthSendTransaction(params TransactionData[] transactionDatas) : base()
     {
-        this.Method = "eth_sendTransaction";
-        this._parameters = transactionDatas;
+        Method = ValidJsonRpcRequestMethods.EthSendTransaction;
+        _parameters = transactionDatas;
     }
 }
