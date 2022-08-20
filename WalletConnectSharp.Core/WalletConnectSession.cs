@@ -428,9 +428,9 @@ public class WalletConnectSession : WalletConnectProtocol
             data = "0x" + encoding.GetBytes(data).ToHex();
         }
 
-        var request = new EthGenericRequest<string>("eth_sendRawTransaction", data);
+        var request = new EthSendRawTransaction(data);
 
-        var response = await Send<EthGenericRequest<string>, EthResponse>(request);
+        var response = await Send<EthSendRawTransaction, EthResponse>(request);
 
         return response.Result;
     }

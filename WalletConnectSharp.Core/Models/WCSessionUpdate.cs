@@ -4,7 +4,7 @@ public class WCSessionUpdate : JsonRpcRequest
 {
     public override string Method
     {
-        get { return "wc_sessionUpdate"; }
+        get { return WalletConnectStates.SessionUpdate; }
     }
 
     [JsonProperty("params")]

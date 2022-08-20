@@ -277,6 +277,6 @@ public class WalletConnectProtocol : DisposableBase
         }
 
         return requestObject is JsonRpcRequest request
-            && (JsonRpcRequestMethods.IsWalletConnectMethod(request.Method) || !JsonRpcRequestMethods.IsSigningMethod(request.Method));
+            && (JsonRpcRequest.IsWalletConnectMethod(request.Method) || !JsonRpcRequest.IsSigningMethod(request.Method));
     }
 }

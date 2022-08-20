@@ -1,16 +1,12 @@
 namespace WalletConnectSharp.Core.Models.Ethereum;
 
-public sealed class EthPersonalSign : JsonRpcRequest
+public sealed class EthPersonalSign : EthGenericRequest<string>
 {
-    [JsonProperty("params")]
-    private string[] _parameters;
-
-    [JsonIgnore]
-    public string[] Parameters => _parameters;
-
-    public EthPersonalSign(string address, string hexData, string password = "") : base()
+    public EthPersonalSign(string address, string hexData, string password = "") :
+    base(
+        ValidJsonRpcRequestMethods.PersonalSign,
+        hexData, address, password
+    )
     {
-        this.Method = "personal_sign";
-        this._parameters = new[] { hexData, address, password };
     }
 }
