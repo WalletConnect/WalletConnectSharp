@@ -587,7 +587,7 @@ public class WalletConnectSession : WalletConnectProtocol
 
     protected async Task HandleSessionDisconnect(string msg, string topic = "", bool createNewSession = true)
     {
-        var broadcastTopic = topic == "" ? WalletConnectStates.Disconnect : topic;
+        var broadcastTopic = string.IsNullOrWhiteSpace(topic) ? WalletConnectStates.Disconnect : topic;
 
         SessionConnected = false;
         Disconnected = true;
