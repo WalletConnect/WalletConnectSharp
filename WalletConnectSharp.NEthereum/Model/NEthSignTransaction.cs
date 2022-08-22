@@ -14,7 +14,7 @@ public class NEthSignTransaction : JsonRpcRequest
 
     public NEthSignTransaction(params TransactionInput[] transactionDatas) : base()
     {
-        this.Method = "eth_signTransaction";
+        this.Method = ValidJsonRpcRequestMethods.EthSignTransaction;
         this._parameters = transactionDatas;
     }
 }
