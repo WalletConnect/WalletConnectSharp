@@ -6,6 +6,7 @@ using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Request;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Ethereum;
+using WalletConnectSharp.Core.Models.Ethereum.Types;
 using WalletConnectSharp.Core.Network;
 using WalletConnectSharp.Core.Utils;
 
