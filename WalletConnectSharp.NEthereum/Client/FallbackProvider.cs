@@ -19,6 +19,7 @@ public class FallbackProvider : IClient
 
     public Task<RpcRequestResponseBatch> SendBatchRequestAsync(RpcRequestResponseBatch rpcRequestResponseBatch)
     {
+        // TODO: ISSUE #55: Implement SendBatchRequestAsync
         throw new NotImplementedException();
     }
 
