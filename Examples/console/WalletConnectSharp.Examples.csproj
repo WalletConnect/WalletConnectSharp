@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Nethereum.Web3" />
+    <PackageReference Include="Nethereum.Signer.EIP712" />
   </ItemGroup>
 
 </Project>

@@ -16,20 +16,18 @@ public class WalletConnectClient : ClientBase
 
     protected override async Task<RpcResponseMessage> SendAsync(RpcRequestMessage message, string route = null)
     {
-        long id = RpcPayloadId.Generate();
+        var id = RpcPayloadId.Generate();
         var mapParameters = message.RawParameters as Dictionary<string, object>;
         var arrayParameters = message.RawParameters as object[];
         var rawParameters = message.RawParameters;
 
-        RpcRequestMessage rpcRequestMessage;
-        if (mapParameters != null)
-            rpcRequestMessage = new RpcRequestMessage(id, message.Method, mapParameters);
-        else if (arrayParameters != null)
-            rpcRequestMessage = new RpcRequestMessage(id, message.Method, arrayParameters);
-        else
-            rpcRequestMessage = new RpcRequestMessage(id, message.Method, rawParameters);
+        var rpcRequestMessage = mapParameters != null
+            ? new RpcRequestMessage(id, message.Method, mapParameters)
+            : arrayParameters != null
+                ? new RpcRequestMessage(id, message.Method, arrayParameters)
+                : new RpcRequestMessage(id, message.Method, rawParameters);
 
-        TaskCompletionSource<RpcResponseMessage> eventCompleted = new TaskCompletionSource<RpcResponseMessage>(TaskCreationOptions.None);
+        var eventCompleted = new TaskCompletionSource<RpcResponseMessage>(TaskCreationOptions.None);
 
         Session.Events.ListenForGenericResponse<RpcResponseMessage>(rpcRequestMessage.Id, (sender, args) =>
         {
@@ -39,5 +37,17 @@ public class WalletConnectClient : ClientBase
         await Session.SendRequest(rpcRequestMessage);
 
         return await eventCompleted.Task;
+    }
+
+    protected override async Task<RpcResponseMessage[]> SendAsync(RpcRequestMessage[] requests)
+    {
+        var responses = new List<RpcResponseMessage>();
+
+        foreach (var request in requests)
+        {
+            responses.Add(await SendAsync(request));
+        }
+
+        return responses.ToArray();
     }
 }

@@ -4,6 +4,10 @@ using Nethereum.Web3;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.NEthereum.Account;
 using WalletConnectSharp.NEthereum.Client;
+using System.IO;
+using WalletConnectSharp.Core.Models.Ethereum;
+using WalletConnectSharp.NEthereum.Model;
+using Nethereum.ABI.EIP712;
 
 namespace WalletConnectSharp.NEthereum;
 
@@ -28,7 +32,7 @@ public class Web3Builder
     /// Signing transactions is limited by support from the connected wallet in the given WalletConnect session.
     /// To force signing transaction support, set allowEthSign to true. allowEthSign will fallback to eth_sign
     /// if eth_signTransaction is not supported by the wallet. This only supports legacy transactions
-    /// <para name="useEthSignForTransactionSigning">Whether the eth_sign endpoint should be used if eth_signTransaction is not supported by the connected wallet</para>
+    /// <param name="useEthSignForTransactionSigning">Whether the eth_sign endpoint should be used if eth_signTransaction is not supported by the connected wallet</para>
     /// </summary>
     /// <returns>A new Web3 instance with an WalletConnectAccount attached representing the WalletConnect session</returns>
     public Web3 AsWalletAccount(bool useEthSignForTransactionSigning = false)
@@ -66,7 +70,7 @@ public static class WalletConnectNEthereumExtensions
     public static Web3Builder BuildWeb3(this WalletConnectSession session, string infruaId,
         string network = "mainnet", AuthenticationHeaderValue authenticationHeader = null)
     {
-        IClient client = session.CreateProviderWithInfura(infruaId, network, authenticationHeader);
+        var client = session.CreateProviderWithInfura(infruaId, network, authenticationHeader);
 
         return new Web3Builder(session, client);
     }
@@ -83,7 +87,7 @@ public static class WalletConnectNEthereumExtensions
     /// <returns>A new Web3Builder that can be used to build the NEthereum Web3 object</returns>
     public static Web3Builder BuildWeb3(this WalletConnectSession session, Uri url, AuthenticationHeaderValue authenticationHeader = null)
     {
-        IClient client = session.CreateProvider(url, authenticationHeader);
+        var client = session.CreateProvider(url, authenticationHeader);
 
         return new Web3Builder(session, client);
     }
@@ -99,7 +103,7 @@ public static class WalletConnectNEthereumExtensions
     /// <returns>A new Web3Builder that can be used to build the NEthereum Web3 object</returns>
     public static Web3Builder BuildWeb3(this WalletConnectSession session, IClient readClient)
     {
-        IClient client = session.CreateProvider(readClient);
+        var client = session.CreateProvider(readClient);
 
         return new Web3Builder(session, client);
     }
@@ -121,7 +125,7 @@ public static class WalletConnectNEthereumExtensions
     [Obsolete("Use BuildWeb3(infruaId).AsUnmanagedAccount() instead. Will be removed in v2")]
     public static IClient CreateProviderWithInfura(this WalletConnectSession session, string infruaId, string network = "mainnet", AuthenticationHeaderValue authenticationHeader = null)
     {
-        string url = "https://" + network + ".infura.io/v3/" + infruaId;
+        var url = "https://" + network + ".infura.io/v3/" + infruaId;
 
         return CreateProvider(session, new Uri(url), authenticationHeader);
     }
@@ -173,5 +177,24 @@ public static class WalletConnectNEthereumExtensions
             new WalletConnectClient(session),
             readClient
         );
+    }
+
+    /// <summary>
+    /// Submit an EIP-712 structure for signature using the built-in Nethereum serialization scheme.
+    /// </summary>
+    public static async Task<string> EthSignTypedData<T, TDomain>(
+        this WalletConnectSession session, string address, T data, TypedData<TDomain> typedData) where TDomain : IDomain
+    {
+        if (session.Disconnected)
+        {
+            throw new IOException(
+                "Session stale! The session has been disconnected. This session cannot be reused.");
+        }
+
+        var request = new NEthSignTypedData<T, TDomain>(address, data, typedData);
+
+        var response = await session.Send<NEthSignTypedData<T, TDomain>, EthResponse>(request);
+
+        return response.Result;
     }
 }

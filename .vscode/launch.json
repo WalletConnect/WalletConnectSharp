@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Examples/console/bin/Debug/net6.0/WalletConnectSharp.Examples.dll",
-            "args": ["nethereum_send_tx_example"],
+            "args": ["sign_typed_data_example"],
             "cwd": "${workspaceFolder}/Examples/console",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

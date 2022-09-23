@@ -17,6 +17,12 @@ public class FallbackProvider : IClient
         _fallback = fallback;
     }
 
+    public Task<RpcRequestResponseBatch> SendBatchRequestAsync(RpcRequestResponseBatch rpcRequestResponseBatch)
+    {
+        // TODO: ISSUE #55: Implement SendBatchRequestAsync
+        throw new NotImplementedException();
+    }
+
     public Task SendRequestAsync(RpcRequest request, string route = null)
     {
         return ValidMethods.Contains(request.Method) ? _signer.SendRequestAsync(request, route) : _fallback.SendRequestAsync(request, route);

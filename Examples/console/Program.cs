@@ -8,10 +8,11 @@ class Program
 {
     private static readonly IExample[] Examples = new IExample[]
     {
-            new NEthereumSendTransactionExample()
+            new NEthereumSendTransactionExample(),
+            new SignTypedDataExample()
     };
 
-    static void ShowHelp()
+    private static void ShowHelp()
     {
         Console.WriteLine("Please specify which example to run");
         foreach (var e in Examples)
@@ -20,7 +21,7 @@ class Program
         }
     }
 
-    static async Task Main(string[] args)
+    public static async Task Main(string[] args)
     {
         if (args.Length == 0)
         {
@@ -28,8 +29,8 @@ class Program
             return;
         }
 
-        string name = args[0];
-        string[] exampleArgs = args.Skip(1).ToArray();
+        var name = args[0];
+        var exampleArgs = args.Skip(1).ToArray();
 
         var example = Examples.FirstOrDefault(e => e.Name.ToLower() == name);
 

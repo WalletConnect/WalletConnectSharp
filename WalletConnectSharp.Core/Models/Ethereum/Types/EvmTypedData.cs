@@ -3,87 +3,110 @@ using System.Runtime.Serialization;
 
 namespace WalletConnectSharp.Core.Models.Ethereum.Types;
 
-public class EvmTypedData<T>
+/// <summary>
+/// EvmTypedData currently only supports primitive types. 
+/// For lists, typles, and classes, use Nethereum for serialization.
+/// </summary>
+[JsonObject(MemberSerialization.OptIn)]
+public class EvmTypedData<TMessage>
 {
-    public static readonly Dictionary<Type, string> TypeMap = new Dictionary<Type, string>()
+    /// <summary>
+    /// An incomplete list of valid EVM types.
+    /// </summary>
+    public static readonly List<string> EvmTypes = new()
         {
-            {typeof(Address), "address"},
-            {typeof(bool), "bool"},
-            {typeof(int), "uint32"},
-            {typeof(long), "int64"},
-            {typeof(uint), "uint32"},
-            {typeof(ulong), "uint64"},
-            {typeof(short), "int16"},
-            {typeof(ushort), "uint16"},
-            {typeof(byte), "int8"},
-            {typeof(sbyte), "uint8"},
-            {typeof(string), "string"},
+            "address",
+            "bool",
+            "bytes",
+            "bytes32",
+            "string",
+            "uint8",
+            "uint16",
+            "uint24",
+            "uint32",
+            "uint64",
+            "uint128",
+            "uint256",
+            "int16",
+            "int24",
+            "int32",
+            "int64",
+            "int128",
+            "int256",
         };
 
-    public Dictionary<string, EvmTypeInfo[]> types = new Dictionary<string, EvmTypeInfo[]>();
-    public string primaryType;
-    public EIP712Domain domain;
-    public T message;
+    [JsonProperty("types")]
+    public Dictionary<string, EvmTypeInfo[]> Types { get; set; } = new Dictionary<string, EvmTypeInfo[]>();
 
-    public EvmTypedData(T data, EIP712Domain domain)
+    [JsonProperty("primaryType")]
+    public string PrimaryType;
+
+    [JsonProperty("domain")]
+    public EIP712Domain Domain;
+
+    [JsonProperty("message")]
+    public TMessage Message;
+
+    public EvmTypedData(TMessage data, EIP712Domain domain, string primaryType = null)
     {
-        this.message = data;
-        this.domain = domain;
-        this.primaryType = typeof(T).Name;
+        Message = data;
+        Domain = domain;
+        PrimaryType = string.IsNullOrWhiteSpace(primaryType)
+            ? typeof(TMessage).Name : primaryType;
 
         AddTypeData(typeof(EIP712Domain));
-        AddTypeData(typeof(T));
+        AddTypeData(typeof(TMessage));
+    }
+
+    /// <summary>
+    /// Build EVM type infos from the specified type. 
+    /// Valid members must be expressed as public properties.
+    /// </summary>
+    public Dictionary<string, EvmTypeInfo> BuildTypeInfos(Type type)
+    {
+        var typeInfos = new Dictionary<string, EvmTypeInfo>();
+        var bindingFlags = BindingFlags.Public |
+                        BindingFlags.Instance;
+
+        foreach (var property in type.GetProperties(bindingFlags))
+        {
+            var fieldType = property.PropertyType;
+            var evmType = (EvmTypeAttribute)property.GetCustomAttribute(typeof(EvmTypeAttribute), true);
+            var shouldIgnore = (EvmIgnoreAttribute)property.GetCustomAttribute(typeof(EvmIgnoreAttribute), true);
+
+            if (evmType == null || shouldIgnore != null)
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(evmType.Type) || !EvmTypes.Contains(evmType.Type))
+            {
+                throw new SerializationException($"Property {property.Name} has no valid EVM type mapping. Verify the [EvmType(...)] declaration type is a valid EVM type.");
+            }
+
+            var name = !string.IsNullOrWhiteSpace(evmType.Name) ? evmType.Name : property.Name;
+
+            var typeInfo = new EvmTypeInfo(name, evmType.Type);
+            _ = typeInfos.TryAdd(name, typeInfo);
+        }
+
+        return typeInfos;
     }
 
     public void AddTypeData(Type type)
     {
         var tname = type.Name;
-        if (types.ContainsKey(tname))
-            return;
-
-        List<EvmTypeInfo> infos = new List<EvmTypeInfo>();
-        BindingFlags bindingFlags = BindingFlags.Public |
-                                    BindingFlags.NonPublic |
-                                    BindingFlags.Instance;
-
-        foreach (var field in type.GetFields(bindingFlags))
+        if (Types.ContainsKey(tname))
         {
-            string name = field.Name;
-            var fieldType = field.FieldType;
-            var evmType = (EvmTypeAttribute)field.GetCustomAttribute(typeof(EvmTypeAttribute), true);
-            var shouldIgnore = (EvmIgnoreAttribute)field.GetCustomAttribute(typeof(EvmIgnoreAttribute), true);
-
-            if (shouldIgnore != null)
-                continue;
-
-
-            string typeName;
-            if (evmType != null)
-            {
-                typeName = evmType.TypeName;
-            }
-            else if (TypeMap.ContainsKey(fieldType))
-            {
-                typeName = TypeMap[fieldType];
-            }
-            else if (
-                (type.IsValueType && !type.IsPrimitive) ||
-                (type.IsClass)
-                )
-            {
-                AddTypeData(fieldType);
-                typeName = fieldType.Name;
-            }
-            else
-            {
-                throw new SerializationException("Field " + name + " has no valid EVM type mapping. Try adding a [EvmType(\"...\")] to this field");
-            }
-
-            var typeInfo = new EvmTypeInfo(name, typeName);
-
-            infos.Add(typeInfo);
+            return;
         }
 
-        types.Add(tname, infos.ToArray());
+        var infos = BuildTypeInfos(type);
+        var values = new List<EvmTypeInfo>();
+        foreach (var info in infos)
+        {
+            values.Add(info.Value);
+        }
+        Types.Add(tname, values.ToArray());
     }
 }
