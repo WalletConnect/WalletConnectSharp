@@ -436,34 +436,20 @@ public class WalletConnectSession : WalletConnectProtocol
         return response.Result;
     }
 
-    public virtual async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
+    public override async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)
     {
-        EnsureNotDisconnected();
-
-        TaskCompletionSource<R> eventCompleted = new TaskCompletionSource<R>(TaskCreationOptions.None);
-
-        Events.ListenForResponse<R>(data.ID, (sender, @event) =>
-        {
-            var response = @event.Response;
-            if (response.IsError)
-            {
-                eventCompleted.SetException(new WalletException(response.Error));
-            }
-            else
-            {
-                eventCompleted.SetResult(@event.Response);
-            }
-
-        });
-
-        await SendRequest(data);
+        await base.SendRequest(requestObject, sendingTopic, forcePushNotification);
 
         if (OnSend != null)
         {
             OnSend(this, this);
         }
+    }
 
-        return await eventCompleted.Task;
+    public override Task<R> Send<T, R>(T data)
+    {
+        EnsureNotDisconnected();
+        return base.Send<T, R>(data);
     }
 
     /// <summary>

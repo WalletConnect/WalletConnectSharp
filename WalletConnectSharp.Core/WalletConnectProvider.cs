@@ -62,33 +62,31 @@ public class WalletConnectProvider : WalletConnectProtocol
             return "wc:" + topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded;
          */
 
-            if (!this.URI.StartsWith("wc"))
-                return;
-            
-            //TODO Figure out a better way to parse this
-            
-            // topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded
-            var data = this.URI.Split(':')[0];
-            
-            _handshakeTopic = WebUtility.UrlDecode(data.Split('@')[0]);
-            
-            // versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded
-            data = data.Split('@')[1];
+        if (!this.URI.StartsWith("wc"))
+            return;
+
+        //TODO Figure out a better way to parse this
+
+        // topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded
+        var data = this.URI.Split(':')[0];
+
+        _handshakeTopic = WebUtility.UrlDecode(data.Split('@')[0]);
+
+        // versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded
+        data = data.Split('@')[1];
 
         Version = WebUtility.UrlDecode(data.Split('?')[0]);
 
         //bridge=" + bridgeUrlEncode + "&key=" + keyEncoded
         data = data.Split('?')[1];
-
-
-
+        
         var parameters = data.Split('&');
 
-            foreach (var parm in parameters)
-            {
-                var parts = parm.Split('=');
-                var name = parts[0];
-                var value = parts[1];
+        foreach (var parm in parameters)
+        {
+            var parts = parm.Split('=');
+            var name = parts[0];
+            var value = parts[1];
 
             switch (name.ToLower())
             {

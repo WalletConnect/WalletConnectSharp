@@ -226,6 +226,29 @@ public class WalletConnectProtocol : DisposableBase
 
         return await response.Task;
     }
+    
+    public virtual async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
+    {
+        TaskCompletionSource<R> eventCompleted = new TaskCompletionSource<R>(TaskCreationOptions.None);
+
+        Events.ListenForResponse<R>(data.ID, (sender, @event) =>
+        {
+            var response = @event.Response;
+            if (response.IsError)
+            {
+                eventCompleted.SetException(new WalletException(response.Error));
+            }
+            else
+            {
+                eventCompleted.SetResult(@event.Response);
+            }
+
+        });
+
+        await SendRequest(data);
+
+        return await eventCompleted.Task;
+    }
 
     public virtual async Task SendRequest<T>(T requestObject, string sendingTopic = null, bool? forcePushNotification = null)
     {
