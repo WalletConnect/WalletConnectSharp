@@ -9,7 +9,8 @@ class Program
     private static readonly IExample[] Examples = new IExample[]
     {
             new NEthereumSendTransactionExample(),
-            new SignTypedDataExample()
+            new SignTypedDataExample(),
+            new BasicExample()
     };
 
     private static void ShowHelp()

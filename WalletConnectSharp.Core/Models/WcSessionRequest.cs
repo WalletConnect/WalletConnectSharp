@@ -2,15 +2,10 @@ namespace WalletConnectSharp.Core.Models;
 
 public class WcSessionRequest : JsonRpcRequest
 {
-    public override string Method
-    {
-        get { return "wc_sessionRequest"; }
-    }
-
     [JsonProperty("params")]
     public WcSessionRequestRequestParams[] parameters;
 
-    public WcSessionRequest(ClientMeta clientMeta, string clientId, int chainId = 1)
+    public WcSessionRequest(ClientMeta clientMeta, string clientId, int chainId = 1) : base("wc_sessionRequest")
     {
         this.parameters = new[]
         {

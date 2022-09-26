@@ -204,18 +204,11 @@ public class WalletConnectProtocol : DisposableBase
 
         var json = await Cipher.DecryptWithKey(_keyRaw, encryptedPayload);
 
-        var response = JsonConvert.DeserializeObject<JsonRpcResponse>(json);
-
-        bool wasResponse = false;
-        if (response != null && response.Event != null)
-            wasResponse = Events.Trigger(response.Event, json);
-
-        if (!wasResponse)
+        var payload = JsonConvert.DeserializeObject<JsonRpcPayload>(json);
+        
+        if (payload != null)
         {
-            var request = JsonConvert.DeserializeObject<JsonRpcRequest>(json);
-
-            if (request != null && request.Method != null)
-                Events.Trigger(request.Method, json);
+            Events.Trigger(payload.Event, json);
         }
     }
 

@@ -1,13 +1,7 @@
 namespace WalletConnectSharp.Core.Models;
 
-public class JsonRpcResponse : IEventSource
+public class JsonRpcResponse : JsonRpcPayload, IEventSource
 {
-    [JsonProperty]
-    private long id;
-
-    [JsonProperty]
-    private string jsonrpc = "2.0";
-
     [JsonProperty]
     private JsonRpcError error;
 
@@ -21,18 +15,6 @@ public class JsonRpcResponse : IEventSource
     public bool IsError
     {
         get { return error != null; }
-    }
-
-    [JsonIgnore]
-    public long ID
-    {
-        get { return id; }
-    }
-
-    [JsonIgnore]
-    public string JsonRPC
-    {
-        get { return jsonrpc; }
     }
 
     public class JsonRpcError

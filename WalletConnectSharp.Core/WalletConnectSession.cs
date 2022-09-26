@@ -577,10 +577,6 @@ public class WalletConnectSession : WalletConnectProtocol
         {
             await HandleSessionDisconnect("Wallet Disconnected");
         }
-        else
-        {
-            Events.Trigger(WalletConnectStates.SessionUpdate, data);
-        }
 
         if (SessionUpdate != null)
             SessionUpdate(this, data);

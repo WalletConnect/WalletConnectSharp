@@ -2,7 +2,7 @@ using WalletConnectSharp.Core.Utils;
 
 namespace WalletConnectSharp.Core.Models;
 
-public class JsonRpcRequest : IEventSource
+public class JsonRpcRequest : JsonRpcPayload, IEventSource
 {
     [JsonIgnore]
     public static JsonRpcRequestMethod[] Methods { get; } = new[] {
@@ -30,30 +30,24 @@ public class JsonRpcRequest : IEventSource
     [JsonIgnore]
     public static readonly JsonRpcRequestMethod[] RedirectMethods = Array.FindAll(Methods, m => m.IsRedirect);
 
-    [JsonProperty(Order = 1)]
-    private readonly long id;
-    [JsonProperty(Order = 2)]
-    private const string JSONRPC = "2.0";
-
     [JsonProperty("method", Order = 3)]
-    public virtual string Method { get; protected set; }
+    public string Method { get; protected set; }
 
-    public JsonRpcRequest()
+    public JsonRpcRequest(string method)
     {
+        if (!string.IsNullOrWhiteSpace(method))
+        {
+            Method = method;
+        }
+        
         if (id == 0)
         {
-            id = RpcPayloadId.Generate();
+            this.id = RpcPayloadId.Generate();
         }
     }
 
     public static bool IsSigningMethod(string method) => Array.Exists(SigningMethods, wcMethod => wcMethod.Name == method);
     public static bool IsWalletConnectMethod(string method) => method.StartsWith(WalletConnectMethodPrefix);
-
-    [JsonIgnore]
-    public long ID => id;
-
-    [JsonIgnore]
-    public string JsonRPC => JSONRPC;
 
     [JsonIgnore]
     public string Event => Method;

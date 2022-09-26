@@ -8,9 +8,8 @@ public class EthGenericRequest<T> : JsonRpcRequest
     [JsonIgnore]
     public T[] Parameters => _parameters;
 
-    public EthGenericRequest(string jsonRpcMethodName, params T[] data) : base()
+    public EthGenericRequest(string jsonRpcMethodName, params T[] data) : base(jsonRpcMethodName)
     {
-        Method = jsonRpcMethodName;
         _parameters = data;
     }
 }
