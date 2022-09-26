@@ -143,15 +143,6 @@ public class WalletConnectSession : WalletConnectProtocol
         ReadyForUserPrompt = false;
     }
 
-    protected void EnsureNotDisconnected()
-    {
-        if (Disconnected)
-        {
-            throw new IOException(
-                "Session stale! The session has been disconnected. This session cannot be reused.");
-        }
-    }
-
     protected void GenerateKey()
     {
         //Generate a random secret
@@ -272,6 +263,16 @@ public class WalletConnectSession : WalletConnectProtocol
         await base.Connect();
 
         await ConnectSession();
+    }
+
+    public async Task WaitForUserPromptReady()
+    {
+        while (!ReadyForUserPrompt)
+        {
+            if (!Connecting) throw new IOException("Session not currently waiting for connection response");
+            
+            await Task.Delay(100);
+        }
     }
 
     public virtual async Task DisconnectSession(string disconnectMessage = "Session Disconnected", bool createNewSession = true)
@@ -444,12 +445,6 @@ public class WalletConnectSession : WalletConnectProtocol
         {
             OnSend(this, this);
         }
-    }
-
-    public override Task<R> Send<T, R>(T data)
-    {
-        EnsureNotDisconnected();
-        return base.Send<T, R>(data);
     }
 
     /// <summary>

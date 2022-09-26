@@ -10,7 +10,8 @@ class Program
     {
             new NEthereumSendTransactionExample(),
             new SignTypedDataExample(),
-            new BasicExample()
+            new BasicExample(),
+            new BiDirectionalExample(),
     };
 
     private static void ShowHelp()

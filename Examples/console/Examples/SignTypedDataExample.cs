@@ -89,8 +89,8 @@ public class SignTypedDataExample : IExample
         {
             Name = "WalletConnectSharp",
             Description = "An example that showcases how to use the WalletConnectSharp library",
-            Icons = new[] { "https://app.warriders.com/favicon.ico" },
-            URL = "https://app.warriders.com/"
+            Icons = new[] { "https://walletconnect.com/favicon.ico" },
+            URL = "https://walletconnect.com/"
         };
 
         // create a client

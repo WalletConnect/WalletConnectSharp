@@ -12,7 +12,11 @@ public class JsonRpcPayload : IEventSource
     protected string jsonrpc = "2.0";
     
     [JsonIgnore]
-    public long ID => id;
+    public virtual long ID
+    {
+        get => id;
+        set => id = value;
+    }
 
     [JsonIgnore]
     public string JsonRPC => jsonrpc;

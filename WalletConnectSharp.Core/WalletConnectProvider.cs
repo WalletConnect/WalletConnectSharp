@@ -1,5 +1,6 @@
 using System.Net;
 using WalletConnectSharp.Core.Events;
+using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Network;
 using WalletConnectSharp.Core.Utils;
@@ -21,6 +22,9 @@ public class WalletConnectProvider : WalletConnectProtocol
     public int ChainId { get; private set; }
 
     public ClientMeta ClientMetadata { get; set; }
+    public ClientMeta PeerMetadata { get; set; }
+    
+    public bool ReadyForUserPrompt { get; private set; }
 
     private string clientId = "";
 
@@ -43,8 +47,9 @@ public class WalletConnectProvider : WalletConnectProtocol
         this.NetworkId = savedSession.NetworkID;
     }
 
-    public WalletConnectProvider(string url, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
+    public WalletConnectProvider(string url, ClientMeta walletMeta, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
     {
+        ClientMetadata = walletMeta;
         this.ChainId = chainId;
         this.URI = url;
 
@@ -68,7 +73,7 @@ public class WalletConnectProvider : WalletConnectProtocol
         //TODO Figure out a better way to parse this
 
         // topicEncode + "@" + versionEncode + "?bridge=" + bridgeUrlEncode + "&key=" + keyEncoded
-        var data = this.URI.Split(':')[0];
+        var data = this.URI.Split(':')[1];
 
         _handshakeTopic = WebUtility.UrlDecode(data.Split('@')[0]);
 
@@ -99,5 +104,94 @@ public class WalletConnectProvider : WalletConnectProtocol
                     break;
             }
         }
+    }
+
+    public async Task ConnectSession()
+    {
+        EnsureNotDisconnected();
+
+        Connecting = true;
+        try
+        {
+            clientId = Guid.NewGuid().ToString();
+            
+            if (!base.TransportConnected)
+            {
+                await base.SetupTransport();
+            }
+            
+            if (_key == null)
+                ParseUrl();
+
+            TaskCompletionSource<bool> sessionRequestTask = new TaskCompletionSource<bool>();
+            Events.ListenFor(WalletConnectStates.SessionRequest,
+                delegate(object sender, JsonRpcRequestEvent<WcSessionRequest> @event)
+                {
+                    _handshakeId = @event.Response.ID;
+                    
+                    UpdateSession(@event.Response.parameters[0]);
+                    
+                    sessionRequestTask.SetResult(true);
+                });
+            
+            await SubscribeAndListenToTopic(this._handshakeTopic);
+
+            await sessionRequestTask.Task;
+            
+            ReadyForUserPrompt = true;
+        }
+        catch (Exception e)
+        {
+            
+        }
+    }
+
+    private void UpdateSession(WcSessionRequest.WcSessionRequestRequestParams request)
+    {
+        PeerId = request.peerId;
+        ChainId = request.chainId;
+        PeerMetadata = request.peerMeta;
+    }
+
+    public override async Task Connect()
+    {
+        EnsureNotDisconnected();
+
+        await base.Connect();
+
+        await ConnectSession();
+    }
+
+    public Task AcceptRequest()
+    {
+        return ResponseToRequest(true);
+    }
+
+    public Task RejectRequest()
+    {
+        return ResponseToRequest(false);
+    }
+
+    public async Task ResponseToRequest(bool approved)
+    {
+        if (!ReadyForUserPrompt) throw new IOException("No session request to accept");
+
+        WCSessionRequestResponse response = new WCSessionRequestResponse() {result = new WCSessionData()
+        {
+            // TODO Where to grab accounts from?
+            accounts = new string[]
+            {
+                "test"
+            },
+            approved = true,
+            chainId = ChainId,
+            networkId = NetworkId,
+            peerId = clientId,
+            peerMeta = ClientMetadata
+        }};
+
+        response.ID = _handshakeId;
+
+        await SendRequest(response);
     }
 }

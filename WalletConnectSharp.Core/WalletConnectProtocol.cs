@@ -229,6 +229,8 @@ public class WalletConnectProtocol : DisposableBase
     
     public virtual async Task<R> Send<T, R>(T data) where T : JsonRpcRequest where R : JsonRpcResponse
     {
+        EnsureNotDisconnected();
+        
         TaskCompletionSource<R> eventCompleted = new TaskCompletionSource<R>(TaskCreationOptions.None);
 
         Events.ListenForResponse<R>(data.ID, (sender, @event) =>
@@ -294,5 +296,14 @@ public class WalletConnectProtocol : DisposableBase
 
         return requestObject is JsonRpcRequest request
             && (JsonRpcRequest.IsWalletConnectMethod(request.Method) || !JsonRpcRequest.IsSigningMethod(request.Method));
+    }
+    
+    protected void EnsureNotDisconnected()
+    {
+        if (Disconnected)
+        {
+            throw new IOException(
+                "Session stale! The session has been disconnected. This session cannot be reused.");
+        }
     }
 }
