@@ -24,12 +24,18 @@ public class BiDirectionalExample : IExample
             URL = "https://walletconnect.com/"
         };
 
-        var walletMetadata = new ClientMeta()
+        var walletData = new StaticWalletData()
         {
-            Name = "WalletConnectSharp Wallet",
-            Description = "An example that showcases how to use WalletConnectSharp as a wallet",
-            Icons = new[] {"https://walletconnect.com/favicon.ico"},
-            URL = "https://walletconnect.com/"
+            Accounts = new[] {"0x4EeABa74D7f51fe3202D7963EFf61D2e7e166cBa"},
+            ChainId = 1,
+            ClientMeta = new ClientMeta()
+            {
+                Name = "WalletConnectSharp Wallet",
+                Description = "An example that showcases how to use WalletConnectSharp as a wallet",
+                Icons = new[] {"https://walletconnect.com/favicon.ico"},
+                URL = "https://walletconnect.com/"
+            },
+            NetworkId = 1
         };
 
         var client = new WalletConnect(appMetadata);
@@ -46,7 +52,7 @@ public class BiDirectionalExample : IExample
 
         await client.WaitForUserPromptReady();
 
-        var wallet = new WalletConnectProvider(client.URI, walletMetadata);
+        var wallet = new WalletConnectProvider(client.URI, walletData);
 
         await wallet.Connect();
         

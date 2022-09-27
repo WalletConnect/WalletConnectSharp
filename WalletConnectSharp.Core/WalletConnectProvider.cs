@@ -2,6 +2,7 @@ using System.Net;
 using WalletConnectSharp.Core.Events;
 using WalletConnectSharp.Core.Events.Response;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.Core.Network;
 using WalletConnectSharp.Core.Utils;
 
@@ -15,16 +16,62 @@ public class WalletConnectProvider : WalletConnectProtocol
 
     public event EventHandler<WalletConnectProtocol> OnProviderConnect;
 
-    public int? NetworkId { get; private set; }
+    public event EventHandler<EventArgWithResponse<WalletAddEthChain, EthResponse>> WalletAddEthChain;
+    public event EventHandler<EventArgWithResponse<WalletSwitchEthChain, EthResponse>> WalletSwitchEthChain;
+    public event EventHandler<EventArgWithResponse<EthSign, EthResponse>> EthSign;
+    public event EventHandler<EventArgWithResponse<EthPersonalSign, EthResponse>> EthPersonalSign;
 
-    public string[] Accounts { get; private set; }
+    public override ClientMeta WalletMetadata
+    {
+        get
+        {
+            return WalletData.ClientMeta;
+        }
+        set
+        {
+            WalletData.ClientMeta = value;
+        }
+    }
 
-    public int ChainId { get; private set; }
-
-    public ClientMeta ClientMetadata { get; set; }
-    public ClientMeta PeerMetadata { get; set; }
-    
     public bool ReadyForUserPrompt { get; private set; }
+    
+    public IWalletData WalletData { get; private set; }
+
+    public string[] Accounts
+    {
+        get
+        {
+            return WalletData.AccountsObservable.Value;
+        }
+        set
+        {
+            WalletData.AccountsObservable.Value = value;
+        }
+    }
+
+    public int ChainId
+    {
+        get
+        {
+            return WalletData.ChainIdObservable.Value;
+        }
+        set
+        {
+            WalletData.ChainIdObservable.Value = value;
+        }
+    }
+
+    public int NetworkId
+    {
+        get
+        {
+            return WalletData.NetworkIdObservable.Value;
+        }
+        set
+        {
+            WalletData.NetworkIdObservable.Value = value;
+        }
+    }
 
     private string clientId = "";
 
@@ -34,26 +81,27 @@ public class WalletConnectProvider : WalletConnectProtocol
         private set;
     }
 
-    public WalletConnectProvider(SavedSession savedSession, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
+    public WalletConnectProvider(SavedSession savedSession, IWalletData walletData, ITransport transport = null, ICipher cipher = null, EventDelegator eventDelegator = null) : base(savedSession, transport, cipher, eventDelegator)
     {
-        this.ClientMetadata = savedSession.DappMeta;
+        this.DappMetadata = savedSession.DappMeta;
         this.WalletMetadata = savedSession.WalletMeta;
-        this.ChainId = savedSession.ChainID;
-
+        this.WalletData = walletData;
+        
         clientId = savedSession.ClientID;
-
-        this.Accounts = savedSession.Accounts;
-
-        this.NetworkId = savedSession.NetworkID;
     }
 
-    public WalletConnectProvider(string url, ClientMeta walletMeta, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
+    public WalletConnectProvider(string url, IWalletData walletData, ITransport transport = null, ICipher cipher = null, int chainId = 1, EventDelegator eventDelegator = null) : base(transport, cipher, eventDelegator)
     {
-        ClientMetadata = walletMeta;
-        this.ChainId = chainId;
         this.URI = url;
 
+        this.WalletData = walletData;
+
         this.ParseUrl();
+    }
+
+    public EventHandler<EventArgWithResponse<EthSignTypedData<T>, EthResponse>> EthSignTypedData<T>()
+    {
+        
     }
 
     protected void ParseUrl()
@@ -149,8 +197,7 @@ public class WalletConnectProvider : WalletConnectProtocol
     private void UpdateSession(WcSessionRequest.WcSessionRequestRequestParams request)
     {
         PeerId = request.peerId;
-        ChainId = request.chainId;
-        PeerMetadata = request.peerMeta;
+        DappMetadata = request.peerMeta;
     }
 
     public override async Task Connect()
@@ -162,9 +209,23 @@ public class WalletConnectProvider : WalletConnectProtocol
         await ConnectSession();
     }
 
-    public Task AcceptRequest()
+    public async Task AcceptRequest()
     {
-        return ResponseToRequest(true);
+        await ResponseToRequest(true);
+        
+        WalletData.AccountsObservable.OnValueChanged += AccountsObservableOnOnValueChanged;
+        WalletData.ChainIdObservable.OnValueChanged += ChainIdOrNetworkObservableOnOnValueChanged;
+        WalletData.NetworkIdObservable.OnValueChanged += ChainIdOrNetworkObservableOnOnValueChanged;
+    }
+
+    private async void ChainIdOrNetworkObservableOnOnValueChanged(object sender, int e)
+    {
+        await SendSessionUpdate();
+    }
+
+    private async void AccountsObservableOnOnValueChanged(object sender, string[] e)
+    {
+        await SendSessionUpdate();
     }
 
     public Task RejectRequest()
@@ -178,20 +239,34 @@ public class WalletConnectProvider : WalletConnectProtocol
 
         WCSessionRequestResponse response = new WCSessionRequestResponse() {result = new WCSessionData()
         {
-            // TODO Where to grab accounts from?
-            accounts = new string[]
-            {
-                "test"
-            },
-            approved = true,
-            chainId = ChainId,
-            networkId = NetworkId,
+            accounts = WalletData.AccountsObservable.Value,
+            chainId = WalletData.ChainIdObservable.Value,
+            networkId = WalletData.NetworkIdObservable.Value,
+            
+            approved = approved,
             peerId = clientId,
-            peerMeta = ClientMetadata
+            peerMeta = WalletMetadata
         }};
 
         response.ID = _handshakeId;
 
         await SendRequest(response);
     }
+
+    public async Task SendSessionUpdate(bool disconnect = false)
+    {
+        if (!SessionConnected) throw new IOException("No session to update");
+
+        WCSessionUpdate request = new WCSessionUpdate(new WCSessionData()
+        {
+            accounts = WalletData.AccountsObservable.Value,
+            chainId = WalletData.ChainIdObservable.Value,
+            networkId = WalletData.NetworkIdObservable.Value,
+            approved = disconnect,
+        });
+
+        await SendRequest(request);
+    }
+    
+    
 }

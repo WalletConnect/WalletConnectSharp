@@ -47,9 +47,9 @@ public class WalletConnectProtocol : DisposableBase
 
     public ICipher Cipher { get; protected set; }
 
-    public ClientMeta DappMetadata { get; set; }
+    public virtual ClientMeta DappMetadata { get; set; }
 
-    public ClientMeta WalletMetadata { get; set; }
+    public virtual ClientMeta WalletMetadata { get; set; }
 
     public ReadOnlyCollection<string> ActiveTopics
     {
