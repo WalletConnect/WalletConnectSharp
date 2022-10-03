@@ -15,6 +15,7 @@
     <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Copyright>Copyright (c) WalletConnect 2022</Copyright>
     <PackageId>WalletConnect.Core</PackageId>
     <AssemblyVersion>1.7.2</AssemblyVersion>
@@ -31,5 +32,6 @@
   <PackageReference Include="Portable.BouncyCastle" />
   <PackageReference Include="Newtonsoft.Json" />
     <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

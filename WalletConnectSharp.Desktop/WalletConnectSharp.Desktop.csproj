@@ -16,6 +16,7 @@
     <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm desktop</PackageTags>
     <Copyright>Copyright (c) WalletConnect 2022</Copyright>
     <PackageId>WalletConnect.Desktop</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>1.7.2</AssemblyVersion>
     <FileVersion>1.7.2</FileVersion>
   </PropertyGroup>
@@ -23,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
     <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
