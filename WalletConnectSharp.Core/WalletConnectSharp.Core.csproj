@@ -4,7 +4,7 @@
     <TargetFrameworks>$(DefaultLibraryVersion)</TargetFrameworks>
     <RootNamespace>WalletConnectSharp.Core</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.8.0</PackageVersion>
+    <PackageVersion>1.7.2</PackageVersion>
     <Title>WalletConnectSharp.Core</Title>
     <Authors>pedrouid, edkek</Authors>
     <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
@@ -17,8 +17,8 @@
     <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
     <Copyright>Copyright (c) WalletConnect 2022</Copyright>
     <PackageId>WalletConnect.Core</PackageId>
-    <AssemblyVersion>1.8.0</AssemblyVersion>
-    <FileVersion>1.8.0</FileVersion>
+    <AssemblyVersion>1.7.2</AssemblyVersion>
+    <FileVersion>1.7.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

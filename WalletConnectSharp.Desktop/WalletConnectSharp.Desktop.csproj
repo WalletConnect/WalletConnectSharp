@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>1.8.0</PackageVersion>
+    <PackageVersion>1.7.2</PackageVersion>
     <Title>WalletConnectSharp.Desktop</Title>
     <Authors>pedrouid, edkek</Authors>
     <Description>A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp. Use this package for desktop applications</Description>
@@ -16,8 +16,8 @@
     <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm desktop</PackageTags>
     <Copyright>Copyright (c) WalletConnect 2022</Copyright>
     <PackageId>WalletConnect.Desktop</PackageId>
-    <AssemblyVersion>1.8.0</AssemblyVersion>
-    <FileVersion>1.8.0</FileVersion>
+    <AssemblyVersion>1.7.2</AssemblyVersion>
+    <FileVersion>1.7.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
