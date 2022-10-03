@@ -8,7 +8,7 @@
         <PackageVersion Include="Nethereum.RPC"               Version="4.8.0" />
         <PackageVersion Include="Nethereum.Web3"              Version="4.8.0" />
         <PackageVersion Include="Nethereum.Signer"            Version="4.8.0" />
-        <PackageVersion Include="Nethereum.Signer.EIP712"     Version="4.8.0" />
+        <PackageVersion Include="Nethereum.Signer.EIP712"     Version="4.9.0" />
     </ItemGroup>
     <ItemGroup>
         <PackageVersion Include="Newtonsoft.Json"             Version="13.0.1" />
