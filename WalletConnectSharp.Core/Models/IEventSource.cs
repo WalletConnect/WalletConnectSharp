@@ -1,7 +1,6 @@
-namespace WalletConnectSharp.Core.Models
+namespace WalletConnectSharp.Core.Models;
+
+public interface IEventSource
 {
-    public interface IEventSource
-    {
-        string Event { get; }
-    }
+    string Event { get; }
 }

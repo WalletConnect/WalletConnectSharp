@@ -1,21 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <IsPackable>false</IsPackable>
-        <AssemblyVersion>1.6.2</AssemblyVersion>
-        <FileVersion>1.6.2</FileVersion>
-        <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <AssemblyVersion>$(DefaultAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(DefaultFileVersion)</FileVersion>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
-      <ProjectReference Include="..\..\WalletConnectSharp.Desktop\WalletConnectSharp.Desktop.csproj" />
-      <ProjectReference Include="..\..\WalletConnectSharp.NEthereum\WalletConnectSharp.NEthereum.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
+    <ProjectReference Include="..\..\WalletConnectSharp.Desktop\WalletConnectSharp.Desktop.csproj" />
+    <ProjectReference Include="..\..\WalletConnectSharp.NEthereum\WalletConnectSharp.NEthereum.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Nethereum.Web3" Version="4.4.1" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Nethereum.Web3" />
+    <PackageReference Include="Nethereum.Signer.EIP712" />
+  </ItemGroup>
 
 </Project>

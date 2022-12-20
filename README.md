@@ -13,7 +13,7 @@ var metadata = new ClientMeta()
     Icons = new[] {"https://app.warriders.com/favicon.ico"},
     Name = "WalletConnect Test",
     URL = "https://app.warriders.com"
-};    
+};
 ```
 
 Once you have the metadata, you can create the `WalletConnect` object
@@ -41,6 +41,11 @@ Console.WriteLine(walletConnectData.chainId);
 With the above, you have enough to use the base WalletConnect protocol. However, this library comes with an NEthereum provider implementation. To use it, you simply invoke `CreateProvider(url)` or `CreateProvider(IClient)`. You are required to specify an additional RPC URL or a custom `IClient` because the `WalletConnect` protocol does not perform read operations (`eth_call`, `eth_estimateGas`, etc..), so you must provide either an `Infura Project ID`, a node's HTTP url for `HttpProvider` or a custom `IClient`.
 
 Here is an example
+
 ```csharp
 var web3 = new Web3(walletConnect.CreateProvider(new Uri("https://mainnet.infura.io/v3/<infruaId>"));
 ```
+
+## Examples
+
+There are examples in the examples directory. If you are using VS Code, you can invoke the console example by running the `.NET Core Launch (console)` launch configuration. For more information on debugging and launch configurations, [refer to the VS Code documentation](https://code.visualstudio.com/Docs/editor/debugging)

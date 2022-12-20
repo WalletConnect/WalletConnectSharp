@@ -1,10 +1,7 @@
-using Newtonsoft.Json;
+namespace WalletConnectSharp.Core.Models;
 
-namespace WalletConnectSharp.Core.Models
+public class InternalEvent
 {
-    public class InternalEvent
-    {
-        [JsonProperty("event")]
-        public string @event;
-    }
+    [JsonProperty("event")]
+    public string @event;
 }

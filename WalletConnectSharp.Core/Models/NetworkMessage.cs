@@ -1,19 +1,16 @@
-using Newtonsoft.Json;
+namespace WalletConnectSharp.Core.Models;
 
-namespace WalletConnectSharp.Core.Models
+public class NetworkMessage
 {
-    public class NetworkMessage
-    {
-        [JsonProperty("topic")]
-        public string Topic;
+    [JsonProperty("topic")]
+    public string Topic;
 
-        [JsonProperty("type")]
-        public string Type;
+    [JsonProperty("type")]
+    public string Type;
 
-        [JsonProperty("payload")]
-        public string Payload;
+    [JsonProperty("payload")]
+    public string Payload;
 
-        [JsonProperty("silent")]
-        public bool Silent;
-    }
+    [JsonProperty("silent")]
+    public bool Silent;
 }
