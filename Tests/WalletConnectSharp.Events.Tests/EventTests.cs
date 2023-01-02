@@ -26,7 +26,7 @@ namespace WalletConnectSharp.Events.Tests
             public T data;
         }
         
-        [Fact]
+        [Fact, Trait("Category", "unit")]
         public async void AsyncEventsPropagate()
         {
             var events = new EventDelegator();
@@ -50,7 +50,7 @@ namespace WalletConnectSharp.Events.Tests
             Assert.Equal(eventData, (await eventCallbackTask.Task));
         }
 
-        [Fact]
+        [Fact, Trait("Category", "unit")]
         public void ListenForOnce()
         {
             EventDelegator events = new EventDelegator();
@@ -79,7 +79,7 @@ namespace WalletConnectSharp.Events.Tests
             Assert.Null(result1);
         }
 
-        [Fact]
+        [Fact, Trait("Category", "unit")]
         public void RemoveListener()
         {
             EventDelegator events = new EventDelegator();
@@ -96,7 +96,7 @@ namespace WalletConnectSharp.Events.Tests
             throw new NotImplementedException();
         }
 
-        [Fact]
+        [Fact, Trait("Category", "unit")]
         public void InheritanceEventsPropagate()
         {
             EventDelegator events = new EventDelegator();
@@ -148,7 +148,7 @@ namespace WalletConnectSharp.Events.Tests
             Assert.Null(result4);
         }
 
-        [Fact]
+        [Fact, Trait("Category", "unit")]
         public void ListenAndDeserializeJson()
         {
             EventDelegator events = new EventDelegator();

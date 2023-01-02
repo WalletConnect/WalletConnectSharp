@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -46,7 +47,7 @@ namespace WalletConnectSharp.Sign.Test
             this._cryptoFixture = cryptoFixture;
         }
 
-        [Fact]
+        [Fact, Trait("Category", "integration")]
         public async void TestApproveSession()
         {
             await _cryptoFixture.WaitForClientsReady();
@@ -97,7 +98,7 @@ namespace WalletConnectSharp.Sign.Test
             await approveData.Acknowledged();
         }
         
-        [Fact]
+        [Fact, Trait("Category", "integration")]
         public async void TestRejectSession()
         {
             await _cryptoFixture.WaitForClientsReady();
@@ -147,7 +148,7 @@ namespace WalletConnectSharp.Sign.Test
             await Assert.ThrowsAsync<WalletConnectException>(() => connectData.Approval);
         }
         
-        [Fact]
+        [Fact, Trait("Category", "integration")]
         public async void TestSessionRequestResponse()
         {
             await _cryptoFixture.WaitForClientsReady();

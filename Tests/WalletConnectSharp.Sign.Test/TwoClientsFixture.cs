@@ -18,6 +18,7 @@ namespace WalletConnectSharp.Sign.Test
             OptionsA = new SignClientOptions()
             {
                 ProjectId = TestValues.TestProjectId,
+                RelayUrl = TestValues.TestRelayUrl,
                 Metadata = new Metadata()
                 {
                     Description = "An example dapp to showcase WalletConnectSharpv2",
@@ -32,6 +33,7 @@ namespace WalletConnectSharp.Sign.Test
             OptionsB = new SignClientOptions()
             {
                 ProjectId = TestValues.TestProjectId,
+                RelayUrl = TestValues.TestRelayUrl,
                 Metadata = new Metadata()
                 {
                     Description = "An example wallet to showcase WalletConnectSharpv2",

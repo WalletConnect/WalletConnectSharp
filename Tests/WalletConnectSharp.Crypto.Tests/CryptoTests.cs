@@ -31,7 +31,7 @@ namespace WalletConnectSharp.Crypto.Tests
             this._cryptoFixture = cryptoFixture;
         }
 
-        [Fact]
+        [Fact, Trait("Category", "unit")]
         public async void TestEncodeDecode()
         {
             await _cryptoFixture.WaitForModulesReady();
