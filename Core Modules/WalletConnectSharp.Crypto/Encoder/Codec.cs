@@ -2,7 +2,7 @@ using System;
 
 namespace WalletConnectSharp.Crypto.Encoder
 {
-    public class Codec
+    internal class Codec
     {
         public string Name { get; }
         public string Prefix { get; }

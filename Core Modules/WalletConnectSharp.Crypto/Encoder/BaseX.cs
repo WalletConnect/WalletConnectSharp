@@ -2,7 +2,7 @@ using System;
 
 namespace WalletConnectSharp.Crypto.Encoder
 {
-    public sealed class BaseX
+    internal sealed class BaseX
     {
         private byte[] BaseMap = new byte[256];
         private char[] Alphabet;

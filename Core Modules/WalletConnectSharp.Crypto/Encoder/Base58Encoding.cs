@@ -7,7 +7,7 @@ using Merkator.Tools;
 namespace Merkator.BitCoin
 {
 	// Implements https://en.bitcoin.it/wiki/Base58Check_encoding
-	public static class Base58Encoding
+	internal static class Base58Encoding
 	{
 		public const int CheckSumSizeInBytes = 4;
 

@@ -10,6 +10,9 @@ using WalletConnectSharp.Storage.Interfaces;
 
 namespace WalletConnectSharp.Crypto
 {
+    /// <summary>
+    /// A module that handles the storage of key/value pairs. 
+    /// </summary>
     public class KeyChain : IKeyChain
     {
         private Dictionary<string, string> _keyChain = new Dictionary<string, string>();
@@ -24,6 +27,9 @@ namespace WalletConnectSharp.Crypto
         /// </summary>
         public IReadOnlyDictionary<string, string> Keychain => new ReadOnlyDictionary<string, string>(_keyChain);
         
+        /// <summary>
+        /// The name of this module, always "keychain"
+        /// </summary>
         public string Name
         {
             get
@@ -32,6 +38,9 @@ namespace WalletConnectSharp.Crypto
             }
         }
 
+        /// <summary>
+        /// The context string for this keychain
+        /// </summary>
         public string Context
         {
             get
@@ -41,6 +50,9 @@ namespace WalletConnectSharp.Crypto
             }
         }
 
+        /// <summary>
+        /// The version of this keychain module
+        /// </summary>
         public string Version
         {
             get

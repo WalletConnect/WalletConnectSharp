@@ -109,8 +109,11 @@ namespace WalletConnectSharp.Crypto.Interfaces
         /// <returns>The decoded, decrypted and deserialized object of type T from an async task</returns>
         Task<T> Decode<T>(string topic, string encoded, DecodeOptions options = null) where T : IJsonRpcPayload;
 
-        Task<string> GetClientId();
-        
+        /// <summary>
+        /// Given an AUD, sign and return a JWT
+        /// </summary>
+        /// <param name="aud">The AUD to sign</param>
+        /// <returns>A JWT token</returns>
         Task<string> SignJwt(string aud);
     }
 }

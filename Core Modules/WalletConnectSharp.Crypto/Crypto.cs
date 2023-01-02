@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using Merkator.BitCoin;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -11,7 +7,6 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Agreement;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Security;
@@ -278,8 +273,7 @@ namespace WalletConnectSharp.Crypto
         /// <summary>
         /// Encrypt a message with the given topic's Sym key. 
         /// </summary>
-        /// <param name="topic">The topic of the Sym key to use to encrypt the message</param>
-        /// <param name="message">The message to encrypt</param>
+        /// <param name="@params">The parameters that define what to encrypt and how</param>
         /// <returns>The encrypted message from an async task</returns>
         public Task<string> Encrypt(EncryptParams @params)
         {
@@ -364,6 +358,7 @@ namespace WalletConnectSharp.Crypto
         /// </summary>
         /// <param name="topic">The topic of the Sym key to use to encrypt the IJsonRpcPayload</param>
         /// <param name="payload">The payload to encode and encrypt</param>
+        /// <param name="options">(optional) Encoding options</param>
         /// <returns>The encoded and encrypted IJsonRpcPayload from an async task</returns>
         public async Task<string> Encode(string topic, IJsonRpcPayload payload, EncodeOptions options = null)
         {
@@ -400,6 +395,7 @@ namespace WalletConnectSharp.Crypto
         /// </summary>
         /// <param name="topic">The topic of the Sym key to use</param>
         /// <param name="encoded">The encoded/encrypted message to decrypt</param>
+        /// <param name="options">(optional) Decoding options</param>
         /// <typeparam name="T">The type of the IJsonRpcPayload to convert the encoded Json to</typeparam>
         /// <returns>The decoded, decrypted and deserialized object of type T from an async task</returns>
         public async Task<T> Decode<T>(string topic, string encoded, DecodeOptions options = null) where T : IJsonRpcPayload
@@ -459,15 +455,11 @@ namespace WalletConnectSharp.Crypto
             }
         }
 
-        public async Task<string> GetClientId()
-        {
-            IsInitialized();
-            var seed = await this.GetClientSeed();
-            var keyPair = KeypairFromSeed(seed);
-            var clientId = EncodeIss(keyPair.GeneratePublicKey());
-            return clientId;
-        }
-
+        /// <summary>
+        /// Given an aud value, create and sign a JWT token
+        /// </summary>
+        /// <param name="aud">The aud value to use</param>
+        /// <returns>A signed JWT token represented as a string</returns>
         public async Task<string> SignJwt(string aud)
         {
             IsInitialized();

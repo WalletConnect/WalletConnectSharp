@@ -1,6 +1,6 @@
 namespace WalletConnectSharp.Crypto.Encoder
 {
-    public static class Bases
+    internal static class Bases
     {
         public static Codec Base10 = new Codec(
             "base10",

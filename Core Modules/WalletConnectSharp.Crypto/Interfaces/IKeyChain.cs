@@ -6,6 +6,9 @@ using WalletConnectSharp.Storage.Interfaces;
 
 namespace WalletConnectSharp.Crypto.Interfaces
 {
+    /// <summary>
+    /// A module that represents a keychain
+    /// </summary>
     public interface IKeyChain : IModule
     {
         /// <summary>

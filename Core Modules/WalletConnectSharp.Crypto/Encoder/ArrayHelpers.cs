@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Merkator.Tools
 {
-    public class ArrayHelpers
+    internal class ArrayHelpers
     {
         public static T[] ConcatArrays<T>(params T[][] arrays)
         {
