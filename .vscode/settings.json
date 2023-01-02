@@ -1,5 +1,0 @@
-{
-    "editor.formatOnSave": true,
-    "omnisharp.enableRoslynAnalyzers": true,
-    "omnisharp.enableEditorConfigSupport": true
-}

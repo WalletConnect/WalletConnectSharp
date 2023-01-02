@@ -8,12 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <ProjectReference Include="..\WalletConnectSharp.Network\WalletConnectSharp.Network.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core Modules\WalletConnectSharp.Crypto\WalletConnectSharp.Crypto.csproj" />
-      <ProjectReference Include="..\Core Modules\WalletConnectSharp.Network.Websocket\WalletConnectSharp.Network.Websocket.csproj" />
+      <PackageReference Include="Websocket.Client" Version="4.4.43" />
     </ItemGroup>
 
 </Project>

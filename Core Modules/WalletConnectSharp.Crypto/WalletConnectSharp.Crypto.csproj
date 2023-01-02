@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.1</TargetFrameworks>
+        <PackageVersion>2.0.0-rc.1</PackageVersion>
+        <AssemblyVersion>2.0.0</AssemblyVersion>
+        <FileVersion>2.0.0</FileVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\WalletConnectSharp.Common\WalletConnectSharp.Common.csproj" />
+      <ProjectReference Include="..\WalletConnectSharp.Network\WalletConnectSharp.Network.csproj" />
+      <ProjectReference Include="..\WalletConnectSharp.Storage\WalletConnectSharp.Storage.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BouncyCastle.Cryptography" Version="2.0.0" />
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.24.0" />
+    </ItemGroup>
+
+</Project>
