@@ -80,6 +80,10 @@ namespace WalletConnectSharp.Events
             }
         }
 
+        /// <summary>
+        /// Clear an eventId from the mapping
+        /// </summary>
+        /// <param name="eventId">The eventId to clear</param>
         public void Clear(string eventId)
         {
             lock (_mappingLock)

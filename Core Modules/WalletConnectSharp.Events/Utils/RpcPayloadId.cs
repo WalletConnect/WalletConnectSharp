@@ -11,6 +11,10 @@ namespace WalletConnectSharp.Events.Utils
         private static readonly DateTime UnixEpoch =
             new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         
+        /// <summary>
+        /// Generate a new random JSON-RPC id. The clock is used as a source of randomness
+        /// </summary>
+        /// <returns>A random JSON-RPC id</returns>
         public static long Generate()
         {
             var date = (long)((DateTime.UtcNow - UnixEpoch).TotalMilliseconds) * (10L * 10L * 10L);

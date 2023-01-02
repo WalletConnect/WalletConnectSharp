@@ -24,10 +24,20 @@ namespace WalletConnectSharp.Events
         public string Name { get; private set; }
         public string Context { get; private set; }
 
+        /// <summary>
+        /// Create a new EventDelegator. This will create an isolated module
+        /// as a context for all event listeners
+        /// </summary>
         public EventDelegator() : this(new IsolatedModule())
         {
         }
 
+        /// <summary>
+        /// Create a new EventDelegator, using a module's context to store
+        /// all event listeners
+        /// </summary>
+        /// <param name="parent">The module to grab context from</param>
+        /// <exception cref="ArgumentException">If this module's context is already being used by EventDelegator</exception>
         public EventDelegator(IModule parent)
         {
             this.Name = parent + ":event-delegator";

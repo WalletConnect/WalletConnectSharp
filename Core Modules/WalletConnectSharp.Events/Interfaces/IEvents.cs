@@ -8,6 +8,9 @@ namespace WalletConnectSharp.Events.Interfaces
     /// </summary>
     public interface IEvents
     {
+        /// <summary>
+        /// The EventDelegator that should be used to listen to (or trigger) events
+        /// </summary>
         EventDelegator Events { get; }
     }
 }
