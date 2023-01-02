@@ -74,14 +74,11 @@ namespace WalletConnectSharp.Network.Models
             }
         }
 
+        /// <summary>
+        /// Create a blank Json RPC payload
+        /// </summary>
         public JsonRpcPayload()
         {
-        }
-
-        public JsonRpcPayload(long id, string jsonRpc)
-        {
-            Id = id;
-            JsonRPC = jsonRpc;
         }
     }
 }

@@ -29,6 +29,13 @@ namespace WalletConnectSharp.Network.Models
         [JsonProperty("data")]
         public string Data;
 
+        /// <summary>
+        /// Create an ErrorResponse with a given ErrorType and (optional) parameters
+        /// </summary>
+        /// <param name="type">The error type of the ErrorResponse to create</param>
+        /// <param name="params">Extra parameters for the error message</param>
+        /// <param name="extraData">Extra data that is stored in the Data field of the newly created ErrorResponse</param>
+        /// <returns>A new ErrorResponse</returns>
         public static ErrorResponse FromErrorType(ErrorType type, object @params = null, string extraData = null)
         {
             string message = SdkErrors.MessageFromType(type, @params);
@@ -41,6 +48,11 @@ namespace WalletConnectSharp.Network.Models
             };
         }
 
+        /// <summary>
+        /// Create an ErrorResponse from a WalletConnectException
+        /// </summary>
+        /// <param name="walletConnectException">The exception to grab error values from</param>
+        /// <returns>A new ErrorResponse object using values from the given exception</returns>
         public static ErrorResponse FromException(WalletConnectException walletConnectException)
         {
             return new ErrorResponse()
@@ -51,6 +63,10 @@ namespace WalletConnectSharp.Network.Models
             };
         }
 
+        /// <summary>
+        /// Convert this ErrorResponse to a WalletConnectException
+        /// </summary>
+        /// <returns>A new WalletConnectException using values from this ErrorResponse</returns>
         public WalletConnectException ToException()
         {
             return WalletConnectException.FromType((ErrorType)Code, Message);

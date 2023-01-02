@@ -12,16 +12,7 @@ namespace WalletConnectSharp.Network
         /// Gets the current IJsonRpcConnection this provider is using
         /// </summary>
         IJsonRpcConnection Connection { get; }
-        
-        /// <summary>
-        /// Connect this provider with the given generic connection parameters. How the parameters are decoded is dependent
-        /// on the implementation
-        /// </summary>
-        /// <param name="params">The connection parameters</param>
-        /// <typeparam name="T">The type of the connection parameters</typeparam>
-        /// <returns>A task that is establishing the connection</returns>
-        Task Connect<T>(T @params);
-        
+
         /// <summary>
         /// Connect this provider using already defined connection parameters.
         /// </summary>

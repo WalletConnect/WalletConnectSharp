@@ -2,6 +2,9 @@ using System.Text.RegularExpressions;
 
 namespace WalletConnectSharp.Network
 {
+    /// <summary>
+    /// A helper class to aid in validation
+    /// </summary>
     public static class Validation
     {
         /// <summary>

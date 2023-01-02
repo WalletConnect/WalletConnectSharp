@@ -23,6 +23,9 @@ namespace WalletConnectSharp.Network
         private TaskCompletionSource<bool> Connecting = new TaskCompletionSource<bool>();
         private long _lastId;
 
+        /// <summary>
+        /// Whether the provider is currently connecting or not
+        /// </summary>
         public bool IsConnecting
         {
             get
@@ -31,6 +34,9 @@ namespace WalletConnectSharp.Network
             }
         }
         
+        /// <summary>
+        /// The current Connection for this provider
+        /// </summary>
         public IJsonRpcConnection Connection
         {
             get
@@ -39,6 +45,9 @@ namespace WalletConnectSharp.Network
             }
         }
 
+        /// <summary>
+        /// The name of this provider module
+        /// </summary>
         public string Name
         {
             get
@@ -47,6 +56,9 @@ namespace WalletConnectSharp.Network
             }
         }
 
+        /// <summary>
+        /// The context string of this provider module
+        /// </summary>
         public string Context
         {
             get
@@ -56,6 +68,9 @@ namespace WalletConnectSharp.Network
             }
         }
 
+        /// <summary>
+        /// The EventDelegator this provider is using for events
+        /// </summary>
         public EventDelegator Events
         {
             get
@@ -64,6 +79,10 @@ namespace WalletConnectSharp.Network
             }
         }
 
+        /// <summary>
+        /// Create a new JsonRpcProvider with the given connection
+        /// </summary>
+        /// <param name="connection">The IJsonRpcConnection to use</param>
         public JsonRpcProvider(IJsonRpcConnection connection)
         {
             _context = Guid.NewGuid();
@@ -75,6 +94,10 @@ namespace WalletConnectSharp.Network
             }
         }
 
+        /// <summary>
+        /// Connect this provider using the given connection string
+        /// </summary>
+        /// <param name="connection">The connection string to use to connect, usually a URI</param>
         public async Task Connect(string connection)
         {
             if (this._connection.Connected)
@@ -90,6 +113,10 @@ namespace WalletConnectSharp.Network
             FinalizeConnection(this._connection);
         }
 
+        /// <summary>
+        /// Connect this provider with the given IJsonRpcConnection connection
+        /// </summary>
+        /// <param name="connection">The connection object to use to connect</param>
         public async Task Connect(IJsonRpcConnection connection)
         {
             if (this._connection == connection && connection.Connected) return;
@@ -116,30 +143,20 @@ namespace WalletConnectSharp.Network
             _connectingStarted = false;
         }
 
-        public async Task Connect<T>(T @params)
-        {
-            if (typeof(string).IsAssignableFrom(typeof(T)))
-            {
-                await Connect(@params as string);
-                return;
-            }
-
-            if (typeof(IJsonRpcConnection).IsAssignableFrom(typeof(T)))
-            {
-                await Connect(@params as IJsonRpcConnection);
-                return;
-            }
-
-            await _connection.Open(@params);
-            
-            FinalizeConnection(_connection);
-        }
-
+        /// <summary>
+        /// Connect this provider using the backing IJsonRpcConnection that was set in the
+        /// constructor
+        /// </summary>
         public async Task Connect()
         {
+            if (_connection == null)
+                throw new Exception("No connection is set");
             await Connect(_connection);
         }
 
+        /// <summary>
+        /// Disconnect this provider
+        /// </summary>
         public async Task Disconnect()
         {
             await _connection.Close();
@@ -147,6 +164,15 @@ namespace WalletConnectSharp.Network
             Connecting = new TaskCompletionSource<bool>();
         }
 
+        /// <summary>
+        /// Send a request and wait for a response. The response is returned as a task and can
+        /// be awaited
+        /// </summary>
+        /// <param name="requestArgs">The request arguments to send</param>
+        /// <param name="context">The context to use during sending</param>
+        /// <typeparam name="T">The type of request arguments</typeparam>
+        /// <typeparam name="TR">The type of the response</typeparam>
+        /// <returns>A Task that will resolve when a response is received</returns>
         public async Task<TR> Request<T, TR>(IRequestArguments<T> requestArgs, object context = null)
         {
             if (IsConnecting)
