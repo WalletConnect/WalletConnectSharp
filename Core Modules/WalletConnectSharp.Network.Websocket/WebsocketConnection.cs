@@ -1,7 +1,4 @@
-using System;
-using System.IO;
 using System.Net.WebSockets;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Utils;
@@ -21,10 +18,16 @@ namespace WalletConnectSharp.Network.Websocket
         private WebsocketClient _socket;
         private string _url;
         private bool _registering;
-        public Guid _context;
+        private Guid _context;
 
+        /// <summary>
+        /// The Open timeout
+        /// </summary>
         public TimeSpan OpenTimeout = TimeSpan.FromSeconds(60);
 
+        /// <summary>
+        /// The Url to connect to
+        /// </summary>
         public string Url
         {
             get
@@ -33,6 +36,9 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// The name of this websocket connection module
+        /// </summary>
         public string Name
         {
             get
@@ -41,6 +47,9 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// The context string of this Websocket module
+        /// </summary>
         public string Context
         {
             get
@@ -49,6 +58,9 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// The EventDelegator this Websocket connection module is using
+        /// </summary>
         public EventDelegator Events
         {
             get
@@ -57,6 +69,9 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
         
+        /// <summary>
+        /// Whether this websocket connection is connected
+        /// </summary>
         public bool Connected
         {
             get
@@ -65,6 +80,9 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// Whether this websocket connection is currently connecting
+        /// </summary>
         public bool Connecting
         {
             get
@@ -73,6 +91,11 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// Create a new websocket connection that will connect to the given URL
+        /// </summary>
+        /// <param name="url">The URL to connect to</param>
+        /// <exception cref="ArgumentException">If the given URL is invalid</exception>
         public WebsocketConnection(string url)
         {
             if (!Validation.IsWsUrl(url))
@@ -83,11 +106,19 @@ namespace WalletConnectSharp.Network.Websocket
             _delegator = new EventDelegator(this);
         }
 
+        /// <summary>
+        /// Open this connection
+        /// </summary>
         public async Task Open()
         {
             await Register(_url);
         }
 
+        /// <summary>
+        /// Open this connection using a string url
+        /// </summary>
+        /// <param name="options">Must be a string url. If any other type, then normal Open() is invoked</param>
+        /// <typeparam name="T">The type of the options. Should always be string</typeparam>
         public async Task Open<T>(T options)
         {
             if (typeof(string).IsAssignableFrom(typeof(T)))
@@ -195,6 +226,10 @@ namespace WalletConnectSharp.Network.Websocket
             Events.Trigger(WebsocketConnectionEvents.Payload, json);
         }
 
+        /// <summary>
+        /// Close this connection
+        /// </summary>
+        /// <exception cref="IOException">If this connection was already closed</exception>
         public async Task Close()
         {
             if (_socket == null)
@@ -205,6 +240,12 @@ namespace WalletConnectSharp.Network.Websocket
             OnClose(new DisconnectionInfo(DisconnectionType.Exit, WebSocketCloseStatus.Empty, "Close Invoked", null, null));
         }
 
+        /// <summary>
+        /// Send a Json RPC request through this websocket connection, using the given context
+        /// </summary>
+        /// <param name="requestPayload">The request payload to encode and send</param>
+        /// <param name="context">The context to use when sending</param>
+        /// <typeparam name="T">The type of the Json RPC request parameter</typeparam>
         public async Task SendRequest<T>(IJsonRpcRequest<T> requestPayload, object context)
         {
             if (_socket == null)
@@ -220,6 +261,12 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// Send a Json RPC response through this websocket connection, using the given context
+        /// </summary>
+        /// <param name="requestPayload">The response payload to encode and send</param>
+        /// <param name="context">The context to use when sending</param>
+        /// <typeparam name="T">The type of the Json RPC response result</typeparam>
         public async Task SendResult<T>(IJsonRpcResult<T> requestPayload, object context)
         {
             if (_socket == null)
@@ -235,6 +282,11 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// Send a Json RPC error response through this websocket connection, using the given context
+        /// </summary>
+        /// <param name="requestPayload">The error response payload to encode and send</param>
+        /// <param name="context">The context to use when sending</param>
         public async Task SendError(IJsonRpcError requestPayload, object context)
         {
             if (_socket == null)
@@ -250,6 +302,10 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        /// <summary>
+        /// Dispose this websocket connection. Will automatically Close this
+        /// websocket if still connected.
+        /// </summary>
         public async void Dispose()
         {
             if (Connected)
