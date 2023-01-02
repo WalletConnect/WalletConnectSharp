@@ -6,8 +6,16 @@ using System.Text.RegularExpressions;
 
 namespace WalletConnectSharp.Common.Utils
 {
+    /// <summary>
+    /// A helper class for URLs
+    /// </summary>
     public static class UrlUtils
     {
+        /// <summary>
+        /// Parse query strings encoded parameters and return a NameValueCollection
+        /// </summary>
+        /// <param name="queryString">The query string to parse</param>
+        /// <returns>The NameValueCollection containing all parameters in the query parameter</returns>
         public static NameValueCollection ParseQs(string queryString)
         {
             return Regex.Matches(queryString, "([^?=&]+)(=([^&]*))?")
@@ -19,6 +27,11 @@ namespace WalletConnectSharp.Common.Utils
                 });
         }
 
+        /// <summary>
+        /// Convert a NameValueCollection to a query string
+        /// </summary>
+        /// <param name="params">The NameValueCollection to convert to a query string</param>
+        /// <returns>A query string containing all parameters from the NameValueCollection</returns>
         public static string StringifyQs(NameValueCollection @params)
         {
             StringBuilder sb = new StringBuilder();

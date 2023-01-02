@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace WalletConnectSharp.Common.Model
 {
+    /// <summary>
+    /// A mock module that represents nothing. Useful for creating an empty
+    /// context
+    /// </summary>
     public sealed class IsolatedModule : IModule
     {
         private static HashSet<Guid> activeModules = new HashSet<Guid>();

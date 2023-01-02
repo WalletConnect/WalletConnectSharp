@@ -2,9 +2,22 @@ using System;
 
 namespace WalletConnectSharp.Common.Utils
 {
+    /// <summary>
+    /// A helper class for generating the relay url for WalletConnect relay servers
+    /// </summary>
     public static class RelayUrl
     {
-        public static string FormatRelayRpcUrl(string protocol, string version, string relayUrl, string sdkVersion,
+        /// <summary>
+        /// Populate the relayUrl parameters with the other parameters as query parameters
+        /// </summary>
+        /// <param name="relayUrl">The relay URL to populate</param>
+        /// <param name="protocol">The protocol string being used</param>
+        /// <param name="version">The protocol version being used</param>
+        /// <param name="sdkVersion">The SDK version being used</param>
+        /// <param name="projectId">The project Id being used</param>
+        /// <param name="auth">The auth code</param>
+        /// <returns>The relay URL with the given parameters encoded as url-encoding</returns>
+        public static string FormatRelayRpcUrl(string relayUrl, string protocol, string version, string sdkVersion,
             string projectId, string auth)
         {
             var splitUrl = relayUrl.Split("?");
@@ -21,6 +34,13 @@ namespace WalletConnectSharp.Common.Utils
             return splitUrl[0] + formattedParameters;
         }
         
+        /// <summary>
+        /// Format the user agent and attach it to the url parameter
+        /// </summary>
+        /// <param name="protocol">The protocol being used</param>
+        /// <param name="version">The protocol version being used</param>
+        /// <param name="sdkVersion">The SDK version being used</param>
+        /// <returns>The URL parameters given with additional user-agent data attached</returns>
         public static string FormatUA(string protocol, string version, string sdkVersion)
         {
             var os = Environment.OSVersion.Platform.ToString();
@@ -29,7 +49,7 @@ namespace WalletConnectSharp.Common.Utils
             var osInfo = string.Join("-", os, osVersion);
             var environment = "WalletConnectSharpv2:" + Environment.Version;
 
-            var sdkType = "C#";
+            var sdkType = "csharp";
 
             return string.Join("/", string.Join("-", protocol, version), string.Join("-", sdkType, sdkVersion), osInfo,
                 environment);

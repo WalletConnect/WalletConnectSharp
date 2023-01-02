@@ -6,10 +6,23 @@ using System.Web;
 
 namespace WalletConnectSharp.Common.Utils
 {
+    /// <summary>
+    /// General purpose extension methods
+    /// </summary>
     public static class Extensions
     {
+        /// <summary>
+        /// Convert an anonymous type to a Dictionary
+        /// </summary>
+        /// <param name="obj">The anonymous type instance to convert to a dictionary</param>
+        /// <param name="enforceLowercase">Enforce all keys to be lowercased</param>
+        /// <returns>A dictionary where each key is the property name of the anonymous type
+        /// and each value is the property's value</returns>
         public static Dictionary<string, object> AsDictionary(this object obj, bool enforceLowercase = true)
         {
+            if (obj is Dictionary<string, object> objects)
+                return objects;
+            
             var dict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             if (obj != null)
@@ -26,6 +39,11 @@ namespace WalletConnectSharp.Common.Utils
             return dict;
         }
         
+        /// <summary>
+        /// Returns true if the given object is a numeric type
+        /// </summary>
+        /// <param name="o">The object to check</param>
+        /// <returns>Returns true if the object has a numeric type</returns>
         public static bool IsNumericType(this object o)
         {   
             switch (Type.GetTypeCode(o.GetType()))
@@ -44,6 +62,13 @@ namespace WalletConnectSharp.Common.Utils
             }
         }
         
+        /// <summary>
+        /// Add a query parameter to the given source string
+        /// </summary>
+        /// <param name="source">The source string to add the generated query parameter to</param>
+        /// <param name="key">The key of the query parameter</param>
+        /// <param name="value">The value of the query parameter</param>
+        /// <returns>The original source string with the generated query parameter appended</returns>
         public static string AddQueryParam(
             this string source, string key, string value)
         {

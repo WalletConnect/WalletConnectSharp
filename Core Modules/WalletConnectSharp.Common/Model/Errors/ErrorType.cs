@@ -1,5 +1,9 @@
 namespace WalletConnectSharp.Common.Model.Errors
 {
+    /// <summary>
+    /// The ErrorType is an enum of error codes defined by
+    /// their name
+    /// </summary>
     public enum ErrorType : uint
     {
         // 0 (Generic)

@@ -4,11 +4,30 @@ using Newtonsoft.Json;
 
 namespace WalletConnectSharp.Common.Model.Relay
 {
+    /// <summary>
+    /// A class that defines the different RPC methods for a
+    /// given pub/sub protocol
+    /// </summary>
     public abstract class RelayProtocols
     {
+        /// <summary>
+        /// The default protocol as a string
+        /// </summary>
         public static readonly string Default = "irn";
+        
+        /// <summary>
+        /// The Waku protocol definitions
+        /// </summary>
         public static RelayProtocols Waku = new WakuRelayProtocol();
+        
+        /// <summary>
+        /// The Irn protocol definitions
+        /// </summary>
         public static RelayProtocols Irn = new IrnRelayProtocol();
+        
+        /// <summary>
+        /// The Iridium protocol definitions
+        /// </summary>
         public static RelayProtocols Iridium = new IridiumRelayProtocol();
         
         private static Dictionary<string, RelayProtocols> _protocols = new Dictionary<string, RelayProtocols>()
@@ -18,8 +37,17 @@ namespace WalletConnectSharp.Common.Model.Relay
             { "iridium", Iridium },
         };
 
+        /// <summary>
+        /// A mapping of protocol names => Protocol Definitions
+        /// </summary>
         public static IReadOnlyDictionary<string, RelayProtocols> Protocols => _protocols;
 
+        /// <summary>
+        /// Get protocol definitions by the protocol's name
+        /// </summary>
+        /// <param name="protocol">The protocol name to get definitions for</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">The protocol doesn't exist</exception>
         public static RelayProtocols GetRelayProtocol(string protocol)
         {
             if (Protocols.ContainsKey(protocol))
@@ -28,18 +56,34 @@ namespace WalletConnectSharp.Common.Model.Relay
             throw new ArgumentException("Relay Protocol not supported: " + protocol);
         }
         
+        /// <summary>
+        /// The Publish action RPC method name
+        /// </summary>
         [JsonProperty("publish")]
         public abstract string Publish { get; }
         
+        /// <summary>
+        /// The Subscribe action RPC method name
+        /// </summary>
         [JsonProperty("subscribe")]
         public abstract string Subscribe { get; }
         
+        /// <summary>
+        /// The Subscription action RPC method name
+        /// </summary>
         [JsonProperty("subscription")]
         public abstract string Subscription { get; }
         
+        /// <summary>
+        /// The Unsubscribe action RPC method name
+        /// </summary>
         [JsonProperty("unsubscribe")]
         public abstract string Unsubscribe { get; }
 
+        /// <summary>
+        /// A class that defines all RelayProtocol definitions for the
+        /// Waku protocol
+        /// </summary>
         public class WakuRelayProtocol : RelayProtocols
         {
             public override string Publish
@@ -75,6 +119,10 @@ namespace WalletConnectSharp.Common.Model.Relay
             }
         }
 
+        /// <summary>
+        /// A class that defines all RelayProtocol definitions for the
+        /// Irn protocol
+        /// </summary>
         public class IrnRelayProtocol : RelayProtocols
         {
             public override string Publish
@@ -110,6 +158,10 @@ namespace WalletConnectSharp.Common.Model.Relay
             }
         }
 
+        /// <summary>
+        /// A class that defines all RelayProtocol definitions for the
+        /// Iridium protocol
+        /// </summary>
         public class IridiumRelayProtocol : RelayProtocols
         {
             public override string Publish

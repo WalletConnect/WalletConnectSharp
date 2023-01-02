@@ -3,6 +3,10 @@ using WalletConnectSharp.Common.Utils;
 
 namespace WalletConnectSharp.Common.Model.Errors
 {
+    /// <summary>
+    /// A helper class for generating error messages
+    /// based on an ErrorType
+    /// </summary>
     public static class SdkErrors
     {
         private static readonly Dictionary<string, object> DefaultParameters = new Dictionary<string, object>()
@@ -14,11 +18,28 @@ namespace WalletConnectSharp.Common.Model.Errors
             {"blockchain", "Ethereum"}
         };
 
+        /// <summary>
+        /// Generate an error message using an ErrorType code and a dictionary
+        /// of parameters for the error message
+        /// An anonymous type can also be passed, which will be converted to a
+        /// dictionary
+        /// </summary>
+        /// <param name="type">The error type message to generate</param>
+        /// <param name="params">A dictionary (or anonymous type) of parameters for the error message</param>
+        /// <returns>The error message as a string</returns>
         public static string MessageFromType(ErrorType type, object @params = null)
         {
             return MessageFromType(type, null, @params.AsDictionary());
         }
         
+        /// <summary>
+        /// Generate an error message using an ErrorType code, a message parameters
+        /// and a dictionary of parameters for the error message
+        /// </summary>
+        /// <param name="type">The error type message to generate</param>
+        /// <param name="message">The message parameter</param>
+        /// <param name="params">A dictionary of parameters for the error message</param>
+        /// <returns>The error message as a string</returns>
         public static string MessageFromType(ErrorType type, string message = null, Dictionary<string, object> @params = null)
         {
             if (@params == null)
