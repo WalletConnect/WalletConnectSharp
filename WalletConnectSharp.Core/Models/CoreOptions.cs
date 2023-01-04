@@ -8,12 +8,10 @@ namespace WalletConnectSharp.Core.Models
     {
         [JsonProperty("projectId")]
         public string ProjectId { get; set; }
-        
-        
+
         [JsonProperty("name")]
         public string Name { get; set; }
-        
-        
+
         [JsonProperty("relayUrl")]
         public string RelayUrl { get; set; }
         

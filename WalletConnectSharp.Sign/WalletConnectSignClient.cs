@@ -112,12 +112,12 @@ namespace WalletConnectSharp.Sign
             Engine = new Engine(this);
         }
 
-        public Task<ConnectedData> Connect(ConnectParams @params)
+        public Task<ConnectedData> Connect(ConnectOptions options)
         {
-            return Engine.Connect(@params);
+            return Engine.Connect(options);
         }
 
-        public Task<PendingPairing> Pair(string uri)
+        public Task<ProposalStruct> Pair(string uri)
         {
             return Pair(new PairParams()
             {
@@ -125,7 +125,7 @@ namespace WalletConnectSharp.Sign
             });
         }
 
-        public Task<PendingPairing> Pair(PairParams pairParams)
+        public Task<ProposalStruct> Pair(PairParams pairParams)
         {
             return Engine.Pair(pairParams);
         }

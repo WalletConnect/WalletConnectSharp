@@ -29,7 +29,7 @@ namespace WalletConnectSharp.Examples
 
             var client = await WalletConnectSignClient.Init(options);
 
-            var connectData = await client.Connect(new ConnectParams()
+            var connectData = await client.Connect(new ConnectOptions()
             {
                 RequiredNamespaces = new RequiredNamespaces()
                 {

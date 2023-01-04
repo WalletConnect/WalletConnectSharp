@@ -25,14 +25,14 @@ namespace WalletConnectSharp.Sign
             }
         }
         
-        async Task IEnginePrivate.IsValidConnect(ConnectParams @params)
+        async Task IEnginePrivate.IsValidConnect(ConnectOptions options)
         {
-            if (@params == null)
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"Connect() params: {JsonConvert.SerializeObject(@params)}");
+            if (options == null)
+                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"Connect() params: {JsonConvert.SerializeObject(options)}");
 
-            var pairingTopic = @params.PairingTopic;
-            var requiredNamespaces = @params.RequiredNamespaces;
-            var relays = @params.Relays;
+            var pairingTopic = options.PairingTopic;
+            var requiredNamespaces = options.RequiredNamespaces;
+            var relays = options.Relays;
 
             if (pairingTopic != null)
                 await IsValidPairingTopic(pairingTopic);

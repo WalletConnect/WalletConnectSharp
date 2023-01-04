@@ -61,7 +61,7 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task OnSessionEventRequest<T>(string topic, JsonRpcRequest<SessionEvent<T>> payload);
 
-        internal Task IsValidConnect(ConnectParams @params);
+        internal Task IsValidConnect(ConnectOptions options);
 
         internal Task IsValidPair(PairParams pairParams);
 

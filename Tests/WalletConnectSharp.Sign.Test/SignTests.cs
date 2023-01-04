@@ -53,7 +53,7 @@ namespace WalletConnectSharp.Sign.Test
             await _cryptoFixture.WaitForClientsReady();
             
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-            var dappConnectOptions = new ConnectParams()
+            var dappConnectOptions = new ConnectOptions()
             {
                 RequiredNamespaces = new RequiredNamespaces()
                 {
@@ -85,12 +85,10 @@ namespace WalletConnectSharp.Sign.Test
             var connectData = await dappClient.Connect(dappConnectOptions);
 
             var walletClient = ClientB;
-            var pairing = await walletClient.Pair(new PairParams()
+            var proposal = await walletClient.Pair(new PairParams()
             {
                 Uri = connectData.Uri
             });
-
-            var proposal = await pairing.FetchProposal;
 
             var approveData = await walletClient.Approve(proposal, testAddress);
 
@@ -104,7 +102,7 @@ namespace WalletConnectSharp.Sign.Test
             await _cryptoFixture.WaitForClientsReady();
             
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-            var dappConnectOptions = new ConnectParams()
+            var dappConnectOptions = new ConnectOptions()
             {
                 RequiredNamespaces = new RequiredNamespaces()
                 {
@@ -136,12 +134,7 @@ namespace WalletConnectSharp.Sign.Test
             var connectData = await dappClient.Connect(dappConnectOptions);
 
             var walletClient = ClientB;
-            var pairing = await walletClient.Pair(new PairParams()
-            {
-                Uri = connectData.Uri
-            });
-
-            var proposal = await pairing.FetchProposal;
+            var proposal = await walletClient.Pair(connectData.Uri);
 
             await walletClient.Reject(proposal);
 
@@ -156,7 +149,7 @@ namespace WalletConnectSharp.Sign.Test
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
             var testMethod = "test_method";
             
-            var dappConnectOptions = new ConnectParams()
+            var dappConnectOptions = new ConnectOptions()
             {
                 RequiredNamespaces = new RequiredNamespaces()
                 {
@@ -184,12 +177,7 @@ namespace WalletConnectSharp.Sign.Test
             var connectData = await dappClient.Connect(dappConnectOptions);
 
             var walletClient = ClientB;
-            var pairing = await walletClient.Pair(new PairParams()
-            {
-                Uri = connectData.Uri
-            });
-
-            var proposal = await pairing.FetchProposal;
+            var proposal = await walletClient.Pair(connectData.Uri);
 
             var approveData = await walletClient.Approve(proposal, testAddress);
 

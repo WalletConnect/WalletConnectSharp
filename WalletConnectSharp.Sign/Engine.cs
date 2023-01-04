@@ -10,6 +10,7 @@ using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events;
+using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
@@ -20,13 +21,13 @@ using WalletConnectSharp.Sign.Models.Expirer;
 
 namespace WalletConnectSharp.Sign
 {
-    public partial class Engine : IEnginePrivate, IEngine, IModule
+    public partial class Engine : IEnginePrivate, IEngine, IModule, IEvents
     {
         private const long ProposalExpiry = Clock.THIRTY_DAYS;
         private const long SessionExpiry = Clock.SEVEN_DAYS;
         private const int KeyLength = 32;
         
-        private EventDelegator Events;
+        public EventDelegator Events { get; }
 
         private bool _initialized = false;
         
@@ -760,13 +761,13 @@ namespace WalletConnectSharp.Sign
             return result;
         }
 
-        public async Task<ConnectedData> Connect(ConnectParams @params)
+        public async Task<ConnectedData> Connect(ConnectOptions options)
         {
             this.IsInitialized();
-            await PrivateThis.IsValidConnect(@params);
-            var requiredNamespaces = @params.RequiredNamespaces;
-            var relays = @params.Relays;
-            var topic = @params.PairingTopic;
+            await PrivateThis.IsValidConnect(options);
+            var requiredNamespaces = options.RequiredNamespaces;
+            var relays = options.Relays;
+            var topic = options.PairingTopic;
             string uri = "";
             var active = false;
 
@@ -908,7 +909,7 @@ namespace WalletConnectSharp.Sign
         }
 
 
-        public async Task<PendingPairing> Pair(PairParams pairParams)
+        public async Task<ProposalStruct> Pair(PairParams pairParams)
         {
             IsInitialized();
             await PrivateThis.IsValidPair(pairParams);
@@ -926,10 +927,15 @@ namespace WalletConnectSharp.Sign
                 Active = false,
             };
 
-            var pendingPairing = new PendingPairing(Client)
-            {
-                PairingData = pairing
-            };
+            TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
+            
+            this.Once(EngineEvents.SessionProposal,
+                delegate(object sender, GenericEvent<JsonRpcRequest<ProposalStruct>> @event)
+                {
+                    var proposal = @event.EventData.Params;
+                    if (topic == proposal.PairingTopic)
+                        sessionProposeTask.SetResult(proposal);
+                });
 
             await this.Client.Pairing.Set(topic, pairing);
             await this.Client.Core.Crypto.SetSymKey(symKey, topic);
@@ -939,7 +945,7 @@ namespace WalletConnectSharp.Sign
             });
             await PrivateThis.SetExpiry(topic, expiry);
 
-            return pendingPairing;
+            return await sessionProposeTask.Task;
         }
 
         public async Task<IApprovedData> Approve(ApproveParams @params)

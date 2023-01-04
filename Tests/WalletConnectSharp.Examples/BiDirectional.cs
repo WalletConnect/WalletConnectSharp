@@ -29,11 +29,46 @@ namespace WalletConnectSharp.Examples
                     Name = "WalletConnectSharpv2 Dapp Example",
                     Url = "https://walletconnect.com"
                 },
-                // Omit if you want persistant storage
-                Storage = new InMemoryStorage()
+                // Uncomment to disable persistant storage
+                // Storage = new InMemoryStorage()
             };
 
-            var dappConnectOptions = new ConnectParams()
+            var dappConnectOptions1 = new ConnectOptions()
+                .RequireNamespace("eip155", new RequiredNamespace()
+                    .WithMethod("eth_sendTransaction")
+                    .WithMethod("eth_signTransaction")
+                    .WithMethod("eth_sign")
+                    .WithMethod("personal_sign")
+                    .WithMethod("eth_signTypedData")
+                    .WithChain("eip155:1")
+                    .WithEvent("chainChanged")
+                    .WithEvent("accountsChanged")
+                );
+            
+            var dappConnectOptions2 = new ConnectOptions()
+                .RequireNamespace("eip155", new RequiredNamespace()
+                    {
+                        Methods = new[]
+                        {
+                            "eth_sendTransaction",
+                            "eth_signTransaction",
+                            "eth_sign",
+                            "personal_sign",
+                            "eth_signTypedData",
+                        },
+                        Chains = new[]
+                        {
+                            "eip155:1"
+                        },
+                        Events = new[]
+                        {
+                            "chainChanged", 
+                            "accountsChanged",
+                        }
+                    }
+                );
+            
+            var dappConnectOptions = new ConnectOptions()
             {
                 RequiredNamespaces = new RequiredNamespaces()
                 {
@@ -54,7 +89,8 @@ namespace WalletConnectSharp.Examples
                             },
                             Events = new[]
                             {
-                                "chainChanged", "accountsChanged"
+                                "chainChanged", 
+                                "accountsChanged",
                             }
                         }
                     }
@@ -80,12 +116,10 @@ namespace WalletConnectSharp.Examples
 
             var walletClient = await WalletConnectSignClient.Init(walletOptions);
 
-            var pairing = await walletClient.Pair(new PairParams()
+            var proposal = await walletClient.Pair(new PairParams()
             {
                 Uri = connectData.Uri
             });
-
-            var proposal = await pairing.FetchProposal;
 
             var approveData = await walletClient.Approve(proposal.ApproveProposal(testAddress));
 

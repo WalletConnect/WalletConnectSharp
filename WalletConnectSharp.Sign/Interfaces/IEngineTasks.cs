@@ -6,9 +6,9 @@ namespace WalletConnectSharp.Sign.Interfaces
 {
     public interface IEngineTasks
     {
-        Task<ConnectedData> Connect(ConnectParams @params);
+        Task<ConnectedData> Connect(ConnectOptions options);
 
-        Task<PendingPairing> Pair(PairParams pairParams);
+        Task<ProposalStruct> Pair(PairParams pairParams);
 
         Task<IApprovedData> Approve(ApproveParams @params);
 
