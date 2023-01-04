@@ -16,12 +16,25 @@ using WalletConnectSharp.Network.Websocket;
 
 namespace WalletConnectSharp.Core.Controllers
 {
+    /// <summary>
+    /// The Relayer module handles the interaction with the WalletConnect relayer server.
+    /// Each Relayer module uses a Publisher, Subscriber and a JsonRPCProvider.
+    /// </summary>
     public class Relayer : IRelayer
     {
+        /// <summary>
+        /// The default relay server URL used when no relay URL is given
+        /// </summary>
         public static readonly string DEFAULT_RELAY_URL = "wss://relay.walletconnect.com/";
         
+        /// <summary>
+        /// The EventDelegaor this Relayer module is using
+        /// </summary>
         public EventDelegator Events { get; }
 
+        /// <summary>
+        /// The Name of this Relayer module
+        /// </summary>
         public string Name
         {
             get
@@ -30,6 +43,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The context string this Relayer module is using
+        /// </summary>
         public string Context
         {
             get
@@ -38,19 +54,50 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The ICore module that is using this Relayer module
+        /// </summary>
         public ICore Core { get; }
+        
+        /// <summary>
+        /// The ISubscriber module that this Relayer module is using
+        /// </summary>
         public ISubscriber Subscriber { get; }
+        
+        /// <summary>
+        /// The IPublisher module that this Relayer module is using
+        /// </summary>
         public IPublisher Publisher { get; }
+        
+        /// <summary>
+        /// The IMessageTracker module that this Relayer module is using
+        /// </summary>
         public IMessageTracker Messages { get; }
+        
+        /// <summary>
+        /// The IJsonRpcProvider module that this Relayer module is using
+        /// </summary>
         public IJsonRpcProvider Provider { get; private set; }
         
+        /// <summary>
+        /// Whether this Relayer is connected
+        /// </summary>
         public bool Connected { get; }
+        
+        /// <summary>
+        /// Whether this Relayer is currently connecting
+        /// </summary>
         public bool Connecting { get; }
         
         private string relayUrl;
         private string projectId;
         private bool initialized;
         
+        /// <summary>
+        /// Create a new Relayer with the given RelayerOptions.
+        /// </summary>
+        /// <param name="opts">The options that must be specified. This includes the ICore module
+        /// using this module, the RelayURL (optional) and the project Id</param>
         public Relayer(RelayerOptions opts)
         {
             Core = opts.Core;
@@ -68,6 +115,10 @@ namespace WalletConnectSharp.Core.Controllers
             projectId = opts.ProjectId;
         }
         
+        /// <summary>
+        /// Initialize this Relayer module. This will initialize all sub-modules
+        /// and connect the backing IJsonRpcProvider.
+        /// </summary>
         public async Task Init()
         {
             var auth = await this.Core.Crypto.SignJwt(this.relayUrl);
@@ -176,6 +227,13 @@ namespace WalletConnectSharp.Core.Controllers
             await Provider.Connection.SendResult(response, this);
         }
 
+        /// <summary>
+        /// Publish a message to this Relayer in the given topic (optionally) specifying
+        /// PublishOptions.
+        /// </summary>
+        /// <param name="topic">The topic to publish the message in</param>
+        /// <param name="message">The message to publish</param>
+        /// <param name="opts">(Optional) Publish options to specify TTL, Prompt, tag, etc..</param>
         public async Task Publish(string topic, string message, PublishOptions opts = null)
         {
             IsInitialized();
@@ -187,12 +245,24 @@ namespace WalletConnectSharp.Core.Controllers
             });
         }
 
+        /// <summary>
+        /// Subscribe to a given topic optionally specifying Subscribe options
+        /// </summary>
+        /// <param name="topic">The topic to subscribe to</param>
+        /// <param name="opts">(Optional) Subscribe options that specify protocol options</param>
+        /// <returns></returns>
         public Task<string> Subscribe(string topic, SubscribeOptions opts = null)
         {
             IsInitialized();
             return Subscriber.Subscribe(topic, opts);
         }
 
+        /// <summary>
+        /// Unsubscribe to a given topic optionally specify unsubscribe options
+        /// </summary>
+        /// <param name="topic">Tbe topic to unsubscribe to</param>
+        /// <param name="opts">(Optional) Unsubscribe options specifying protocol options</param>
+        /// <returns></returns>
         public Task Unsubscribe(string topic, UnsubscribeOptions opts = null)
         {
             IsInitialized();

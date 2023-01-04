@@ -14,11 +14,24 @@ using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
 {
+    /// <summary>
+    /// The publisher module is responsible for publishing messages asynchronously. 
+    /// </summary>
     public class Publisher : IPublisher
     {
+        /// <summary>
+        /// The EventDelegator this publisher module is using
+        /// </summary>
         public EventDelegator Events { get; }
+        
+        /// <summary>
+        /// The Relayer this publisher module uses to publish messages
+        /// </summary>
         public IRelayer Relayer { get; }
 
+        /// <summary>
+        /// The name of this publisher module
+        /// </summary>
         public string Name
         {
             get
@@ -27,6 +40,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The context string this publisher module is using
+        /// </summary>
         public string Context
         {
             get
@@ -37,6 +53,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected Dictionary<string, PublishParams> queue = new Dictionary<string, PublishParams>();
 
+        /// <summary>
+        /// Create a new Publisher that uses the given IRelayer to publish messages to
+        /// </summary>
+        /// <param name="relayer">The IRelayer to publish messages to</param>
         public Publisher(IRelayer relayer)
         {
             Relayer = relayer;
@@ -92,6 +112,12 @@ namespace WalletConnectSharp.Core.Controllers
             return this.Relayer.Provider.Request<RelayPublishParams, object>(request, this);
         }
 
+        /// <summary>
+        /// Publish a messages to the given topic, optionally specifying publish options.
+        /// </summary>
+        /// <param name="topic">The topic to send the message in</param>
+        /// <param name="message">The message to send</param>
+        /// <param name="opts">(Optional) publish options specifying things like prompt, TTL, tag, etc..</param>
         public async Task Publish(string topic, string message, PublishOptions opts = null)
         {
             if (opts == null)

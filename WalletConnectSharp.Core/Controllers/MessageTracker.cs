@@ -8,10 +8,20 @@ using WalletConnectSharp.Core.Interfaces;
 
 namespace WalletConnectSharp.Core.Controllers
 {
+    /// <summary>
+    /// The MessageTracker module acts as a data store
+    /// that stores all hashed messages that are sent to a given topic
+    /// </summary>
     public class MessageTracker : IMessageTracker
     {
+        /// <summary>
+        /// The current version of this MessageTracker module
+        /// </summary>
         public static readonly string Version = "0.3";
         
+        /// <summary>
+        /// The name of this MessageTracker module
+        /// </summary>
         public string Name
         {
             get
@@ -20,6 +30,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The context string for this MessageTracker module
+        /// </summary>
         public string Context
         {
             get
@@ -28,6 +41,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The storage key this module will store data in
+        /// </summary>
         public string StorageKey
         {
             get
@@ -38,13 +54,26 @@ namespace WalletConnectSharp.Core.Controllers
 
         private bool initialized;
         private ICore _core;
+        
+        /// <summary>
+        /// A mapping of MessageRecords by a topic string key. Each MessageRecord
+        /// stores a list of hashed messages sent in the topic string key
+        /// </summary>
         public Dictionary<string, MessageRecord> Messages { get; private set; }
 
+        /// <summary>
+        /// Create a new MessageTracker module
+        /// </summary>
+        /// <param name="core">The ICore instance that will use this module</param>
         public MessageTracker(ICore core)
         {
             this._core = core;
         }
         
+        /// <summary>
+        /// Initializes this MessageTracker module. This will load all
+        /// previous MessageRecords from storage.
+        /// </summary>
         public async Task Init()
         {
             if (!initialized)
@@ -60,6 +89,12 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// Set the message from a topic and store it
+        /// </summary>
+        /// <param name="topic">The topic to store the message in</param>
+        /// <param name="message">The message to hash and store</param>
+        /// <returns>The hashed message that was stored</returns>
         public async Task<string> Set(string topic, string message)
         {
             IsInitialized();
@@ -83,6 +118,11 @@ namespace WalletConnectSharp.Core.Controllers
             return hash;
         }
 
+        /// <summary>
+        /// Get all hashed messages stored in a given topic
+        /// </summary>
+        /// <param name="topic">The topic to get hashed messages for</param>
+        /// <returns>All hashed messages stored in the given topic</returns>
         public Task<MessageRecord> Get(string topic)
         {
             IsInitialized();
@@ -90,6 +130,13 @@ namespace WalletConnectSharp.Core.Controllers
             return Task.FromResult(Messages.ContainsKey(topic) ? Messages[topic] : new MessageRecord());
         }
 
+        /// <summary>
+        /// Determine whether a given message has been set before in a given
+        /// topic
+        /// </summary>
+        /// <param name="topic">The topic to look in</param>
+        /// <param name="message">The message to hash and find</param>
+        /// <returns>Returns true if the hashed message has been set in the topic</returns>
         public bool Has(string topic, string message)
         {
             IsInitialized();
@@ -102,6 +149,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         }
 
+        /// <summary>
+        /// Delete a topic and all set hashed messages
+        /// </summary>
+        /// <param name="topic">The topic to delete</param>
         public async Task Delete(string topic)
         {
             IsInitialized();

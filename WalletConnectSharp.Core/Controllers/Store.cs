@@ -9,17 +9,30 @@ using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
 {
+    /// <summary>
+    /// A generic Store module that is capable of storing any key / value of types TKey : TValue
+    /// </summary>
+    /// <typeparam name="TKey">The type of the keys stored</typeparam>
+    /// <typeparam name="TValue">The type of the values stored, the value must contain the key</typeparam>
     public class Store<TKey, TValue> : IStore<TKey, TValue> where TValue : IKeyHolder<TKey>
     {
         private bool initialized;
         private Dictionary<TKey, TValue> map = new Dictionary<TKey, TValue>();
         private TValue[] cached = Array.Empty<TValue>();
+        
+        /// <summary>
+        /// The ICore module using this Store module
+        /// </summary>
         public ICore Core { get; }
         
+        /// <summary>
+        /// The StoragePrefix this Store module will prepend to the storage key
+        /// </summary>
         public string StoragePrefix { get; }
-        
-        public Func<TValue, TKey> GetKey { get; }
 
+        /// <summary>
+        /// The version of this Store module
+        /// </summary>
         public string Version
         {
             get
@@ -27,9 +40,20 @@ namespace WalletConnectSharp.Core.Controllers
                 return "0.3";
             }
         }
+        
+        /// <summary>
+        /// The Name of this Store module
+        /// </summary>
         public string Name { get; }
+        
+        /// <summary>
+        /// The context string of this Store module
+        /// </summary>
         public string Context { get; }
 
+        /// <summary>
+        /// The storage key this Store module will store data in
+        /// </summary>
         public string StorageKey
         {
             get
@@ -38,6 +62,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// How many items this Store module is currently holding
+        /// </summary>
         public int Length
         {
             get
@@ -46,6 +73,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of TKey of all keys in this Store module
+        /// </summary>
         public TKey[] Keys
         {
             get
@@ -54,6 +84,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of TValue of all values in this Store module
+        /// </summary>
         public TValue[] Values
         {
             get
@@ -62,7 +95,13 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
-        public Store(ICore core, string name, string storagePrefix = null, Func<TValue, TKey> getKey = null)
+        /// <summary>
+        /// Create a new Store module with the given ICore, name, and storagePrefix.
+        /// </summary>
+        /// <param name="core">The ICore module that is using this Store module</param>
+        /// <param name="name">The name of this Store module</param>
+        /// <param name="storagePrefix">The storage prefix that should be used in the storage key</param>
+        public Store(ICore core, string name, string storagePrefix = null)
         {
             Core = core;
 
@@ -74,10 +113,12 @@ namespace WalletConnectSharp.Core.Controllers
                 StoragePrefix = WalletConnectSharp.Core.Core.STORAGE_PREFIX;
             else
                 StoragePrefix = storagePrefix;
-
-            GetKey = getKey;
         }
 
+        /// <summary>
+        /// Initialize this Store module. This will load all data from the storage module used
+        /// by ICore
+        /// </summary>
         public async Task Init()
         {
             if (!initialized)
@@ -95,6 +136,13 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// Store a given key/value. If the key already exists in this Store, then the
+        /// value will be updated
+        /// </summary>
+        /// <param name="key">The key to store in</param>
+        /// <param name="value">The value to store</param>
+        /// <returns></returns>
         public Task Set(TKey key, TValue value)
         {
             IsInitialized();
@@ -107,6 +155,12 @@ namespace WalletConnectSharp.Core.Controllers
             return Persist();
         }
 
+        /// <summary>
+        /// Get the value stored under a given TKey key
+        /// </summary>
+        /// <param name="key">The key to lookup a value for.</param>
+        /// <exception cref="WalletConnectException">Thrown when the given key doesn't exist in this Store</exception>
+        /// <returns>Returns the TValue value stored at the given key</returns>
         public TValue Get(TKey key)
         {
             IsInitialized();
@@ -114,6 +168,13 @@ namespace WalletConnectSharp.Core.Controllers
             return value;
         }
 
+        /// <summary>
+        /// Update the given key with the TValue update. Partial updates are supported
+        /// using reflection. This means, only non-null values in TValue update will be updated
+        /// </summary>
+        /// <param name="key">The key to update</param>
+        /// <param name="update">The updates to make</param>
+        /// <returns></returns>
         public Task Update(TKey key, TValue update)
         {
             IsInitialized();
@@ -157,6 +218,12 @@ namespace WalletConnectSharp.Core.Controllers
             return Persist();
         }
 
+        /// <summary>
+        /// Delete a given key with an ErrorResponse reason
+        /// </summary>
+        /// <param name="key">The key to delete</param>
+        /// <param name="reason">The reason this key was deleted using an ErrorResponse</param>
+        /// <returns></returns>
         public Task Delete(TKey key, ErrorResponse reason)
         {
             IsInitialized();
