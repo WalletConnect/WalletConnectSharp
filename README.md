@@ -1,51 +1,170 @@
 # WalletConnectSharp
 
-WalletConnectSharp is an implementation of the [WalletConnect](https://walletconnect.org/) protocol (currently only v1) using .NET and (optinoally) NEthereum. This library implements the [WalletConnect Technical Specification](https://docs.walletconnect.org/tech-spec) in .NET to allow C# dApps makers to add support for the open [WalletConnect](https://walletconnect.org/) protocol.
+WalletConnectSharp is an implementation of the [WalletConnect](https://walletconnect.org/) protocol v2 using .NET. This library implements the [WalletConnect Technical Specification](https://docs.walletconnect.org/tech-spec) in .NET to allow C# dApps makers and wallet makers to add support for the open [WalletConnect](https://walletconnect.org/) protocol.
+
+## Installation
+
+install via Nuget
+
+```jsx
+dotnet add package WalletConnect.Sign
+```
 
 ## Usage
 
-First you must define the `ClientMeta` you would like to send along with your connect request. This is what is shown in the Wallet UI
+### **Dapp Usage**
+
+First you must setup `SignClientOptions` which stores both the `ProjectId` and `Metadata`. You may also optionally specify the storage module to use. By default, the `FileSystemStorage` module is used if none is specified.
 
 ```csharp
-var metadata = new ClientMeta()
+var dappOptions = new SignClientOptions()
 {
-    Description = "This is a test of the Nethereum.WalletConnect feature",
-    Icons = new[] {"https://app.warriders.com/favicon.ico"},
-    Name = "WalletConnect Test",
-    URL = "https://app.warriders.com"
+    ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
+    Metadata = new Metadata()
+    {
+        Description = "An example dapp to showcase WalletConnectSharpv2",
+        Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+        Name = "WalletConnectSharpv2 Dapp Example",
+        Url = "https://walletconnect.com"
+    },
+    // Uncomment to disable persistant storage
+    // Storage = new InMemoryStorage()
 };
 ```
 
-Once you have the metadata, you can create the `WalletConnect` object
+Then, you must setup the `ConnectOptions` which define what blockchain, RPC methods and events your dapp will use.
+
+*C# Constructor*
 
 ```csharp
-var walletConnect = new WalletConnect(metadata);
-Console.WriteLine(walletConnect.URI);
+var dappConnectOptions = new ConnectOptions()
+{
+    RequiredNamespaces = new RequiredNamespaces()
+    {
+        {
+            "eip155", new RequiredNamespace()
+            {
+                Methods = new[]
+                {
+                    "eth_sendTransaction",
+                    "eth_signTransaction",
+                    "eth_sign",
+                    "personal_sign",
+                    "eth_signTypedData",
+                },
+                Chains = new[]
+                {
+                    "eip155:1"
+                },
+                Events = new[]
+                {
+                    "chainChanged",
+                    "accountsChanged",
+                }
+            }
+        }
+    }
+};
 ```
 
-This will print the `wc` connect code into the console. You can transform this text into a QR code or use it for deep linking. Once you have the `wc` link displayed to the user, you can then call `Connect()`. The `Connect()` function will block until either a successful or rejected session response
+*Builder Functions Style*
 
 ```csharp
-var walletConnectData = await walletConnect.Connect();
+var dappConnectOptions1 = new ConnectOptions()
+    .RequireNamespace("eip155", new RequiredNamespace()
+        .WithMethod("eth_sendTransaction")
+        .WithMethod("eth_signTransaction")
+        .WithMethod("eth_sign")
+        .WithMethod("personal_sign")
+        .WithMethod("eth_signTypedData")
+        .WithChain("eip155:1")
+        .WithEvent("chainChanged")
+        .WithEvent("accountsChanged")
+    );
 ```
 
-This function returns a `Task<WCSessionData>` object, so it can be awaited if your using async/await. The `WCSessionData` has data about the current session (accounts, chainId, etc..)
+With both options defined, you can initialize and connect the SDK
 
 ```csharp
-Console.WriteLine(walletConnectData.accounts[0]);
-Console.WriteLine(walletConnectData.chainId);
+var dappClient = await WalletConnectSignClient.Init(dappOptions);
+var connectData = await dappClient.Connect(dappConnectOptions);
 ```
 
-## Connecting with NEthereum
-
-With the above, you have enough to use the base WalletConnect protocol. However, this library comes with an NEthereum provider implementation. To use it, you simply invoke `CreateProvider(url)` or `CreateProvider(IClient)`. You are required to specify an additional RPC URL or a custom `IClient` because the `WalletConnect` protocol does not perform read operations (`eth_call`, `eth_estimateGas`, etc..), so you must provide either an `Infura Project ID`, a node's HTTP url for `HttpProvider` or a custom `IClient`.
-
-Here is an example
+You can grab the `Uri` for the connection request from `connectData`
 
 ```csharp
-var web3 = new Web3(walletConnect.CreateProvider(new Uri("https://mainnet.infura.io/v3/<infruaId>"));
+ExampleShowQRCode(connectData.Uri);
 ```
+
+and await for connection approval using the `Approval` Task object
+
+```csharp
+Task<SessionData> sessionConnectTask = connectData.Approval;
+SessionData sessionData = await sessionConnectTask;
+
+// or
+// SessionData sessionData = await connectData.Approval;
+```
+
+This `Task` will return the `SessionData` when the session was approved, or throw an exception when the session rquest has either
+
+* Timed out
+* Been Rejected
+
+### **Wallet Usage**
+
+First you must setup `SignClientOptions` which stores both the `ProjectId` and `Metadata`. You may also optionally specify the storage module to use. By default, the `FileSystemStorage` module is used if none is specified.
+
+```csharp
+var walletOptions = new SignClientOptions()
+{
+    ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
+    Metadata = new Metadata()
+    {
+        Description = "An example wallet to showcase WalletConnectSharpv2",
+        Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+        Name = "WalletConnectSharpv2 Wallet Example",
+        Url = "https://walletconnect.com"
+    },
+    // Uncomment to disable persistant storage
+    // Storage = new InMemoryStorage()
+};
+```
+
+Once you have options defined, you can initialize the SDK
+
+```csharp
+var walletClient = await WalletConnectSignClient.Init(walletOptions);
+```
+
+Wallets can pair an incoming session using the session's Uri. Pairing a session lets the Wallet obtain the connection proposal which can then be approved or denied.
+
+```csharp
+ProposalStruct proposal = await walletClient.Pair(connectData.Uri);
+```
+
+The wallet can then approve or reject the proposal using either of the following
+
+```csharp
+string addressToConnect = ...;
+var approveData = await walletClient.Approve(proposal, addressToConnect);
+await approveData.Acknowledged();
+```
+
+```csharp
+string[] addressesToConnect = ...;
+var approveData = await walletClient.Approve(proposal, addressesToConnect);
+await approveData.Acknowledged();
+```
+
+```csharp
+await walletClient.Reject(proposal, "User rejected");
+```
+
 
 ## Examples
 
-There are examples in the examples directory. If you are using VS Code, you can invoke the console example by running the `.NET Core Launch (console)` launch configuration. For more information on debugging and launch configurations, [refer to the VS Code documentation](https://code.visualstudio.com/Docs/editor/debugging)
+There are examples and unit tests in the Tests directory. Some examples include
+
+* BiDirectional Communication
+* Basic dApp Example
