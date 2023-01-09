@@ -929,7 +929,7 @@ namespace WalletConnectSharp.Sign
 
             TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
             
-            this.Once(EngineEvents.SessionProposal,
+            Client.Once(EngineEvents.SessionProposal,
                 delegate(object sender, GenericEvent<JsonRpcRequest<ProposalStruct>> @event)
                 {
                     var proposal = @event.EventData.Params;
