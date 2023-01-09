@@ -15,8 +15,16 @@ using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
 {
+    /// <summary>
+    /// This module handles both subscribing to events as well as keeping track
+    /// of active and pending subscriptions. It will also resubscribe to topics if
+    /// the backing Relayer connection disconnects
+    /// </summary>
     public class Subscriber : ISubscriber
     {
+        /// <summary>
+        /// Constants that define eventIds for the Subscriber events
+        /// </summary>
         public static class SubscriberEvents
         {
             public static readonly string Created = "subscription_created";
@@ -26,8 +34,14 @@ namespace WalletConnectSharp.Core.Controllers
             public static readonly string Sync = "subscription_sync";
         }
         
+        /// <summary>
+        /// The EventDelegator this module is using
+        /// </summary>
         public EventDelegator Events { get; }
 
+        /// <summary>
+        /// The name of this Subscriber
+        /// </summary>
         public string Name
         {
             get
@@ -36,6 +50,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The context string for this module
+        /// </summary>
         public string Context
         {
             get
@@ -44,6 +61,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The version of this module
+        /// </summary>
         public string Version
         {
             get
@@ -54,6 +74,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         private Dictionary<string, SubscriberActive> _subscriptions = new Dictionary<string, SubscriberActive>();
         private Dictionary<string, SubscriberParams> pending = new Dictionary<string, SubscriberParams>();
+        
+        /// <summary>
+        /// A dictionary of active subscriptions where the key is the id of the Subscription
+        /// </summary>
         public IReadOnlyDictionary<string, SubscriberActive> Subscriptions
         {
             get
@@ -64,6 +88,9 @@ namespace WalletConnectSharp.Core.Controllers
 
         private TopicMap _topicMap = new TopicMap();
 
+        /// <summary>
+        /// A subscription mapping of Topics => Subscription ids
+        /// </summary>
         public ISubscriberMap TopicMap
         {
             get
@@ -72,6 +99,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The number of active subscriptions 
+        /// </summary>
         public int Length
         {
             get
@@ -80,6 +110,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of active subscription Ids
+        /// </summary>
         public string[] Ids
         {
             get
@@ -88,6 +121,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of active Subscriptions
+        /// </summary>
         public SubscriberActive[] Values
         {
             get
@@ -96,6 +132,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of topics that are currently subscribed
+        /// </summary>
         public string[] Topics
         {
             get
@@ -104,6 +143,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// The Storage key this module is using to store subscriptions
+        /// </summary>
         public string StorageKey
         {
             get
@@ -116,6 +158,10 @@ namespace WalletConnectSharp.Core.Controllers
         private bool initialized;
         private SubscriberActive[] cached = Array.Empty<SubscriberActive>();
 
+        /// <summary>
+        /// Create a new Subscriber module using a backing Relayer
+        /// </summary>
+        /// <param name="relayer">The relayer to use to subscribe to topics</param>
         public Subscriber(IRelayer relayer)
         {
             _relayer = relayer;
@@ -123,6 +169,10 @@ namespace WalletConnectSharp.Core.Controllers
             Events = new EventDelegator(this);
         }
         
+        /// <summary>
+        /// Initialize this Subscriber, which will restore + resubscribe to all active subscriptions found
+        /// in storage
+        /// </summary>
         public async Task Init()
         {
             if (!initialized)
@@ -427,6 +477,12 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        /// <summary>
+        /// Subscribe to a new topic with (optional) SubscribeOptions
+        /// </summary>
+        /// <param name="topic">The topic to subscribe to</param>
+        /// <param name="opts">Options to determine the protocol to use for subscribing</param>
+        /// <returns>The subscription id</returns>
         public async Task<string> Subscribe(string topic, SubscribeOptions opts = null)
         {
             if (opts == null)
@@ -454,6 +510,11 @@ namespace WalletConnectSharp.Core.Controllers
             return id;
         }
 
+        /// <summary>
+        /// Unsubscribe to a given topic with optional UnsubscribeOptions
+        /// </summary>
+        /// <param name="topic">The topic to unsubscribe from</param>
+        /// <param name="opts">The options to specify the subscription id as well as protocol options</param>
         public Task Unsubscribe(string topic, UnsubscribeOptions opts = null)
         {
             IsInitialized();
@@ -466,6 +527,11 @@ namespace WalletConnectSharp.Core.Controllers
             return UnsubscribeByTopic(topic, opts);
         }
 
+        /// <summary>
+        /// Determines whether the given topic is subscribed or not
+        /// </summary>
+        /// <param name="topic">The topic to check</param>
+        /// <returns>Return true if the topic is subscribed, false otherwise</returns>
         public Task<bool> IsSubscribed(string topic)
         {
             if (Topics.Contains(topic)) return Task.FromResult(true);
