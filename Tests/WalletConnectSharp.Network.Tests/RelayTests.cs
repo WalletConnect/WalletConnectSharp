@@ -25,7 +25,7 @@ namespace WalletConnectSharp.Network.Tests
         private static readonly JsonRpcRequest<TopicData> TEST_BAD_WAKU_REQUEST =
             new JsonRpcRequest<TopicData>(RelayProtocols.DefaultProtocol.Subscribe, new TopicData());
 
-        private static readonly string DEFAULT_GOOD_WS_URL = "wss://relay.walletconnect.com/";
+        private static readonly string DEFAULT_GOOD_WS_URL = "wss://relay.walletconnect.com";
         private static readonly string ENVIRONMENT_DEFAULT_GOOD_WS_URL = Environment.GetEnvironmentVariable("RELAY_ENDPOINT");
         private static readonly string GOOD_WS_URL = !string.IsNullOrWhiteSpace(ENVIRONMENT_DEFAULT_GOOD_WS_URL) ? ENVIRONMENT_DEFAULT_GOOD_WS_URL : DEFAULT_GOOD_WS_URL;
         private static readonly string TEST_RANDOM_HOST = "random.domain.that.does.not.exist";
@@ -39,9 +39,9 @@ namespace WalletConnectSharp.Network.Tests
             var auth = await crypto.SignJwt(GOOD_WS_URL);
 
             return RelayUrl.FormatRelayRpcUrl(
+                GOOD_WS_URL,
                 RelayProtocols.Default,
                 RelayConstants.Version.ToString(),
-                GOOD_WS_URL,
                 SDKConstants.SDK_VERSION,
                 TestValues.TestProjectId,
                 auth

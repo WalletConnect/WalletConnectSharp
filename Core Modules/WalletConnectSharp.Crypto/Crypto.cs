@@ -1,5 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Merkator.BitCoin;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -29,7 +33,7 @@ namespace WalletConnectSharp.Crypto
     /// </summary>
     public class Crypto : ICrypto
     {
-        private const string CRYPTO_CLIENT_SEED = "client_ed25519_seed";
+        private readonly string CRYPTO_CLIENT_SEED = $"client_ed25519_seed_{new Random().Next()}";
         
         private const string MULTICODEC_ED25519_ENCODING = "base58btc";
         private const string MULTICODEC_ED25519_BASE = "z";

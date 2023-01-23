@@ -25,7 +25,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <summary>
         /// The default relay server URL used when no relay URL is given
         /// </summary>
-        public static readonly string DEFAULT_RELAY_URL = "wss://relay.walletconnect.com/";
+        public static readonly string DEFAULT_RELAY_URL = "wss://relay.walletconnect.com";
         
         /// <summary>
         /// The EventDelegaor this Relayer module is using

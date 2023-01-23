@@ -9,7 +9,7 @@ namespace WalletConnectSharp.Tests.Common
             ? EnvironmentProjectId
             : DefaultProjectId;
 
-        private const string DefaultRelayUrl = "wss://relay.walletconnect.com/";
+        private const string DefaultRelayUrl = "wss://relay.walletconnect.com";
         private static readonly string EnvironmentRelayUrl = Environment.GetEnvironmentVariable("RELAY_ENDPOINT");
         public static readonly string TestRelayUrl = !string.IsNullOrWhiteSpace(EnvironmentRelayUrl) ? EnvironmentRelayUrl : DefaultRelayUrl;
     }
