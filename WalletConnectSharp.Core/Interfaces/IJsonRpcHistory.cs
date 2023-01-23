@@ -57,17 +57,35 @@ namespace WalletConnectSharp.Core.Interfaces
         void Set(string topic, IJsonRpcRequest<T> request, string chainId);
 
         /// <summary>
-        /// 
+        /// Get a request that has previously been set with a given topic and id.
         /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="topic">The topic of the request was made in</param>
+        /// <param name="id">The id of the request to get</param>
+        /// <returns>The recorded request record</returns>
         Task<JsonRpcRecord<T, TR>> Get(string topic, long id);
 
+        /// <summary>
+        /// Resolve a request that has previously been set using a specific response. The id and topic of the response
+        /// will be used to determine which request to resolve. If the request is not found, then nothing happens.
+        /// </summary>
+        /// <param name="response">The response to resolve. The id and topic of the response
+        /// will be used to determine which request to resolve.</param>
+        /// <returns></returns>
         Task Resolve(IJsonRpcResult<TR> response);
 
-        void Delete(string topic, long? id);
+        /// <summary>
+        /// Delete a request record with a given topic and id (optional). If the request is not found, then nothing happens.
+        /// </summary>
+        /// <param name="topic">The topic the request was made in</param>
+        /// <param name="id">The id of the request. If no id is given then all requests in the given topic are deleted.</param>
+        void Delete(string topic, long? id = null);
 
+        /// <summary>
+        /// Check if a request with a given topic and id exists.
+        /// </summary>
+        /// <param name="topic">The topic the request was made in</param>
+        /// <param name="id">The id of the request</param>
+        /// <returns>True if the request with the given topic and id exists, false otherwise</returns>
         Task<bool> Exists(string topic, long id);
     }
 }

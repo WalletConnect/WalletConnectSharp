@@ -85,6 +85,9 @@ namespace WalletConnectSharp.Core.Controllers
                 topicMap.Remove(topic);
         }
 
+        /// <summary>
+        /// Clear all entries in this TopicMap
+        /// </summary>
         public void Clear()
         {
             topicMap.Clear();
