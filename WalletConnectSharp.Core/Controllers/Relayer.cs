@@ -138,9 +138,9 @@ namespace WalletConnectSharp.Core.Controllers
             return new JsonRpcProvider(
                 new WebsocketConnection(
                     RelayUrl.FormatRelayRpcUrl(
+                        relayUrl,
                         IRelayer.Protocol,
                         IRelayer.Version.ToString(),
-                        relayUrl,
                         SDKConstants.SDK_VERSION,
                         projectId,
                         auth
