@@ -12,11 +12,22 @@ using WalletConnectSharp.Storage.Interfaces;
 
 namespace WalletConnectSharp.Core
 {
+    /// <summary>
+    /// The Core module. This module holds all Core Modules and holds configuration data
+    /// required by several Core Module.
+    /// </summary>
     public class Core : ICore
     {
+        /// <summary>
+        /// The prefix string used for the storage key
+        /// </summary>
         public static readonly string STORAGE_PREFIX = ICore.Protocol + "@" + ICore.Version + ":core:";
 
         private string _optName;
+        
+        /// <summary>
+        /// The name of this module. 
+        /// </summary>
         public string Name
         {
             get
@@ -25,6 +36,9 @@ namespace WalletConnectSharp.Core
             }
         }
 
+        /// <summary>
+        /// The current context of this module instance. 
+        /// </summary>
         public string Context
         {
             get
@@ -33,15 +47,51 @@ namespace WalletConnectSharp.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public EventDelegator Events { get; }
+        
+        /// <summary>
+        /// If this module is initialized or not
+        /// </summary>
         public bool Initialized { get; private set; }
+        
+        /// <summary>
+        /// The url of the relay server to connect to in the <see cref="IRelayer"/> module
+        /// </summary>
         public string RelayUrl { get; }
+        
+        /// <summary>
+        /// The Project ID to use for authentication on the relay server
+        /// </summary>
         public string ProjectId { get; }
+        
+        /// <summary>
+        /// The <see cref="IHeartBeat"/> module this Core module is using
+        /// </summary>
         public IHeartBeat HeartBeat { get; }
+        
+        /// <summary>
+        /// The <see cref="ICrypto"/> module this Core module is using
+        /// </summary>
         public ICrypto Crypto { get; }
+        
+        /// <summary>
+        /// The <see cref="IRelayer"/> module this Core module is using
+        /// </summary>
         public IRelayer Relayer { get; }
+        
+        /// <summary>
+        /// The <see cref="IKeyValueStorage"/> module this Core module is using. All
+        /// Core Modules should use this for storage.
+        /// </summary>
         public IKeyValueStorage Storage { get; }
         
+        /// <summary>
+        /// Create a new Core with the given options.
+        /// </summary>
+        /// <param name="options">The options to use to configure the new Core module</param>
         public Core(CoreOptions options = null)
         {
             if (options == null)
@@ -50,7 +100,6 @@ namespace WalletConnectSharp.Core
                 options = new CoreOptions()
                 {
                     KeyChain = new KeyChain(storage),
-                    LoggerContext = Context, //TODO Add logger
                     ProjectId = null,
                     RelayUrl = null,
                     Storage = storage
@@ -78,16 +127,20 @@ namespace WalletConnectSharp.Core
             Relayer = new Relayer(new RelayerOptions()
             {
                 Core = this,
-                LoggerContext = Context,
                 ProjectId = ProjectId,
                 RelayUrl = options.RelayUrl
             });
         }
 
+        /// <summary>
+        /// Start this module, this will initialize all Core Modules. If this module has already been
+        /// initialized, then nothing will happen
+        /// </summary>
         public async Task Start()
         {
             if (Initialized) return;
 
+            Initialized = true;
             await Initialize();
         }
 
@@ -97,7 +150,6 @@ namespace WalletConnectSharp.Core
             await Crypto.Init();
             await Relayer.Init();
             await HeartBeat.Init();
-            Initialized = true;
         }
     }
 }

@@ -1,14 +1,15 @@
 using Newtonsoft.Json;
+using WalletConnectSharp.Core.Models.Relay;
 
 namespace WalletConnectSharp.Core.Models.Subscriber
 {
     /// <summary>
-    /// The parameters for a JSON-RPC Subscribe method call
+    /// Represents a subscription that's pending
     /// </summary>
-    public class JsonRpcSubscriberParams
+    public class PendingSubscription : SubscribeOptions
     {
         /// <summary>
-        /// The topic to subscribe to
+        /// The topic that will be subscribed to
         /// </summary>
         [JsonProperty("topic")]
         public string Topic { get; set; }

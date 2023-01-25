@@ -82,10 +82,10 @@ namespace WalletConnectSharp.Sign
             
             Name = options.Name;
 
-            if (string.IsNullOrWhiteSpace(options.LoggerContext))
+            if (string.IsNullOrWhiteSpace(options.BaseContext))
                 Context = $"{Metadata.Name}-{CONTEXT}";
             else
-                Context = options.LoggerContext;
+                Context = options.BaseContext;
 
             // Setup storage
             if (options.Storage == null)

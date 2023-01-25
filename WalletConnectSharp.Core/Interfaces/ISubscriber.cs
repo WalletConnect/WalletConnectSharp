@@ -17,7 +17,7 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <summary>
         /// A dictionary of active subscriptions where the key is the id of the Subscription
         /// </summary>
-        public IReadOnlyDictionary<string, SubscriberActive> Subscriptions { get; }
+        public IReadOnlyDictionary<string, ActiveSubscription> Subscriptions { get; }
         
         /// <summary>
         /// A subscription mapping of Topics => Subscription ids
@@ -37,7 +37,7 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <summary>
         /// An array of active Subscriptions
         /// </summary>
-        public SubscriberActive[] Values { get; }
+        public ActiveSubscription[] Values { get; }
         
         /// <summary>
         /// An array of topics that are currently subscribed

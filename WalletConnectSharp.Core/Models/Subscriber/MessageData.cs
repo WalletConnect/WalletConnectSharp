@@ -1,21 +1,21 @@
 using Newtonsoft.Json;
 
-namespace WalletConnectSharp.Core.Models.Relay
+namespace WalletConnectSharp.Core.Models.Subscriber
 {
     /// <summary>
-    /// A class that represents a message that has been sent / received inside
-    /// a specific topic
+    /// The data for a specific message, containing the message and the topic the message
+    /// came from
     /// </summary>
-    public class MessageEvent
+    public class MessageData
     {
         /// <summary>
-        /// The topic the message was sent / received in
+        /// The topic the message came from
         /// </summary>
         [JsonProperty("topic")]
         public string Topic { get; set; }
         
         /// <summary>
-        /// The message that was sent / received
+        /// The message as a string
         /// </summary>
         [JsonProperty("message")]
         public string Message { get; set; }

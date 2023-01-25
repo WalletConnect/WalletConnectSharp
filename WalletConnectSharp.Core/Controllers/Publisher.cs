@@ -96,10 +96,10 @@ namespace WalletConnectSharp.Core.Controllers
             long? tag = null)
         {
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
-            var request = new RequestArguments<RelayPublishParams>()
+            var request = new RequestArguments<RelayPublishRequest>()
             {
                 Method = api.Publish,
-                Params = new RelayPublishParams()
+                Params = new RelayPublishRequest()
                 {
                     Message = message,
                     Topic = topic,
@@ -109,7 +109,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
 
-            return this.Relayer.Provider.Request<RelayPublishParams, object>(request, this);
+            return this.Relayer.Provider.Request<RelayPublishRequest, object>(request, this);
         }
 
         /// <summary>

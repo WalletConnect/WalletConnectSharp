@@ -3,14 +3,14 @@ using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Models.Relay
 {
-    public class DecodedMessageEvent
+    /// <summary>
+    /// Represents a <see cref="MessageEvent"/> that has been deserialized into a <see cref="JsonRpcPayload"/>
+    /// </summary>
+    public class DecodedMessageEvent : MessageEvent
     {
-        [JsonProperty("topic")]
-        public string Topic { get; set; }
-        
-        [JsonProperty("message")]
-        public string Message { get; set; }
-        
+        /// <summary>
+        /// The deserialized payload that was decoded from the Message property
+        /// </summary>
         [JsonProperty("payload")]
         public JsonRpcPayload Payload { get; set; }
     }

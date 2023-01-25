@@ -72,13 +72,13 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
-        private Dictionary<string, SubscriberActive> _subscriptions = new Dictionary<string, SubscriberActive>();
-        private Dictionary<string, SubscriberParams> pending = new Dictionary<string, SubscriberParams>();
+        private Dictionary<string, ActiveSubscription> _subscriptions = new Dictionary<string, ActiveSubscription>();
+        private Dictionary<string, PendingSubscription> pending = new Dictionary<string, PendingSubscription>();
         
         /// <summary>
         /// A dictionary of active subscriptions where the key is the id of the Subscription
         /// </summary>
-        public IReadOnlyDictionary<string, SubscriberActive> Subscriptions
+        public IReadOnlyDictionary<string, ActiveSubscription> Subscriptions
         {
             get
             {
@@ -124,7 +124,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <summary>
         /// An array of active Subscriptions
         /// </summary>
-        public SubscriberActive[] Values
+        public ActiveSubscription[] Values
         {
             get
             {
@@ -156,7 +156,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         private IRelayer _relayer;
         private bool initialized;
-        private SubscriberActive[] cached = Array.Empty<SubscriberActive>();
+        private ActiveSubscription[] cached = Array.Empty<ActiveSubscription>();
 
         /// <summary>
         /// Create a new Subscriber module using a backing Relayer
@@ -218,15 +218,15 @@ namespace WalletConnectSharp.Core.Controllers
             Events.Trigger(SubscriberEvents.Sync, new object());
         }
 
-        protected virtual async Task<SubscriberActive[]> GetRelayerSubscriptions()
+        protected virtual async Task<ActiveSubscription[]> GetRelayerSubscriptions()
         {
             if (await _relayer.Core.Storage.HasItem(StorageKey))
-                return await _relayer.Core.Storage.GetItem<SubscriberActive[]>(StorageKey);
+                return await _relayer.Core.Storage.GetItem<ActiveSubscription[]>(StorageKey);
 
-            return Array.Empty<SubscriberActive>();
+            return Array.Empty<ActiveSubscription>();
         }
 
-        protected virtual async Task SetRelayerSubscriptions(SubscriberActive[] subscriptions)
+        protected virtual async Task SetRelayerSubscriptions(ActiveSubscription[] subscriptions)
         {
             await _relayer.Core.Storage.SetItem(StorageKey, subscriptions);
         }
@@ -264,11 +264,11 @@ namespace WalletConnectSharp.Core.Controllers
             );
         }
 
-        protected virtual async Task Resubscribe(SubscriberActive subscription)
+        protected virtual async Task Resubscribe(ActiveSubscription subscription)
         {
             if (!Ids.Contains(subscription.Id))
             {
-                var @params = new SubscriberParams()
+                var @params = new PendingSubscription()
                 {
                     Relay = subscription.Relay,
                     Topic = subscription.Topic
@@ -317,7 +317,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void OnEnabled()
         {
-            cached = Array.Empty<SubscriberActive>();
+            cached = Array.Empty<ActiveSubscription>();
             initialized = true;
         }
 
@@ -340,9 +340,9 @@ namespace WalletConnectSharp.Core.Controllers
             OnEnabled();
         }
 
-        protected virtual void OnSubscribe(string id, SubscriberParams @params)
+        protected virtual void OnSubscribe(string id, PendingSubscription @params)
         {
-            SetSubscription(id, new SubscriberActive()
+            SetSubscription(id, new ActiveSubscription()
             {
                 Id = id,
                 Relay = @params.Relay,
@@ -352,9 +352,9 @@ namespace WalletConnectSharp.Core.Controllers
             pending.Remove(@params.Topic);
         }
 
-        protected virtual void OnResubscribe(string id, SubscriberParams @params)
+        protected virtual void OnResubscribe(string id, PendingSubscription @params)
         {
-            AddSubscription(id, new SubscriberActive()
+            AddSubscription(id, new ActiveSubscription()
             {
                 Id = id,
                 Relay = @params.Relay,
@@ -377,14 +377,14 @@ namespace WalletConnectSharp.Core.Controllers
             await _relayer.Messages.Delete(topic);
         }
 
-        protected virtual void SetSubscription(string id, SubscriberActive subscription)
+        protected virtual void SetSubscription(string id, ActiveSubscription subscription)
         {
             if (_subscriptions.ContainsKey(id)) return;
             
             AddSubscription(id, subscription);
         }
 
-        protected virtual void AddSubscription(string id, SubscriberActive subscription)
+        protected virtual void AddSubscription(string id, ActiveSubscription subscription)
         {
             if (_subscriptions.ContainsKey(id))
                 _subscriptions.Remove(id);
@@ -417,7 +417,7 @@ namespace WalletConnectSharp.Core.Controllers
             var subscription = GetSubscription(id);
             _subscriptions.Remove(id);
             _topicMap.Delete(id);
-            Events.Trigger(SubscriberEvents.Deleted, new SubscriberDeleted()
+            Events.Trigger(SubscriberEvents.Deleted, new DeletedSubscription()
             {
                 Id = id,
                 Reason = reason,
@@ -445,7 +445,7 @@ namespace WalletConnectSharp.Core.Controllers
             await OnUnsubscribe(topic, id, reason);
         }
 
-        protected virtual SubscriberActive GetSubscription(string id)
+        protected virtual ActiveSubscription GetSubscription(string id)
         {
             if (!_subscriptions.ContainsKey(id))
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, Name + ": " + id);
@@ -498,7 +498,7 @@ namespace WalletConnectSharp.Core.Controllers
             
             IsInitialized();
 
-            var @params = new SubscriberParams()
+            var @params = new PendingSubscription()
             {
                 Relay = opts.Relay,
                 Topic = topic

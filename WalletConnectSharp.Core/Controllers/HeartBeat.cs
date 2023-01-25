@@ -64,20 +64,12 @@ namespace WalletConnectSharp.Core.Controllers
         /// <summary>
         /// Create a new Heartbeat module, optionally specifying options
         /// </summary>
-        /// <param name="opts">Options that configure the interval</param>
-        public HeartBeat(HeartBeatOptions opts = null)
+        /// <param name="interval">The interval to emit the <see cref="HeartbeatEvents.Pulse"/> event at</param>
+        public HeartBeat(int interval = 5000)
         {
-            if (opts == null)
-            {
-                opts = new HeartBeatOptions()
-                {
-                    Interval = 5000 // 5 seconds
-                };
-            }
-            
             Events = new EventDelegator(this);
 
-            Interval = opts.Interval;
+            Interval = interval;
         }
 
         /// <summary>
