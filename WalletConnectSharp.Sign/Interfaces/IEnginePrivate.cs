@@ -1,6 +1,7 @@
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
+using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign.Interfaces
@@ -61,7 +62,7 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task IsValidConnect(ConnectOptions options);
 
-        internal Task IsValidPair(PairParams pairParams);
+        internal Task IsValidPair(string uri);
 
         internal Task IsValidSessionSettleRequest(SessionSettle settle);
 
@@ -69,18 +70,18 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task IsValidReject(RejectParams @params);
 
-        internal Task IsValidUpdate(UpdateParams @params);
+        internal Task IsValidUpdate(string topic, Namespaces namespaces);
 
-        internal Task IsValidExtend(ExtendParams @params);
+        internal Task IsValidExtend(string topic);
 
-        internal Task IsValidRequest<T>(RequestParams<T> @params);
+        internal Task IsValidRequest<T>(string topic, JsonRpcRequest<T> request, string chainId);
 
-        internal Task IsValidRespond<T>(RespondParams<T> @params);
+        internal Task IsValidRespond<T>(string topic, JsonRpcResponse<T> response);
 
-        internal Task IsValidPing(PingParams @params);
+        internal Task IsValidPing(string topic);
 
-        internal Task IsValidEmit<T>(EmitParams<T> @params);
+        internal Task IsValidEmit<T>(string topic, EventData<T> request, string chainId);
 
-        internal Task IsValidDisconnect(DisconnectParams @params);
+        internal Task IsValidDisconnect(string topic, ErrorResponse reason);
     }
 }

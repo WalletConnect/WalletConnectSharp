@@ -5,6 +5,7 @@ using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
+using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign
@@ -43,7 +44,8 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY,
                     $"pairing topic doesn't exist {topic}");
 
-            if (Clock.IsExpired(this.Client.Pairing.Get(topic).Expiry.Value))
+            var expiry = this.Client.Pairing.Get(topic).Expiry;
+            if (expiry != null && Clock.IsExpired(expiry.Value))
             {
                 await PrivateThis.DeletePairing(topic);
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"pairing topic: {topic}");
@@ -59,8 +61,9 @@ namespace WalletConnectSharp.Sign
             if (!this.Client.Session.Keys.Contains(topic))
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY,
                     $"session topic doesn't exist {topic}");
-            
-            if (Clock.IsExpired(this.Client.Session.Get(topic).Expiry.Value))
+
+            var expiry = this.Client.Session.Get(topic).Expiry;
+            if (expiry != null && Clock.IsExpired(expiry.Value))
             {
                 await PrivateThis.DeleteSession(topic);
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"session topic: {topic}");
@@ -72,8 +75,9 @@ namespace WalletConnectSharp.Sign
             if (!this.Client.Proposal.Keys.Contains(id))
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY,
                     $"proposal id doesn't exist {id}");
-            
-            if (Clock.IsExpired(this.Client.Proposal.Get(id).Expiry.Value))
+
+            var expiry = this.Client.Proposal.Get(id).Expiry;
+            if (expiry != null && Clock.IsExpired(expiry.Value))
             {
                 await PrivateThis.DeleteProposal(id);
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"proposal id: {id}");
@@ -109,15 +113,10 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        Task IEnginePrivate.IsValidPair(PairParams pairParams)
+        Task IEnginePrivate.IsValidPair(string uri)
         {
-            if (pairParams == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"pair() params: {pairParams}");
-            }
-
-            if (!IsValidUrl(pairParams.Uri))
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"pair() uri: {pairParams.Uri}");
+            if (!IsValidUrl(uri))
+                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"pair() uri: {uri}");
             return Task.CompletedTask;
         }
 
@@ -202,16 +201,8 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        async Task IEnginePrivate.IsValidUpdate(UpdateParams @params)
+        async Task IEnginePrivate.IsValidUpdate(string topic, Namespaces namespaces)
         {
-            if (@params == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"update() params: {@params}");
-            }
-
-            var topic = @params.Topic;
-            var namespaces = @params.Namespaces;
-
             await IsValidSessionTopic(topic);
 
             var session = this.Client.Session.Get(topic);
@@ -226,29 +217,13 @@ namespace WalletConnectSharp.Sign
                 throw conformingNamespacesError.ToException();
         }
 
-        async Task IEnginePrivate.IsValidExtend(ExtendParams @params)
+        async Task IEnginePrivate.IsValidExtend(string topic)
         {
-            if (@params == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"extend() params: {@params}");
-            }
-
-            var topic = @params.Topic;
-
             await IsValidSessionTopic(topic);
         }
 
-        async Task IEnginePrivate.IsValidRequest<T>(RequestParams<T> @params)
+        async Task IEnginePrivate.IsValidRequest<T>(string topic, JsonRpcRequest<T> request, string chainId)
         {
-            if (@params == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"request() params: {@params}");
-            }
-
-            var topic = @params.Topic;
-            var request = @params.Request;
-            var chainId = @params.ChainId;
-
             await IsValidSessionTopic(topic);
 
             var session = this.Client.Session.Get(topic);
@@ -270,16 +245,8 @@ namespace WalletConnectSharp.Sign
                     $"request() method: {request.Method}");
         }
 
-        async Task IEnginePrivate.IsValidRespond<T>(RespondParams<T> @params)
+        async Task IEnginePrivate.IsValidRespond<T>(string topic, JsonRpcResponse<T> response)
         {
-            if (@params == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"respond() params: {@params}");
-            }
-
-            var topic = @params.Topic;
-            var response = @params.Response;
-
             await IsValidSessionTopic(topic);
 
             if (response == null || (response.Result == null && response.Error == null))
@@ -289,15 +256,8 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        async Task IEnginePrivate.IsValidPing(PingParams @params)
+        async Task IEnginePrivate.IsValidPing(string topic)
         {
-            if (@params == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"ping() params: {@params}");
-            }
-
-            var topic = @params.Topic;
-
             await IsValidSessionOrPairingTopic(topic);
         }
 
@@ -319,17 +279,8 @@ namespace WalletConnectSharp.Sign
             return events;
         }
 
-        async Task IEnginePrivate.IsValidEmit<T>(EmitParams<T> @params)
+        async Task IEnginePrivate.IsValidEmit<T>(string topic, EventData<T> @event, string chainId)
         {
-            if (@params == null)
-            {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"emit() params: {@params}");
-            }
-
-            var topic = @params.Topic;
-            var @event = @params.Event;
-            var chainId = @params.ChainId;
-
             await IsValidSessionTopic(topic);
             var session = this.Client.Session.Get(topic);
             var namespaces = session.Namespaces;
@@ -349,14 +300,12 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        async Task IEnginePrivate.IsValidDisconnect(DisconnectParams @params)
+        async Task IEnginePrivate.IsValidDisconnect(string topic, ErrorResponse reason)
         {
-            if (@params == null)
+            if (string.IsNullOrWhiteSpace(topic))
             {
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"disconnect() params: {@params}");
+                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"disconnect() params: {topic}");
             }
-
-            var topic = @params.Topic;
 
             await IsValidSessionOrPairingTopic(topic);
         }
@@ -602,9 +551,8 @@ namespace WalletConnectSharp.Sign
             return chains.ToArray();
         }
 
-        private bool IsSessionCompatible(SessionStruct session, FindParams @params)
+        private bool IsSessionCompatible(SessionStruct session, RequiredNamespaces requiredNamespaces)
         {
-            var requiredNamespaces = @params.RequiredNamespaces;
             var compatible = true;
 
             var sessionKeys = session.Namespaces.Keys.ToArray();

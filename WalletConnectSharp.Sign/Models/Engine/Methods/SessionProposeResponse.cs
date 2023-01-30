@@ -3,7 +3,7 @@ using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
 
-namespace WalletConnectSharp.Sign.Models.Engine
+namespace WalletConnectSharp.Sign.Models.Engine.Methods
 {
     [RpcResponseOptions(Clock.FIVE_MINUTES, false, 1101)]
     public class SessionProposeResponse

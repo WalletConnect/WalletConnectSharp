@@ -7,6 +7,7 @@ using WalletConnectSharp.Sign.Controllers;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
+using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Storage;
 
 namespace WalletConnectSharp.Sign
@@ -116,15 +117,7 @@ namespace WalletConnectSharp.Sign
 
         public Task<ProposalStruct> Pair(string uri)
         {
-            return Pair(new PairParams()
-            {
-                Uri = uri
-            });
-        }
-
-        public Task<ProposalStruct> Pair(PairParams pairParams)
-        {
-            return Engine.Pair(pairParams);
+            return Engine.Pair(uri);
         }
 
         public Task<IApprovedData> Approve(ApproveParams @params)
@@ -171,14 +164,14 @@ namespace WalletConnectSharp.Sign
             return Reject(rejectParams);
         }
 
-        public Task<IAcknowledgement> Update(UpdateParams @params)
+        public Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
         {
-            return Engine.Update(@params);
+            return Engine.Update(topic, namespaces);
         }
 
-        public Task<IAcknowledgement> Extend(ExtendParams @params)
+        public Task<IAcknowledgement> Extend(string topic)
         {
-            return Engine.Extend(@params);
+            return Engine.Extend(topic);
         }
 
         public Task<TR> Request<T, TR>(string topic, T data, string chainId = null)
@@ -186,34 +179,29 @@ namespace WalletConnectSharp.Sign
             return Engine.Request<T, TR>(topic, data, chainId);
         }
 
-        public Task<TR> Request<T, TR>(RequestParams<T> @params)
+        public Task Respond<T, TR>(string topic, JsonRpcResponse<TR> response)
         {
-            return Engine.Request<T, TR>(@params);
+            return Engine.Respond<T, TR>(topic, response);
         }
 
-        public Task Respond<T, TR>(RespondParams<TR> @params)
+        public Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
         {
-            return Engine.Respond<T, TR>(@params);
+            return Engine.Emit(topic, @event, chainId);
         }
 
-        public Task Emit<T>(EmitParams<T> @params)
+        public Task Ping(string topic)
         {
-            return Engine.Emit(@params);
+            return Engine.Ping(topic);
         }
 
-        public Task Ping(PingParams @params)
+        public Task Disconnect(string topic, ErrorResponse reason)
         {
-            return Engine.Ping(@params);
+            return Engine.Disconnect(topic, reason);
         }
 
-        public Task Disconnect(DisconnectParams @params)
+        public SessionStruct[] Find(RequiredNamespaces requiredNamespaces)
         {
-            return Engine.Disconnect(@params);
-        }
-
-        public SessionStruct[] Find(FindParams @params)
-        {
-            return Engine.Find(@params);
+            return Engine.Find(requiredNamespaces);
         }
 
         private async Task Initialize()

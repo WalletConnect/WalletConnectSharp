@@ -114,10 +114,7 @@ namespace WalletConnectSharp.Examples
 
             var walletClient = await WalletConnectSignClient.Init(walletOptions);
 
-            var proposal = await walletClient.Pair(new PairParams()
-            {
-                Uri = connectData.Uri
-            });
+            var proposal = await walletClient.Pair(connectData.Uri);
 
             var approveData = await walletClient.Approve(proposal.ApproveProposal(testAddress));
 

@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Network;
 
-namespace WalletConnectSharp.Sign.Models.Engine
+namespace WalletConnectSharp.Sign.Models.Engine.Events
 {
     public class SessionRequestEvent<T> : SessionEvent
     {

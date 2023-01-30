@@ -162,16 +162,8 @@ namespace WalletConnectSharp.Sign.Models
 
             if (rea.Response != null || rea.Error != null)
             {
-                await _ref.Respond<T, TR>(new RespondParams<TR>()
-                {
-                    Response = new JsonRpcResponse<TR>()
-                    {
-                        Error = rea.Error,
-                        Id = arg2.Id,
-                        Result = rea.Response
-                    },
-                    Topic = arg1
-                });
+                await _ref.Respond<T, TR>(arg1,
+                    new JsonRpcResponse<TR>() {Error = rea.Error, Id = arg2.Id, Result = rea.Response});
             }
         }
     }

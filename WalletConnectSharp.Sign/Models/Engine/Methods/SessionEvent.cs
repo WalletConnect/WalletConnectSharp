@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
+using WalletConnectSharp.Sign.Models.Engine.Events;
 
 namespace WalletConnectSharp.Sign.Models.Engine.Methods
 {

@@ -12,6 +12,7 @@ using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
+using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 using WalletConnectSharp.Sign.Models.Expirer;
 
@@ -533,11 +534,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             try
             {
-                await PrivateThis.IsValidUpdate(new UpdateParams()
-                {
-                    Namespaces = @params.Namespaces,
-                    Topic = topic
-                });
+                await PrivateThis.IsValidUpdate(topic, @params.Namespaces);
 
                 await this.Client.Session.Update(topic, new SessionStruct()
                 {
@@ -569,10 +566,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             try
             {
-                await PrivateThis.IsValidExtend(new ExtendParams()
-                {
-                    Topic = topic
-                });
+                await PrivateThis.IsValidExtend(topic);
                 await PrivateThis.SetExpiry(topic, Clock.CalculateExpiry(SessionExpiry));
                 await PrivateThis.SendResult<SessionExtend, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.SessionExtend, new SessionEvent()
@@ -598,10 +592,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             try
             {
-                await PrivateThis.IsValidPing(new PingParams()
-                {
-                    Topic = topic
-                });
+                await PrivateThis.IsValidPing(topic);
                 await PrivateThis.SendResult<SessionPing, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.SessionPing, new SessionEvent()
                 {
@@ -631,10 +622,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             try
             {
-                await PrivateThis.IsValidPing(new PingParams()
-                {
-                    Topic = topic
-                });
+                await PrivateThis.IsValidPing(topic);
 
                 await PrivateThis.SendResult<PairingPing, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.PairingPing, new SessionEvent()
@@ -665,11 +653,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             try
             {
-                await PrivateThis.IsValidDisconnect(new DisconnectParams()
-                {
-                    Topic = topic,
-                    Reason = payload.Params
-                });
+                await PrivateThis.IsValidDisconnect(topic, payload.Params);
 
                 await PrivateThis.SendResult<SessionDelete, bool>(id, topic, true);
                 await PrivateThis.DeleteSession(topic);
@@ -690,11 +674,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             try
             {
-                await PrivateThis.IsValidDisconnect(new DisconnectParams()
-                {
-                    Topic = topic,
-                    Reason = payload.Params
-                });
+                await PrivateThis.IsValidDisconnect(topic, payload.Params);
 
                 await PrivateThis.SendResult<PairingDelete, bool>(id, topic, true);
                 await PrivateThis.DeletePairing(topic);
@@ -716,12 +696,7 @@ namespace WalletConnectSharp.Sign
             var @params = payload.Params;
             try
             {
-                await PrivateThis.IsValidRequest(new RequestParams<T>()
-                {
-                    Topic = topic,
-                    ChainId = @params.ChainId,
-                    Request = @params.Request
-                });
+                await PrivateThis.IsValidRequest(topic, @params.Request, @params.ChainId);
                 this.Client.Events.Trigger(EngineEvents.SessionRequest, new SessionRequestEvent<T>()
                 {
                     Topic = topic,
@@ -742,12 +717,7 @@ namespace WalletConnectSharp.Sign
             var @params = payload.Params;
             try
             {
-                await PrivateThis.IsValidEmit(new EmitParams<T>()
-                {
-                    Topic = topic,
-                    ChainId = @params.ChainId,
-                    Event = @params.Event
-                });
+                await PrivateThis.IsValidEmit(topic, @params.Event, @params.ChainId);
                 this.Client.Events.Trigger(EngineEvents.SessionEvent, new EmitEvent<T>()
                 {
                     Topic = topic,
@@ -940,11 +910,11 @@ namespace WalletConnectSharp.Sign
         }
 
 
-        public async Task<ProposalStruct> Pair(PairParams pairParams)
+        public async Task<ProposalStruct> Pair(string uri)
         {
             IsInitialized();
-            await PrivateThis.IsValidPair(pairParams);
-            var uriParams = ParseUri(pairParams.Uri);
+            await PrivateThis.IsValidPair(uri);
+            var uriParams = ParseUri(uri);
 
             var topic = uriParams.Topic;
             var symKey = uriParams.SymKey;
@@ -1081,12 +1051,10 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        public async Task<IAcknowledgement> Update(UpdateParams @params)
+        public async Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
         {
             IsInitialized();
-            await PrivateThis.IsValidUpdate(@params);
-            var topic = @params.Topic;
-            var namespaces = @params.Namespaces;
+            await PrivateThis.IsValidUpdate(topic, namespaces);
             var id = await PrivateThis.SendRequest<SessionUpdate, bool>(topic, new SessionUpdate()
             {
                 Namespaces = namespaces
@@ -1109,11 +1077,10 @@ namespace WalletConnectSharp.Sign
             return IAcknowledgement.FromTask(acknowledgedTask.Task);
         }
 
-        public async Task<IAcknowledgement> Extend(ExtendParams @params)
+        public async Task<IAcknowledgement> Extend(string topic)
         {
             IsInitialized();
-            await PrivateThis.IsValidExtend(@params);
-            var topic = @params.Topic;
+            await PrivateThis.IsValidExtend(topic);
             var id = await PrivateThis.SendRequest<SessionExtend, bool>(topic, new SessionExtend());
             
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
@@ -1148,21 +1115,11 @@ namespace WalletConnectSharp.Sign
                 defaultChainId = chainId;
             }
 
-            return await Request<T, TR>(new RequestParams<T>()
-            {
-                ChainId = defaultChainId,
-                Request = new JsonRpcRequest<T>(method, data),
-                Topic = topic
-            });
-        }
-
-        public async Task<TR> Request<T, TR>(RequestParams<T> @params)
-        {
+            var request = new JsonRpcRequest<T>(method, data);
+            
             IsInitialized();
-            await PrivateThis.IsValidRequest(@params);
-            var chainId = @params.ChainId;
-            var request = @params.Request;
-            var topic = @params.Topic;
+            await PrivateThis.IsValidRequest(topic, request, defaultChainId);
+            
 
             var id = await PrivateThis.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
             {
@@ -1187,12 +1144,10 @@ namespace WalletConnectSharp.Sign
             return await taskSource.Task;
         }
 
-        public async Task Respond<T, TR>(RespondParams<TR> @params)
+        public async Task Respond<T, TR>(string topic, JsonRpcResponse<TR> response)
         {
             IsInitialized();
-            await PrivateThis.IsValidRespond(@params);
-            var topic = @params.Topic;
-            var response = @params.Response;
+            await PrivateThis.IsValidRespond(topic, response);
             var id = response.Id;
             if (response.IsError)
             {
@@ -1204,12 +1159,9 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        public async Task Emit<T>(EmitParams<T> @params)
+        public async Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
         {
             IsInitialized();
-            var topic = @params.Topic;
-            var @event = @params.Event;
-            var chainId = @params.ChainId;
             await PrivateThis.SendRequest<SessionEvent<T>, object>(topic, new SessionEvent<T>()
             {
                 ChainId = chainId,
@@ -1217,12 +1169,11 @@ namespace WalletConnectSharp.Sign
             });
         }
 
-        public async Task Ping(PingParams @params)
+        public async Task Ping(string topic)
         {
             IsInitialized();
-            await PrivateThis.IsValidPing(@params);
-
-            var topic = @params.Topic;
+            await PrivateThis.IsValidPing(topic);
+            
             if (this.Client.Session.Keys.Contains(topic))
             {
                 var id = await PrivateThis.SendRequest<SessionPing, bool>(topic, new SessionPing());
@@ -1251,13 +1202,12 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        public async Task Disconnect(DisconnectParams @params)
+        public async Task Disconnect(string topic, ErrorResponse reason)
         {
             IsInitialized();
-            await PrivateThis.IsValidDisconnect(@params);
-            var topic = @params.Topic;
+            var error = reason ?? ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED);
+            await PrivateThis.IsValidDisconnect(topic, error);
             
-            var error = ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED);
             if (this.Client.Session.Keys.Contains(topic))
             {
                 await PrivateThis.SendRequest<SessionDelete, bool>(topic, new SessionDelete()
@@ -1280,15 +1230,10 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        public SessionStruct[] Find(FindParams @params)
+        public SessionStruct[] Find(RequiredNamespaces requiredNamespaces)
         {
             IsInitialized();
-            return this.Client.Session.Values.Where(s => IsSessionCompatible(s, @params)).ToArray();
-        }
-        
-        public Task<ProposalStruct> Pair(string uri)
-        {
-            return Pair(new PairParams() {Uri = uri});
+            return this.Client.Session.Values.Where(s => IsSessionCompatible(s, requiredNamespaces)).ToArray();
         }
 
         public Task<IApprovedData> Approve(ProposalStruct proposalStruct, params string[] approvedAddresses)

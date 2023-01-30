@@ -83,10 +83,7 @@ namespace WalletConnectSharp.Sign.Test
             var connectData = await dappClient.Connect(dappConnectOptions);
 
             var walletClient = ClientB;
-            var proposal = await walletClient.Pair(new PairParams()
-            {
-                Uri = connectData.Uri
-            });
+            var proposal = await walletClient.Pair(connectData.Uri);
 
             var approveData = await walletClient.Approve(proposal, testAddress);
 
