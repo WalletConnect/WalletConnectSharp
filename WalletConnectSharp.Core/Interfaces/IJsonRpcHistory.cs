@@ -51,9 +51,9 @@ namespace WalletConnectSharp.Core.Interfaces
         /// Set a new request in the given topic on the given chainId. This will add the request to the
         /// history as pending. To add a response to this request, use the Resolve method
         /// </summary>
-        /// <param name="topic"></param>
-        /// <param name="request"></param>
-        /// <param name="chainId"></param>
+        /// <param name="topic">The topic to record this request in</param>
+        /// <param name="request">The request to record</param>
+        /// <param name="chainId">The chainId this request came from</param>
         void Set(string topic, IJsonRpcRequest<T> request, string chainId);
 
         /// <summary>

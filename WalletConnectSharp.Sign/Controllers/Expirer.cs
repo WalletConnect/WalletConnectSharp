@@ -11,11 +11,19 @@ using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models.Expirer;
+using WalletConnectSharp.Storage.Interfaces;
 
 namespace WalletConnectSharp.Sign.Controllers
 {
+    /// <summary>
+    /// The Expirer module keeps track of expiration dates and triggers an event when an expiration date
+    /// has passed
+    /// </summary>
     public class Expirer : IExpirer
     {
+        /// <summary>
+        /// The version of this module
+        /// </summary>
         public static readonly string Version = "0.3";
         
         private Dictionary<string, Expiration> _expirations = new Dictionary<string, Expiration>();
@@ -23,6 +31,9 @@ namespace WalletConnectSharp.Sign.Controllers
         private Expiration[] _cached = Array.Empty<Expiration>();
         private ICore _core;
 
+        /// <summary>
+        /// The name of this module instance
+        /// </summary>
         public string Name
         {
             get
@@ -31,6 +42,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// The context string to use for this module instance
+        /// </summary>
         public string Context
         {
             get
@@ -39,8 +53,15 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// The <see cref="EventDelegator"/> this module uses to emit events
+        /// </summary>
         public EventDelegator Events { get; }
 
+        /// <summary>
+        /// The string key value this module will use when storing data in the <see cref="ICore.Storage"/> module
+        /// module 
+        /// </summary>
         public string StorageKey
         {
             get
@@ -49,6 +70,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// The number of expirations this module is tracking
+        /// </summary>
         public int Length
         {
             get
@@ -57,6 +81,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of key values that represents each expiration this module is tracking
+        /// </summary>
         public string[] Keys
         {
             get
@@ -65,6 +92,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of expirations this module is tracking
+        /// </summary>
         public Expiration[] Values
         {
             get
@@ -73,12 +103,19 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a new Expirer module using the given <see cref="ICore"/> module
+        /// </summary>
+        /// <param name="core">The <see cref="ICore"/> module the Expirer should reference for Storage</param>
         public Expirer(ICore core)
         {
             this._core = core;
             Events = new EventDelegator(this);
         }
 
+        /// <summary>
+        /// Initialize this module
+        /// </summary>
         public async Task Init()
         {
             if (!initialized)
@@ -96,6 +133,11 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// Determine whether this Expirer is tracking an expiration with the given string key (usually a topic). 
+        /// </summary>
+        /// <param name="key">The key of the expiration to check existence for</param>
+        /// <returns>True if the given key is being tracked by this module, false otherwise</returns>
         public bool Has(string key)
         {
             try
@@ -109,6 +151,11 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// Determine whether this Expirer is tracking an expiration with the given long key (usually an id). 
+        /// </summary>
+        /// <param name="key">The key of the expiration to check existence for</param>
+        /// <returns>True if the given key is being tracked by this module, false otherwise</returns>
         public bool Has(long key)
         {
             try
@@ -122,12 +169,24 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// Store a new expiration date with the given string key (usually a topic).
+        /// This will also start tracking for the expiration date
+        /// </summary>
+        /// <param name="key">The string key of the expiration to store</param>
+        /// <param name="expiry">The expiration date to store</param>
         public void Set(string key, long expiry)
         {
             IsInitialized();
             SetWithTarget("topic", key, expiry);
         }
 
+        /// <summary>
+        /// Store a new expiration date with the given long key (usually a id).
+        /// This will also start tracking for the expiration date
+        /// </summary>
+        /// <param name="key">The long key of the expiration to store</param>
+        /// <param name="expiry">The expiration date to store</param>
         public void Set(long key, long expiry)
         {
             IsInitialized();
@@ -155,12 +214,22 @@ namespace WalletConnectSharp.Sign.Controllers
             });
         }
 
+        /// <summary>
+        /// Get an expiration date with the given string key (usually a topic)
+        /// </summary>
+        /// <param name="key">The string key to get the expiration for</param>
+        /// <returns>The expiration date</returns>
         public Expiration Get(string key)
         {
             IsInitialized();
             return GetWithTarget("topic", key);
         }
 
+        /// <summary>
+        /// Get an expiration date with the given long key (usually an id)
+        /// </summary>
+        /// <param name="key">The long key to get the expiration for</param>
+        /// <returns>The expiration date</returns>
         public Expiration Get(long key)
         {
             IsInitialized();
@@ -173,40 +242,26 @@ namespace WalletConnectSharp.Sign.Controllers
             return GetExpiration(target);
         }
 
+        /// <summary>
+        /// Delete a expiration with the given string key (usually a topic).
+        /// </summary>
+        /// <param name="key">The string key of the expiration to delete</param>
         public Task Delete(string key)
         {
             IsInitialized();
-            var target = FormatTarget("topic", key);
-            var exists = this.Has(target);
-            if (exists)
-            {
-                var expiration = this.GetExpiration(target);
-                this._expirations.Remove(target);
-                this.Events.Trigger(ExpirerEvents.Deleted, new ExpirerEventArgs()
-                {
-                    Expiration = expiration,
-                    Target = target
-                });
-            }
+            DeleteWithTarget("topic", key);
 
             return Task.CompletedTask;
         }
-
+        
+        /// <summary>
+        /// Delete a expiration with the given long key (usually a id).
+        /// </summary>
+        /// <param name="key">The long key of the expiration to delete</param>
         public Task Delete(long key)
         {
             IsInitialized();
-            var target = FormatTarget("id", key);
-            var exists = this.Has(target);
-            if (exists)
-            {
-                var expiration = this.GetExpiration(target);
-                this._expirations.Remove(target);
-                this.Events.Trigger(ExpirerEvents.Deleted, new ExpirerEventArgs()
-                {
-                    Expiration = expiration,
-                    Target = target
-                });
-            }
+            DeleteWithTarget("id", key);
 
             return Task.CompletedTask;
         }

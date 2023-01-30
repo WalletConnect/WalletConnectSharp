@@ -1,14 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;netcoreapp3.1;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;netcoreapp3.1;netcoreapp3.1</TargetFrameworks>
         <PackageVersion>2.0.0-rc.1</PackageVersion>
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <FileVersion>2.0.0</FileVersion>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\WalletConnectSharp.Sign\WalletConnectSharp.Sign.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NJsonSchema.CodeGeneration" Version="10.8.0" />
+      <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.8.0" />
     </ItemGroup>
 
 </Project>

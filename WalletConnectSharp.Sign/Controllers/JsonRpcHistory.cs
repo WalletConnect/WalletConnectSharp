@@ -13,13 +13,27 @@ using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Sign.Controllers
 {
+    /// <summary>
+    /// A module that stores Json RPC request/response history data for a given Request type (T) and Response type (TR).
+    /// Each request / response is stored in a JsonRpcRecord of type T, TR
+    /// </summary>
+    /// <typeparam name="T">The JSON RPC Request type</typeparam>
+    /// <typeparam name="TR">The JSON RPC Response type</typeparam>
     public class JsonRpcHistory<T, TR> : IJsonRpcHistory<T, TR>
     {
-
+        /// <summary>
+        /// The storage version of this module
+        /// </summary>
         public static readonly string Version = "0.3";
         
+        /// <summary>
+        /// The <see cref="EventDelegator"/> this module is using to emit events
+        /// </summary>
         public EventDelegator Events { get; }
         
+        /// <summary>
+        /// The name of this module instance
+        /// </summary>
         public string Name
         {
             get
@@ -28,6 +42,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// The context string this module is using
+        /// </summary>
         public string Context
         {
             get
@@ -36,6 +53,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// The storage key this module uses to store data in the <see cref="ICore.Storage"/> module
+        /// </summary>
         public string StorageKey
         {
             get
@@ -49,6 +69,9 @@ namespace WalletConnectSharp.Sign.Controllers
         private bool initialized = false;
         private ICore _core;
 
+        /// <summary>
+        /// A mapping of Json RPC Records to their corresponding Json RPC id
+        /// </summary>
         public IReadOnlyDictionary<long, JsonRpcRecord<T, TR>> Records
         {
             get
@@ -57,6 +80,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// The number of history records stored
+        /// </summary>
         public int Size
         {
             get
@@ -65,6 +91,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of all JsonRpcRecord ids
+        /// </summary>
         public long[] Keys
         {
             get
@@ -73,6 +102,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of all JsonRpcRecords, each record contains a request / response
+        /// </summary>
         public JsonRpcRecord<T, TR>[] Values
         {
             get
@@ -81,6 +113,9 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// An array of all pending requests. A request is pending when it has no response
+        /// </summary>
         public RequestEvent<T>[] Pending
         {
             get
@@ -97,6 +132,10 @@ namespace WalletConnectSharp.Sign.Controllers
             Events = new EventDelegator(this);
         }
 
+        /// <summary>
+        /// Initialize this JsonRpcFactory. This will restore all history records from storage
+        /// </summary>
+        /// <returns></returns>
         public async Task Init()
         {
             if (!initialized)
@@ -113,6 +152,13 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// Set a new request in the given topic on the given chainId. This will add the request to the
+        /// history as pending. To add a response to this request, use the <see cref="Resolve"/> method
+        /// </summary>
+        /// <param name="topic">The topic to record this request in</param>
+        /// <param name="request">The request to record</param>
+        /// <param name="chainId">The chainId this request came from</param>
         public void Set(string topic, IJsonRpcRequest<T> request, string chainId)
         {
             IsInitialized();
@@ -128,6 +174,12 @@ namespace WalletConnectSharp.Sign.Controllers
             Events.Trigger(HistoryEvents.Created, record);
         }
 
+        /// <summary>
+        /// Get a request that has previously been set with a given topic and id.
+        /// </summary>
+        /// <param name="topic">The topic of the request was made in</param>
+        /// <param name="id">The id of the request to get</param>
+        /// <returns>The recorded request record</returns>
         public Task<JsonRpcRecord<T, TR>> Get(string topic, long id)
         {
             IsInitialized();
@@ -141,6 +193,13 @@ namespace WalletConnectSharp.Sign.Controllers
             return Task.FromResult<JsonRpcRecord<T, TR>>(record);
         }
 
+        /// <summary>
+        /// Resolve a request that has previously been set using a specific response. The id and topic of the response
+        /// will be used to determine which request to resolve. If the request is not found, then nothing happens.
+        /// </summary>
+        /// <param name="response">The response to resolve. The id and topic of the response
+        /// will be used to determine which request to resolve.</param>
+        /// <returns></returns>
         public Task Resolve(IJsonRpcResult<TR> response)
         {
             IsInitialized();
@@ -154,6 +213,11 @@ namespace WalletConnectSharp.Sign.Controllers
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Delete a request record with a given topic and id (optional). If the request is not found, then nothing happens.
+        /// </summary>
+        /// <param name="topic">The topic the request was made in</param>
+        /// <param name="id">The id of the request. If no id is given then all requests in the given topic are deleted.</param>
         public void Delete(string topic, long? id)
         {
             IsInitialized();
@@ -169,6 +233,12 @@ namespace WalletConnectSharp.Sign.Controllers
             }
         }
 
+        /// <summary>
+        /// Check if a request with a given topic and id exists.
+        /// </summary>
+        /// <param name="topic">The topic the request was made in</param>
+        /// <param name="id">The id of the request</param>
+        /// <returns>True if the request with the given topic and id exists, false otherwise</returns>
         public Task<bool> Exists(string topic, long id)
         {
             IsInitialized();

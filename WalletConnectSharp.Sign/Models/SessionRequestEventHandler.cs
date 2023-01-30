@@ -7,7 +7,7 @@ namespace WalletConnectSharp.Sign.Models
 {
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
     { 
-        public new static TypedEventHandler<T, TR> GetInstance(IEngine engine)
+        public static new TypedEventHandler<T, TR> GetInstance(IEngine engine)
         {
             var context = engine.Client.Context;
             
