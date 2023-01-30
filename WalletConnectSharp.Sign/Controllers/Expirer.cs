@@ -114,7 +114,7 @@ namespace WalletConnectSharp.Sign.Controllers
         }
 
         /// <summary>
-        /// Initialize this module
+        /// Initialize this module. This will restore all stored expiration from Storage
         /// </summary>
         public async Task Init()
         {

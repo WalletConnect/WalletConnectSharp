@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 
 namespace WalletConnectSharp.Sign.Models
@@ -74,6 +76,29 @@ namespace WalletConnectSharp.Sign.Models
                 RelayProtocol = relayProtocol,
                 Namespaces = namespaces
             };
+        }
+
+        public RejectParams RejectProposal(ErrorResponse error)
+        {
+            if (Id == null)
+                throw new Exception("Proposal has no set Id");
+
+            return new RejectParams() {Id = Id.Value, Reason = error};
+        }
+
+        public RejectParams RejectProposal(string message = null)
+        {
+            if (Id == null)
+                throw new Exception("Proposal has no set Id");
+            
+            if (message == null)
+                message = "Proposal denied by remote host";
+            
+            return RejectProposal(new ErrorResponse()
+            {
+                Message = message,
+                Code = (long) ErrorType.USER_DISCONNECTED
+            });
         }
     }
 }

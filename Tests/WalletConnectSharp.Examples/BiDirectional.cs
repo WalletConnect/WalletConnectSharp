@@ -1,7 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using NJsonSchema;
-using NJsonSchema.CodeGeneration.CSharp;
 using WalletConnectSharp.Sign;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -19,12 +15,6 @@ namespace WalletConnectSharp.Examples
 
         public async Task Execute(string[] args)
         {
-            var schema = await JsonSchema.FromFileAsync("test.json");
-            var generator = new CSharpGenerator(schema);
-            var file = generator.GenerateFile();
-            
-            File.WriteAllText("test.cs", file);
-            
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
             var dappOptions = new SignClientOptions()

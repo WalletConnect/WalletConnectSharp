@@ -1,14 +1,15 @@
 ﻿using System.Threading.Tasks;
+using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 
 namespace WalletConnectSharp.Sign.Test
 {
-    public class TwoClientsFixture
+    public abstract class TwoClientsFixture<SClient> where SClient : ISignClient
     {
-        public WalletConnectSignClient ClientA { get; private set; }
-        public WalletConnectSignClient ClientB { get; private set; }
+        public SClient ClientA { get; protected set; }
+        public SClient ClientB { get; protected set; }
         
         public SignClientOptions OptionsA { get; }
         public SignClientOptions OptionsB { get; }
@@ -48,11 +49,7 @@ namespace WalletConnectSharp.Sign.Test
             Init();
         }
 
-        private async void Init()
-        {
-            ClientA = await WalletConnectSignClient.Init(OptionsA);
-            ClientB = await WalletConnectSignClient.Init(OptionsB);
-        }
+        protected abstract void Init();
 
         public async Task WaitForClientsReady()
         {

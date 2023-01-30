@@ -1,8 +1,5 @@
-using System;
-using System.Threading.Tasks;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -10,17 +7,18 @@ using Xunit;
 
 namespace WalletConnectSharp.Sign.Test
 {
-    public class SignTests : IClassFixture<TwoClientsFixture>
+    public class SignTests : IClassFixture<SignClientFixture>
     {
-        private TwoClientsFixture _cryptoFixture;
+        private SignClientFixture _cryptoFixture;
 
-        [RpcMethod("test_method"), RpcResponseOptions(Clock.ONE_MINUTE, false, 99999)]
+        [RpcMethod("test_method"), RpcRequestOptions(Clock.ONE_MINUTE, false, 99998)]
         public class TestRequest
         {
             public int a;
             public int b;
         }
 
+        [RpcResponseOptions(Clock.ONE_MINUTE, false, 99999)]
         public class TestResponse
         {
             public int result;
@@ -42,7 +40,7 @@ namespace WalletConnectSharp.Sign.Test
             }
         }
 
-        public SignTests(TwoClientsFixture cryptoFixture)
+        public SignTests(SignClientFixture cryptoFixture)
         {
             this._cryptoFixture = cryptoFixture;
         }

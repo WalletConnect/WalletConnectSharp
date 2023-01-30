@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
@@ -215,11 +211,28 @@ namespace WalletConnectSharp.Sign
             Events.ListenFor<DecodedMessageEvent>($"response_raw", InspectResponseRaw);
         }
 
+        public PublishOptions RpcRequestOptionsFromType<T1, T2>()
+        {
+            var opts = RpcRequestOptionsForType<T1>();
+            if (opts == null)
+            {
+                opts = RpcRequestOptionsForType<T2>();
+                if (opts == null)
+                {
+                    throw new Exception($"No RpcRequestOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
+                }
+            }
+
+            return opts;
+        }
+
         public PublishOptions RpcRequestOptionsForType<T>()
         {
             var attributes = typeof(T).GetCustomAttributes(typeof(RpcRequestOptionsAttribute), true);
-            if (attributes.Length != 1)
-                throw new Exception($"Type {typeof(T).FullName} has no RpcRequestOptions attribute!");
+            if (attributes.Length > 1)
+                throw new Exception($"Type {typeof(T).FullName} has multiple RpcRequestOptions attributes!");
+            if (attributes.Length == 0)
+                return null;
 
             var opts = attributes.Cast<RpcRequestOptionsAttribute>().First();
 
@@ -230,12 +243,31 @@ namespace WalletConnectSharp.Sign
                 TTL = opts.TTL
             };
         }
+
+        public PublishOptions RpcResponseOptionsFromTypes<T1, T2>()
+        {
+            var opts = RpcResponseOptionsForType<T1>();
+            if (opts != null)
+            {
+                return opts;
+            }
+
+            opts = RpcResponseOptionsForType<T2>();
+            if (opts == null)
+            {
+                throw new Exception($"No RpcResponseOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
+            }
+
+            return opts;
+        }
         
         public PublishOptions RpcResponseOptionsForType<T>()
         {
             var attributes = typeof(T).GetCustomAttributes(typeof(RpcResponseOptionsAttribute), true);
-            if (attributes.Length != 1)
-                throw new Exception($"Type {typeof(T).FullName} has no RpcResponseOptions attribute!");
+            if (attributes.Length > 1)
+                throw new Exception($"Type {typeof(T).FullName} has multiple RpcResponseOptions attributes!");
+            if (attributes.Length == 0)
+                return null;
 
             var opts = attributes.Cast<RpcResponseOptionsAttribute>().First();
 
@@ -255,7 +287,7 @@ namespace WalletConnectSharp.Sign
 
             var message = await this.Client.Core.Crypto.Encode(topic, payload);
 
-            var opts = RpcRequestOptionsForType<T>();
+            var opts = RpcRequestOptionsFromType<T, TR>();
             
             (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
 
@@ -272,8 +304,7 @@ namespace WalletConnectSharp.Sign
         {
             var payload = new JsonRpcResponse<TR>(id, null, result);
             var message = await this.Client.Core.Crypto.Encode(topic, payload);
-         
-            var opts = RpcResponseOptionsForType<T>();
+            var opts = RpcResponseOptionsFromTypes<T, TR>();
             await this.Client.Core.Relayer.Publish(topic, message, opts);
             await (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
         }
@@ -282,7 +313,7 @@ namespace WalletConnectSharp.Sign
         {
             var payload = new JsonRpcResponse<TR>(id, error, default);
             var message = await this.Client.Core.Crypto.Encode(topic, payload);
-            var opts = RpcResponseOptionsForType<T>();
+            var opts = RpcResponseOptionsFromTypes<T, TR>();
             await this.Client.Core.Relayer.Publish(topic, message, opts);
             await (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
         }
@@ -1253,6 +1284,26 @@ namespace WalletConnectSharp.Sign
         {
             IsInitialized();
             return this.Client.Session.Values.Where(s => IsSessionCompatible(s, @params)).ToArray();
+        }
+        
+        public Task<ProposalStruct> Pair(string uri)
+        {
+            return Pair(new PairParams() {Uri = uri});
+        }
+
+        public Task<IApprovedData> Approve(ProposalStruct proposalStruct, params string[] approvedAddresses)
+        {
+            return Approve(proposalStruct.ApproveProposal(approvedAddresses));
+        }
+
+        public Task Reject(ProposalStruct @params, string message = null)
+        {
+            return Reject(@params.RejectProposal(message));
+        }
+
+        public Task Reject(ProposalStruct @params, ErrorResponse error)
+        {
+            return Reject(@params.RejectProposal(error));
         }
     }
 }

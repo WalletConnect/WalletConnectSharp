@@ -8,7 +8,6 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
 {
     [RpcMethod("wc_sessionPropose")]
     [RpcRequestOptions(Clock.FIVE_MINUTES, true, 1100)]
-    [RpcResponseOptions(Clock.FIVE_MINUTES, false, 1101)]
     public class SessionPropose : IWcMethod
     {
         [JsonProperty("relays")]

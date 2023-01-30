@@ -185,7 +185,7 @@ namespace WalletConnectSharp.Events
                 //Find all EventFactories that inherit from type T
                 var inheritedT = from assembly in AppDomain.CurrentDomain.GetAssemblies()
                     from type in assembly.GetTypes()
-                    where type.IsSubclassOf(typeToTrigger)
+                    where typeToTrigger.IsSubclassOf(type)
                     select type;
 
                 // Create list of types that include types inherit from type T, type T, and type object

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
@@ -114,7 +109,7 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        async Task IEnginePrivate.IsValidPair(PairParams pairParams)
+        Task IEnginePrivate.IsValidPair(PairParams pairParams)
         {
             if (pairParams == null)
             {
@@ -123,9 +118,10 @@ namespace WalletConnectSharp.Sign
 
             if (!IsValidUrl(pairParams.Uri))
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"pair() uri: {pairParams.Uri}");
+            return Task.CompletedTask;
         }
 
-        async Task IEnginePrivate.IsValidSessionSettleRequest(SessionSettle settle)
+        Task IEnginePrivate.IsValidSessionSettleRequest(SessionSettle settle)
         {
             if (settle == null)
             {
@@ -154,6 +150,7 @@ namespace WalletConnectSharp.Sign
 
             if (Clock.IsExpired(expiry))
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, "OnSessionSettleRequest()");
+            return Task.CompletedTask;
         }
 
         async Task IEnginePrivate.IsValidApprove(ApproveParams @params)

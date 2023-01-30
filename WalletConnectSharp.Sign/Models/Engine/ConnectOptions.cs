@@ -19,6 +19,14 @@ namespace WalletConnectSharp.Sign.Models.Engine
             RequiredNamespaces = new RequiredNamespaces();
         }
         
+        public ConnectOptions(RequiredNamespaces requiredNamespaces = null, string pairingTopic = null,
+            ProtocolOptions relays = null)
+        {
+            RequiredNamespaces = requiredNamespaces ?? new RequiredNamespaces();
+            PairingTopic = pairingTopic ?? "";
+            Relays = relays;
+        }
+
         public ConnectOptions RequireNamespace(string chain, RequiredNamespace requiredNamespace)
         {
             RequiredNamespaces.Add(chain, requiredNamespace);

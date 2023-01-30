@@ -12,9 +12,4 @@
       <ProjectReference Include="..\..\WalletConnectSharp.Sign\WalletConnectSharp.Sign.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="NJsonSchema.CodeGeneration" Version="10.8.0" />
-      <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.8.0" />
-    </ItemGroup>
-
 </Project>

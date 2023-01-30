@@ -5,6 +5,9 @@ using WalletConnectSharp.Sign.Interfaces;
 
 namespace WalletConnectSharp.Sign.Models.Engine.Methods
 {
+    /// <summary>
+    /// A class that represents the request wc_pairingDelete. 
+    /// </summary>
     [RpcMethod("wc_pairingDelete")]
     [RpcRequestOptions(Clock.ONE_DAY, false, 1000)]
     [RpcResponseOptions(Clock.ONE_DAY, false, 1001)]

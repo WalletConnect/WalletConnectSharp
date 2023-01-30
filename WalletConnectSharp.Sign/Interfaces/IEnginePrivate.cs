@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
