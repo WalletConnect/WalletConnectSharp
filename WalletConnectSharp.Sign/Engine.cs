@@ -731,7 +731,7 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        private UriParameters ParseUri(string uri)
+        public UriParameters ParseUri(string uri)
         {
             var pathStart = uri.IndexOf(":", StringComparison.Ordinal);
             int? pathEnd = uri.IndexOf("?", StringComparison.Ordinal) != -1 ? uri.IndexOf("?", StringComparison.Ordinal) : (int?)null;

@@ -5,6 +5,10 @@ using WalletConnectSharp.Sign.Interfaces;
 
 namespace WalletConnectSharp.Sign.Models.Engine.Methods
 {
+    /// <summary>
+    /// A class that represents the request wc_sessionDelete. Used to delete
+    /// a session 
+    /// </summary>
     [RpcMethod("wc_sessionDelete")]
     [RpcRequestOptions(Clock.ONE_DAY, false, 1112)]
     [RpcResponseOptions(Clock.ONE_DAY, false, 1113)]

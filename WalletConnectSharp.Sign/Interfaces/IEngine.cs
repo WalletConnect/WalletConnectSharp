@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
+using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign.Interfaces
@@ -44,5 +45,12 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
         TypedEventHandler<T, TR> SessionRequestEvents<T, TR>();
+
+        /// <summary>
+        /// Parse a session proposal URI and return all information in the URI. 
+        /// </summary>
+        /// <param name="uri">The URI to parse</param>
+        /// <returns>The parameters parsed from the URI</returns>
+        UriParameters ParseUri(string uri);
     }
 }

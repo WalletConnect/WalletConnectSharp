@@ -5,6 +5,9 @@ using WalletConnectSharp.Sign.Interfaces;
 
 namespace WalletConnectSharp.Sign.Models.Engine.Methods
 {
+    /// <summary>
+    /// A class that represents the request wc_sessionExtend. Used to extend a session
+    /// </summary>
     [RpcMethod("wc_sessionExtend")]
     [RpcRequestOptions(Clock.ONE_DAY, false, 1106)]
     [RpcResponseOptions(Clock.ONE_DAY, false, 1107)]
