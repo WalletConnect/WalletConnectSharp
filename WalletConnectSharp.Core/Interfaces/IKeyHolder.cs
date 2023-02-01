@@ -9,6 +9,9 @@ namespace WalletConnectSharp.Core.Interfaces
     /// <typeparam name="TKey">The type of key this object uses.</typeparam>
     public interface IKeyHolder<TKey>
     {
+        /// <summary>
+        /// The key field of this data element
+        /// </summary>
         [JsonIgnore]
         public TKey Key { get; }
     }

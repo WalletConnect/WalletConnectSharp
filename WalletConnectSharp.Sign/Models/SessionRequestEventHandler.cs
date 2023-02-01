@@ -5,8 +5,23 @@ using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign.Models
 {
+    /// <summary>
+    /// A sub-class of <see cref="TypedEventHandler{T,TR}"/> that fixes complex nesting issue with
+    /// SessionRequest<T>. The purpose of this class is to un-nest the SessionRequest<T> object
+    /// </summary>
+    /// <typeparam name="T">The type of the session request</typeparam>
+    /// <typeparam name="TR">The type of the response for the session request</typeparam>
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
     { 
+        /// <summary>
+        /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
+        /// string of the given <see cref="IEngine"/> will be used to determine the singleton instance to
+        /// return (or if a new one needs to be created). Beware that multiple <see cref="IEngine"/> instances
+        /// with the same context string will share the same event handlers.
+        /// </summary>
+        /// <param name="engine">The engine this singleton instance is for, and where the context string will
+        /// be read from</param>
+        /// <returns>The singleton instance to use for request/response event handlers</returns>
         public static new TypedEventHandler<T, TR> GetInstance(IEngine engine)
         {
             var context = engine.Client.Context;

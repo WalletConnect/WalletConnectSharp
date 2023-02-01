@@ -1,5 +1,10 @@
+using WalletConnectSharp.Sign.Interfaces;
+
 namespace WalletConnectSharp.Sign.Models.Expirer
 {
+    /// <summary>
+    /// A static class that holds all event ids of events the <see cref="IExpirer"/> module emits
+    /// </summary>
     public static class ExpirerEvents
     {
         public static readonly string Created = "expirer_created";

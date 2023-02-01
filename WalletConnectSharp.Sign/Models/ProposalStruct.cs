@@ -7,15 +7,27 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
+using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models.Engine;
 
 namespace WalletConnectSharp.Sign.Models
 {
+    /// <summary>
+    /// A struct that stores proposal data, including the id of the proposal, when the
+    /// proposal expires and other information
+    /// </summary>
     public struct ProposalStruct : IKeyHolder<long>
     {
+        /// <summary>
+        /// The id of this proposal
+        /// </summary>
         [JsonProperty("id")]
         public long? Id { get; set; }
 
+        /// <summary>
+        /// This is the key field, mapped to the Id. Implemented for <see cref="IKeyHolder{TKey}"/>
+        /// so this struct can be stored using <see cref="IStore{TKey,TValue}"/>
+        /// </summary>
         [JsonIgnore]
         public long Key
         {
@@ -25,26 +37,57 @@ namespace WalletConnectSharp.Sign.Models
             }
         }
         
+        /// <summary>
+        /// When this proposal expires
+        /// </summary>
         [JsonProperty("expiry")]
         public long? Expiry { get; set; }
         
+        /// <summary>
+        /// Relay protocol options for this proposal
+        /// </summary>
         [JsonProperty("relays")]
         public ProtocolOptions[] Relays { get; set; }
         
+        /// <summary>
+        /// The participant that created this proposal
+        /// </summary>
         [JsonProperty("proposer")]
         public Participant Proposer { get; set; }
         
+        /// <summary>
+        /// The required namespaces this proposal requests
+        /// </summary>
         [JsonProperty("requiredNamespaces")]
         public RequiredNamespaces RequiredNamespaces { get; set; }
         
+        /// <summary>
+        /// The pairing topic this proposal lives in
+        /// </summary>
         [JsonProperty("pairingTopic")]
         public string PairingTopic { get; set; }
 
+        /// <summary>
+        /// Approve this proposal with a single address and (optional) protocol options. The
+        /// protocolOption given must exist in this proposal
+        /// </summary>
+        /// <param name="approvedAccount">The account address that approves this proposal</param>
+        /// <param name="protocolOption">(optional) The protocol option to use. If left null, then the first protocol
+        /// option in this proposal will be chosen</param>
+        /// <returns>The <see cref="ApproveParams"/> that can be given to <see cref="IEngineTasks.Approve(ApproveParams)"/></returns>
         public ApproveParams ApproveProposal(string approvedAccount, ProtocolOptions protocolOption = null)
         {
             return ApproveProposal(new[] { approvedAccount }, protocolOption);
         }
 
+        /// <summary>
+        /// Approve this proposal with am array of addresses and (optional) protocol options. The
+        /// protocolOption given must exist in this proposal
+        /// </summary>
+        /// <param name="approvedAccounts">The account addresses that are approved in this proposal</param>
+        /// <param name="protocolOption">(optional) The protocol option to use. If left null, then the first protocol
+        /// option in this proposal will be chosen.</param>
+        /// <returns>The <see cref="ApproveParams"/> that can be given to <see cref="IEngineTasks.Approve(ApproveParams)"/></returns>
         public ApproveParams ApproveProposal(string[] approvedAccounts, ProtocolOptions protocolOption = null)
         {
             if (Id == null)
@@ -78,6 +121,13 @@ namespace WalletConnectSharp.Sign.Models
             };
         }
 
+        /// <summary>
+        /// Reject this proposal with the given <see cref="ErrorResponse"/>. This
+        /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/>
+        /// </summary>
+        /// <param name="error">The error reason this proposal was rejected</param>
+        /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/></returns>
+        /// <exception cref="Exception">If this proposal has no Id</exception>
         public RejectParams RejectProposal(ErrorResponse error)
         {
             if (Id == null)
@@ -86,6 +136,13 @@ namespace WalletConnectSharp.Sign.Models
             return new RejectParams() {Id = Id.Value, Reason = error};
         }
 
+        /// <summary>
+        /// Reject this proposal with the given message. This
+        /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/>
+        /// </summary>
+        /// <param name="message">The reason message this proposal was rejected</param>
+        /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/></returns>
+        /// <exception cref="Exception">If this proposal has no Id</exception>
         public RejectParams RejectProposal(string message = null)
         {
             if (Id == null)
