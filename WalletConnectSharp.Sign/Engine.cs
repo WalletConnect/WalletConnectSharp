@@ -18,22 +18,37 @@ using WalletConnectSharp.Sign.Models.Expirer;
 
 namespace WalletConnectSharp.Sign
 {
+    /// <summary>
+    /// The Engine for running the Sign client protocol and code flow.
+    /// </summary>
     public partial class Engine : IEnginePrivate, IEngine, IModule, IEvents
     {
         private const long ProposalExpiry = Clock.THIRTY_DAYS;
         private const long SessionExpiry = Clock.SEVEN_DAYS;
         private const int KeyLength = 32;
         
+        /// <summary>
+        /// The EventDelegator that should be used to listen to (or trigger) events
+        /// </summary>
         public EventDelegator Events { get; }
 
         private bool _initialized = false;
         
+        /// <summary>
+        /// The <see cref="ISignClient"/> using this Engine
+        /// </summary>
         public ISignClient Client { get; }
 
         private IEnginePrivate PrivateThis => this;
 
+        /// <summary>
+        /// The name of this Engine module
+        /// </summary>
         public string Name => $"{Client.Name}-engine";
 
+        /// <summary>
+        /// The context string for this Engine module
+        /// </summary>
         public string Context
         {
             get
@@ -42,12 +57,21 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        /// <summary>
+        /// Create a new Engine with the given <see cref="ISignClient"/> module
+        /// </summary>
+        /// <param name="client">That client that will be using this Engine</param>
         public Engine(ISignClient client)
         {
             this.Client = client;
             Events = new EventDelegator(this);
         }
 
+        /// <summary>
+        /// Initialize the Engine. This loads any persistant state and connects to the WalletConnect
+        /// relay server 
+        /// </summary>
+        /// <returns></returns>
         public async Task Init()
         {
             if (!this._initialized)
@@ -59,33 +83,9 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        private async void RegisterExpirerEvents()
+        private void RegisterExpirerEvents()
         {
             this.Client.Expirer.On<Expiration>(ExpirerEvents.Expired, ExpiredCallback);
-        }
-
-        private async void ExpiredCallback(object sender, GenericEvent<Expiration> e)
-        {
-            var target = new ExpirerTarget(e.EventData.Target);
-
-            if (!string.IsNullOrWhiteSpace(target.Topic))
-            {
-                var topic = target.Topic;
-                if (this.Client.Session.Keys.Contains(topic))
-                {
-                    await PrivateThis.DeleteSession(topic);
-                    this.Client.Events.Trigger(EngineEvents.SessionExpire, topic);
-                } 
-                else if (this.Client.Pairing.Keys.Contains(topic))
-                {
-                    await PrivateThis.DeletePairing(topic);
-                    this.Client.Events.Trigger(EngineEvents.PairingExpire, topic);
-                }
-            } 
-            else if (target.Id != null)
-            {
-                await PrivateThis.DeleteProposal((long) target.Id);
-            }
         }
 
         private void RegisterRelayerEvents()
@@ -103,42 +103,52 @@ namespace WalletConnectSharp.Sign
             this.Client.Core.Relayer.On<MessageEvent>(RelayerEvents.Message, RelayerMessageCallback);
         }
 
-        private async void RelayerMessageCallback(object sender, GenericEvent<MessageEvent> e)
-        {
-            var topic = e.EventData.Topic;
-            var message = e.EventData.Message;
-
-            var payload = await this.Client.Core.Crypto.Decode<JsonRpcPayload>(topic, message);
-            if (payload.IsRequest)
-            {
-                Events.Trigger($"request_{payload.Method}", e.EventData);
-            }
-            else if (payload.IsResponse)
-            {
-                Events.Trigger($"response_raw", new DecodedMessageEvent()
-                {
-                    Topic = topic,
-                    Message = message,
-                    Payload = payload
-                });
-            }
-        }
-
+        /// <summary>
+        /// Get static event handlers for requests / responses for the given type T, TR. This is similar to
+        /// <see cref="IEngine.HandleMessageType{T,TR}"/> but uses EventHandler rather than callback functions
+        /// </summary>
+        /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
+        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
+        /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
         public TypedEventHandler<T, TR> SessionRequestEvents<T, TR>()
         {
             return SessionRequestEventHandler<T, TR>.GetInstance(this);
         }
 
+        /// <summary>
+        /// An alias for <see cref="HandleMessageType{T,TR}"/> where T is <see cref="SessionRequest{T}"/> and
+        /// TR is unchanged
+        /// </summary>
+        /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
+        /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
+        /// <typeparam name="T">The request type to trigger the requestCallback for. Will be wrapped in <see cref="SessionRequest{T}"/></typeparam>
+        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         public void HandleSessionRequestMessageType<T, TR>(Func<string, JsonRpcRequest<SessionRequest<T>>, Task> requestCallback, Func<string, JsonRpcResponse<TR>, Task> responseCallback)
         {
             HandleMessageType(requestCallback, responseCallback);
         }
         
+        /// <summary>
+        /// An alias for <see cref="HandleMessageType{T,TR}"/> where T is <see cref="SessionEvent{T}"/> and
+        /// TR is unchanged
+        /// </summary>
+        /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
+        /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
+        /// <typeparam name="T">The request type to trigger the requestCallback for. Will be wrapped in <see cref="SessionEvent{T}"/></typeparam>
+        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
             HandleMessageType(requestCallback, responseCallback);
         }
 
+        /// <summary>
+        /// Handle a specific request / response type and call the given callbacks for requests and responses. The
+        /// response callback is only triggered when it originates from the request of the same type.
+        /// </summary>
+        /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
+        /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
+        /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
+        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         public async void HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback, Func<string, JsonRpcResponse<TR>, Task> responseCallback)
         {
             var method = RpcMethodAttribute.MethodForType<T>();
@@ -212,6 +222,15 @@ namespace WalletConnectSharp.Sign
             Events.ListenFor<DecodedMessageEvent>($"response_raw", InspectResponseRaw);
         }
 
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcRequestOptionsAttribute"/> from
+        /// either the type T1 or T2. T1 will take priority over T2.
+        /// </summary>
+        /// <typeparam name="T1">The first type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
+        /// <typeparam name="T2">The second type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcRequestOptionsAttribute"/>
+        /// from either type T1 or T2</returns>
+        /// <exception cref="Exception">If no <see cref="RpcOptionsAttribute"/> is found in either type</exception>
         public PublishOptions RpcRequestOptionsFromType<T1, T2>()
         {
             var opts = RpcRequestOptionsForType<T1>();
@@ -227,6 +246,14 @@ namespace WalletConnectSharp.Sign
             return opts;
         }
 
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcRequestOptionsAttribute"/> from
+        /// the given type T
+        /// </summary>
+        /// <typeparam name="T">The type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcRequestOptionsAttribute"/>
+        /// from the given type T</returns>
+        /// <exception cref="Exception">If no <see cref="RpcOptionsAttribute"/> is found in the type T</exception>
         public PublishOptions RpcRequestOptionsForType<T>()
         {
             var attributes = typeof(T).GetCustomAttributes(typeof(RpcRequestOptionsAttribute), true);
@@ -245,6 +272,15 @@ namespace WalletConnectSharp.Sign
             };
         }
 
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
+        /// either the type T1 or T2. T1 will take priority over T2.
+        /// </summary>
+        /// <typeparam name="T1">The first type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
+        /// <typeparam name="T2">The second type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcResponseOptionsAttribute"/>
+        /// from either type T1 or T2</returns>
+        /// <exception cref="Exception">If no <see cref="RpcResponseOptionsAttribute"/> is found in either type</exception>
         public PublishOptions RpcResponseOptionsFromTypes<T1, T2>()
         {
             var opts = RpcResponseOptionsForType<T1>();
@@ -262,6 +298,14 @@ namespace WalletConnectSharp.Sign
             return opts;
         }
         
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
+        /// the given type T
+        /// </summary>
+        /// <typeparam name="T">The type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcResponseOptionsAttribute"/>
+        /// from the given type T</returns>
+        /// <exception cref="Exception">If no <see cref="RpcResponseOptionsAttribute"/> is found in the type T</exception>
         public PublishOptions RpcResponseOptionsForType<T>()
         {
             var attributes = typeof(T).GetCustomAttributes(typeof(RpcResponseOptionsAttribute), true);
@@ -280,457 +324,13 @@ namespace WalletConnectSharp.Sign
             };
         }
 
-        async Task<long> IEnginePrivate.SendRequest<T, TR>(string topic, T parameters)
-        {
-            var method = RpcMethodAttribute.MethodForType<T>();
-
-            var payload = new JsonRpcRequest<T>(method, parameters);
-
-            var message = await this.Client.Core.Crypto.Encode(topic, payload);
-
-            var opts = RpcRequestOptionsFromType<T, TR>();
-            
-            (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
-
-            // await is intentionally omitted here because of a possible race condition
-            // where a response is received before the publish call is resolved
-#pragma warning disable CS4014
-            this.Client.Core.Relayer.Publish(topic, message, opts);
-#pragma warning restore CS4014
-
-            return payload.Id;
-        }
-
-        async Task IEnginePrivate.SendResult<T, TR>(long id, string topic, TR result)
-        {
-            var payload = new JsonRpcResponse<TR>(id, null, result);
-            var message = await this.Client.Core.Crypto.Encode(topic, payload);
-            var opts = RpcResponseOptionsFromTypes<T, TR>();
-            await this.Client.Core.Relayer.Publish(topic, message, opts);
-            await (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
-        }
-
-        async Task IEnginePrivate.SendError<T, TR>(long id, string topic, ErrorResponse error)
-        {
-            var payload = new JsonRpcResponse<TR>(id, error, default);
-            var message = await this.Client.Core.Crypto.Encode(topic, payload);
-            var opts = RpcResponseOptionsFromTypes<T, TR>();
-            await this.Client.Core.Relayer.Publish(topic, message, opts);
-            await (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
-        }
-
-        async Task IEnginePrivate.ActivatePairing(string topic)
-        {
-            var expiry = Clock.CalculateExpiry(ProposalExpiry);
-            await this.Client.Pairing.Update(topic, new PairingStruct()
-            {
-                Active = true,
-                Expiry = expiry
-            });
-
-            await PrivateThis.SetExpiry(topic, expiry);
-        }
-
-        async Task IEnginePrivate.DeleteSession(string topic)
-        {
-            var session = this.Client.Session.Get(topic);
-            var self = session.Self;
-            
-            bool expirerHasDeleted = !this.Client.Expirer.Has(topic);
-            bool sessionDeleted = !this.Client.Session.Keys.Contains(topic);
-            bool hasKeypairDeleted = !(await this.Client.Core.Crypto.HasKeys(self.PublicKey));
-            bool hasSymkeyDeleted = !(await this.Client.Core.Crypto.HasKeys(topic));
-
-            await this.Client.Core.Relayer.Unsubscribe(topic);
-            await Task.WhenAll(
-                sessionDeleted ? Task.CompletedTask : this.Client.Session.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
-                hasKeypairDeleted ? Task.CompletedTask : this.Client.Core.Crypto.DeleteKeyPair(self.PublicKey),
-                hasSymkeyDeleted ? Task.CompletedTask : this.Client.Core.Crypto.DeleteSymKey(topic),
-                expirerHasDeleted ? Task.CompletedTask : this.Client.Expirer.Delete(topic)
-            );
-        }
-
-        async Task IEnginePrivate.DeletePairing(string topic)
-        {
-            bool expirerHasDeleted = !this.Client.Expirer.Has(topic);
-            bool pairingHasDeleted = !this.Client.Pairing.Keys.Contains(topic);
-            bool symKeyHasDeleted = !(await this.Client.Core.Crypto.HasKeys(topic));
-            
-            await this.Client.Core.Relayer.Unsubscribe(topic);
-            await Task.WhenAll(
-                pairingHasDeleted ? Task.CompletedTask : this.Client.Pairing.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
-                symKeyHasDeleted ? Task.CompletedTask : this.Client.Core.Crypto.DeleteSymKey(topic),
-                expirerHasDeleted ? Task.CompletedTask : this.Client.Expirer.Delete(topic)
-            );
-        }
-
-        Task IEnginePrivate.DeleteProposal(long id)
-        {
-            bool expirerHasDeleted = !this.Client.Expirer.Has(id);
-            bool proposalHasDeleted = !this.Client.Proposal.Keys.Contains(id);
-            
-            return Task.WhenAll(
-                proposalHasDeleted ? Task.CompletedTask : this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
-                expirerHasDeleted ? Task.CompletedTask : this.Client.Expirer.Delete(id)
-            );
-        }
-
-        async Task IEnginePrivate.SetExpiry(string topic, long expiry)
-        {
-            if (this.Client.Pairing.Keys.Contains(topic))
-            {
-                await this.Client.Pairing.Update(topic, new PairingStruct()
-                {
-                    Expiry = expiry
-                });
-            } 
-            else if (this.Client.Session.Keys.Contains(topic))
-            {
-                await this.Client.Session.Update(topic, new SessionStruct()
-                {
-                    Expiry = expiry
-                });
-            }
-            this.Client.Expirer.Set(topic, expiry);
-        }
-
-        async Task IEnginePrivate.SetProposal(long id, ProposalStruct proposal)
-        {
-            await this.Client.Proposal.Set(id, proposal);
-            if (proposal.Expiry != null)
-                this.Client.Expirer.Set(id, (long)proposal.Expiry);
-        }
-
-        Task IEnginePrivate.Cleanup()
-        {
-            List<string> sessionTopics = (from session in this.Client.Session.Values.Where(e => e.Expiry != null) where Clock.IsExpired(session.Expiry.Value) select session.Topic).ToList();
-            List<string> pairingTopics = (from pair in this.Client.Pairing.Values.Where(e => e.Expiry != null) where Clock.IsExpired(pair.Expiry.Value) select pair.Topic).ToList();
-            List<long> proposalIds = (from p in this.Client.Proposal.Values.Where(e => e.Expiry != null) where Clock.IsExpired(p.Expiry.Value) select p.Id.Value).ToList();
-
-            return Task.WhenAll(
-                sessionTopics.Select(t => PrivateThis.DeleteSession(t)).Concat(
-                    pairingTopics.Select(t => PrivateThis.DeletePairing(t))
-                ).Concat(
-                    proposalIds.Select(id => PrivateThis.DeleteProposal(id))
-                )
-            );
-        }
-
-        async Task IEnginePrivate.OnSessionProposeRequest(string topic, JsonRpcRequest<SessionPropose> payload)
-        {
-            var @params = payload.Params;
-            var id = payload.Id;
-            try
-            {
-                var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
-                var proposal = new ProposalStruct()
-                {
-                    Id = id,
-                    PairingTopic = topic,
-                    Expiry = expiry,
-                    Proposer = @params.Proposer,
-                    Relays = @params.Relays,
-                    RequiredNamespaces = @params.RequiredNamespaces
-                };
-                await PrivateThis.SetProposal(id, proposal);
-                this.Client.Events.Trigger(EngineEvents.SessionProposal, new JsonRpcRequest<ProposalStruct>()
-                {
-                    Id = id,
-                    Params = proposal
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionPropose, SessionProposeResponse>(id, topic,
-                    ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionProposeResponse(string topic, JsonRpcResponse<SessionProposeResponse> payload)
-        {
-            var id = payload.Id;
-            if (payload.IsError)
-            {
-                await this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
-                this.Events.Trigger(EngineEvents.SessionConnect, payload);
-            }
-            else
-            {
-                var result = payload.Result;
-                var proposal = this.Client.Proposal.Get(id);
-                var selfPublicKey = proposal.Proposer.PublicKey;
-                var peerPublicKey = result.ResponderPublicKey;
-
-                var sessionTopic = await this.Client.Core.Crypto.GenerateSharedKey(
-                    selfPublicKey,
-                    peerPublicKey
-                );
-                var subscriptionId = await this.Client.Core.Relayer.Subscribe(sessionTopic);
-                await PrivateThis.ActivatePairing(topic);
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionSettleRequest(string topic, JsonRpcRequest<SessionSettle> payload)
-        {
-            var id = payload.Id;
-            var @params = payload.Params;
-            try
-            {
-                await PrivateThis.IsValidSessionSettleRequest(@params);
-                var relay = @params.Relay;
-                var controller = @params.Controller;
-                var expiry = @params.Expiry;
-                var namespaces = @params.Namespaces;
-
-                var session = new SessionStruct()
-                {
-                    Topic = topic,
-                    Relay = relay,
-                    Expiry = expiry,
-                    Namespaces = namespaces,
-                    Acknowledged = true,
-                    Controller = controller.PublicKey,
-                    Self = new Participant()
-                    {
-                        Metadata = this.Client.Metadata,
-                        PublicKey = ""
-                    },
-                    Peer = new Participant()
-                    {
-                        PublicKey = controller.PublicKey,
-                        Metadata = controller.Metadata
-                    }
-                };
-                await PrivateThis.SendResult<SessionSettle, bool>(payload.Id, topic, true);
-                this.Events.Trigger(EngineEvents.SessionConnect, session);
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionSettle, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionSettleResponse(string topic, JsonRpcResponse<bool> payload)
-        {
-            var id = payload.Id;
-            if (payload.IsError)
-            {
-                await this.Client.Session.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
-                this.Events.Trigger($"session_approve{id}", payload);
-            }
-            else
-            {
-                await this.Client.Session.Update(topic, new SessionStruct()
-                {
-                    Acknowledged = true
-                });
-                this.Events.Trigger($"session_approve{id}", payload); 
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionUpdateRequest(string topic, JsonRpcRequest<SessionUpdate> payload)
-        {
-            var @params = payload.Params;
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidUpdate(topic, @params.Namespaces);
-
-                await this.Client.Session.Update(topic, new SessionStruct()
-                {
-                    Namespaces = @params.Namespaces
-                });
-
-                await PrivateThis.SendResult<SessionUpdate, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.SessionUpdate, new SessionUpdateEvent()
-                {
-                    Id = id,
-                    Topic = topic,
-                    Params = @params
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionUpdate, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionUpdateResponse(string topic, JsonRpcResponse<bool> payload)
-        {
-            var id = payload.Id;
-            this.Events.Trigger($"session_update{id}", payload);
-        }
-
-        async Task IEnginePrivate.OnSessionExtendRequest(string topic, JsonRpcRequest<SessionExtend> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidExtend(topic);
-                await PrivateThis.SetExpiry(topic, Clock.CalculateExpiry(SessionExpiry));
-                await PrivateThis.SendResult<SessionExtend, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.SessionExtend, new SessionEvent()
-                {
-                    Id = id,
-                    Topic = topic
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionExtend, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionExtendResponse(string topic, JsonRpcResponse<bool> payload)
-        {
-            var id = payload.Id;
-            this.Events.Trigger($"session_extend{id}", payload);
-        }
-
-        async Task IEnginePrivate.OnSessionPingRequest(string topic, JsonRpcRequest<SessionPing> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidPing(topic);
-                await PrivateThis.SendResult<SessionPing, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.SessionPing, new SessionEvent()
-                {
-                    Id = id,
-                    Topic = topic
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionPing, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionPingResponse(string topic, JsonRpcResponse<bool> payload)
-        {
-            var id = payload.Id;
-            
-            // put at the end of the stack to avoid a race condition
-            // where session_ping listener is not yet initialized
-            await Task.Delay(500);
-
-            this.Events.Trigger($"session_ping{id}", payload);
-        }
-
-        async Task IEnginePrivate.OnPairingPingRequest(string topic, JsonRpcRequest<PairingPing> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidPing(topic);
-
-                await PrivateThis.SendResult<PairingPing, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.PairingPing, new SessionEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<PairingPing, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnPairingPingResponse(string topic, JsonRpcResponse<bool> payload)
-        {
-            var id = payload.Id;
-            
-            // put at the end of the stack to avoid a race condition
-            // where session_ping listener is not yet initialized
-            await Task.Delay(500);
-
-            this.Events.Trigger($"pairing_ping{id}", payload);
-        }
-
-        async Task IEnginePrivate.OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidDisconnect(topic, payload.Params);
-
-                await PrivateThis.SendResult<SessionDelete, bool>(id, topic, true);
-                await PrivateThis.DeleteSession(topic);
-                this.Client.Events.Trigger(EngineEvents.SessionDelete, new SessionEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionDelete, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnPairingDeleteRequest(string topic, JsonRpcRequest<PairingDelete> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidDisconnect(topic, payload.Params);
-
-                await PrivateThis.SendResult<PairingDelete, bool>(id, topic, true);
-                await PrivateThis.DeletePairing(topic);
-                this.Client.Events.Trigger(EngineEvents.PairingDelete, new SessionEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<PairingDelete, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionRequest<T, TR>(string topic, JsonRpcRequest<SessionRequest<T>> payload)
-        {
-            var id = payload.Id;
-            var @params = payload.Params;
-            try
-            {
-                await PrivateThis.IsValidRequest(topic, @params.Request, @params.ChainId);
-                this.Client.Events.Trigger(EngineEvents.SessionRequest, new SessionRequestEvent<T>()
-                {
-                    Topic = topic,
-                    Id = id,
-                    ChainId = @params.ChainId,
-                    Request = @params.Request
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionRequest<T>, TR>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionEventRequest<T>(string topic, JsonRpcRequest<SessionEvent<T>> payload)
-        {
-            var id = payload.Id;
-            var @params = payload.Params;
-            try
-            {
-                await PrivateThis.IsValidEmit(topic, @params.Event, @params.ChainId);
-                this.Client.Events.Trigger(EngineEvents.SessionEvent, new EmitEvent<T>()
-                {
-                    Topic = topic,
-                    Id = id,
-                    Params = @params
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await PrivateThis.SendError<SessionEvent<T>, object>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
+        /// <summary>
+        /// Parse a session proposal URI and return all information in the URI in a
+        /// new <see cref="UriParameters"/> object
+        /// </summary>
+        /// <param name="uri">The uri to parse</param>
+        /// <returns>A new <see cref="UriParameters"/> object that contains all data
+        /// parsed from the given uri</returns>
         public UriParameters ParseUri(string uri)
         {
             var pathStart = uri.IndexOf(":", StringComparison.Ordinal);
@@ -762,6 +362,12 @@ namespace WalletConnectSharp.Sign
             return result;
         }
 
+        /// <summary>
+        /// Connect (a dApp) with the given ConnectOptions. At a minimum, you must specified a RequiredNamespace. 
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns>Connection data that includes the session proposal URI as well as a
+        /// way to await for a session approval</returns>
         public async Task<ConnectedData> Connect(ConnectOptions options)
         {
             this.IsInitialized();
@@ -873,43 +479,13 @@ namespace WalletConnectSharp.Sign
             };
         }
 
-        private async Task<CreatePairingData> CreatePairing()
-        {
-            byte[] symKeyRaw = new byte[KeyLength];
-            RandomNumberGenerator.Fill(symKeyRaw);
-            var symKey = symKeyRaw.ToHex();
-            var topic = await this.Client.Core.Crypto.SetSymKey(symKey);
-            var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
-            var relay = new ProtocolOptions()
-            {
-                Protocol = RelayProtocols.Default
-            };
-            var pairing = new PairingStruct()
-            {
-                Topic = topic,
-                Expiry = expiry,
-                Relay = relay,
-                Active = false,
-            };
-            var uri = $"{this.Client.Protocol}:{topic}@{this.Client.Version}?"
-                .AddQueryParam("symKey", symKey)
-                .AddQueryParam("relay-protocol", relay.Protocol);
-
-            if (!string.IsNullOrWhiteSpace(relay.Data))
-                uri = uri.AddQueryParam("relay-data", relay.Data);
-
-            await this.Client.Pairing.Set(topic, pairing);
-            await this.Client.Core.Relayer.Subscribe(topic);
-            await PrivateThis.SetExpiry(topic, expiry);
-
-            return new CreatePairingData()
-            {
-                Topic = topic,
-                Uri = uri
-            };
-        }
-
-
+        /// <summary>
+        /// Pair (a wallet) with a peer (dApp) using the given uri. The uri must be in the correct
+        /// format otherwise an exception will be thrown.
+        /// </summary>
+        /// <param name="uri">The URI to pair with</param>
+        /// <returns>The proposal the connecting peer wants to connect using. You must approve or reject
+        /// the proposal</returns>
         public async Task<ProposalStruct> Pair(string uri)
         {
             IsInitialized();
@@ -949,6 +525,14 @@ namespace WalletConnectSharp.Sign
             return await sessionProposeTask.Task;
         }
 
+        /// <summary>
+        /// Approve a proposal that was recently paired. If the given proposal was not from a recent pairing,
+        /// or the proposal has expired, then an Exception will be thrown.
+        /// Use <see cref="ProposalStruct.ApproveProposal(string, ProtocolOptions)"/> to generate an
+        /// <see cref="ApproveParams"/> object, or use the alias function <see cref="IEngineAPI.Approve(ProposalStruct, string[])"/>
+        /// </summary>
+        /// <param name="@params">Parameters for the approval. This usually comes from <see cref="ProposalStruct.ApproveProposal(string, ProtocolOptions)"/></param>
+        /// <returns>Approval data, includes the topic of the session and a way to wait for approval acknowledgement</returns>
         public async Task<IApprovedData> Approve(ApproveParams @params)
         {
             IsInitialized();
@@ -1035,6 +619,14 @@ namespace WalletConnectSharp.Sign
             return IApprovedData.FromTask(sessionTopic, acknowledgedTask.Task);
         }
 
+        /// <summary>
+        /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
+        /// or the proposal has expired, then an Exception will be thrown.
+        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(ErrorResponse)"/>
+        /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineAPI.Reject(ProposalStruct, string)"/>
+        /// </summary>
+        /// <param name="params">The parameters of the rejection</param>
+        /// <returns></returns>
         public async Task Reject(RejectParams @params)
         {
             IsInitialized();
@@ -1051,6 +643,12 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        /// <summary>
+        /// Update a session, adding/removing additional namespaces in the given topic.
+        /// </summary>
+        /// <param name="topic">The topic to update</param>
+        /// <param name="namespaces">The updated namespaces</param>
+        /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
         public async Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
         {
             IsInitialized();
@@ -1077,6 +675,11 @@ namespace WalletConnectSharp.Sign
             return IAcknowledgement.FromTask(acknowledgedTask.Task);
         }
 
+        /// <summary>
+        /// Extend a session in the given topic. 
+        /// </summary>
+        /// <param name="topic">The topic of the session to extend</param>
+        /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the extension</returns>
         public async Task<IAcknowledgement> Extend(string topic)
         {
             IsInitialized();
@@ -1097,6 +700,23 @@ namespace WalletConnectSharp.Sign
             return IAcknowledgement.FromTask(acknowledgedTask.Task);
         }
 
+        /// <summary>
+        /// Send a request to the session in the given topic with the request data T. You may (optionally) specify
+        /// a chainId the request should be performed in. This function will await a response of type TR from the session.
+        ///
+        /// If no response is ever received, then a Timeout exception may be thrown.
+        ///
+        /// The type T MUST define the RpcMethodAttribute to tell the SDK what JSON RPC method to use for the given
+        /// type T.
+        /// Either type T or TR MUST define a RpcRequestOptions and RpcResponseOptions attribute to tell the SDK
+        /// what options to use for the Request / Response.
+        /// </summary>
+        /// <param name="topic">The topic of the session to send the request in</param>
+        /// <param name="data">The data of the request</param>
+        /// <param name="chainId">An (optional) chainId the request should be performed in</param>
+        /// <typeparam name="T">The type of the request data. MUST define the RpcMethodAttribute</typeparam>
+        /// <typeparam name="TR">The type of the response data.</typeparam>
+        /// <returns>The response data as type TR</returns>
         public async Task<TR> Request<T, TR>(string topic, T data, string chainId = null)
         {
             await IsValidSessionTopic(topic);
@@ -1144,6 +764,15 @@ namespace WalletConnectSharp.Sign
             return await taskSource.Task;
         }
 
+        /// <summary>
+        /// Send a response to a request to the session in the given topic with the response data TR. This function
+        /// can be called directly, however it may be easier to use <see cref="TypedEventHandler{T, TR}.OnResponse"/> event
+        /// to handle sending responses to specific requests. 
+        /// </summary>
+        /// <param name="topic">The topic of the session to respond in</param>
+        /// <param name="response">The JSON RPC response to send</param>
+        /// <typeparam name="T">The type of the request data</typeparam>
+        /// <typeparam name="TR">The type of the response data</typeparam>
         public async Task Respond<T, TR>(string topic, JsonRpcResponse<TR> response)
         {
             IsInitialized();
@@ -1159,6 +788,14 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        /// <summary>
+        /// Emit an event to the session with the given topic with the given <see cref="EventData{T}"/>. You may
+        /// optionally specify a chainId to specify where the event occured. 
+        /// </summary>
+        /// <param name="topic">The topic of the session to emit the event to</param>
+        /// <param name="eventData">The event data for the event emitted</param>
+        /// <param name="chainId">An (optional) chainId to specify where the event occured</param>
+        /// <typeparam name="T">The type of the event data</typeparam>
         public async Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
         {
             IsInitialized();
@@ -1169,6 +806,10 @@ namespace WalletConnectSharp.Sign
             });
         }
 
+        /// <summary>
+        /// Send a ping to the session in the given topic
+        /// </summary>
+        /// <param name="topic">The topic of the session to send a ping to</param>
         public async Task Ping(string topic)
         {
             IsInitialized();
@@ -1202,6 +843,11 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        /// <summary>
+        /// Disconnect a session in the given topic with an (optional) error reason
+        /// </summary>
+        /// <param name="topic">The topic of the session to disconnect</param>
+        /// <param name="reason">An (optional) error reason for the disconnect</param>
         public async Task Disconnect(string topic, ErrorResponse reason)
         {
             IsInitialized();
@@ -1230,25 +876,49 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        /// <summary>
+        /// Find all sessions that have a namespace that match the given <see cref="RequiredNamespaces"/>
+        /// </summary>
+        /// <param name="requiredNamespaces">The required namespaces the session must have to be returned</param>
+        /// <returns>All sessions that have a namespace that match the given <see cref="RequiredNamespaces"/></returns>
         public SessionStruct[] Find(RequiredNamespaces requiredNamespaces)
         {
             IsInitialized();
             return this.Client.Session.Values.Where(s => IsSessionCompatible(s, requiredNamespaces)).ToArray();
         }
 
+        /// <summary>
+        /// Approve a proposal that was recently paired. If the given proposal was not from a recent pairing,
+        /// or the proposal has expired, then an Exception will be thrown.
+        /// </summary>
+        /// <param name="proposalStruct">The proposal to approve</param>
+        /// <param name="approvedAddresses">An array of address strings to connect to the session</param>
+        /// <returns>Approval data, includes the topic of the session and a way to wait for approval acknowledgement</returns>
         public Task<IApprovedData> Approve(ProposalStruct proposalStruct, params string[] approvedAddresses)
         {
             return Approve(proposalStruct.ApproveProposal(approvedAddresses));
         }
 
-        public Task Reject(ProposalStruct @params, string message = null)
+        /// <summary>
+        /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
+        /// or the proposal has expired, then an Exception will be thrown.
+        /// </summary>
+        /// <param name="proposalStruct">The proposal to reject</param>
+        /// <param name="message">A message explaining the reason for the rejection</param>
+        public Task Reject(ProposalStruct proposalStruct, string message = null)
         {
-            return Reject(@params.RejectProposal(message));
+            return Reject(proposalStruct.RejectProposal(message));
         }
 
-        public Task Reject(ProposalStruct @params, ErrorResponse error)
+        /// <summary>
+        /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
+        /// or the proposal has expired, then an Exception will be thrown.
+        /// </summary>
+        /// <param name="proposalStruct">The proposal to reject</param>
+        /// <param name="error">An error explaining the reason for the rejection</param>
+        public Task Reject(ProposalStruct proposalStruct, ErrorResponse error)
         {
-            return Reject(@params.RejectProposal(error));
+            return Reject(proposalStruct.RejectProposal(error));
         }
     }
 }

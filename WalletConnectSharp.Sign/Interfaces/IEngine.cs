@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -9,10 +10,10 @@ namespace WalletConnectSharp.Sign.Interfaces
 {
     /// <summary>
     /// An interface that represents the Engine for running the Sign client. This interface
-    /// is an sub-type of <see cref="IEngineTasks"/> and represents the actual Engine. This is
+    /// is an sub-type of <see cref="IEngineAPI"/> and represents the actual Engine. This is
     /// different than the Sign client.
     /// </summary>
-    public interface IEngine : IEngineTasks
+    public interface IEngine : IEngineAPI
     {
         /// <summary>
         /// The <see cref="ISignClient"/> this Engine is using
@@ -52,5 +53,47 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <param name="uri">The URI to parse</param>
         /// <returns>The parameters parsed from the URI</returns>
         UriParameters ParseUri(string uri);
+
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcRequestOptionsAttribute"/> from
+        /// either the type T1 or T2. T1 will take priority over T2.
+        /// </summary>
+        /// <typeparam name="T1">The first type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
+        /// <typeparam name="T2">The second type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcRequestOptionsAttribute"/>
+        /// from either type T1 or T2</returns>
+        /// <exception cref="Exception">If no <see cref="RpcOptionsAttribute"/> is found in either type</exception>
+        PublishOptions RpcRequestOptionsFromType<T1, T2>();
+
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcRequestOptionsAttribute"/> from
+        /// the given type T
+        /// </summary>
+        /// <typeparam name="T">The type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcRequestOptionsAttribute"/>
+        /// from the given type T</returns>
+        /// <exception cref="Exception">If no <see cref="RpcOptionsAttribute"/> is found in the type T</exception>
+        PublishOptions RpcRequestOptionsForType<T>();
+
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
+        /// either the type T1 or T2. T1 will take priority over T2.
+        /// </summary>
+        /// <typeparam name="T1">The first type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
+        /// <typeparam name="T2">The second type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcResponseOptionsAttribute"/>
+        /// from either type T1 or T2</returns>
+        /// <exception cref="Exception">If no <see cref="RpcResponseOptionsAttribute"/> is found in either type</exception>
+        PublishOptions RpcResponseOptionsFromTypes<T1, T2>();
+
+        /// <summary>
+        /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
+        /// the given type T
+        /// </summary>
+        /// <typeparam name="T">The type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
+        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcResponseOptionsAttribute"/>
+        /// from the given type T</returns>
+        /// <exception cref="Exception">If no <see cref="RpcResponseOptionsAttribute"/> is found in the type T</exception>
+        PublishOptions RpcResponseOptionsForType<T>();
     }
 }

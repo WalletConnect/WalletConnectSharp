@@ -10,13 +10,14 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// An interface that represents functions the Sign client Engine can perform. These
     /// functions exist in both the Engine and in the Sign client. 
     /// </summary>
-    public interface IEngineTasks
+    public interface IEngineAPI
     {
         /// <summary>
         /// Connect (a dApp) with the given ConnectOptions. At a minimum, you must specified a RequiredNamespace. 
         /// </summary>
         /// <param name="options"></param>
-        /// <returns></returns>
+        /// <returns>Connection data that includes the session proposal URI as well as a
+        /// way to await for a session approval</returns>
         Task<ConnectedData> Connect(ConnectOptions options);
 
         /// <summary>
@@ -41,9 +42,9 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// Approve a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
         /// Use <see cref="ProposalStruct.ApproveProposal(string, ProtocolOptions)"/> to generate an
-        /// <see cref="ApproveParams"/> object, or use the alias function <see cref="IEngineTasks.Approve(ProposalStruct, string[])"/>
+        /// <see cref="ApproveParams"/> object, or use the alias function <see cref="IEngineAPI.Approve(ProposalStruct, string[])"/>
         /// </summary>
-        /// <param name="@params">Parameters for the approval. This usually comes from <see cref="ProposalStruct.ApproveProposal(string, ProtocolOptions)"/></param>
+        /// <param name="params">Parameters for the approval. This usually comes from <see cref="ProposalStruct.ApproveProposal(string, ProtocolOptions)"/></param>
         /// <returns>Approval data, includes the topic of the session and a way to wait for approval acknowledgement</returns>
         Task<IApprovedData> Approve(ApproveParams @params);
 
@@ -51,7 +52,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
         /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(ErrorResponse)"/>
-        /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineTasks.Reject(ProposalStruct, string)"/>
+        /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineAPI.Reject(ProposalStruct, string)"/>
         /// </summary>
         /// <param name="params">The parameters of the rejection</param>
         /// <returns></returns>

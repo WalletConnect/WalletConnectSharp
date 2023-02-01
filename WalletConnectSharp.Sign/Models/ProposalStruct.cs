@@ -74,7 +74,7 @@ namespace WalletConnectSharp.Sign.Models
         /// <param name="approvedAccount">The account address that approves this proposal</param>
         /// <param name="protocolOption">(optional) The protocol option to use. If left null, then the first protocol
         /// option in this proposal will be chosen</param>
-        /// <returns>The <see cref="ApproveParams"/> that can be given to <see cref="IEngineTasks.Approve(ApproveParams)"/></returns>
+        /// <returns>The <see cref="ApproveParams"/> that can be given to <see cref="IEngineAPI.Approve(ApproveParams)"/></returns>
         public ApproveParams ApproveProposal(string approvedAccount, ProtocolOptions protocolOption = null)
         {
             return ApproveProposal(new[] { approvedAccount }, protocolOption);
@@ -87,7 +87,7 @@ namespace WalletConnectSharp.Sign.Models
         /// <param name="approvedAccounts">The account addresses that are approved in this proposal</param>
         /// <param name="protocolOption">(optional) The protocol option to use. If left null, then the first protocol
         /// option in this proposal will be chosen.</param>
-        /// <returns>The <see cref="ApproveParams"/> that can be given to <see cref="IEngineTasks.Approve(ApproveParams)"/></returns>
+        /// <returns>The <see cref="ApproveParams"/> that can be given to <see cref="IEngineAPI.Approve(ApproveParams)"/></returns>
         public ApproveParams ApproveProposal(string[] approvedAccounts, ProtocolOptions protocolOption = null)
         {
             if (Id == null)
@@ -123,10 +123,10 @@ namespace WalletConnectSharp.Sign.Models
 
         /// <summary>
         /// Reject this proposal with the given <see cref="ErrorResponse"/>. This
-        /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/>
+        /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineAPI.Reject(RejectParams)"/>
         /// </summary>
         /// <param name="error">The error reason this proposal was rejected</param>
-        /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/></returns>
+        /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineAPI.Reject(RejectParams)"/></returns>
         /// <exception cref="Exception">If this proposal has no Id</exception>
         public RejectParams RejectProposal(ErrorResponse error)
         {
@@ -138,10 +138,10 @@ namespace WalletConnectSharp.Sign.Models
 
         /// <summary>
         /// Reject this proposal with the given message. This
-        /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/>
+        /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineAPI.Reject(RejectParams)"/>
         /// </summary>
         /// <param name="message">The reason message this proposal was rejected</param>
-        /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineTasks.Reject(RejectParams)"/></returns>
+        /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineAPI.Reject(RejectParams)"/></returns>
         /// <exception cref="Exception">If this proposal has no Id</exception>
         public RejectParams RejectProposal(string message = null)
         {

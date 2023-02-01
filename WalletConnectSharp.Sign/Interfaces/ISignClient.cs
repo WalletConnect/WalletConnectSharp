@@ -9,7 +9,7 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// An interface for the Sign Client. This includes modules the Sign Client will use, the ICore module
     /// this Sign Client is using, as well as public facing Engine functions and properties.
     /// </summary>
-    public interface ISignClient : IModule, IEvents, IEngineTasks
+    public interface ISignClient : IModule, IEvents, IEngineAPI
     {
         /// <summary>
         /// The Metadata this Sign Client is broadcasting with
