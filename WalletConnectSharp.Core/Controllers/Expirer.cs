@@ -1,19 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Events;
-using WalletConnectSharp.Sign.Interfaces;
-using WalletConnectSharp.Sign.Models.Expirer;
-using WalletConnectSharp.Storage.Interfaces;
 
-namespace WalletConnectSharp.Sign.Controllers
+namespace WalletConnectSharp.Core.Controllers
 {
     /// <summary>
     /// The Expirer module keeps track of expiration dates and triggers an event when an expiration date
@@ -66,7 +58,7 @@ namespace WalletConnectSharp.Sign.Controllers
         {
             get
             {
-                return WalletConnectSignClient.StoragePrefix + Version + "//" + Name;
+                return Core.STORAGE_PREFIX + Version + "//" + Name;
             }
         }
 

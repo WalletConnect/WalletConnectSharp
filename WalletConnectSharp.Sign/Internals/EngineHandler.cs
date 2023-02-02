@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
@@ -7,7 +8,6 @@ using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
-using WalletConnectSharp.Sign.Models.Expirer;
 
 namespace WalletConnectSharp.Sign
 {
@@ -83,7 +83,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionPropose, SessionProposeResponse>(id, topic,
+                await MessageHandler.SendError<SessionPropose, SessionProposeResponse>(id, topic,
                     ErrorResponse.FromException(e));
             }
         }
@@ -143,12 +143,12 @@ namespace WalletConnectSharp.Sign
                         Metadata = controller.Metadata
                     }
                 };
-                await PrivateThis.SendResult<SessionSettle, bool>(payload.Id, topic, true);
+                await MessageHandler.SendResult<SessionSettle, bool>(payload.Id, topic, true);
                 this.Events.Trigger(EngineEvents.SessionConnect, session);
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionSettle, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionSettle, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -183,7 +183,7 @@ namespace WalletConnectSharp.Sign
                     Namespaces = @params.Namespaces
                 });
 
-                await PrivateThis.SendResult<SessionUpdate, bool>(id, topic, true);
+                await MessageHandler.SendResult<SessionUpdate, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.SessionUpdate, new SessionUpdateEvent()
                 {
                     Id = id,
@@ -193,7 +193,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionUpdate, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionUpdate, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -210,7 +210,7 @@ namespace WalletConnectSharp.Sign
             {
                 await PrivateThis.IsValidExtend(topic);
                 await PrivateThis.SetExpiry(topic, Clock.CalculateExpiry(SessionExpiry));
-                await PrivateThis.SendResult<SessionExtend, bool>(id, topic, true);
+                await MessageHandler.SendResult<SessionExtend, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.SessionExtend, new SessionEvent()
                 {
                     Id = id,
@@ -219,7 +219,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionExtend, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionExtend, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -235,7 +235,7 @@ namespace WalletConnectSharp.Sign
             try
             {
                 await PrivateThis.IsValidPing(topic);
-                await PrivateThis.SendResult<SessionPing, bool>(id, topic, true);
+                await MessageHandler.SendResult<SessionPing, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.SessionPing, new SessionEvent()
                 {
                     Id = id,
@@ -244,7 +244,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionPing, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionPing, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -266,7 +266,7 @@ namespace WalletConnectSharp.Sign
             {
                 await PrivateThis.IsValidPing(topic);
 
-                await PrivateThis.SendResult<PairingPing, bool>(id, topic, true);
+                await MessageHandler.SendResult<PairingPing, bool>(id, topic, true);
                 this.Client.Events.Trigger(EngineEvents.PairingPing, new SessionEvent()
                 {
                     Topic = topic,
@@ -275,7 +275,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<PairingPing, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<PairingPing, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -297,7 +297,7 @@ namespace WalletConnectSharp.Sign
             {
                 await PrivateThis.IsValidDisconnect(topic, payload.Params);
 
-                await PrivateThis.SendResult<SessionDelete, bool>(id, topic, true);
+                await MessageHandler.SendResult<SessionDelete, bool>(id, topic, true);
                 await PrivateThis.DeleteSession(topic);
                 this.Client.Events.Trigger(EngineEvents.SessionDelete, new SessionEvent()
                 {
@@ -307,7 +307,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionDelete, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionDelete, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -318,7 +318,7 @@ namespace WalletConnectSharp.Sign
             {
                 await PrivateThis.IsValidDisconnect(topic, payload.Params);
 
-                await PrivateThis.SendResult<PairingDelete, bool>(id, topic, true);
+                await MessageHandler.SendResult<PairingDelete, bool>(id, topic, true);
                 await PrivateThis.DeletePairing(topic);
                 this.Client.Events.Trigger(EngineEvents.PairingDelete, new SessionEvent()
                 {
@@ -328,7 +328,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<PairingDelete, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<PairingDelete, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -349,7 +349,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionRequest<T>, TR>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionRequest<T>, TR>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
@@ -369,7 +369,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await PrivateThis.SendError<SessionEvent<T>, object>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionEvent<T>, object>(id, topic, ErrorResponse.FromException(e));
             }
         }
     }

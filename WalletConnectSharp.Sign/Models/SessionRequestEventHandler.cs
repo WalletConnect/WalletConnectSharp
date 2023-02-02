@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 
@@ -22,9 +23,9 @@ namespace WalletConnectSharp.Sign.Models
         /// <param name="engine">The engine this singleton instance is for, and where the context string will
         /// be read from</param>
         /// <returns>The singleton instance to use for request/response event handlers</returns>
-        public static new TypedEventHandler<T, TR> GetInstance(IEngine engine)
+        public static new TypedEventHandler<T, TR> GetInstance(ICore engine)
         {
-            var context = engine.Client.Context;
+            var context = engine.Context;
             
             if (_instances.ContainsKey(context)) return _instances[context];
 
@@ -35,11 +36,11 @@ namespace WalletConnectSharp.Sign.Models
             return _instance;
         }
         
-        protected SessionRequestEventHandler(IEngine engine) : base(engine)
+        protected SessionRequestEventHandler(ICore engine) : base(engine)
         {
         }
 
-        protected override TypedEventHandler<T, TR> BuildNew(IEngine _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
+        protected override TypedEventHandler<T, TR> BuildNew(ICore _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
             return new SessionRequestEventHandler<T, TR>(_ref)
             {

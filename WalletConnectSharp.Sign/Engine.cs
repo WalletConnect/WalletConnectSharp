@@ -4,6 +4,8 @@ using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Interfaces;
@@ -14,7 +16,6 @@ using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
-using WalletConnectSharp.Sign.Models.Expirer;
 
 namespace WalletConnectSharp.Sign
 {
@@ -40,6 +41,8 @@ namespace WalletConnectSharp.Sign
         public ISignClient Client { get; }
 
         private IEnginePrivate PrivateThis => this;
+
+        private ITypedMessageHandler MessageHandler => Client.Core.MessageHandler;
 
         /// <summary>
         /// The name of this Engine module
@@ -85,22 +88,20 @@ namespace WalletConnectSharp.Sign
 
         private void RegisterExpirerEvents()
         {
-            this.Client.Expirer.On<Expiration>(ExpirerEvents.Expired, ExpiredCallback);
+            this.Client.Core.Expirer.On<Expiration>(ExpirerEvents.Expired, ExpiredCallback);
         }
 
         private void RegisterRelayerEvents()
         {
             // Register all Request Types
-            HandleMessageType<PairingDelete, bool>(PrivateThis.OnPairingDeleteRequest, null);
-            HandleMessageType<PairingPing, bool>(PrivateThis.OnPairingPingRequest, PrivateThis.OnPairingPingResponse);
-            HandleMessageType<SessionPropose, SessionProposeResponse>(PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse);
-            HandleMessageType<SessionSettle, bool>(PrivateThis.OnSessionSettleRequest, PrivateThis.OnSessionSettleResponse);
-            HandleMessageType<SessionUpdate, bool>(PrivateThis.OnSessionUpdateRequest, PrivateThis.OnSessionUpdateResponse);
-            HandleMessageType<SessionExtend, bool>(PrivateThis.OnSessionExtendRequest, PrivateThis.OnSessionExtendResponse);
-            HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null);
-            HandleMessageType<SessionPing, bool>(PrivateThis.OnSessionPingRequest, PrivateThis.OnSessionPingResponse);
-
-            this.Client.Core.Relayer.On<MessageEvent>(RelayerEvents.Message, RelayerMessageCallback);
+            MessageHandler.HandleMessageType<PairingDelete, bool>(PrivateThis.OnPairingDeleteRequest, null);
+            MessageHandler.HandleMessageType<PairingPing, bool>(PrivateThis.OnPairingPingRequest, PrivateThis.OnPairingPingResponse);
+            MessageHandler.HandleMessageType<SessionPropose, SessionProposeResponse>(PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse);
+            MessageHandler.HandleMessageType<SessionSettle, bool>(PrivateThis.OnSessionSettleRequest, PrivateThis.OnSessionSettleResponse);
+            MessageHandler.HandleMessageType<SessionUpdate, bool>(PrivateThis.OnSessionUpdateRequest, PrivateThis.OnSessionUpdateResponse);
+            MessageHandler.HandleMessageType<SessionExtend, bool>(PrivateThis.OnSessionExtendRequest, PrivateThis.OnSessionExtendResponse);
+            MessageHandler.HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null);
+            MessageHandler.HandleMessageType<SessionPing, bool>(PrivateThis.OnSessionPingRequest, PrivateThis.OnSessionPingResponse);
         }
 
         /// <summary>
@@ -112,7 +113,7 @@ namespace WalletConnectSharp.Sign
         /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
         public TypedEventHandler<T, TR> SessionRequestEvents<T, TR>()
         {
-            return SessionRequestEventHandler<T, TR>.GetInstance(this);
+            return SessionRequestEventHandler<T, TR>.GetInstance(Client.Core);
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace WalletConnectSharp.Sign
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         public void HandleSessionRequestMessageType<T, TR>(Func<string, JsonRpcRequest<SessionRequest<T>>, Task> requestCallback, Func<string, JsonRpcResponse<TR>, Task> responseCallback)
         {
-            HandleMessageType(requestCallback, responseCallback);
+            Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
         }
         
         /// <summary>
@@ -138,190 +139,7 @@ namespace WalletConnectSharp.Sign
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
-            HandleMessageType(requestCallback, responseCallback);
-        }
-
-        /// <summary>
-        /// Handle a specific request / response type and call the given callbacks for requests and responses. The
-        /// response callback is only triggered when it originates from the request of the same type.
-        /// </summary>
-        /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
-        /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
-        /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
-        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
-        public async void HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback, Func<string, JsonRpcResponse<TR>, Task> responseCallback)
-        {
-            var method = RpcMethodAttribute.MethodForType<T>();
-            var rpcHistory = await this.Client.History.JsonRpcHistoryOfType<T, TR>();
-            
-            async void RequestCallback(object sender, GenericEvent<MessageEvent> e)
-            {
-                if (requestCallback == null) return;
-                
-                var topic = e.EventData.Topic;
-                var message = e.EventData.Message;
-
-                var payload = await this.Client.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message);
-                
-                (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
-
-                await requestCallback(topic, payload);
-            }
-            
-            async void ResponseCallback(object sender, GenericEvent<MessageEvent> e)
-            {
-                if (responseCallback == null) return;
-                
-                var topic = e.EventData.Topic;
-                var message = e.EventData.Message;
-
-                var payload = await this.Client.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message);
-
-                await (await this.Client.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
-
-                await responseCallback(topic, payload);
-            }
-
-            async void InspectResponseRaw(object sender, GenericEvent<DecodedMessageEvent> e)
-            {
-                var topic = e.EventData.Topic;
-                var message = e.EventData.Message;
-
-                var payload = e.EventData.Payload;
-
-                try
-                {
-                    var record = await rpcHistory.Get(topic, payload.Id);
-
-                    // ignored if we can't find anything in the history
-                    if (record == null) return;
-                    var resMethod = record.Request.Method;
-                    
-                    // Trigger the true response event, which will trigger ResponseCallback
-                    Events.Trigger($"response_{resMethod}", new MessageEvent()
-                    {
-                        Topic = topic,
-                        Message = message
-                    });
-                }
-                catch(WalletConnectException err)
-                {
-                    if (err.CodeType != ErrorType.NO_MATCHING_KEY)
-                        throw;
-                    
-                    // ignored if we can't find anything in the history
-                }
-            }
-
-            Events.ListenFor<MessageEvent>($"request_{method}", RequestCallback);
-            
-            Events.ListenFor<MessageEvent>($"response_{method}", ResponseCallback);
-            
-            // Handle response_raw in this context
-            // This will allow us to examine response_raw in every typed context registered
-            Events.ListenFor<DecodedMessageEvent>($"response_raw", InspectResponseRaw);
-        }
-
-        /// <summary>
-        /// Build <see cref="PublishOptions"/> from an <see cref="RpcRequestOptionsAttribute"/> from
-        /// either the type T1 or T2. T1 will take priority over T2.
-        /// </summary>
-        /// <typeparam name="T1">The first type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
-        /// <typeparam name="T2">The second type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
-        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcRequestOptionsAttribute"/>
-        /// from either type T1 or T2</returns>
-        /// <exception cref="Exception">If no <see cref="RpcOptionsAttribute"/> is found in either type</exception>
-        public PublishOptions RpcRequestOptionsFromType<T1, T2>()
-        {
-            var opts = RpcRequestOptionsForType<T1>();
-            if (opts == null)
-            {
-                opts = RpcRequestOptionsForType<T2>();
-                if (opts == null)
-                {
-                    throw new Exception($"No RpcRequestOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
-                }
-            }
-
-            return opts;
-        }
-
-        /// <summary>
-        /// Build <see cref="PublishOptions"/> from an <see cref="RpcRequestOptionsAttribute"/> from
-        /// the given type T
-        /// </summary>
-        /// <typeparam name="T">The type to check for <see cref="RpcRequestOptionsAttribute"/></typeparam>
-        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcRequestOptionsAttribute"/>
-        /// from the given type T</returns>
-        /// <exception cref="Exception">If no <see cref="RpcOptionsAttribute"/> is found in the type T</exception>
-        public PublishOptions RpcRequestOptionsForType<T>()
-        {
-            var attributes = typeof(T).GetCustomAttributes(typeof(RpcRequestOptionsAttribute), true);
-            if (attributes.Length > 1)
-                throw new Exception($"Type {typeof(T).FullName} has multiple RpcRequestOptions attributes!");
-            if (attributes.Length == 0)
-                return null;
-
-            var opts = attributes.Cast<RpcRequestOptionsAttribute>().First();
-
-            return new PublishOptions()
-            {
-                Prompt = opts.Prompt,
-                Tag = opts.Tag,
-                TTL = opts.TTL
-            };
-        }
-
-        /// <summary>
-        /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
-        /// either the type T1 or T2. T1 will take priority over T2.
-        /// </summary>
-        /// <typeparam name="T1">The first type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
-        /// <typeparam name="T2">The second type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
-        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcResponseOptionsAttribute"/>
-        /// from either type T1 or T2</returns>
-        /// <exception cref="Exception">If no <see cref="RpcResponseOptionsAttribute"/> is found in either type</exception>
-        public PublishOptions RpcResponseOptionsFromTypes<T1, T2>()
-        {
-            var opts = RpcResponseOptionsForType<T1>();
-            if (opts != null)
-            {
-                return opts;
-            }
-
-            opts = RpcResponseOptionsForType<T2>();
-            if (opts == null)
-            {
-                throw new Exception($"No RpcResponseOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
-            }
-
-            return opts;
-        }
-        
-        /// <summary>
-        /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
-        /// the given type T
-        /// </summary>
-        /// <typeparam name="T">The type to check for <see cref="RpcResponseOptionsAttribute"/></typeparam>
-        /// <returns><see cref="PublishOptions"/> constructed from the values found in the <see cref="RpcResponseOptionsAttribute"/>
-        /// from the given type T</returns>
-        /// <exception cref="Exception">If no <see cref="RpcResponseOptionsAttribute"/> is found in the type T</exception>
-        public PublishOptions RpcResponseOptionsForType<T>()
-        {
-            var attributes = typeof(T).GetCustomAttributes(typeof(RpcResponseOptionsAttribute), true);
-            if (attributes.Length > 1)
-                throw new Exception($"Type {typeof(T).FullName} has multiple RpcResponseOptions attributes!");
-            if (attributes.Length == 0)
-                return null;
-
-            var opts = attributes.Cast<RpcResponseOptionsAttribute>().First();
-
-            return new PublishOptions()
-            {
-                Prompt = opts.Prompt,
-                Tag = opts.Tag,
-                TTL = opts.TTL
-            };
+            Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
         }
 
         /// <summary>
@@ -460,7 +278,7 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, $"connect() pairing topic: {topic}");
             }
 
-            var id = await PrivateThis.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
+            var id = await MessageHandler.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
 
             await PrivateThis.SetProposal(id, new ProposalStruct()
@@ -568,7 +386,7 @@ namespace WalletConnectSharp.Sign
             };
 
             await this.Client.Core.Relayer.Subscribe(sessionTopic);
-            var requestId = await PrivateThis.SendRequest<SessionSettle, bool>(sessionTopic, sessionSettle);
+            var requestId = await MessageHandler.SendRequest<SessionSettle, bool>(sessionTopic, sessionSettle);
 
             var acknowledgedTask = new TaskCompletionSource<SessionStruct>();
             
@@ -603,7 +421,7 @@ namespace WalletConnectSharp.Sign
 
             if (!string.IsNullOrWhiteSpace(pairingTopic) && id > 0)
             {
-                await PrivateThis.SendResult<SessionPropose, SessionProposeResponse>(id, pairingTopic,
+                await MessageHandler.SendResult<SessionPropose, SessionProposeResponse>(id, pairingTopic,
                     new SessionProposeResponse()
                     {
                         Relay = new ProtocolOptions()
@@ -638,7 +456,7 @@ namespace WalletConnectSharp.Sign
 
             if (!string.IsNullOrWhiteSpace(pairingTopic))
             {
-                await PrivateThis.SendError<SessionPropose, SessionProposeResponse>(id, pairingTopic, reason);
+                await MessageHandler.SendError<SessionPropose, SessionProposeResponse>(id, pairingTopic, reason);
                 await this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
             }
         }
@@ -653,7 +471,7 @@ namespace WalletConnectSharp.Sign
         {
             IsInitialized();
             await PrivateThis.IsValidUpdate(topic, namespaces);
-            var id = await PrivateThis.SendRequest<SessionUpdate, bool>(topic, new SessionUpdate()
+            var id = await MessageHandler.SendRequest<SessionUpdate, bool>(topic, new SessionUpdate()
             {
                 Namespaces = namespaces
             });
@@ -684,7 +502,7 @@ namespace WalletConnectSharp.Sign
         {
             IsInitialized();
             await PrivateThis.IsValidExtend(topic);
-            var id = await PrivateThis.SendRequest<SessionExtend, bool>(topic, new SessionExtend());
+            var id = await MessageHandler.SendRequest<SessionExtend, bool>(topic, new SessionExtend());
             
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
             this.Events.ListenForOnce<JsonRpcResponse<bool>>($"session_extend{id}", (sender, e) =>
@@ -741,7 +559,7 @@ namespace WalletConnectSharp.Sign
             await PrivateThis.IsValidRequest(topic, request, defaultChainId);
             
 
-            var id = await PrivateThis.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
+            var id = await MessageHandler.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
             {
                 ChainId = chainId,
                 Request = request
@@ -780,11 +598,11 @@ namespace WalletConnectSharp.Sign
             var id = response.Id;
             if (response.IsError)
             {
-                await PrivateThis.SendError<T, TR>(id, topic, response.Error);
+                await MessageHandler.SendError<T, TR>(id, topic, response.Error);
             }
             else
             {
-                await PrivateThis.SendResult<T, TR>(id, topic, response.Result);
+                await MessageHandler.SendResult<T, TR>(id, topic, response.Result);
             }
         }
 
@@ -799,7 +617,7 @@ namespace WalletConnectSharp.Sign
         public async Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
         {
             IsInitialized();
-            await PrivateThis.SendRequest<SessionEvent<T>, object>(topic, new SessionEvent<T>()
+            await MessageHandler.SendRequest<SessionEvent<T>, object>(topic, new SessionEvent<T>()
             {
                 ChainId = chainId,
                 Event = @event
@@ -817,7 +635,7 @@ namespace WalletConnectSharp.Sign
             
             if (this.Client.Session.Keys.Contains(topic))
             {
-                var id = await PrivateThis.SendRequest<SessionPing, bool>(topic, new SessionPing());
+                var id = await MessageHandler.SendRequest<SessionPing, bool>(topic, new SessionPing());
                 var done = new TaskCompletionSource<bool>();
                 this.Events.ListenForOnce<JsonRpcResponse<bool>>($"session_ping{id}", (sender, e) =>
                 {
@@ -830,7 +648,7 @@ namespace WalletConnectSharp.Sign
             } 
             else if (this.Client.Pairing.Keys.Contains(topic))
             {
-                var id = await PrivateThis.SendRequest<PairingPing, bool>(topic, new PairingPing());
+                var id = await MessageHandler.SendRequest<PairingPing, bool>(topic, new PairingPing());
                 var done = new TaskCompletionSource<bool>();
                 this.Events.ListenForOnce<JsonRpcResponse<bool>>($"pairing_ping{id}", (sender, e) =>
                 {
@@ -856,7 +674,7 @@ namespace WalletConnectSharp.Sign
             
             if (this.Client.Session.Keys.Contains(topic))
             {
-                await PrivateThis.SendRequest<SessionDelete, bool>(topic, new SessionDelete()
+                await MessageHandler.SendRequest<SessionDelete, bool>(topic, new SessionDelete()
                 {
                     Code = error.Code,
                     Message = error.Message,
@@ -866,7 +684,7 @@ namespace WalletConnectSharp.Sign
             } 
             else if (this.Client.Pairing.Keys.Contains(topic))
             {
-                await PrivateThis.SendRequest<PairingDelete, bool>(topic, new PairingDelete()
+                await MessageHandler.SendRequest<PairingDelete, bool>(topic, new PairingDelete()
                 {
                     Code = error.Code,
                     Data = error.Data,

@@ -1,4 +1,5 @@
 using WalletConnectSharp.Common.Model.Errors;
+using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
@@ -86,18 +87,7 @@ namespace WalletConnectSharp.Sign
         /// The <see cref="IProposal"/> module this Sign Client module is using. Used for storing proposal data
         /// </summary>
         public IProposal Proposal { get; }
-        
-        /// <summary>
-        /// The <see cref="IJsonRpcHistoryFactory"/> factory this Sign Client module is using. Used for storing
-        /// JSON RPC request and responses of various types T, TR
-        /// </summary>
-        public IJsonRpcHistoryFactory History { get; }
-        
-        /// <summary>
-        /// The <see cref="IExpirer"/> module this Sign Client is using. Used for keeping track of expiration dates
-        /// </summary>
-        public IExpirer Expirer { get; }
-        
+
         /// <summary>
         /// The <see cref="SignClientOptions"/> this Sign Client was initialized with. 
         /// </summary>
@@ -183,8 +173,6 @@ namespace WalletConnectSharp.Sign
             Pairing = new Pairing(Core);
             Session = new Session(Core);
             Proposal = new Proposal(Core);
-            History = new JsonRpcHistoryFactory(Core);
-            Expirer = new Expirer(Core);
             Engine = new Engine(this);
         }
 
@@ -395,8 +383,6 @@ namespace WalletConnectSharp.Sign
             await Pairing.Init();
             await Session.Init();
             await Proposal.Init();
-
-            await Expirer.Init();
             await Engine.Init();
         }
     }

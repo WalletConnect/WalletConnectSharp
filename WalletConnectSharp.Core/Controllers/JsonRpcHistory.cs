@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.History;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network;
-using WalletConnectSharp.Network.Models;
 
-namespace WalletConnectSharp.Sign.Controllers
+namespace WalletConnectSharp.Core.Controllers
 {
     /// <summary>
     /// A module that stores Json RPC request/response history data for a given Request type (T) and Response type (TR).
@@ -60,7 +54,7 @@ namespace WalletConnectSharp.Sign.Controllers
         {
             get
             {
-                return WalletConnectSignClient.StoragePrefix + Version + "//" + Name;
+                return Core.STORAGE_PREFIX + Version + "//" + Name;
             }
         }
 

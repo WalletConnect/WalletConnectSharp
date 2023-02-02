@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Network.Models;
-using WalletConnectSharp.Sign.Interfaces;
-using WalletConnectSharp.Sign.Models.Engine;
 
 namespace WalletConnectSharp.Sign.Models
 {
@@ -21,7 +17,7 @@ namespace WalletConnectSharp.Sign.Models
 
         protected Func<RequestEventArgs<T, TR>, bool> requestPredicate;
         protected Func<ResponseEventArgs<TR>, bool> responsePredicate;
-        protected IEngine _ref;
+        protected ICore _ref;
 
         /// <summary>
         /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
@@ -32,9 +28,9 @@ namespace WalletConnectSharp.Sign.Models
         /// <param name="engine">The engine this singleton instance is for, and where the context string will
         /// be read from</param>
         /// <returns>The singleton instance to use for request/response event handlers</returns>
-        public static TypedEventHandler<T, TR> GetInstance(IEngine engine)
+        public static TypedEventHandler<T, TR> GetInstance(ICore engine)
         {
-            var context = engine.Client.Context;
+            var context = engine.Context;
             
             if (_instances.ContainsKey(context)) return _instances[context];
 
@@ -141,7 +137,7 @@ namespace WalletConnectSharp.Sign.Models
             }
         }
 
-        protected TypedEventHandler(IEngine engine)
+        protected TypedEventHandler(ICore engine)
         {
             _ref = engine;
         }
@@ -180,7 +176,7 @@ namespace WalletConnectSharp.Sign.Models
             return BuildNew(_ref, requestPredicate, finalPredicate);
         }
 
-        protected virtual TypedEventHandler<T, TR> BuildNew(IEngine _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate,
+        protected virtual TypedEventHandler<T, TR> BuildNew(ICore _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate,
             Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
             return new TypedEventHandler<T, TR>(_ref)
@@ -192,7 +188,7 @@ namespace WalletConnectSharp.Sign.Models
 
         protected virtual void Setup()
         {
-            _ref.HandleMessageType<T, TR>(RequestCallback, ResponseCallback);
+            _ref.MessageHandler.HandleMessageType<T, TR>(RequestCallback, ResponseCallback);
         }
 
         protected virtual void Teardown()
@@ -218,8 +214,7 @@ namespace WalletConnectSharp.Sign.Models
 
             if (rea.Response != null || rea.Error != null)
             {
-                await _ref.Respond<T, TR>(arg1,
-                    new JsonRpcResponse<TR>() {Error = rea.Error, Id = arg2.Id, Result = rea.Response});
+                await _ref.MessageHandler.SendResult<T, TR>(arg2.Id, arg1, rea.Response);
             }
         }
     }

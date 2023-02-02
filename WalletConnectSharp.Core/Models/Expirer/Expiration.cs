@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace WalletConnectSharp.Sign.Models.Expirer
+namespace WalletConnectSharp.Core.Models.Expirer
 {
     /// <summary>
     /// A class that represents a specific expiration date for a specific target.

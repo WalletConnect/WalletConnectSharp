@@ -54,6 +54,23 @@ namespace WalletConnectSharp.Core.Interfaces
         /// SDK executions
         /// </summary>
         public IKeyValueStorage Storage { get; }
+        
+        /// <summary>
+        /// The <see cref="ITypedMessageHandler"/> module this Core module is using. Use this for handling
+        /// custom message types (request or response) and for sending messages (request, responses or errors)
+        /// </summary>
+        public ITypedMessageHandler MessageHandler { get; }
+        
+        /// <summary>
+        /// The <see cref="IExpirer"/> module this Sign Client is using to track expiration dates
+        /// </summary>
+        IExpirer Expirer { get; }
+        
+        /// <summary>
+        /// The <see cref="IJsonRpcHistoryFactory"/> factory this Core module is using. Used for storing
+        /// JSON RPC request and responses of various types T, TR
+        /// </summary>
+        IJsonRpcHistoryFactory History { get; }
 
         /// <summary>
         /// Start the Core module, which will initialize all modules the Core module uses 

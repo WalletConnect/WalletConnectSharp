@@ -40,18 +40,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// The <see cref="IProposal"/> module this Sign Client is using to store Proposal data
         /// </summary>
         IProposal Proposal { get; }
-        
-        /// <summary>
-        /// The <see cref="IJsonRpcHistoryFactory"/> instance this Sign Client is using to track Json RPC Request / Response
-        /// history
-        /// </summary>
-        IJsonRpcHistoryFactory History { get; }
-        
-        /// <summary>
-        /// The <see cref="IExpirer"/> module this Sign Client is using to track expiration dates
-        /// </summary>
-        IExpirer Expirer { get; }
-        
+
         /// <summary>
         /// The options this Sign Client was initialized with
         /// </summary>

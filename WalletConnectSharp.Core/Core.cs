@@ -87,7 +87,24 @@ namespace WalletConnectSharp.Core
         /// Core Modules should use this for storage.
         /// </summary>
         public IKeyValueStorage Storage { get; }
-        
+
+        /// <summary>
+        /// The <see cref="ITypedMessageHandler"/> module this Core module is using. Use this for handling
+        /// custom message types (request or response) and for sending messages (request, responses or errors)
+        /// </summary>
+        public ITypedMessageHandler MessageHandler { get; }
+
+        /// <summary>
+        /// The <see cref="IExpirer"/> module this Sign Client is using to track expiration dates
+        /// </summary>
+        public IExpirer Expirer { get; }
+
+        /// <summary>
+        /// The <see cref="IJsonRpcHistoryFactory"/> factory this Sign Client module is using. Used for storing
+        /// JSON RPC request and responses of various types T, TR
+        /// </summary>
+        public IJsonRpcHistoryFactory History { get; }
+
         /// <summary>
         /// Create a new Core with the given options.
         /// </summary>
@@ -123,6 +140,7 @@ namespace WalletConnectSharp.Core
             HeartBeat = new HeartBeat();
             _optName = options.Name;
             Events = new EventDelegator(this);
+            Expirer = new Expirer(this);
             
             Relayer = new Relayer(new RelayerOptions()
             {
@@ -130,6 +148,9 @@ namespace WalletConnectSharp.Core
                 ProjectId = ProjectId,
                 RelayUrl = options.RelayUrl
             });
+
+            MessageHandler = new TypedMessageHandler(this);
+            History = new JsonRpcHistoryFactory(this);
         }
 
         /// <summary>
@@ -150,6 +171,8 @@ namespace WalletConnectSharp.Core
             await Crypto.Init();
             await Relayer.Init();
             await HeartBeat.Init();
+            await Expirer.Init();
+            await MessageHandler.Init();
         }
     }
 }

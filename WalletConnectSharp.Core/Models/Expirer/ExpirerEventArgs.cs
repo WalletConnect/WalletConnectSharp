@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
-using WalletConnectSharp.Sign.Interfaces;
 
-namespace WalletConnectSharp.Sign.Models.Expirer
+namespace WalletConnectSharp.Core.Models.Expirer
 {
     /// <summary>
     /// The event args that is passed to all <see cref="IExpirer"/> events triggered

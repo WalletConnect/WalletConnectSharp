@@ -1,9 +1,8 @@
-using System.Threading.Tasks;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Events.Interfaces;
-using WalletConnectSharp.Sign.Models.Expirer;
 
-namespace WalletConnectSharp.Sign.Interfaces
+namespace WalletConnectSharp.Core.Interfaces
 {
     /// <summary>
     /// The interface for the Expirer module. The Expirer module keeps track of expiration dates and triggers an event when an expiration date

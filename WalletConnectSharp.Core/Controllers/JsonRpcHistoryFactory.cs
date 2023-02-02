@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using WalletConnectSharp.Core.Interfaces;
 
-namespace WalletConnectSharp.Sign.Controllers
+namespace WalletConnectSharp.Core.Controllers
 {
     /// <summary>
     /// A factory that creates/tracks instances of <see cref="JsonRpcHistory{T,TR}"/> for the given

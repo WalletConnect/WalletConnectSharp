@@ -8,12 +8,6 @@ namespace WalletConnectSharp.Sign.Interfaces
 {
     internal interface IEnginePrivate
     {
-        internal Task<long> SendRequest<T, TR>(string topic, T parameters) where T : IWcMethod;
-
-        internal Task SendResult<T, TR>(long id, string topic, TR result);
-
-        internal Task SendError<T, TR>(long id, string topic, ErrorResponse error);
-
         internal Task ActivatePairing(string topic);
 
         internal Task DeleteSession(string topic);

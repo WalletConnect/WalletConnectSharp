@@ -1,7 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace WalletConnectSharp.Sign.Models.Expirer
+namespace WalletConnectSharp.Core.Models.Expirer
 {
     /// <summary>
     /// A class that converts a <see cref="Expiration.Target"/> >string to either a ID (long) or a Topic (string). Either the ID or Topic
