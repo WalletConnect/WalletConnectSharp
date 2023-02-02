@@ -1,6 +1,7 @@
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Events;
@@ -74,9 +75,9 @@ namespace WalletConnectSharp.Sign
         public IEngine Engine { get; }
         
         /// <summary>
-        /// The <see cref="IPairing"/> module this Sign Client module is using. Used for storing pairing data
+        /// The <see cref="IPairingStore"/> module this Sign Client module is using. Used for storing pairing data
         /// </summary>
-        public IPairing Pairing { get; }
+        public IPairingStore PairingStore { get; }
         
         /// <summary>
         /// The <see cref="ISession"/> module this Sign Client module is using. Used for storing session data
@@ -170,7 +171,7 @@ namespace WalletConnectSharp.Sign
 
             Events = new EventDelegator(this);
             
-            Pairing = new Pairing(Core);
+            PairingStore = new PairingStore(Core);
             Session = new Session(Core);
             Proposal = new Proposal(Core);
             Engine = new Engine(this);
@@ -380,7 +381,7 @@ namespace WalletConnectSharp.Sign
         private async Task Initialize()
         {
             await this.Core.Start();
-            await Pairing.Init();
+            await PairingStore.Init();
             await Session.Init();
             await Proposal.Init();
             await Engine.Init();

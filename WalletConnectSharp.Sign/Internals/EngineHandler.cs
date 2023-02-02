@@ -25,7 +25,7 @@ namespace WalletConnectSharp.Sign
                     await PrivateThis.DeleteSession(topic);
                     this.Client.Events.Trigger(EngineEvents.SessionExpire, topic);
                 } 
-                else if (this.Client.Pairing.Keys.Contains(topic))
+                else if (this.Client.PairingStore.Keys.Contains(topic))
                 {
                     await PrivateThis.DeletePairing(topic);
                     this.Client.Events.Trigger(EngineEvents.PairingExpire, topic);

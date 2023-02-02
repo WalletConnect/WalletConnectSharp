@@ -7,9 +7,9 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
     /// include
     /// * Session Extended
     /// * Session Ping
-    /// * Pairing Ping
+    /// * PairingStore Ping
     /// * Session Delete
-    /// * Pairing Delete
+    /// * PairingStore Delete
     /// * Generic Session Request
     /// * Generic Session Event Emitted
     /// </summary>

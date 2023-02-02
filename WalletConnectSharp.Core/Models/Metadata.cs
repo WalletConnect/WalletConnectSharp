@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace WalletConnectSharp.Sign.Models
+namespace WalletConnectSharp.Core.Models
 {
     /// <summary>
     /// A class that holds Metadata for either peer in a given Session. Includes things such

@@ -2,6 +2,7 @@
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
@@ -37,7 +38,7 @@ namespace WalletConnectSharp.Sign
             if (!string.IsNullOrWhiteSpace(relay.Data))
                 uri = uri.AddQueryParam("relay-data", relay.Data);
 
-            await this.Client.Pairing.Set(topic, pairing);
+            await this.Client.PairingStore.Set(topic, pairing);
             await this.Client.Core.Relayer.Subscribe(topic);
             await PrivateThis.SetExpiry(topic, expiry);
 
@@ -51,7 +52,7 @@ namespace WalletConnectSharp.Sign
         async Task IEnginePrivate.ActivatePairing(string topic)
         {
             var expiry = Clock.CalculateExpiry(ProposalExpiry);
-            await this.Client.Pairing.Update(topic, new PairingStruct()
+            await this.Client.PairingStore.Update(topic, new PairingStruct()
             {
                 Active = true,
                 Expiry = expiry
@@ -82,12 +83,12 @@ namespace WalletConnectSharp.Sign
         async Task IEnginePrivate.DeletePairing(string topic)
         {
             bool expirerHasDeleted = !this.Client.Core.Expirer.Has(topic);
-            bool pairingHasDeleted = !this.Client.Pairing.Keys.Contains(topic);
+            bool pairingHasDeleted = !this.Client.PairingStore.Keys.Contains(topic);
             bool symKeyHasDeleted = !(await this.Client.Core.Crypto.HasKeys(topic));
             
             await this.Client.Core.Relayer.Unsubscribe(topic);
             await Task.WhenAll(
-                pairingHasDeleted ? Task.CompletedTask : this.Client.Pairing.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
+                pairingHasDeleted ? Task.CompletedTask : this.Client.PairingStore.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
                 symKeyHasDeleted ? Task.CompletedTask : this.Client.Core.Crypto.DeleteSymKey(topic),
                 expirerHasDeleted ? Task.CompletedTask : this.Client.Core.Expirer.Delete(topic)
             );
@@ -106,9 +107,9 @@ namespace WalletConnectSharp.Sign
 
         async Task IEnginePrivate.SetExpiry(string topic, long expiry)
         {
-            if (this.Client.Pairing.Keys.Contains(topic))
+            if (this.Client.PairingStore.Keys.Contains(topic))
             {
-                await this.Client.Pairing.Update(topic, new PairingStruct()
+                await this.Client.PairingStore.Update(topic, new PairingStruct()
                 {
                     Expiry = expiry
                 });
@@ -133,7 +134,7 @@ namespace WalletConnectSharp.Sign
         Task IEnginePrivate.Cleanup()
         {
             List<string> sessionTopics = (from session in this.Client.Session.Values.Where(e => e.Expiry != null) where Clock.IsExpired(session.Expiry.Value) select session.Topic).ToList();
-            List<string> pairingTopics = (from pair in this.Client.Pairing.Values.Where(e => e.Expiry != null) where Clock.IsExpired(pair.Expiry.Value) select pair.Topic).ToList();
+            List<string> pairingTopics = (from pair in this.Client.PairingStore.Values.Where(e => e.Expiry != null) where Clock.IsExpired(pair.Expiry.Value) select pair.Topic).ToList();
             List<long> proposalIds = (from p in this.Client.Proposal.Values.Where(e => e.Expiry != null) where Clock.IsExpired(p.Expiry.Value) select p.Id.Value).ToList();
 
             return Task.WhenAll(

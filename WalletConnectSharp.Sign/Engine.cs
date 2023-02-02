@@ -5,6 +5,7 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events;
@@ -198,7 +199,7 @@ namespace WalletConnectSharp.Sign
 
             if (!string.IsNullOrEmpty(topic))
             {
-                var pairing = this.Client.Pairing.Get(topic);
+                var pairing = this.Client.PairingStore.Get(topic);
                 if (pairing.Active != null)
                     active = pairing.Active.Value;
             }
@@ -255,7 +256,7 @@ namespace WalletConnectSharp.Sign
                 
                 if (!string.IsNullOrWhiteSpace(topic))
                 {
-                    await this.Client.Pairing.Update(topic, new PairingStruct()
+                    await this.Client.PairingStore.Update(topic, new PairingStruct()
                     {
                         PeerMetadata = session.Peer.Metadata
                     });
@@ -332,7 +333,7 @@ namespace WalletConnectSharp.Sign
                         sessionProposeTask.SetResult(proposal);
                 });
 
-            await this.Client.Pairing.Set(topic, pairing);
+            await this.Client.PairingStore.Set(topic, pairing);
             await this.Client.Core.Crypto.SetSymKey(symKey, topic);
             await this.Client.Core.Relayer.Subscribe(topic, new SubscribeOptions()
             {
@@ -414,7 +415,7 @@ namespace WalletConnectSharp.Sign
             await this.Client.Session.Set(sessionTopic, session);
             await PrivateThis.SetExpiry(sessionTopic, Clock.CalculateExpiry(SessionExpiry));
             if (!string.IsNullOrWhiteSpace(pairingTopic))
-                await this.Client.Pairing.Update(pairingTopic, new PairingStruct()
+                await this.Client.PairingStore.Update(pairingTopic, new PairingStruct()
                 {
                     PeerMetadata = session.Peer.Metadata
                 });
@@ -646,7 +647,7 @@ namespace WalletConnectSharp.Sign
                 });
                 await done.Task;
             } 
-            else if (this.Client.Pairing.Keys.Contains(topic))
+            else if (this.Client.PairingStore.Keys.Contains(topic))
             {
                 var id = await MessageHandler.SendRequest<PairingPing, bool>(topic, new PairingPing());
                 var done = new TaskCompletionSource<bool>();
@@ -682,7 +683,7 @@ namespace WalletConnectSharp.Sign
                 });
                 await PrivateThis.DeleteSession(topic);
             } 
-            else if (this.Client.Pairing.Keys.Contains(topic))
+            else if (this.Client.PairingStore.Keys.Contains(topic))
             {
                 await MessageHandler.SendRequest<PairingDelete, bool>(topic, new PairingDelete()
                 {

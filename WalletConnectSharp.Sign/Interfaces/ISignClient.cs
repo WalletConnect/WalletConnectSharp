@@ -1,5 +1,6 @@
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Sign.Models;
 
@@ -27,9 +28,9 @@ namespace WalletConnectSharp.Sign.Interfaces
         IEngine Engine { get; }
         
         /// <summary>
-        /// The <see cref="IPairing"/> module this Sign Client is using for Pairing
+        /// The <see cref="IPairingStore"/> module this Sign Client is using for PairingStore
         /// </summary>
-        IPairing Pairing { get; }
+        IPairingStore PairingStore { get; }
         
         /// <summary>
         /// The <see cref="ISession"/> module this Sign Client is using to store Session data
