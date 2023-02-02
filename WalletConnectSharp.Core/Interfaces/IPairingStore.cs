@@ -1,4 +1,5 @@
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Sign.Models;
 
 namespace WalletConnectSharp.Core.Interfaces

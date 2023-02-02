@@ -21,6 +21,8 @@ namespace WalletConnectSharp.Events
     {
         private static HashSet<string> contextInstances = new HashSet<string>();
 
+        private Dictionary<Type, Type[]> _typeToTriggerTypes = new Dictionary<Type, Type[]>();
+
         public string Name { get; private set; }
         public string Context { get; private set; }
 
@@ -171,26 +173,33 @@ namespace WalletConnectSharp.Events
         /// <returns>true if any event listeners were triggered, otherwise false</returns>
         public bool TriggerType(string eventId, object eventData, Type typeToTrigger, bool raiseOnException = true)
         {
-            IEnumerable<Type> allPossibleTypes;
+            Type[] allPossibleTypes;
             bool wasTriggered = false;
-            
-            if (typeToTrigger == typeof(object))
-            {
-                // If the type of object was given, then only
-                // trigger event listeners listening to the object type explicitly
-                allPossibleTypes = new[] { typeof(object) };
-            }
+
+            if (_typeToTriggerTypes.ContainsKey(typeToTrigger))
+                allPossibleTypes = _typeToTriggerTypes[typeToTrigger];
             else
             {
-                //Find all EventFactories that inherit from type T
-                var inheritedT = from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    from type in assembly.GetTypes()
-                    where typeToTrigger.IsSubclassOf(type)
-                    select type;
+                if (typeToTrigger == typeof(object))
+                {
+                    // If the type of object was given, then only
+                    // trigger event listeners listening to the object type explicitly
+                    allPossibleTypes = new[] {typeof(object)};
+                }
+                else
+                {
+                    //Find all EventFactories that inherit from type T
+                    var inheritedT = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                        from type in assembly.GetTypes()
+                        where type != typeof(object) && typeToTrigger.IsSubclassOf(type)
+                        select type;
 
-                // Create list of types that include types inherit from type T, type T, and type object
-                allPossibleTypes = inheritedT.Concat(typeToTrigger.GetInterfaces()).Append(typeToTrigger)
-                    .Append(typeof(object));
+                    // Create list of types that include types inherit from type T, type T, and type object
+                    allPossibleTypes = inheritedT.Concat(typeToTrigger.GetInterfaces()).Append(typeToTrigger)
+                        .Append(typeof(object)).ToArray();
+                }
+                
+                _typeToTriggerTypes.Add(typeToTrigger, allPossibleTypes);
             }
 
             foreach (var type in allPossibleTypes)

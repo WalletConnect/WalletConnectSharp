@@ -2,6 +2,7 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Events;

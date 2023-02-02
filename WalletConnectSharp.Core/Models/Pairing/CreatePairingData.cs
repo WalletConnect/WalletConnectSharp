@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace WalletConnectSharp.Sign.Models.Engine
+namespace WalletConnectSharp.Core.Models.Pairing
 {
     /// <summary>
     /// A class that represents a new pairing. Includes the pairing topic

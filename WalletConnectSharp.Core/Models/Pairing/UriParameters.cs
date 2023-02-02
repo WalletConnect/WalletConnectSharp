@@ -1,8 +1,7 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Models.Relay;
-using WalletConnectSharp.Sign.Interfaces;
 
-namespace WalletConnectSharp.Sign.Models.Engine
+namespace WalletConnectSharp.Core.Models.Pairing
 {
     /// <summary>
     /// A class that holds parameters from a parsed session proposal URI. This can be

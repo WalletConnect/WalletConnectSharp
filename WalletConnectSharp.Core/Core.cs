@@ -106,6 +106,12 @@ namespace WalletConnectSharp.Core
         public IJsonRpcHistoryFactory History { get; }
 
         /// <summary>
+        /// The <see cref="IPairing"/> module this Core module is using. Used for pairing two peers
+        /// with each other and keeping track of pairing state
+        /// </summary>
+        public IPairing Pairing { get; }
+
+        /// <summary>
         /// Create a new Core with the given options.
         /// </summary>
         /// <param name="options">The options to use to configure the new Core module</param>
@@ -141,6 +147,7 @@ namespace WalletConnectSharp.Core
             _optName = options.Name;
             Events = new EventDelegator(this);
             Expirer = new Expirer(this);
+            Pairing = new Pairing(this);
             
             Relayer = new Relayer(new RelayerOptions()
             {
@@ -173,6 +180,7 @@ namespace WalletConnectSharp.Core
             await HeartBeat.Init();
             await Expirer.Init();
             await MessageHandler.Init();
+            await Pairing.Init();
         }
     }
 }

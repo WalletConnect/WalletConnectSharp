@@ -12,7 +12,6 @@ namespace WalletConnectSharp.Sign
 {
     public partial class Engine
     {
-        
         private void IsInitialized()
         {
             if (!_initialized)
@@ -40,14 +39,13 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
                     $"pairing topic should be a string {topic}");
 
-            if (!this.Client.PairingStore.Keys.Contains(topic))
+            if (!this.Client.Core.Pairing.Store.Keys.Contains(topic))
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY,
                     $"pairing topic doesn't exist {topic}");
 
-            var expiry = this.Client.PairingStore.Get(topic).Expiry;
+            var expiry = this.Client.Core.Pairing.Store.Get(topic).Expiry;
             if (expiry != null && Clock.IsExpired(expiry.Value))
             {
-                await PrivateThis.DeletePairing(topic);
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"pairing topic: {topic}");
             }
         }
@@ -87,7 +85,7 @@ namespace WalletConnectSharp.Sign
         async Task IsValidSessionOrPairingTopic(string topic)
         {
             if (this.Client.Session.Keys.Contains(topic)) await this.IsValidSessionTopic(topic);
-            else if (this.Client.PairingStore.Keys.Contains(topic)) await this.IsValidPairingTopic(topic);
+            else if (this.Client.Core.Pairing.Store.Keys.Contains(topic)) await this.IsValidPairingTopic(topic);
             else if (string.IsNullOrWhiteSpace(topic))
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
                     $"session or pairing topic should be a string {topic}");

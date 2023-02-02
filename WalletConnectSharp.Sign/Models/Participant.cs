@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Pairing;
 
 namespace WalletConnectSharp.Sign.Models
 {

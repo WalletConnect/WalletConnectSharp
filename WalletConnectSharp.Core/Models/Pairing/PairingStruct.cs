@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 
-namespace WalletConnectSharp.Core.Models
+namespace WalletConnectSharp.Core.Models.Pairing
 {
     /// <summary>
     /// A struct that stores pairing data, including the topic the pairing took place, whether

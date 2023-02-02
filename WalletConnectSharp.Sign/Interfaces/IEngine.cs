@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;

@@ -7,6 +7,8 @@ using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Expirer;
+using WalletConnectSharp.Core.Models.Pairing;
+using WalletConnectSharp.Core.Models.Pairing.Methods;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Interfaces;
@@ -95,8 +97,6 @@ namespace WalletConnectSharp.Sign
         private void RegisterRelayerEvents()
         {
             // Register all Request Types
-            MessageHandler.HandleMessageType<PairingDelete, bool>(PrivateThis.OnPairingDeleteRequest, null);
-            MessageHandler.HandleMessageType<PairingPing, bool>(PrivateThis.OnPairingPingRequest, PrivateThis.OnPairingPingResponse);
             MessageHandler.HandleMessageType<SessionPropose, SessionProposeResponse>(PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse);
             MessageHandler.HandleMessageType<SessionSettle, bool>(PrivateThis.OnSessionSettleRequest, PrivateThis.OnSessionSettleResponse);
             MessageHandler.HandleMessageType<SessionUpdate, bool>(PrivateThis.OnSessionUpdateRequest, PrivateThis.OnSessionUpdateResponse);
@@ -199,14 +199,14 @@ namespace WalletConnectSharp.Sign
 
             if (!string.IsNullOrEmpty(topic))
             {
-                var pairing = this.Client.PairingStore.Get(topic);
+                var pairing = this.Client.Core.Pairing.Store.Get(topic);
                 if (pairing.Active != null)
                     active = pairing.Active.Value;
             }
 
             if (string.IsNullOrEmpty(topic) || !active)
             {
-                CreatePairingData CreatePairing = await this.CreatePairing();
+                var CreatePairing = await this.Client.Core.Pairing.Create();
                 topic = CreatePairing.Topic;
                 uri = CreatePairing.Uri;
             }
@@ -256,10 +256,7 @@ namespace WalletConnectSharp.Sign
                 
                 if (!string.IsNullOrWhiteSpace(topic))
                 {
-                    await this.Client.PairingStore.Update(topic, new PairingStruct()
-                    {
-                        PeerMetadata = session.Peer.Metadata
-                    });
+                    await this.Client.Core.Pairing.UpdateMetadata(topic, session.Peer.Metadata);
                 }
                 approvalTask.SetResult(completeSession);
             });
@@ -307,21 +304,8 @@ namespace WalletConnectSharp.Sign
         /// the proposal</returns>
         public async Task<ProposalStruct> Pair(string uri)
         {
-            IsInitialized();
-            await PrivateThis.IsValidPair(uri);
-            var uriParams = ParseUri(uri);
-
-            var topic = uriParams.Topic;
-            var symKey = uriParams.SymKey;
-            var relay = uriParams.Relay;
-            var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
-            var pairing = new PairingStruct()
-            {
-                Topic = topic,
-                Relay = relay,
-                Expiry = expiry,
-                Active = false,
-            };
+            var pairing = await this.Client.Core.Pairing.Pair(uri);
+            var topic = pairing.Topic;
 
             TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
             
@@ -332,14 +316,6 @@ namespace WalletConnectSharp.Sign
                     if (topic == proposal.PairingTopic)
                         sessionProposeTask.SetResult(proposal);
                 });
-
-            await this.Client.PairingStore.Set(topic, pairing);
-            await this.Client.Core.Crypto.SetSymKey(symKey, topic);
-            await this.Client.Core.Relayer.Subscribe(topic, new SubscribeOptions()
-            {
-                Relay = relay
-            });
-            await PrivateThis.SetExpiry(topic, expiry);
 
             return await sessionProposeTask.Task;
         }
@@ -415,10 +391,7 @@ namespace WalletConnectSharp.Sign
             await this.Client.Session.Set(sessionTopic, session);
             await PrivateThis.SetExpiry(sessionTopic, Clock.CalculateExpiry(SessionExpiry));
             if (!string.IsNullOrWhiteSpace(pairingTopic))
-                await this.Client.PairingStore.Update(pairingTopic, new PairingStruct()
-                {
-                    PeerMetadata = session.Peer.Metadata
-                });
+                await this.Client.Core.Pairing.UpdateMetadata(pairingTopic, session.Peer.Metadata);
 
             if (!string.IsNullOrWhiteSpace(pairingTopic) && id > 0)
             {
@@ -432,7 +405,7 @@ namespace WalletConnectSharp.Sign
                         ResponderPublicKey = selfPublicKey
                     });
                 await this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
-                await PrivateThis.ActivatePairing(pairingTopic);
+                await this.Client.Core.Pairing.Activate(pairingTopic);
             }
             
             return IApprovedData.FromTask(sessionTopic, acknowledgedTask.Task);
@@ -647,18 +620,9 @@ namespace WalletConnectSharp.Sign
                 });
                 await done.Task;
             } 
-            else if (this.Client.PairingStore.Keys.Contains(topic))
+            else if (this.Client.Core.Pairing.Store.Keys.Contains(topic))
             {
-                var id = await MessageHandler.SendRequest<PairingPing, bool>(topic, new PairingPing());
-                var done = new TaskCompletionSource<bool>();
-                this.Events.ListenForOnce<JsonRpcResponse<bool>>($"pairing_ping{id}", (sender, e) =>
-                {
-                    if (e.EventData.IsError)
-                        done.SetException(e.EventData.Error.ToException());
-                    else
-                        done.SetResult(e.EventData.Result);
-                });
-                await done.Task;
+                await this.Client.Core.Pairing.Ping(topic);
             }
         }
 
@@ -683,15 +647,9 @@ namespace WalletConnectSharp.Sign
                 });
                 await PrivateThis.DeleteSession(topic);
             } 
-            else if (this.Client.PairingStore.Keys.Contains(topic))
+            else if (this.Client.Core.Pairing.Store.Keys.Contains(topic))
             {
-                await MessageHandler.SendRequest<PairingDelete, bool>(topic, new PairingDelete()
-                {
-                    Code = error.Code,
-                    Data = error.Data,
-                    Message = error.Message
-                });
-                await PrivateThis.DeletePairing(topic);
+                await this.Client.Core.Pairing.Disconnect(topic);
             }
         }
 

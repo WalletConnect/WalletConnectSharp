@@ -1,3 +1,4 @@
+using WalletConnectSharp.Core.Models.Pairing.Methods;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -8,11 +9,7 @@ namespace WalletConnectSharp.Sign.Interfaces
 {
     internal interface IEnginePrivate
     {
-        internal Task ActivatePairing(string topic);
-
         internal Task DeleteSession(string topic);
-
-        internal Task DeletePairing(string topic);
 
         internal Task DeleteProposal(long id);
 
@@ -42,13 +39,7 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task OnSessionPingResponse(string topic, JsonRpcResponse<bool> payload);
 
-        internal Task OnPairingPingRequest(string topic, JsonRpcRequest<PairingPing> payload);
-
-        internal Task OnPairingPingResponse(string topic, JsonRpcResponse<bool> payload);
-
         internal Task OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload);
-
-        internal Task OnPairingDeleteRequest(string topic, JsonRpcRequest<PairingDelete> payload);
 
         internal Task OnSessionRequest<T, TR>(string topic, JsonRpcRequest<SessionRequest<T>> payload);
 

@@ -1,5 +1,6 @@
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Sign.Models;
 
 namespace WalletConnectSharp.Core.Controllers

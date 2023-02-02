@@ -71,6 +71,12 @@ namespace WalletConnectSharp.Core.Interfaces
         /// JSON RPC request and responses of various types T, TR
         /// </summary>
         IJsonRpcHistoryFactory History { get; }
+        
+        /// <summary>
+        /// The <see cref="IPairing"/> module this Core module is using. Used for pairing two peers
+        /// with each other and keeping track of pairing state
+        /// </summary>
+        IPairing Pairing { get; }
 
         /// <summary>
         /// Start the Core module, which will initialize all modules the Core module uses 

@@ -1,6 +1,7 @@
 ﻿using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Expirer;
+using WalletConnectSharp.Core.Models.Pairing.Methods;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
@@ -20,16 +21,13 @@ namespace WalletConnectSharp.Sign
             if (!string.IsNullOrWhiteSpace(target.Topic))
             {
                 var topic = target.Topic;
-                if (this.Client.Session.Keys.Contains(topic))
+                if (!this.Client.Session.Keys.Contains(topic))
                 {
-                    await PrivateThis.DeleteSession(topic);
-                    this.Client.Events.Trigger(EngineEvents.SessionExpire, topic);
-                } 
-                else if (this.Client.PairingStore.Keys.Contains(topic))
-                {
-                    await PrivateThis.DeletePairing(topic);
-                    this.Client.Events.Trigger(EngineEvents.PairingExpire, topic);
+                    return;
                 }
+
+                await PrivateThis.DeleteSession(topic);
+                this.Client.Events.Trigger(EngineEvents.SessionExpire, topic);
             } 
             else if (target.Id != null)
             {
@@ -108,7 +106,7 @@ namespace WalletConnectSharp.Sign
                     peerPublicKey
                 );
                 var subscriptionId = await this.Client.Core.Relayer.Subscribe(sessionTopic);
-                await PrivateThis.ActivatePairing(topic);
+                await this.Client.Core.Pairing.Activate(topic);
             }
         }
 
@@ -259,37 +257,6 @@ namespace WalletConnectSharp.Sign
             this.Events.Trigger($"session_ping{id}", payload);
         }
 
-        async Task IEnginePrivate.OnPairingPingRequest(string topic, JsonRpcRequest<PairingPing> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidPing(topic);
-
-                await MessageHandler.SendResult<PairingPing, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.PairingPing, new SessionEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await MessageHandler.SendError<PairingPing, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnPairingPingResponse(string topic, JsonRpcResponse<bool> payload)
-        {
-            var id = payload.Id;
-            
-            // put at the end of the stack to avoid a race condition
-            // where session_ping listener is not yet initialized
-            await Task.Delay(500);
-
-            this.Events.Trigger($"pairing_ping{id}", payload);
-        }
-
         async Task IEnginePrivate.OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload)
         {
             var id = payload.Id;
@@ -308,27 +275,6 @@ namespace WalletConnectSharp.Sign
             catch (WalletConnectException e)
             {
                 await MessageHandler.SendError<SessionDelete, bool>(id, topic, ErrorResponse.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnPairingDeleteRequest(string topic, JsonRpcRequest<PairingDelete> payload)
-        {
-            var id = payload.Id;
-            try
-            {
-                await PrivateThis.IsValidDisconnect(topic, payload.Params);
-
-                await MessageHandler.SendResult<PairingDelete, bool>(id, topic, true);
-                await PrivateThis.DeletePairing(topic);
-                this.Client.Events.Trigger(EngineEvents.PairingDelete, new SessionEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await MessageHandler.SendError<PairingDelete, bool>(id, topic, ErrorResponse.FromException(e));
             }
         }
 
