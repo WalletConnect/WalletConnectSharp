@@ -115,5 +115,11 @@ namespace WalletConnectSharp.Crypto.Interfaces
         /// <param name="aud">The AUD to sign</param>
         /// <returns>A JWT token</returns>
         Task<string> SignJwt(string aud);
+
+        /// <summary>
+        /// Get a unique client id for this client
+        /// </summary>
+        /// <returns>The client id as a string</returns>
+        Task<string> GetClientId();
     }
 }

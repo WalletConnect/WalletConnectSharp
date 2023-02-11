@@ -17,8 +17,12 @@ namespace WalletConnectSharp.Examples
 
         public async Task Execute(string[] args)
         {
+            var home = 
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-
+            
+            var dappFilePath = Path.Combine(home, ".wc", "store_dapp_example.json");
             var dappOptions = new SignClientOptions()
             {
                 ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
@@ -29,44 +33,8 @@ namespace WalletConnectSharp.Examples
                     Name = "WalletConnectSharpv2 Dapp Example",
                     Url = "https://walletconnect.com"
                 },
-                // Uncomment to disable persistant storage
-                // Storage = new InMemoryStorage()
+                Storage = new FileSystemStorage(dappFilePath)
             };
-
-            var dappConnectOptions1 = new ConnectOptions()
-                .RequireNamespace("eip155", new RequiredNamespace()
-                    .WithMethod("eth_sendTransaction")
-                    .WithMethod("eth_signTransaction")
-                    .WithMethod("eth_sign")
-                    .WithMethod("personal_sign")
-                    .WithMethod("eth_signTypedData")
-                    .WithChain("eip155:1")
-                    .WithEvent("chainChanged")
-                    .WithEvent("accountsChanged")
-                );
-            
-            var dappConnectOptions2 = new ConnectOptions()
-                .RequireNamespace("eip155", new RequiredNamespace()
-                    {
-                        Methods = new[]
-                        {
-                            "eth_sendTransaction",
-                            "eth_signTransaction",
-                            "eth_sign",
-                            "personal_sign",
-                            "eth_signTypedData",
-                        },
-                        Chains = new[]
-                        {
-                            "eip155:1"
-                        },
-                        Events = new[]
-                        {
-                            "chainChanged", 
-                            "accountsChanged",
-                        }
-                    }
-                );
             
             var dappConnectOptions = new ConnectOptions()
             {
@@ -100,6 +68,7 @@ namespace WalletConnectSharp.Examples
             var dappClient = await WalletConnectSignClient.Init(dappOptions);
             var connectData = await dappClient.Connect(dappConnectOptions);
 
+            var walletFilePath = Path.Combine(home, ".wc", "store_wallet_example.json");
             var walletOptions = new SignClientOptions()
             {
                 ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
@@ -110,8 +79,7 @@ namespace WalletConnectSharp.Examples
                     Name = "WalletConnectSharpv2 Wallet Example",
                     Url = "https://walletconnect.com"
                 },
-                // Omit if you want persistant storage
-                Storage = new InMemoryStorage()
+                Storage = new FileSystemStorage(walletFilePath)
             };
 
             var walletClient = await WalletConnectSignClient.Init(walletOptions);

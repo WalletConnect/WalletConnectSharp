@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
+using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Core.Models.Relay;
@@ -74,7 +75,16 @@ namespace WalletConnectSharp.Core.Controllers
 
         private Dictionary<string, ActiveSubscription> _subscriptions = new Dictionary<string, ActiveSubscription>();
         private Dictionary<string, PendingSubscription> pending = new Dictionary<string, PendingSubscription>();
-        
+        private TaskCompletionSource<bool> restartTask = null;
+
+        public bool RestartInProgress
+        {
+            get
+            {
+                return restartTask != null && !restartTask.Task.IsCompleted;
+            }
+        }
+
         /// <summary>
         /// A dictionary of active subscriptions where the key is the id of the Subscription
         /// </summary>
@@ -156,6 +166,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         private IRelayer _relayer;
         private bool initialized;
+        private string clientId;
         private ActiveSubscription[] cached = Array.Empty<ActiveSubscription>();
 
         /// <summary>
@@ -177,11 +188,19 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!initialized)
             {
-                await Restore();
-                await Reset();
+                await Restart();
                 RegisterEventListeners();
                 OnEnabled();
+                this.clientId = await this._relayer.Core.Crypto.GetClientId();
             }
+        }
+
+        private async Task Restart()
+        {
+            this.restartTask = new TaskCompletionSource<bool>();
+            await Restore();
+            await Reset();
+            this.restartTask.SetResult(true);
         }
 
         protected virtual void RegisterEventListeners()
@@ -284,7 +303,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
-        protected virtual Task<string> RpcSubscribe<TR>(string topic, ProtocolOptions relay)
+        protected virtual async Task<string> RpcSubscribe<TR>(string topic, ProtocolOptions relay)
         {
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
             var request = new RequestArguments<JsonRpcSubscriberParams>()
@@ -296,7 +315,10 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
             
-            return _relayer.Provider.Request<JsonRpcSubscriberParams, string>(request);
+            var subscribe = _relayer.Provider.Request<JsonRpcSubscriberParams, string>(request);
+            await subscribe.WithTimeout(10000);
+
+            return HashUtils.HashMessage(topic + this.clientId);
         }
 
         protected virtual Task RpcUnsubscribe(string topic, string id, ProtocolOptions relay)
@@ -336,8 +358,17 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual async void OnConnect()
         {
+            if (RestartInProgress) return;
+            
             await Reset();
             OnEnabled();
+        }
+
+        private Task RestartToComplete()
+        {
+            if (!RestartInProgress) return Task.CompletedTask;
+
+            return restartTask.Task;
         }
 
         protected virtual void OnSubscribe(string id, PendingSubscription @params)
@@ -407,8 +438,10 @@ namespace WalletConnectSharp.Core.Controllers
                 };
             }
 
+            var ids = TopicMap.Get(topic);
+
             return Task.WhenAll(
-                Ids.Select(id => UnsubscribeById(topic, id, opts))
+                ids.Select(id => UnsubscribeById(topic, id, opts))
             );
         }
 
@@ -416,7 +449,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             var subscription = GetSubscription(id);
             _subscriptions.Remove(id);
-            _topicMap.Delete(id);
+            _topicMap.Delete(subscription.Topic, id);
             Events.Trigger(SubscriberEvents.Deleted, new DeletedSubscription()
             {
                 Id = id,
@@ -485,6 +518,8 @@ namespace WalletConnectSharp.Core.Controllers
         /// <returns>The subscription id</returns>
         public async Task<string> Subscribe(string topic, SubscribeOptions opts = null)
         {
+            await RestartToComplete();
+            
             if (opts == null)
             {
                 opts = new SubscribeOptions()
@@ -515,16 +550,20 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         /// <param name="topic">The topic to unsubscribe from</param>
         /// <param name="opts">The options to specify the subscription id as well as protocol options</param>
-        public Task Unsubscribe(string topic, UnsubscribeOptions opts = null)
+        public async Task Unsubscribe(string topic, UnsubscribeOptions opts = null)
         {
+            await RestartToComplete();
+            
             IsInitialized();
 
             if (opts != null && !string.IsNullOrWhiteSpace(opts.Id))
             {
-                return UnsubscribeById(topic, opts.Id, opts);
+                await UnsubscribeById(topic, opts.Id, opts);
             }
-
-            return UnsubscribeByTopic(topic, opts);
+            else
+            {
+                await UnsubscribeByTopic(topic, opts);
+            }
         }
 
         /// <summary>

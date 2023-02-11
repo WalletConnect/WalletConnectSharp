@@ -109,11 +109,19 @@ namespace WalletConnectSharp.Storage
             await _semaphoreSlim.WaitAsync();
             var json = await File.ReadAllTextAsync(FilePath, Encoding.UTF8);
             _semaphoreSlim.Release();
-            
-            Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json, new JsonSerializerSettings()
+
+            try
             {
-                TypeNameHandling = TypeNameHandling.Auto
-            });
+                Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
+                    new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
+            }
+            catch (JsonSerializationException e)
+            {
+                // Move the file to a .unsupported file
+                // and start fresh
+                File.Move(FilePath, FilePath + ".unsupported");
+                Entries = new Dictionary<string, object>();
+            }
         }
     }
 }

@@ -33,7 +33,7 @@ namespace WalletConnectSharp.Crypto
     /// </summary>
     public class Crypto : ICrypto
     {
-        private readonly string CRYPTO_CLIENT_SEED = $"client_ed25519_seed_{new Random().Next()}";
+        private readonly string CRYPTO_CLIENT_SEED = $"client_ed25519_seed";
         
         private const string MULTICODEC_ED25519_ENCODING = "base58btc";
         private const string MULTICODEC_ED25519_BASE = "z";
@@ -503,6 +503,19 @@ namespace WalletConnectSharp.Crypto
                 Payload = payload,
                 Signature = signature
             });
+        }
+
+        /// <summary>
+        /// Get a unique client id for this client
+        /// </summary>
+        /// <returns>The client id as a string</returns>
+        public async Task<string> GetClientId()
+        {
+            this.IsInitialized();
+            var seed = await this.GetClientSeed();
+            var keyPair = KeypairFromSeed(seed);
+            var clientId = EncodeIss(keyPair.GeneratePublicKey());
+            return clientId;
         }
 
         private string EncodeJwt(IridiumJWTSigned data)
