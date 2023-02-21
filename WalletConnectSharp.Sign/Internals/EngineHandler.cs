@@ -35,27 +35,6 @@ namespace WalletConnectSharp.Sign
             }
         }
         
-        async void RelayerMessageCallback(object sender, GenericEvent<MessageEvent> e)
-        {
-            var topic = e.EventData.Topic;
-            var message = e.EventData.Message;
-
-            var payload = await this.Client.Core.Crypto.Decode<JsonRpcPayload>(topic, message);
-            if (payload.IsRequest)
-            {
-                Events.Trigger($"request_{payload.Method}", e.EventData);
-            }
-            else if (payload.IsResponse)
-            {
-                Events.Trigger($"response_raw", new DecodedMessageEvent()
-                {
-                    Topic = topic,
-                    Message = message,
-                    Payload = payload
-                });
-            }
-        }
-        
         async Task IEnginePrivate.OnSessionProposeRequest(string topic, JsonRpcRequest<SessionPropose> payload)
         {
             var @params = payload.Params;

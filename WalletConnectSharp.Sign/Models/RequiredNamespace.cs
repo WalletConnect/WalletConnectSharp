@@ -21,7 +21,7 @@ namespace WalletConnectSharp.Sign.Models
         /// </summary>
         public RequiredNamespace() : base()
         {
-            Extension = Array.Empty<BaseRequiredNamespace<RequiredNamespace>>();
+            Extension = null;
         }
 
         /// <summary>
@@ -31,7 +31,10 @@ namespace WalletConnectSharp.Sign.Models
         /// <returns>This object, acts a builder function</returns>
         public RequiredNamespace WithExtension(BaseRequiredNamespace<RequiredNamespace> requiredNamespace)
         {
-            Extension = Extension.Append(requiredNamespace).ToArray();
+            if (Extension == null)
+                Extension = Array.Empty<BaseRequiredNamespace<RequiredNamespace>>().Append(requiredNamespace).ToArray();
+            else
+                Extension = Extension.Append(requiredNamespace).ToArray();
             return this;
         }
     }

@@ -21,6 +21,7 @@ namespace WalletConnectSharp.Events
     {
         private static HashSet<string> contextInstances = new HashSet<string>();
 
+        private readonly object _cacheLock = new object();
         private Dictionary<Type, Type[]> _typeToTriggerTypes = new Dictionary<Type, Type[]>();
 
         public string Name { get; private set; }
@@ -101,9 +102,11 @@ namespace WalletConnectSharp.Events
             
             wrappedCallback = delegate(object sender, GenericEvent<T> @event)
             {
-                callback(sender, @event);
+                if (callback == null)
+                    return;
                 RemoveListener(eventId, wrappedCallback);
-                
+                callback(sender, @event);
+                callback = null;
             };
             
             EventManager<T, GenericEvent<T>>.InstanceOf(Context).EventTriggers[eventId] += wrappedCallback;
@@ -176,30 +179,33 @@ namespace WalletConnectSharp.Events
             Type[] allPossibleTypes;
             bool wasTriggered = false;
 
-            if (_typeToTriggerTypes.ContainsKey(typeToTrigger))
-                allPossibleTypes = _typeToTriggerTypes[typeToTrigger];
-            else
+            lock (_cacheLock)
             {
-                if (typeToTrigger == typeof(object))
-                {
-                    // If the type of object was given, then only
-                    // trigger event listeners listening to the object type explicitly
-                    allPossibleTypes = new[] {typeof(object)};
-                }
+                if (_typeToTriggerTypes.ContainsKey(typeToTrigger))
+                    allPossibleTypes = _typeToTriggerTypes[typeToTrigger];
                 else
                 {
-                    //Find all EventFactories that inherit from type T
-                    var inheritedT = from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                        from type in assembly.GetTypes()
-                        where type != typeof(object) && typeToTrigger.IsSubclassOf(type)
-                        select type;
+                    if (typeToTrigger == typeof(object))
+                    {
+                        // If the type of object was given, then only
+                        // trigger event listeners listening to the object type explicitly
+                        allPossibleTypes = new[] { typeof(object) };
+                    }
+                    else
+                    {
+                        //Find all EventFactories that inherit from type T
+                        var inheritedT = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                            from type in assembly.GetTypes()
+                            where type != typeof(object) && typeToTrigger.IsSubclassOf(type)
+                            select type;
 
-                    // Create list of types that include types inherit from type T, type T, and type object
-                    allPossibleTypes = inheritedT.Concat(typeToTrigger.GetInterfaces()).Append(typeToTrigger)
-                        .Append(typeof(object)).ToArray();
+                        // Create list of types that include types inherit from type T, type T, and type object
+                        allPossibleTypes = inheritedT.Concat(typeToTrigger.GetInterfaces()).Append(typeToTrigger)
+                            .Append(typeof(object)).Distinct().ToArray();
+                    }
+
+                    _typeToTriggerTypes.Add(typeToTrigger, allPossibleTypes);
                 }
-                
-                _typeToTriggerTypes.Add(typeToTrigger, allPossibleTypes);
             }
 
             foreach (var type in allPossibleTypes)

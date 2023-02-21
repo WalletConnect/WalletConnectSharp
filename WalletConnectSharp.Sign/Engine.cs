@@ -1,14 +1,11 @@
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing;
-using WalletConnectSharp.Core.Models.Pairing.Methods;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Interfaces;
@@ -531,18 +528,12 @@ namespace WalletConnectSharp.Sign
             
             IsInitialized();
             await PrivateThis.IsValidRequest(topic, request, defaultChainId);
-            
-
-            var id = await MessageHandler.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
-            {
-                ChainId = chainId,
-                Request = request
-            });
+            long[] id = new long[1];
             
             var taskSource = new TaskCompletionSource<TR>();
-
+            
             SessionRequestEvents<T, TR>()
-                .FilterResponses((e) => e.Response.Id == id)
+                .FilterResponses((e) => e.Topic == topic && e.Response.Id == id[0])
                 .OnResponse += args =>
             {
                 if (args.Response.IsError)
@@ -552,6 +543,13 @@ namespace WalletConnectSharp.Sign
 
                 return Task.CompletedTask;
             };
+
+            id[0] = await MessageHandler.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
+            {
+                ChainId = chainId,
+                Request = request
+            });
+            
 
             return await taskSource.Task;
         }

@@ -30,6 +30,7 @@ namespace WalletConnectSharp.Network.Models
         /// Get the method for this payload, if this payload is a request.
         /// If this payload is not a request, then an error is thrown
         /// </summary>
+        [JsonIgnore]
         public string Method
         {
             get
@@ -43,7 +44,8 @@ namespace WalletConnectSharp.Network.Models
         
         /// <summary>
         /// Whether this payload represents a request
-        /// </summary>
+        /// </summary>+
+        [JsonIgnore]
         public bool IsRequest
         {
             get
@@ -55,6 +57,7 @@ namespace WalletConnectSharp.Network.Models
         /// <summary>
         /// Whether this payload represents a response
         /// </summary>
+        [JsonIgnore]
         public bool IsResponse
         {
             get
@@ -66,6 +69,7 @@ namespace WalletConnectSharp.Network.Models
         /// <summary>
         /// Whether this payload represents an error
         /// </summary>
+        [JsonIgnore]
         public bool IsError
         {
             get
