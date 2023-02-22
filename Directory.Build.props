@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <DefaultVersion>1.7.2</DefaultVersion>
-        <DefaultTargetFramework>net6.0</DefaultTargetFramework>
-        <DefaultLibraryVersion>netstandard2.1</DefaultLibraryVersion>
+        <DefaultVersion>2.0.0</DefaultVersion>
+        <DefaultTargetFrameworks>net6.0;netcoreapp3.1;netstandard2.1;</DefaultTargetFrameworks>
     </PropertyGroup>
     <PropertyGroup Label="C#">
         <LangVersion>latest</LangVersion>
