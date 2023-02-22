@@ -30,10 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="..\..\resources\icon.png">
-        <Pack>True</Pack>
-        <Link>icon.png</Link>
-      </None>
+      <None Include="..\..\resources\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
