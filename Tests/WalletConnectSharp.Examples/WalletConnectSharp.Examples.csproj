@@ -2,10 +2,20 @@
 
     <PropertyGroup>
         <TargetFrameworks>net6.0;netcoreapp3.1;netcoreapp3.1</TargetFrameworks>
-        <PackageVersion>2.0.0-rc.1</PackageVersion>
+        <PackageVersion>2.0.0</PackageVersion>
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <FileVersion>2.0.0</FileVersion>
         <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <PackageId>WalletConnect.Examples</PackageId>
+        <Title>WalletConnectSharp.Examples</Title>
+        <Authors>pedrouid, gigajuwels, edkek</Authors>
+        <Description>A port of the TypeScript SDK to C#. A complete implementation of the WalletConnect v2 protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
+        <Copyright>Copyright (c) WalletConnect 2023</Copyright>
+        <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
+        <RepositoryType>git </RepositoryType>
+        <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
