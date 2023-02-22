@@ -16,7 +16,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>walletconnect sign wallet web3 ether ethereum blockchain evm</PackageTags>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageLicenseUrl>https://github.com/WalletConnect/WalletConnectSharp/blob/2.0/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
