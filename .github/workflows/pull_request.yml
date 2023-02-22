@@ -6,6 +6,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-type: [ unit-tests, integration-tests ]
+      
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -20,6 +24,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
       working-directory: ./
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-      working-directory: ./
+    - uses: ./.github/actions/ci
+      with:
+        type: ${{ matrix.test-type }}
+        project-id: ${{ secrets.PROJECT_ID }}
