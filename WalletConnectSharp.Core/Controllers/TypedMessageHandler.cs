@@ -263,10 +263,11 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         /// <param name="topic">The topic to send the request in</param>
         /// <param name="parameters">The typed request message to send</param>
+        /// <param name="expiry">An override to specify how long this request will live for. If null is given, then expiry will be taken from either T or TR attributed options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
         /// <returns>The id of the request sent</returns>
-        public async Task<long> SendRequest<T, TR>(string topic, T parameters)
+        public async Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null)
         {
             var method = RpcMethodAttribute.MethodForType<T>();
 
@@ -275,6 +276,11 @@ namespace WalletConnectSharp.Core.Controllers
             var message = await this.Core.Crypto.Encode(topic, payload);
 
             var opts = RpcRequestOptionsFromType<T, TR>();
+
+            if (expiry != null)
+            {
+                opts.TTL = (long)expiry;
+            }
             
             (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
 

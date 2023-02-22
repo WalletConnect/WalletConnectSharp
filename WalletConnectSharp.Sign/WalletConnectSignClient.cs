@@ -318,9 +318,9 @@ namespace WalletConnectSharp.Sign
         /// <typeparam name="T">The type of the request data. MUST define the RpcMethodAttribute</typeparam>
         /// <typeparam name="TR">The type of the response data.</typeparam>
         /// <returns>The response data as type TR</returns>
-        public Task<TR> Request<T, TR>(string topic, T data, string chainId = null)
+        public Task<TR> Request<T, TR>(string topic, T data, string chainId = null, long? expiry = null)
         {
-            return Engine.Request<T, TR>(topic, data, chainId);
+            return Engine.Request<T, TR>(topic, data, chainId, expiry);
         }
 
         /// <summary>

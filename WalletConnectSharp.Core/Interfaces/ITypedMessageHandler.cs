@@ -79,10 +79,11 @@ namespace WalletConnectSharp.Core.Interfaces
         /// </summary>
         /// <param name="topic">The topic to send the request in</param>
         /// <param name="parameters">The typed request message to send</param>
+        /// <param name="expiry">An override to specify how long this request will live for. If null is given, then expiry will be taken from either T or TR attributed options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
         /// <returns>The id of the request sent</returns>
-        Task<long> SendRequest<T, TR>(string topic, T parameters);
+        Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null);
 
         /// <summary>
         /// Send a typed response message with the given request / response type pair T, TR to the given topic

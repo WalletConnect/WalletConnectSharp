@@ -103,10 +103,11 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <param name="topic">The topic of the session to send the request in</param>
         /// <param name="data">The data of the request</param>
         /// <param name="chainId">An (optional) chainId the request should be performed in</param>
+        /// <param name="expiry">An override to specify how long this request will live for. If null is given, then expiry will be taken from either T or TR attributed options</param>
         /// <typeparam name="T">The type of the request data. MUST define the RpcMethodAttribute</typeparam>
         /// <typeparam name="TR">The type of the response data.</typeparam>
         /// <returns>The response data as type TR</returns>
-        Task<TR> Request<T, TR>(string topic, T data, string chainId = null);
+        Task<TR> Request<T, TR>(string topic, T data, string chainId = null, long? expiry = null);
 
         /// <summary>
         /// Send a response to a request to the session in the given topic with the response data TR. This function

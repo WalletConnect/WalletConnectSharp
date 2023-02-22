@@ -506,7 +506,7 @@ namespace WalletConnectSharp.Sign
         /// <typeparam name="T">The type of the request data. MUST define the RpcMethodAttribute</typeparam>
         /// <typeparam name="TR">The type of the response data.</typeparam>
         /// <returns>The response data as type TR</returns>
-        public async Task<TR> Request<T, TR>(string topic, T data, string chainId = null)
+        public async Task<TR> Request<T, TR>(string topic, T data, string chainId = null, long? expiry = null)
         {
             await IsValidSessionTopic(topic);
 
@@ -546,7 +546,7 @@ namespace WalletConnectSharp.Sign
 
             id[0] = await MessageHandler.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
             {
-                ChainId = chainId,
+                ChainId = defaultChainId,
                 Request = request
             });
             
