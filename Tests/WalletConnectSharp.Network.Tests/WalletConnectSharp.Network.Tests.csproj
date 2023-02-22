@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
-        <PackageVersion>2.0.0-rc.1</PackageVersion>
+        <PackageVersion>2.0.0</PackageVersion>
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <FileVersion>2.0.0</FileVersion>
     </PropertyGroup>
