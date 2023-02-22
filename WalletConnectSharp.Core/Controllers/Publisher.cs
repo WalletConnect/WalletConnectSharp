@@ -82,7 +82,7 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 var hash = HashUtils.HashMessage(@params.Message);
                 await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Relay,
-                    @params.Options.Prompt, @params.Options.TTL);
+                    @params.Options.Prompt, @params.Options.Tag);
                 OnPublish(hash);
             }
         }
