@@ -16,6 +16,7 @@
         <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
         <PackageIcon>icon.png</PackageIcon>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageLicenseUrl>https://github.com/WalletConnect/WalletConnectSharp/blob/2.0/LICENSE</PackageLicenseUrl>
     </PropertyGroup>
 
     <ItemGroup>
