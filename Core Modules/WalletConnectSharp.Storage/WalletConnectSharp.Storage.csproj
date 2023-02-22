@@ -6,6 +6,7 @@
         <AssemblyVersion>$(DefaultVersion)</AssemblyVersion>
         <FileVersion>$(DefaultVersion)</FileVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>WalletConnect.Storage</PackageId>
         <Title>WalletConnectSharp.Storage</Title>
         <Authors>pedrouid, gigajuwels, edkek</Authors>
         <Description>A port of the TypeScript SDK to C#. A complete implementation of the WalletConnect v2 protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
