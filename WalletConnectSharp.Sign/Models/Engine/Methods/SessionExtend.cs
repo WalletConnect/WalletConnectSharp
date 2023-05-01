@@ -9,8 +9,8 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// A class that represents the request wc_sessionExtend. Used to extend a session
     /// </summary>
     [RpcMethod("wc_sessionExtend")]
-    [RpcRequestOptions(Clock.ONE_DAY, false, 1106)]
-    [RpcResponseOptions(Clock.ONE_DAY, false, 1107)]
+    [RpcRequestOptions(Clock.ONE_DAY, 1106)]
+    [RpcResponseOptions(Clock.ONE_DAY, 1107)]
     public class SessionExtend : Dictionary<string, object>, IWcMethod
     {
     }

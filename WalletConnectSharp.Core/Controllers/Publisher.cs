@@ -81,8 +81,7 @@ namespace WalletConnectSharp.Core.Controllers
                 var @params = queue[key];
                 
                 var hash = HashUtils.HashMessage(@params.Message);
-                await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Relay,
-                    @params.Options.Prompt, @params.Options.Tag);
+                await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay);
                 OnPublish(hash);
             }
         }
@@ -92,8 +91,7 @@ namespace WalletConnectSharp.Core.Controllers
             this.queue.Remove(hash);
         }
 
-        protected Task RpcPublish(string topic, string message, long ttl, ProtocolOptions relay, bool prompt = false,
-            long? tag = null)
+        protected Task RpcPublish(string topic, string message, long ttl, long tag, ProtocolOptions relay)
         {
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
             var request = new RequestArguments<RelayPublishRequest>()
@@ -104,7 +102,6 @@ namespace WalletConnectSharp.Core.Controllers
                     Message = message,
                     Topic = topic,
                     TTL = ttl,
-                    Prompt = prompt,
                     Tag = tag
                 }
             };
@@ -117,14 +114,13 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         /// <param name="topic">The topic to send the message in</param>
         /// <param name="message">The message to send</param>
-        /// <param name="opts">(Optional) publish options specifying things like prompt, TTL, tag, etc..</param>
+        /// <param name="opts">(Optional) publish options specifying TTL and tag</param>
         public async Task Publish(string topic, string message, PublishOptions opts = null)
         {
             if (opts == null)
             {
                 opts = new PublishOptions()
                 {
-                    Prompt = false,
                     Relay = new ProtocolOptions()
                     {
                         Protocol = RelayProtocols.Default
@@ -153,8 +149,7 @@ namespace WalletConnectSharp.Core.Controllers
 
             var hash = HashUtils.HashMessage(message);
             queue.Add(hash, @params);
-            await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Relay, @params.Options.Prompt,
-                @params.Options.Tag);
+            await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay);
             OnPublish(hash);
         }
     }

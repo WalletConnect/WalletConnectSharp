@@ -10,8 +10,8 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// in this session
     /// </summary>
     [RpcMethod("wc_sessionUpdate")]
-    [RpcRequestOptions(Clock.ONE_DAY, false, 1104)]
-    [RpcResponseOptions(Clock.ONE_DAY, false, 1105)]
+    [RpcRequestOptions(Clock.ONE_DAY, 1104)]
+    [RpcResponseOptions(Clock.ONE_DAY, 1105)]
     public class SessionUpdate : IWcMethod
     {
         /// <summary>

@@ -12,7 +12,7 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// is proposing the session
     /// </summary>
     [RpcMethod("wc_sessionPropose")]
-    [RpcRequestOptions(Clock.FIVE_MINUTES, true, 1100)]
+    [RpcRequestOptions(Clock.FIVE_MINUTES, 1100)]
     public class SessionPropose : IWcMethod
     {
         /// <summary>

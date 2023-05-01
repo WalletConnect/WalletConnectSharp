@@ -7,8 +7,8 @@ namespace WalletConnectSharp.Core.Models.Pairing.Methods
     /// A class that represents the request wc_pairingDelete. This is used to delete a pairing
     /// </summary>
     [RpcMethod("wc_pairingDelete")]
-    [RpcRequestOptions(Clock.ONE_DAY, false, 1000)]
-    [RpcResponseOptions(Clock.ONE_DAY, false, 1001)]
+    [RpcRequestOptions(Clock.ONE_DAY, 1000)]
+    [RpcResponseOptions(Clock.ONE_DAY, 1001)]
     public class PairingDelete : ErrorResponse
     {
     }

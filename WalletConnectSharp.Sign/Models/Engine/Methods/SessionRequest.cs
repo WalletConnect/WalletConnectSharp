@@ -10,8 +10,8 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// peer in this session.
     /// </summary>
     [RpcMethod("wc_sessionRequest")]
-    [RpcRequestOptions(Clock.ONE_DAY, true, 1108)]
-    [RpcResponseOptions(Clock.ONE_DAY, false, 1109)]
+    [RpcRequestOptions(Clock.ONE_DAY, 1108)]
+    [RpcResponseOptions(Clock.ONE_DAY, 1109)]
     public class SessionRequest<T> : IWcMethod
     {
         /// <summary>

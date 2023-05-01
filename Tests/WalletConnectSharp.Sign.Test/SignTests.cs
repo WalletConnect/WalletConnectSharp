@@ -11,14 +11,14 @@ namespace WalletConnectSharp.Sign.Test
     {
         private SignClientFixture _cryptoFixture;
 
-        [RpcMethod("test_method"), RpcRequestOptions(Clock.ONE_MINUTE, false, 99998)]
+        [RpcMethod("test_method"), RpcRequestOptions(Clock.ONE_MINUTE, 99998)]
         public class TestRequest
         {
             public int a;
             public int b;
         }
 
-        [RpcResponseOptions(Clock.ONE_MINUTE, false, 99999)]
+        [RpcResponseOptions(Clock.ONE_MINUTE, 99999)]
         public class TestResponse
         {
             public int result;
