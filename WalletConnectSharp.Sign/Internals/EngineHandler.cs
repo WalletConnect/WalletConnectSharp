@@ -49,7 +49,9 @@ namespace WalletConnectSharp.Sign
                     Expiry = expiry,
                     Proposer = @params.Proposer,
                     Relays = @params.Relays,
-                    RequiredNamespaces = @params.RequiredNamespaces
+                    RequiredNamespaces = @params.RequiredNamespaces,
+                    OptionalNamespaces = @params.OptionalNamespaces,
+                    SessionProperties = @params.SessionProperties,
                 };
                 await PrivateThis.SetProposal(id, proposal);
                 this.Client.Events.Trigger(EngineEvents.SessionProposal, new JsonRpcRequest<ProposalStruct>()

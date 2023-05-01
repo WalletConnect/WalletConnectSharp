@@ -236,18 +236,7 @@ namespace WalletConnectSharp.Sign
                 
                 var session = e.EventData;
                 session.Self.PublicKey = publicKey;
-                var completeSession = new SessionStruct()
-                {
-                    Acknowledged = session.Acknowledged,
-                    Controller = session.Controller,
-                    Expiry = session.Expiry,
-                    RequiredNamespaces = requiredNamespaces,
-                    Namespaces = session.Namespaces,
-                    Peer = session.Peer,
-                    Relay = session.Relay,
-                    Self = session.Self,
-                    Topic = session.Topic
-                };
+                var completeSession = session with { RequiredNamespaces = requiredNamespaces };
                 await PrivateThis.SetExpiry(session.Topic, session.Expiry.Value);
                 await Client.Session.Set(session.Topic, completeSession);
                 
@@ -282,7 +271,9 @@ namespace WalletConnectSharp.Sign
                 Id = id,
                 Proposer = proposal.Proposer,
                 Relays = proposal.Relays,
-                RequiredNamespaces = proposal.RequiredNamespaces
+                RequiredNamespaces = proposal.RequiredNamespaces,
+                OptionalNamespaces = proposal.OptionalNamespaces,
+                SessionProperties = proposal.SessionProperties,
             });
 
             return new ConnectedData()
@@ -336,6 +327,7 @@ namespace WalletConnectSharp.Sign
             var pairingTopic = proposal.PairingTopic;
             var proposer = proposal.Proposer;
             var requiredNamespaces = proposal.RequiredNamespaces;
+            var optionalNamespaces = proposal.OptionalNamespaces;
 
             var selfPublicKey = await this.Client.Core.Crypto.GenerateKeyPair();
             var peerPublicKey = proposer.PublicKey;
@@ -382,7 +374,7 @@ namespace WalletConnectSharp.Sign
                 Expiry = sessionSettle.Expiry,
                 Namespaces = sessionSettle.Namespaces,
                 Relay = sessionSettle.Relay,
-                RequiredNamespaces = requiredNamespaces
+                RequiredNamespaces = requiredNamespaces,
             };
 
             await this.Client.Session.Set(sessionTopic, session);

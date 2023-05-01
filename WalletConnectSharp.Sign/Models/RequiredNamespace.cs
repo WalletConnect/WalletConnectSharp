@@ -5,36 +5,68 @@ using Newtonsoft.Json;
 namespace WalletConnectSharp.Sign.Models
 {
     /// <summary>
-    /// A required namespace that holds chains, methods and events enabled. Also includes
-    /// extension required namespaces that are enabled as well
+    /// A required namespace that holds chains, methods and events enabled.
     /// </summary>
-    public class RequiredNamespace : BaseRequiredNamespace<RequiredNamespace>
+    public class RequiredNamespace
     {
         /// <summary>
-        /// An array of required extension namespaces that are enabled
+        /// A list of all chains that are required to be enabled in this namespace
         /// </summary>
-        [JsonProperty("extension", NullValueHandling=NullValueHandling.Ignore)]
-        public BaseRequiredNamespace<RequiredNamespace>[] Extension { get; set; }
+        [JsonProperty("chains")]
+        public string[] Chains { get; set; }
+        
+        /// <summary>
+        /// A list of all methods that are required to be enabled in this namespace
+        /// </summary>
+        [JsonProperty("methods")]
+        public string[] Methods { get; set; }
+        
+        /// <summary>
+        /// A list of all events that are required to be enabled in this namespace
+        /// </summary>
+        [JsonProperty("events")]
+        public string[] Events { get; set; }
 
         /// <summary>
-        /// Create a new blank required namespace
+        /// Create a blank required namespace
         /// </summary>
-        public RequiredNamespace() : base()
+        public RequiredNamespace()
         {
-            Extension = null;
+            Chains = Array.Empty<string>();
+            Methods = Array.Empty<string>();
+            Events = Array.Empty<string>();
         }
 
         /// <summary>
-        /// Add an extension required namespace to this required namespace
+        /// Add a chainId as required in this namespace
         /// </summary>
-        /// <param name="requiredNamespace">The extension required namespace to add</param>
-        /// <returns>This object, acts a builder function</returns>
-        public RequiredNamespace WithExtension(BaseRequiredNamespace<RequiredNamespace> requiredNamespace)
+        /// <param name="chain">The chain to add</param>
+        /// <returns>This object, acts as a builder function</returns>
+        public RequiredNamespace WithChain(string chain)
         {
-            if (Extension == null)
-                Extension = Array.Empty<BaseRequiredNamespace<RequiredNamespace>>().Append(requiredNamespace).ToArray();
-            else
-                Extension = Extension.Append(requiredNamespace).ToArray();
+            Chains = Chains.Append(chain).ToArray();
+            return this;
+        }
+
+        /// <summary>
+        /// Add a method as required in this namespace
+        /// </summary>
+        /// <param name="method">The method name to add</param>
+        /// <returns>This object, acts as a builder function</returns>
+        public RequiredNamespace WithMethod(string method)
+        {
+            Methods = Methods.Append(method).ToArray();
+            return this;
+        }
+        
+        /// <summary>
+        /// Add an event as required in this namespace
+        /// </summary>
+        /// <param name="event">The event name to add</param>
+        /// <returns>This object, acts as a builder function</returns>
+        public RequiredNamespace WithEvent(string @event)
+        {
+            Events = Events.Append(@event).ToArray();
             return this;
         }
     }
