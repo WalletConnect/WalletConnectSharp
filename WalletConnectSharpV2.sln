@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Sign.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Tests.Common", "Tests\WalletConnectSharp.Tests.Common\WalletConnectSharp.Tests.Common.csproj", "{C3CC2BC9-CD29-46B8-94DB-B104E427330B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Auth", "WalletConnectSharp.Auth\WalletConnectSharp.Auth.csproj", "{5189138F-FAE5-4B2C-912F-CEB429C156AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,10 @@ Global
 		{C3CC2BC9-CD29-46B8-94DB-B104E427330B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3CC2BC9-CD29-46B8-94DB-B104E427330B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3CC2BC9-CD29-46B8-94DB-B104E427330B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5189138F-FAE5-4B2C-912F-CEB429C156AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5189138F-FAE5-4B2C-912F-CEB429C156AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5189138F-FAE5-4B2C-912F-CEB429C156AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5189138F-FAE5-4B2C-912F-CEB429C156AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{23897558-4177-425D-B2FA-75AB0B6FEDAE} = {3A55D6C7-0EF8-4EEA-90A5-89F5AFB97BA0}

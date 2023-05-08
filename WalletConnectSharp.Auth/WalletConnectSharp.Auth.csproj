@@ -5,27 +5,32 @@
         <PackageVersion>$(DefaultVersion)</PackageVersion>
         <AssemblyVersion>$(DefaultVersion)</AssemblyVersion>
         <FileVersion>$(DefaultVersion)</FileVersion>
-        <PackageId>WalletConnect.Core</PackageId>
-        <Title>WalletConnectSharp.Core</Title>
+        <PackageId>WalletConnect.Auth</PackageId>
+        <Title>WalletConnectSharp.Auth</Title>
         <Authors>pedrouid, gigajuwels</Authors>
         <Description>A port of the TypeScript SDK to C#. A complete implementation of the WalletConnect v2 protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
         <Copyright>Copyright (c) WalletConnect 2023</Copyright>
         <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
+        <PackageIcon>icon.png</PackageIcon>
         <RepositoryUrl>https://github.com/WalletConnect/WalletConnectSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>walletconnect wallet web3 ether ethereum blockchain evm</PackageTags>
-        <PackageIcon>icon.png</PackageIcon>
+        <PackageTags>walletconnect sign wallet web3 ether ethereum blockchain evm</PackageTags>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-       <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core Modules\WalletConnectSharp.Crypto\WalletConnectSharp.Crypto.csproj" />
-      <ProjectReference Include="..\Core Modules\WalletConnectSharp.Network.Websocket\WalletConnectSharp.Network.Websocket.csproj" />
+      <ProjectReference Include="..\WalletConnectSharp.Core\WalletConnectSharp.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Controllers" />
+      <Folder Include="Interfaces" />
+      <Folder Include="Models" />
     </ItemGroup>
 
 </Project>
