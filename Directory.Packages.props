@@ -6,7 +6,7 @@
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="6.27.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Websocket.Client" Version="4.4.43" />
+    <PackageVersion Include="Websocket.Client" Version="4.6.1" />
     <PackageVersion Include="xunit" Version="2.4.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.3" />
