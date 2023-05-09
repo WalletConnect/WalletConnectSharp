@@ -25,5 +25,11 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// </summary>
         [JsonProperty("relayProtocol")]
         public string RelayProtocol { get; set; }
+        
+        /// <summary>
+        /// Custom session properties for this approval
+        /// </summary>
+        [JsonProperty("sessionProperties")]
+        public Dictionary<string, string> SessionProperties { get; set; }
     }
 }

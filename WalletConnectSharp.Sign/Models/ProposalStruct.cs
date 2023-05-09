@@ -56,11 +56,23 @@ namespace WalletConnectSharp.Sign.Models
         public Participant Proposer { get; set; }
         
         /// <summary>
-        /// The required namespaces this proposal requests
+        /// The required namespaces for this proposal requests
         /// </summary>
         [JsonProperty("requiredNamespaces")]
         public RequiredNamespaces RequiredNamespaces { get; set; }
         
+        /// <summary>
+        /// The optional namespaces for this proposal requests
+        /// </summary>
+        [JsonProperty("optionalNamespaces")]
+        public Dictionary<string, RequiredNamespace> OptionalNamespaces { get; set; }
+        
+        /// <summary>
+        /// Custom session properties for this proposal request
+        /// </summary>
+        [JsonProperty("sessionProperties")]
+        public Dictionary<string, string> SessionProperties { get; set; }
+
         /// <summary>
         /// The pairing topic this proposal lives in
         /// </summary>
@@ -112,12 +124,29 @@ namespace WalletConnectSharp.Sign.Models
                     Methods = rn.Methods
                 });
             }
+            if (OptionalNamespaces != null)
+            {
+                foreach (var key in OptionalNamespaces.Keys)
+                {
+                    var rn = OptionalNamespaces[key];
+                    var allAccounts = (from chain in rn.Chains from account in approvedAccounts select $"{chain}:{account}").ToArray();
+                
+                    namespaces.Add(key, new Namespace()
+                    {
+                        Accounts = allAccounts,
+                        Events = rn.Events,
+                        Methods = rn.Methods
+                    });
+                }
+                
+            }
 
             return new ApproveParams()
             {
                 Id = Id.Value,
                 RelayProtocol = relayProtocol,
-                Namespaces = namespaces
+                Namespaces = namespaces,
+                SessionProperties = SessionProperties,
             };
         }
 

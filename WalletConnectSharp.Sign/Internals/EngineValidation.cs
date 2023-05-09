@@ -160,6 +160,7 @@ namespace WalletConnectSharp.Sign
             var id = @params.Id;
             var namespaces = @params.Namespaces;
             var relayProtocol = @params.RelayProtocol;
+            var properties = @params.SessionProperties;
             
             await IsValidProposalId(id);
             var proposal = this.Client.Proposal.Get(id);
@@ -177,6 +178,14 @@ namespace WalletConnectSharp.Sign
                 if (string.IsNullOrWhiteSpace(relayProtocol))
                     throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
                         $"approve() relayProtocol: {relayProtocol}");
+            }
+
+            if (@params.SessionProperties != null)
+            {
+                if (@params.SessionProperties.Values.Any(string.IsNullOrWhiteSpace))
+                    throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
+                        $"sessionProperties must be in Dictionary<string, string> format with no null or " +
+                        $"empty/whitespace values. Received: {JsonConvert.SerializeObject(@params.SessionProperties)}");
             }
         }
 
@@ -266,12 +275,6 @@ namespace WalletConnectSharp.Sign
             {
                 var chains = GetAccountsChains(ns.Accounts);
                 if (chains.Contains(chainId)) events.AddRange(ns.Events);
-                if (ns.Extension == null) continue;
-                foreach (var ext in ns.Extension)
-                {
-                    var extChains = GetAccountsChains(ext.Accounts);
-                    if (extChains.Contains(chainId)) events.AddRange(ext.Events);
-                }
             }
 
             return events;
@@ -339,17 +342,6 @@ namespace WalletConnectSharp.Sign
             return error;
         }
 
-        private ErrorResponse IsValidExtension(Namespace ns, string method)
-        {
-            if (ns.Extension != null)
-            {
-                if (ns.Extension.Length == 0)
-                    return ErrorResponse.FromErrorType(ErrorType.MISSING_OR_INVALID, $"{method} extension should be an array of namespaces, or omitted");
-            }
-
-            return null;
-        }
-
         private ErrorResponse IsValidNamespaceAccounts(Namespaces namespaces, string method)
         {
             ErrorResponse error = null;
@@ -358,28 +350,9 @@ namespace WalletConnectSharp.Sign
                 if (error != null) break;
 
                 var validAccountsError = IsValidAccounts(ns.Accounts, $"{method} namespace");
-                var validExtensionError = IsValidExtension(ns, method);
                 if (validAccountsError != null)
                 {
                     error = validAccountsError;
-                }
-                else if (validExtensionError != null)
-                {
-                    error = validAccountsError;
-                } 
-                else if (ns.Extension != null)
-                {
-                    foreach (var ext in ns.Extension)
-                    {
-                        if (error != null)
-                            break;
-
-                        var extValidAccountsError = IsValidAccounts(ext.Accounts, $"{method} extension");
-                        if (extValidAccountsError != null)
-                        {
-                            error = extValidAccountsError;
-                        }
-                    }
                 }
             }
 
@@ -412,12 +385,6 @@ namespace WalletConnectSharp.Sign
             {
                 var chains = GetAccountsChains(ns.Accounts);
                 if (chains.Contains(chainId)) methods.AddRange(ns.Methods);
-                if (ns.Extension == null) continue;
-                foreach (var ext in ns.Extension)
-                {
-                    var extChains = GetAccountsChains(ext.Accounts);
-                    if (extChains.Contains(chainId)) methods.AddRange(ext.Methods);
-                }
             }
 
             return methods;
@@ -440,11 +407,6 @@ namespace WalletConnectSharp.Sign
             foreach (var ns in namespaces.Values)
             {
                 chains.AddRange(GetAccountsChains(ns.Accounts));
-                if (ns.Extension == null) continue;
-                foreach (var ext in ns.Extension)
-                {
-                    chains.AddRange(GetAccountsChains(ext.Accounts));
-                }
             }
 
             return chains;
@@ -490,38 +452,6 @@ namespace WalletConnectSharp.Sign
                     {
                         error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces events don't satisfy requiredNamespaces events for {key}");
                     }
-                    else if (requiredNamespaces[key].Extension != null &&
-                             requiredNamespaces[key].Extension.Length > 0 && namespaces[key].Extension == null)
-                    {
-                        error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces extension doesn't satisfy requiredNamespaces extension for {key}");
-                    }
-                    else if (requiredNamespaces[key].Extension != null &&
-                             requiredNamespaces[key].Extension.Length > 0 && namespaces[key].Extension != null &&
-                             namespaces[key].Extension.Length > 0)
-                    {
-                        foreach (var ext in requiredNamespaces[key].Extension)
-                        {
-                            var extMethods = ext.Methods;
-                            var extEvents = ext.Events;
-                            var extChains = ext.Chains;
-
-                            if (error != null)
-                                break;
-
-                            var isOverlap = namespaces[key].Extension.Any(ns =>
-                            {
-                                var accChains = GetAccountsChains(ns.Accounts);
-                                return HasOverlap(extChains, accChains) &&
-                                       HasOverlap(extEvents, ns.Events) &&
-                                       HasOverlap(extMethods, ns.Methods);
-                            });
-
-                            if (!isOverlap)
-                            {
-                                error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces extension doesn't satisfy requiredNamespaces extension for {key}");
-                            }
-                        }
-                    }
                 }
             }
 
@@ -564,7 +494,6 @@ namespace WalletConnectSharp.Sign
                 var accounts = value.Accounts;
                 var methods = value.Methods;
                 var events = value.Events;
-                var extension = value.Extension;
                 var chains = GetAccountsChains(accounts);
                 var requiredNamespace = requiredNamespaces[key];
 
@@ -572,25 +501,6 @@ namespace WalletConnectSharp.Sign
                     !HasOverlap(requiredNamespace.Methods, methods) ||
                     !HasOverlap(requiredNamespace.Events, events))
                     compatible = false;
-
-                if (compatible && extension != null && extension.Length > 0)
-                {
-                    foreach (var extensionNamespace in extension)
-                    {
-                        var extAccounts = extensionNamespace.Accounts;
-                        var extMethods = extensionNamespace.Methods;
-                        var extEvents = extensionNamespace.Events;
-                        var extChains = GetAccountsChains(extAccounts);
-                        var overlap = false;
-
-                        if (requiredNamespace.Extension != null)
-                            overlap = requiredNamespace.Extension.Any(re =>
-                                HasOverlap(re.Chains, extChains) && HasOverlap(re.Methods, extMethods) &&
-                                HasOverlap(re.Events, extEvents));
-
-                        if (!overlap) compatible = false;
-                    }
-                }
             }
 
             return compatible;
