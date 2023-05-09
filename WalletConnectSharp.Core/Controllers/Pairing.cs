@@ -127,6 +127,17 @@ namespace WalletConnectSharp.Core.Controllers
             var topic = uriParams.Topic;
             var symKey = uriParams.SymKey;
             var relay = uriParams.Relay;
+
+            if (this.Store.Keys.Contains(topic))
+            {
+                throw new ArgumentException($"Topic {topic} already has pairing");
+            }
+
+            if (await this.Core.Crypto.HasKeys(topic))
+            {
+                throw new ArgumentException($"Topic {topic} already has keychain");
+            }
+            
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
             var pairing = new PairingStruct()
             {
