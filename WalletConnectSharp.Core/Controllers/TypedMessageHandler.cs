@@ -200,7 +200,6 @@ namespace WalletConnectSharp.Core.Controllers
 
             return new PublishOptions()
             {
-                Prompt = opts.Prompt,
                 Tag = opts.Tag,
                 TTL = opts.TTL
             };
@@ -252,7 +251,6 @@ namespace WalletConnectSharp.Core.Controllers
 
             return new PublishOptions()
             {
-                Prompt = opts.Prompt,
                 Tag = opts.Tag,
                 TTL = opts.TTL
             };

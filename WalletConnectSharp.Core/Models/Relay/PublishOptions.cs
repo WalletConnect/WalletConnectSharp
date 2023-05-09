@@ -12,13 +12,7 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// </summary>
         [JsonProperty("ttl")]
         public long TTL { get; set; }
-        
-        /// <summary>
-        /// Whether to prompt/alert the receiver of the message
-        /// </summary>
-        [JsonProperty("prompt")]
-        public bool Prompt { get; set; }
-        
+
         /// <summary>
         /// A Tag for the message
         /// </summary>

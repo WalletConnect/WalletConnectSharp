@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 
 namespace WalletConnectSharp.Core.Models.Relay
@@ -25,17 +26,11 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// </summary>
         [JsonProperty("ttl")]
         public long TTL { get; set; }
-        
-        /// <summary>
-        /// Whether the relay server should prompt the subscribers in the topic
-        /// </summary>
-        [JsonProperty("prompt")]
-        public bool Prompt { get; set; }
-        
+
         /// <summary>
         /// A tag for the message to identify it
         /// </summary>
         [JsonProperty("tag")]
-        public long? Tag { get; set; }
+        public long Tag { get; set; }
     }
 }

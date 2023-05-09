@@ -9,8 +9,8 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// A class that represents the request wc_sessionPing. Used to ping a session
     /// </summary>
     [RpcMethod("wc_sessionPing")]
-    [RpcRequestOptions(Clock.THIRTY_SECONDS, false, 1114)]
-    [RpcResponseOptions(Clock.THIRTY_SECONDS, false, 1115)]
+    [RpcRequestOptions(Clock.THIRTY_SECONDS, 1114)]
+    [RpcResponseOptions(Clock.THIRTY_SECONDS, 1115)]
     public class SessionPing : Dictionary<string, object>, IWcMethod
     {
     }

@@ -21,7 +21,7 @@ namespace WalletConnectSharp.Core.Interfaces
         /// </summary>
         /// <param name="topic">The topic to publish the message in</param>
         /// <param name="message">The message to publish</param>
-        /// <param name="opts">(optional) PublishOptions specifying TTL, whether to prompt and the Tag.</param>
+        /// <param name="opts">(optional) PublishOptions specifying TTL the Tag.</param>
         /// <returns></returns>
         public Task Publish(string topic, string message, PublishOptions opts = null);
     }

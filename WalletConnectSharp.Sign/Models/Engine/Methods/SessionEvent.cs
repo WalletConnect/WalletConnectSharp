@@ -11,8 +11,8 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// event
     /// </summary>
     [RpcMethod("wc_sessionEvent")]
-    [RpcRequestOptions(Clock.FIVE_MINUTES, true, 1110)]
-    [RpcResponseOptions(Clock.FIVE_MINUTES, false, 1111)]
+    [RpcRequestOptions(Clock.FIVE_MINUTES, 1110)]
+    [RpcResponseOptions(Clock.FIVE_MINUTES, 1111)]
     public class SessionEvent<T> : IWcMethod
     {
         /// <summary>

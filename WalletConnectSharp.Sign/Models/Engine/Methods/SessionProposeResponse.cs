@@ -8,7 +8,7 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// <summary>
     /// A class that represents the response to wc_sessionPropose. Used to approve a session proposal
     /// </summary>
-    [RpcResponseOptions(Clock.FIVE_MINUTES, false, 1101)]
+    [RpcResponseOptions(Clock.FIVE_MINUTES, 1101)]
     public class SessionProposeResponse
     {
         /// <summary>

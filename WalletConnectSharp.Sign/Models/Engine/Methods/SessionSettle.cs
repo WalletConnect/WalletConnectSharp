@@ -10,8 +10,8 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     /// A class that represents the request wc_sessionSettle. Used to approve and settle a proposed session.
     /// </summary>
     [RpcMethod("wc_sessionSettle")]
-    [RpcRequestOptions(Clock.FIVE_MINUTES, false, 1102)]
-    [RpcResponseOptions(Clock.FIVE_MINUTES, false, 1103)]
+    [RpcRequestOptions(Clock.FIVE_MINUTES, 1102)]
+    [RpcResponseOptions(Clock.FIVE_MINUTES, 1103)]
     public class SessionSettle : IWcMethod
     {
         /// <summary>
