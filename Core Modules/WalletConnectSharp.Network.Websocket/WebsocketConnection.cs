@@ -141,13 +141,13 @@ namespace WalletConnectSharp.Network.Websocket
                 TaskCompletionSource<WebsocketClient> registeringTask =
                     new TaskCompletionSource<WebsocketClient>(TaskCreationOptions.None);
                 
-                Events.ListenForOnce("register_error",
+                Events.ListenForOnce(WebsocketConnectionEvents.RegisterError,
                     delegate(object sender, GenericEvent<Exception> @event)
                     {
                         registeringTask.SetException(@event.EventData);
                     });
                 
-                Events.ListenForOnce("open",
+                Events.ListenForOnce(WebsocketConnectionEvents.Open,
                     delegate(object sender, GenericEvent<WebsocketClient> @event)
                     {
                         registeringTask.SetResult(@event.EventData);
@@ -161,18 +161,21 @@ namespace WalletConnectSharp.Network.Websocket
             this._url = url;
             this._registering = true;
 
+            WebsocketClient socket = null;
             try
             {
-                _socket = new WebsocketClient(new Uri(_url));
+                socket = new WebsocketClient(new Uri(_url));
 
-                await _socket.Start().WithTimeout(OpenTimeout, "Unavailable WS RPC url at " + _url);
-                OnOpen(_socket);
-                return _socket;
+                await socket.Start().WithTimeout(OpenTimeout, "Unavailable WS RPC url at " + _url);
+                OnOpen(socket);
+                return socket;
             }
             catch (Exception e)
             {
                 Events.Trigger(WebsocketConnectionEvents.RegisterError, e);
-                OnClose(new DisconnectionInfo(DisconnectionType.Error, WebSocketCloseStatus.Empty, e.Message, null, e));
+                
+                if (socket != null)
+                    socket.Dispose();
 
                 throw;
             }
@@ -200,10 +203,11 @@ namespace WalletConnectSharp.Network.Websocket
         {
             if (this._socket == null)
                 return;
-            
-            //_socket.Dispose();
+
+            var socketDisposing = _socket;
             this._socket = null;
             this._registering = false;
+            socketDisposing.Dispose();
             Events.Trigger(WebsocketConnectionEvents.Close, obj);
         }
 

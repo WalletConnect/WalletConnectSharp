@@ -75,13 +75,13 @@ namespace WalletConnectSharp.Core.Controllers
 
         private Dictionary<string, ActiveSubscription> _subscriptions = new Dictionary<string, ActiveSubscription>();
         private Dictionary<string, PendingSubscription> pending = new Dictionary<string, PendingSubscription>();
-        private TaskCompletionSource<bool> restartTask = null;
+        private Task restartTask = null;
 
         public bool RestartInProgress
         {
             get
             {
-                return restartTask != null && !restartTask.Task.IsCompleted;
+                return restartTask is { IsCompleted: false };
             }
         }
 
@@ -195,12 +195,17 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
-        private async Task Restart()
+        private Task Restart()
         {
-            this.restartTask = new TaskCompletionSource<bool>();
+            if (RestartInProgress) return this.restartTask;
+            this.restartTask = DoRestart();
+            return this.restartTask;
+        }
+
+        private async Task DoRestart()
+        {
             await Restore();
             await Reset();
-            this.restartTask.SetResult(true);
         }
 
         protected virtual void RegisterEventListeners()
@@ -368,7 +373,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!RestartInProgress) return Task.CompletedTask;
 
-            return restartTask.Task;
+            return restartTask;
         }
 
         protected virtual void OnSubscribe(string id, PendingSubscription @params)

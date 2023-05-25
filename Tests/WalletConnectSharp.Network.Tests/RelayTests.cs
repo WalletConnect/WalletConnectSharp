@@ -17,12 +17,12 @@ namespace WalletConnectSharp.Network.Tests
 {
     public class RelayTests
     {
-        private static readonly JsonRpcRequest<TopicData> TEST_WAKU_REQUEST =
+        private static readonly JsonRpcRequest<TopicData> TEST_REQUEST =
             new JsonRpcRequest<TopicData>(RelayProtocols.DefaultProtocol.Subscribe, new TopicData()
             {
                 Topic = "ca838d59a3a3fe3824dab9ca7882ac9a2227c5d0284c88655b261a2fe85db270"
             });
-        private static readonly JsonRpcRequest<TopicData> TEST_BAD_WAKU_REQUEST =
+        private static readonly JsonRpcRequest<TopicData> TEST_BAD_REQUEST =
             new JsonRpcRequest<TopicData>(RelayProtocols.DefaultProtocol.Subscribe, new TopicData());
 
         private static readonly string DEFAULT_GOOD_WS_URL = "wss://relay.walletconnect.com";
@@ -56,11 +56,11 @@ namespace WalletConnectSharp.Network.Tests
             var provider = new JsonRpcProvider(connection);
             await provider.Connect();
 
-            var result = await provider.Request<TopicData, string>(TEST_WAKU_REQUEST);
+            var result = await provider.Request<TopicData, string>(TEST_REQUEST);
             
             Assert.True(result.Length > 0);
         }
-        
+
         [Fact, Trait("Category", "integration")]
         public async void RequestWithoutConnect()
         {
@@ -68,7 +68,7 @@ namespace WalletConnectSharp.Network.Tests
             var connection = new WebsocketConnection(url);
             var provider = new JsonRpcProvider(connection);
 
-            var result = await provider.Request<TopicData, string>(TEST_WAKU_REQUEST);
+            var result = await provider.Request<TopicData, string>(TEST_REQUEST);
             
             Assert.True(result.Length > 0);
         }
@@ -80,7 +80,7 @@ namespace WalletConnectSharp.Network.Tests
             var connection = new WebsocketConnection(url);
             var provider = new JsonRpcProvider(connection);
 
-            await Assert.ThrowsAsync<WalletConnectException>(() => provider.Request<TopicData, string>(TEST_BAD_WAKU_REQUEST));
+            await Assert.ThrowsAsync<WalletConnectException>(() => provider.Request<TopicData, string>(TEST_BAD_REQUEST));
         }
 
         [Fact, Trait("Category", "integration")]
@@ -89,7 +89,7 @@ namespace WalletConnectSharp.Network.Tests
             var connection = new WebsocketConnection(BAD_WS_URL);
             var provider = new JsonRpcProvider(connection);
             
-            await Assert.ThrowsAsync<TimeoutException>(() => provider.Request<TopicData, string>(TEST_WAKU_REQUEST));
+            await Assert.ThrowsAsync<TimeoutException>(() => provider.Request<TopicData, string>(TEST_REQUEST));
         }
 
         [Fact, Trait("Category", "integration")]
@@ -102,7 +102,7 @@ namespace WalletConnectSharp.Network.Tests
             await provider.Connect(url);
             Assert.Equal(url, provider.Connection.Url);
             
-            var result = await provider.Request<TopicData, string>(TEST_WAKU_REQUEST);
+            var result = await provider.Request<TopicData, string>(TEST_REQUEST);
             
             Assert.True(result.Length > 0);
         }

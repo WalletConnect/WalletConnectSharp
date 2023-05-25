@@ -92,6 +92,53 @@ namespace WalletConnectSharp.Sign.Test
         }
         
         [Fact, Trait("Category", "integration")]
+        public async void TestExpiredApprovalSession()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+            
+            var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+            var dappConnectOptions = new ConnectOptions()
+            {
+                RequiredNamespaces = new RequiredNamespaces()
+                {
+                    {
+                        "eip155", new RequiredNamespace()
+                        {
+                            Methods = new[]
+                            {
+                                "eth_sendTransaction",
+                                "eth_signTransaction",
+                                "eth_sign",
+                                "personal_sign",
+                                "eth_signTypedData",
+                            },
+                            Chains = new[]
+                            {
+                                "eip155:1"
+                            },
+                            Events = new[]
+                            {
+                                "chainChanged", "accountsChanged"
+                            }
+                        }
+                    }
+                }
+            };
+
+            var dappClient = ClientA;
+            var connectData = await dappClient.Connect(dappConnectOptions);
+
+            await Task.Delay(TimeSpan.FromMinutes(6));
+            
+            var walletClient = ClientB;
+            var proposal = await walletClient.Pair(connectData.Uri);
+            var approveData = await walletClient.Approve(proposal, testAddress);
+            
+            var sessionData = await connectData.Approval;
+            await approveData.Acknowledged();
+        }
+        
+        [Fact, Trait("Category", "integration")]
         public async void TestRejectSession()
         {
             await _cryptoFixture.WaitForClientsReady();
