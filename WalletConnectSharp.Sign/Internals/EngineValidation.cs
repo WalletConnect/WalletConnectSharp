@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
@@ -96,24 +97,9 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        private bool IsValidUrl(string url)
-        {
-            if (string.IsNullOrWhiteSpace(url)) return false;
-            
-            try
-            {
-                new Uri(url);
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
-
         Task IEnginePrivate.IsValidPair(string uri)
         {
-            if (!IsValidUrl(uri))
+            if (!Utils.IsValidUrl(uri))
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"pair() uri: {uri}");
             return Task.CompletedTask;
         }

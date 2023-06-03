@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network.Models;
 
@@ -80,10 +81,11 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="topic">The topic to send the request in</param>
         /// <param name="parameters">The typed request message to send</param>
         /// <param name="expiry">An override to specify how long this request will live for. If null is given, then expiry will be taken from either T or TR attributed options</param>
+        /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
         /// <returns>The id of the request sent</returns>
-        Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null);
+        Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null, EncodeOptions options = null);
 
         /// <summary>
         /// Send a typed response message with the given request / response type pair T, TR to the given topic
@@ -91,9 +93,10 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="id">The id of the request to respond to</param>
         /// <param name="topic">The topic to send the response in</param>
         /// <param name="result">The typed response message to send</param>
+        /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        Task SendResult<T, TR>(long id, string topic, TR result);
+        Task SendResult<T, TR>(long id, string topic, TR result, EncodeOptions options = null);
 
         /// <summary>
         /// Send an error response message with the given request / response type pair T, TR to the given topic
@@ -101,8 +104,9 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="id">The id of the request to respond to</param>
         /// <param name="topic">The topic to send the response in</param>
         /// <param name="error">The error response to send</param>
+        /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        Task SendError<T, TR>(long id, string topic, ErrorResponse error);
+        Task SendError<T, TR>(long id, string topic, ErrorResponse error, EncodeOptions options = null);
     }
 }

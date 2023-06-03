@@ -1,4 +1,6 @@
-﻿namespace WalletConnectSharp.Auth.Internals
+﻿using System.Globalization;
+
+namespace WalletConnectSharp.Auth.Internals
 {
     public static class IssDidUtils
     {
@@ -39,6 +41,11 @@
                 return null;
 
             return segments[segments.Length - 1];
+        }
+
+        public static string ToISOString(this DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture);
         }
     }
 }

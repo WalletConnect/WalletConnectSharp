@@ -4,6 +4,7 @@ using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Events;
@@ -110,6 +111,12 @@ namespace WalletConnectSharp.Core
         /// with each other and keeping track of pairing state
         /// </summary>
         public IPairing Pairing { get; }
+        
+        /// <summary>
+        /// The <see cref="Verifier"/> module that is used to resolve origins
+        /// of a given attestation Id.
+        /// </summary>
+        public Verifier Verify { get; }
 
         /// <summary>
         /// Create a new Core with the given options.
@@ -148,6 +155,7 @@ namespace WalletConnectSharp.Core
             Events = new EventDelegator(this);
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
+            Verify = new Verifier();
             
             Relayer = new Relayer(new RelayerOptions()
             {

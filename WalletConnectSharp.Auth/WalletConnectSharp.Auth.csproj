@@ -27,10 +27,4 @@
       <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Controllers" />
-      <Folder Include="Interfaces" />
-      <Folder Include="Models" />
-    </ItemGroup>
-
 </Project>

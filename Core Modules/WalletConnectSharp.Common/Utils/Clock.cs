@@ -164,5 +164,10 @@ namespace WalletConnectSharp.Common.Utils
         {
             return ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
         }
+
+        public static TimeSpan AsTimeSpan(long seconds)
+        {
+            return TimeSpan.FromSeconds(seconds);
+        }
     }
 }
