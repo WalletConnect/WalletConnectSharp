@@ -6,6 +6,11 @@ namespace WalletConnectSharp.Core.Models.Relay
     public static class RelayerEvents
     {
         /// <summary>
+        /// The event id for the publish event
+        /// </summary>
+        public static readonly string Publish = "relayer_publish";
+
+        /// <summary>
         /// The event id for the message event
         /// </summary>
         public static readonly string Message = "relayer_message";

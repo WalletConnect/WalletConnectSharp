@@ -179,10 +179,12 @@ namespace WalletConnectSharp.Core.Controllers
             IsInitialized();
 
             var record = GetRecord(id);
-            if (topic != record.Topic)
+            
+            // TODO Log
+            /*if (topic != record.Topic)
             {
                 throw WalletConnectException.FromType(ErrorType.MISMATCHED_TOPIC, $"{Name}: {id}");
-            }
+            }*/
             
             return Task.FromResult<JsonRpcRecord<T, TR>>(record);
         }

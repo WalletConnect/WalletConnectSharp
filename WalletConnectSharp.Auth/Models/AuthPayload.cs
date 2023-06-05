@@ -33,5 +33,4 @@ public class AuthPayload
     
     [JsonProperty("resources", NullValueHandling = NullValueHandling.Ignore)]
     public string[] Resources { get; set; }
-
 }

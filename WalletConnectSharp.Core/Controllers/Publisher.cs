@@ -151,6 +151,7 @@ namespace WalletConnectSharp.Core.Controllers
             queue.Add(hash, @params);
             await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay);
             OnPublish(hash);
+            this.Relayer.Events.Trigger(RelayerEvents.Publish, @params);
         }
     }
 }

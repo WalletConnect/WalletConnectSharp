@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text;
+using Nethereum.Signer;
+using Newtonsoft.Json;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Eth;
@@ -31,7 +33,8 @@ public class SignatureUtils
         var dynamicTypeOffset = "0000000000000000000000000000000000000000000000000000000000000040";
         var dynamicTypeLength = "0000000000000000000000000000000000000000000000000000000000000041";
         var nonPrefixedSignature = cacaoSignatureS.Substring(2);
-        var nonPrefixedHashedMessage = HashUtils.HashMessage(reconstructedMessage).Substring(2);
+        var signer = new EthereumMessageSigner();
+        var nonPrefixedHashedMessage = signer.HashPrefixedMessage(Encoding.UTF8.GetBytes(reconstructedMessage)).ToHex();
 
         var data =
             eip1271MagicValue +
@@ -71,6 +74,8 @@ public class SignatureUtils
 
     private static bool IsValidEip191Signature(string address, string reconstructedMessage, string cacaoSignatureS)
     {
-        return false;
+        var signer = new EthereumMessageSigner();
+        var recoveredAddress = signer.EncodeUTF8AndEcRecover(reconstructedMessage, cacaoSignatureS);
+        return String.Equals(recoveredAddress, address, StringComparison.CurrentCultureIgnoreCase);
     }
 }

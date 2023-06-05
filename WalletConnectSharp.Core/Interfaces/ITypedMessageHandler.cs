@@ -76,6 +76,25 @@ namespace WalletConnectSharp.Core.Interfaces
         PublishOptions RpcResponseOptionsForType<T>();
 
         /// <summary>
+        /// Set the decode options that should be used whenever a message in the given
+        /// topic is received. By default, no decode options are used when a message is received.
+        /// Use this function to set decode options for Type1 messages inside a specific topic
+        /// </summary>
+        /// <param name="options">The decode options to use for all messages received in a specific topic</param>
+        /// <param name="topic">The topic to set the given decode options for</param>
+        void SetDecodeOptionsForTopic(DecodeOptions options, string topic);
+
+        /// <summary>
+        /// Get the decode options for the given topic, all messages received in the given topic
+        /// will be decoded using these decode options. If no decode options are set for the given
+        /// topic, then null is returned.
+        /// </summary>
+        /// <param name="topic">The topic to get decode options for</param>
+        /// <returns>The decode options set for the given topic. If no decode options
+        /// are set for the given topic, then null is returned.</returns>
+        DecodeOptions DecodeOptionForTopic(string topic);
+
+        /// <summary>
         /// Send a typed request message with the given request / response type pair T, TR to the given topic
         /// </summary>
         /// <param name="topic">The topic to send the request in</param>

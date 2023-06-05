@@ -1,6 +1,7 @@
 ﻿using WalletConnectSharp.Auth.Controllers;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Auth.Models.Engine;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Events;
@@ -18,7 +19,7 @@ public class AuthClient : IAuthClient
     {
         get
         {
-            return AUTH_CLIENT_DEFAULT_NAME;
+            return $"{Metadata.Name}-{AUTH_CLIENT_DEFAULT_NAME}";
         }
     }
 
@@ -57,6 +58,12 @@ public class AuthClient : IAuthClient
     public IStore<string, AuthData> AuthKeys { get; set; }
     public IStore<string, PairingData> PairingTopics { get; set; }
     public IStore<long, Message> Requests { get; set; }
+
+    public Task<IJsonRpcHistory<WcAuthRequest, Cacao>> AuthHistory()
+    {
+        return Core.History.JsonRpcHistoryOfType<WcAuthRequest, Cacao>();
+    }
+
     public IAuthEngine Engine { get; }
     public AuthOptions Options { get; }
 
@@ -68,7 +75,7 @@ public class AuthClient : IAuthClient
         }
     }
 
-    public static async Task<IAuthClient> Init(AuthOptions options)
+    public static async Task<AuthClient> Init(AuthOptions options)
     {
         var client = new AuthClient(options);
         await client.Initialize();
@@ -89,6 +96,10 @@ public class AuthClient : IAuthClient
         Options = options;
         Metadata = options.Metadata;
         ProjectId = options.ProjectId;
+        
+        if (string.IsNullOrWhiteSpace(options.Name))
+            options.Name = $"{options.Metadata.Name}-{Name}";
+        
         Core = options.Core ?? new Core.Core(options);
 
         AuthKeys = new Store<string, AuthData>(Core, "authKeys", AUTH_CLIENT_STORAGE_PREFIX);
@@ -96,6 +107,7 @@ public class AuthClient : IAuthClient
         Requests = new Store<long, Message>(Core, "requests", AUTH_CLIENT_STORAGE_PREFIX);
 
         Engine = new AuthEngine(this);
+        Events = new EventDelegator(this);
     }
     
     public Task<RequestUri> Request(RequestParams @params, string topic = null)
@@ -108,9 +120,14 @@ public class AuthClient : IAuthClient
         return this.Engine.Respond(message, iss);
     }
 
-    public string FormatMessage(Cacao.CacaoPayload cacao, string iss)
+    public string FormatMessage(Cacao.CacaoPayload cacao)
     {
-        return this.Engine.FormatMessage(cacao, iss);
+        return this.Engine.FormatMessage(cacao);
+    }
+
+    public string FormatMessage(Cacao.CacaoRequestPayload cacao, string iss)
+    {
+        return FormatMessage(new Cacao.CacaoPayload(cacao, iss));
     }
 
     bool IAuthClient.OnAuthRequest(AuthRequest request)

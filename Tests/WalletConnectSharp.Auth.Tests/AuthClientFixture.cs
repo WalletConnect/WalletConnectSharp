@@ -1,18 +1,19 @@
-﻿using WalletConnectSharp.Core.Models.Pairing;
-using WalletConnectSharp.Sign.Models;
+﻿using WalletConnectSharp.Auth.Interfaces;
+using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 
-namespace WalletConnectSharp.Sign.Test;
+namespace WalletConnectSharp.Auth.Tests;
 
-public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
+public class AuthClientFixture : TwoClientsFixture<IAuthClient>
 {
-    public SignClientOptions OptionsA { get; protected set; }
-    public SignClientOptions OptionsB { get;  protected set; }
+    public AuthOptions OptionsA { get; protected set; }
+    
+    public AuthOptions OptionsB { get; protected set; }
 
     protected override async void Init()
     {
-        OptionsA = new SignClientOptions()
+        OptionsA = new AuthOptions()
         {
             ProjectId = TestValues.TestProjectId,
             RelayUrl = TestValues.TestRelayUrl,
@@ -24,10 +25,10 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
                 Url = "https://walletconnect.com"
             },
             // Omit if you want persistant storage
-            Storage = new InMemoryStorage()
+            Storage = new InMemoryStorage(),
         };
-            
-        OptionsB = new SignClientOptions()
+
+        OptionsB = new AuthOptions()
         {
             ProjectId = TestValues.TestProjectId,
             RelayUrl = TestValues.TestRelayUrl,
@@ -41,8 +42,8 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
             // Omit if you want persistant storage
             Storage = new InMemoryStorage()
         };
-        
-        ClientA = await WalletConnectSignClient.Init(OptionsA);
-        ClientB = await WalletConnectSignClient.Init(OptionsB);
+
+        ClientA = await AuthClient.Init(OptionsA);
+        ClientB = await AuthClient.Init(OptionsB);
     }
 }

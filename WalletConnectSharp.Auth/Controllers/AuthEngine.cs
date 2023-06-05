@@ -74,6 +74,8 @@ public partial class AuthEngine : IAuthEngine
     {
         IsInitialized();
 
+        @params.Type ??= new Cacao.CacaoHeader();
+
         if (!IsValidRequest(@params))
         {
             throw new ArgumentException("Invalid request", nameof(@params));
@@ -98,6 +100,11 @@ public partial class AuthEngine : IAuthEngine
         await this.Client.PairingTopics.Set(responseTopic,
             new PairingData() { Topic = responseTopic, PairingTopic = pairingTopic });
 
+        this.Client.Core.MessageHandler.SetDecodeOptionsForTopic(new DecodeOptions()
+        {
+            ReceiverPublicKey = publicKey
+        }, responseTopic);
+        
         await this.Client.Core.Relayer.Subscribe(responseTopic);
         
         // TODO Log
@@ -176,17 +183,27 @@ public partial class AuthEngine : IAuthEngine
             Type = Crypto.Crypto.TYPE_1, ReceiverPublicKey = receiverPublicKey, SenderPublicKey = senderPublicKey
         };
 
-        if (message is ErrorResponse errorResponse)
+        Cacao cacao;
+        switch (message)
         {
-            await this.SendError(id, responseTopic, errorResponse, encodeOptions);
-            return;
+            case ErrorResponse errorResponse:
+                await this.SendError(id, responseTopic, errorResponse, encodeOptions);
+                return;
+            case Cacao cacao1:
+                cacao = cacao1;
+                cacao.Payload ??= new Cacao.CacaoPayload(pendingRequest.CacaoPayload) { Iss = iss };
+                break;
+            case ResultResponse response:
+                cacao = new Cacao()
+                {
+                    Payload = new Cacao.CacaoPayload(pendingRequest.CacaoPayload) { Iss = iss },
+                    Signature = response.Signature
+                };
+                break;
+            default:
+                throw new ArgumentException(
+                    $"Unknown message type {message.GetType()}, expected Cacao or ResultResponse");
         }
-
-        var cacao = new Cacao()
-        {
-            Payload = new Cacao.CacaoPayload(pendingRequest.CacaoPayload) { Iss = iss },
-            Signature = ((ResultResponse)message).Signature
-        };
 
         await this.SendResult(id, responseTopic, cacao, encodeOptions);
 
@@ -229,12 +246,14 @@ public partial class AuthEngine : IAuthEngine
 
         if (!response.IsError)
         {
-            var pairingTopic = this.Client.PairingTopics.Get(topic);
+            var pairing = this.Client.PairingTopics.Get(topic);
+            await this.Client.Core.Pairing.Activate(pairing.PairingTopic);
+            
             var signature = response.Result.Signature;
             var payload = response.Result.Payload;
 
             await this.Client.Requests.Set(id, response.Result);
-            var reconstructed = FormatMessage(payload, payload.Iss);
+            var reconstructed = FormatMessage(payload);
             
             // TODO Log
 
@@ -341,8 +360,9 @@ public partial class AuthEngine : IAuthEngine
         return context;
     }
 
-    public string FormatMessage(Cacao.CacaoPayload cacao, string iss)
+    public string FormatMessage(Cacao.CacaoPayload cacao)
     {
+        string iss = cacao.Iss;
         var header = $"{cacao.Domain} wants you to sign in with your Ethereum account:";
         var walletAddress = IssDidUtils.DidAddress(iss);
         var statement = cacao.Statement;

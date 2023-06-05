@@ -15,5 +15,5 @@ public interface IAuthEngine : IModule
 
     Task Respond(Message message, string iss);
 
-    string FormatMessage(Cacao.CacaoPayload cacao, string iss);
+    string FormatMessage(Cacao.CacaoPayload cacao);
 }

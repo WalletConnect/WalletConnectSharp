@@ -199,7 +199,9 @@ namespace WalletConnectSharp.Core.Controllers
                     // If it exists (its not null), then set it
                     if (@value != null)
                     {
-                        prop.SetValue(previousValue, null);
+                        object test = previousValue;
+                        prop.SetValue(test, @value, null);
+                        previousValue = (TValue)test;
                     }
                 }
                 

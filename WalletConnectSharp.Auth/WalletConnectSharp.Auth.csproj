@@ -27,4 +27,8 @@
       <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Nethereum.Signer" />
+    </ItemGroup>
+
 </Project>

@@ -11,7 +11,8 @@ namespace WalletConnectSharp.Core.Controllers
     public class TypedMessageHandler : ITypedMessageHandler
     {
         private bool _initialized = false;
-        
+        private Dictionary<string, DecodeOptions> _decodeOptionsMap = new Dictionary<string, DecodeOptions>();
+
         public EventDelegator Events { get; }
         
         public ICore Core { get; }
@@ -60,7 +61,9 @@ namespace WalletConnectSharp.Core.Controllers
             var topic = e.EventData.Topic;
             var message = e.EventData.Message;
 
-            var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message);
+            var options = DecodeOptionForTopic(topic);
+
+            var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
             if (payload.IsRequest)
             {
                 Events.Trigger($"request_{payload.Method}", e.EventData);
@@ -95,8 +98,10 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 var topic = e.EventData.Topic;
                 var message = e.EventData.Message;
+                
+                var options = DecodeOptionForTopic(topic);
 
-                var payload = await this.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message);
+                var payload = await this.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message, options);
                 
                 (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
 
@@ -109,8 +114,10 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 var topic = e.EventData.Topic;
                 var message = e.EventData.Message;
+                
+                var options = DecodeOptionForTopic(topic);
 
-                var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message);
+                var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message, options);
 
                 await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
 
@@ -256,7 +263,19 @@ namespace WalletConnectSharp.Core.Controllers
                 TTL = opts.TTL
             };
         }
-        
+
+        public void SetDecodeOptionsForTopic(DecodeOptions options, string topic)
+        {
+            _decodeOptionsMap.Add(topic, options);
+        }
+
+        public DecodeOptions DecodeOptionForTopic(string topic)
+        {
+            if (_decodeOptionsMap.ContainsKey(topic))
+                return _decodeOptionsMap[topic];
+            return null;
+        }
+
         /// <summary>
         /// Send a typed request message with the given request / response type pair T, TR to the given topic
         /// </summary>

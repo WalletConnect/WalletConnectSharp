@@ -22,7 +22,7 @@ public partial class AuthEngine : IAuthEngine
         var hasNonce = !string.IsNullOrWhiteSpace(@params.Nonce);
         var hasValidType = @params.Type is { t: "eip4361" };
         var expiry = @params.Expiry;
-        if (expiry != null && Utils.IsValidRequestExpiry(expiry.Value, MinExpiry, MaxExpiry))
+        if (expiry != null && !Utils.IsValidRequestExpiry(expiry.Value, MinExpiry, MaxExpiry))
         {
             throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"request() expiry: {expiry}. Expiry must be a number (in seconds) between {MinExpiry} and {MaxExpiry}");
         }
