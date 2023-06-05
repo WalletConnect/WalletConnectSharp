@@ -124,18 +124,21 @@ namespace WalletConnectSharp.Sign.Models
                     Methods = rn.Methods
                 });
             }
-            
-            foreach (var key in OptionalNamespaces.Keys)
+            if (OptionalNamespaces != null)
             {
-                var rn = OptionalNamespaces[key];
-                var allAccounts = (from chain in rn.Chains from account in approvedAccounts select $"{chain}:{account}").ToArray();
-                
-                namespaces.Add(key, new Namespace()
+                foreach (var key in OptionalNamespaces.Keys)
                 {
-                    Accounts = allAccounts,
-                    Events = rn.Events,
-                    Methods = rn.Methods
-                });
+                    var rn = OptionalNamespaces[key];
+                    var allAccounts = (from chain in rn.Chains from account in approvedAccounts select $"{chain}:{account}").ToArray();
+                
+                    namespaces.Add(key, new Namespace()
+                    {
+                        Accounts = allAccounts,
+                        Events = rn.Events,
+                        Methods = rn.Methods
+                    });
+                }
+                
             }
 
             return new ApproveParams()
