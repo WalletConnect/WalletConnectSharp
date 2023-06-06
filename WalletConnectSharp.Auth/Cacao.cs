@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
 
-namespace WalletConnectSharp.Auth.Models;
+namespace WalletConnectSharp.Auth;
 
 [RpcResponseOptions(Clock.ONE_MINUTE, 3001)]
 public class Cacao : Message

@@ -1,8 +1,9 @@
 ﻿using Newtonsoft.Json;
+using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
 
-namespace WalletConnectSharp.Auth.Models.Engine;
+namespace WalletConnectSharp.Auth;
 
 [RpcMethod("wc_authRequest")]
 [RpcRequestOptions(Clock.ONE_DAY, 3000)]

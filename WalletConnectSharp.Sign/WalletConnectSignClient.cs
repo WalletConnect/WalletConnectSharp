@@ -1,4 +1,5 @@
 using WalletConnectSharp.Common.Model.Errors;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
@@ -90,6 +91,8 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         public IProposal Proposal { get; }
 
+        public IPendingRequests PendingRequests { get; }
+
         /// <summary>
         /// The <see cref="SignClientOptions"/> this Sign Client was initialized with. 
         /// </summary>
@@ -114,6 +117,15 @@ namespace WalletConnectSharp.Sign
             get
             {
                 return VERSION;
+            }
+        }
+        
+        
+        public PendingRequestStruct[] PendingSessionRequests
+        {
+            get
+            {
+                return Engine.PendingSessionRequests;
             }
         }
 
@@ -171,7 +183,8 @@ namespace WalletConnectSharp.Sign
                 Core = new Core.Core(options);
 
             Events = new EventDelegator(this);
-            
+
+            PendingRequests = new PendingRequests(Core);
             PairingStore = new PairingStore(Core);
             Session = new Session(Core);
             Proposal = new Proposal(Core);
@@ -382,6 +395,7 @@ namespace WalletConnectSharp.Sign
         private async Task Initialize()
         {
             await this.Core.Start();
+            await PendingRequests.Init();
             await PairingStore.Init();
             await Session.Init();
             await Proposal.Init();

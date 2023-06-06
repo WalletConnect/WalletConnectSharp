@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
 

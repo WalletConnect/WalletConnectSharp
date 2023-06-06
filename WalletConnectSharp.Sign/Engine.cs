@@ -179,6 +179,18 @@ namespace WalletConnectSharp.Sign
         }
 
         /// <summary>
+        /// Get all pending session requests
+        /// </summary>
+        public PendingRequestStruct[] PendingSessionRequests
+        {
+            get
+            {
+                this.IsInitialized();
+                return this.Client.PendingRequests.Values;
+            }
+        }
+
+        /// <summary>
         /// Connect (a dApp) with the given ConnectOptions. At a minimum, you must specified a RequiredNamespace. 
         /// </summary>
         /// <param name="options"></param>

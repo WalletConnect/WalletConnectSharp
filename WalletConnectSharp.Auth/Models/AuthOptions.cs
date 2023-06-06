@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Auth.Models;
 
 public class AuthOptions : CoreOptions
 {
-    public Metadata Metadata { get; set; }
+    public AuthMetadata Metadata { get; set; }
     
     public ICore Core { get; set; }
 }

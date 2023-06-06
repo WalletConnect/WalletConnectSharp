@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using WalletConnectSharp.Common;
@@ -235,6 +236,13 @@ namespace WalletConnectSharp.Core.Controllers
             map.Remove(key);
 
             return Persist();
+        }
+
+        public IDictionary<TKey, TValue> ToDictionary()
+        {
+            IsInitialized();
+
+            return new ReadOnlyDictionary<TKey, TValue>(map);
         }
 
         protected virtual Task SetDataStore(TValue[] data)

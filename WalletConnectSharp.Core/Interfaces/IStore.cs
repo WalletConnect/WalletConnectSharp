@@ -65,5 +65,7 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="reason">The reason this key was deleted using an ErrorResponse</param>
         /// <returns></returns>
         public Task Delete(TKey key, ErrorResponse reason);
+
+        public IDictionary<TKey, TValue> ToDictionary();
     }
 }

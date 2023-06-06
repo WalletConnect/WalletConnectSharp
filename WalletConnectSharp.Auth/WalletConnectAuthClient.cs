@@ -1,14 +1,13 @@
 ﻿using WalletConnectSharp.Auth.Controllers;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
-using WalletConnectSharp.Auth.Models.Engine;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Events;
 
 namespace WalletConnectSharp.Auth;
 
-public class AuthClient : IAuthClient
+public class WalletConnectAuthClient : IAuthClient
 {
     public const string AUTH_CLIENT_PROTOCOL = AuthEngine.AUTH_CLIENT_PROTOCOL;
     public const int AUTH_CLIENT_VERSION = AuthEngine.AUTH_CLIENT_VERSION;
@@ -53,7 +52,7 @@ public class AuthClient : IAuthClient
     public event EventHandler<AuthResponse> AuthResponded;
     public event EventHandler<AuthErrorResponse> AuthError;
     public ICore Core { get; set; }
-    public Metadata Metadata { get; set; }
+    public AuthMetadata Metadata { get; set; }
     public string ProjectId { get; set; }
     public IStore<string, AuthData> AuthKeys { get; set; }
     public IStore<string, PairingData> PairingTopics { get; set; }
@@ -75,9 +74,9 @@ public class AuthClient : IAuthClient
         }
     }
 
-    public static async Task<AuthClient> Init(AuthOptions options)
+    public static async Task<WalletConnectAuthClient> Init(AuthOptions options)
     {
-        var client = new AuthClient(options);
+        var client = new WalletConnectAuthClient(options);
         await client.Initialize();
         return client;
     }
@@ -91,7 +90,7 @@ public class AuthClient : IAuthClient
         this.Engine.Init();
     }
 
-    private AuthClient(AuthOptions options)
+    private WalletConnectAuthClient(AuthOptions options)
     {
         Options = options;
         Metadata = options.Metadata;

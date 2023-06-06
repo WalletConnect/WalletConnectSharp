@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace WalletConnectSharp.Core.Models.Pairing
+namespace WalletConnectSharp.Core
 {
     /// <summary>
     /// A class that holds Metadata for either peer in a given Session. Includes things such

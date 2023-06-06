@@ -13,6 +13,11 @@ namespace WalletConnectSharp.Sign.Interfaces
     public interface IEngineAPI
     {
         /// <summary>
+        /// Get all pending session requests as an array
+        /// </summary>
+        PendingRequestStruct[] PendingSessionRequests { get; }
+        
+        /// <summary>
         /// Connect (a dApp) with the given ConnectOptions. At a minimum, you must specified a RequiredNamespace. 
         /// </summary>
         /// <param name="options"></param>

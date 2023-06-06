@@ -1,4 +1,4 @@
-﻿using WalletConnectSharp.Core.Models.Pairing;
+﻿using WalletConnectSharp.Core;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;

@@ -2,7 +2,6 @@
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
-using WalletConnectSharp.Auth.Models.Engine;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Relay;
@@ -333,7 +332,7 @@ public partial class AuthEngine : IAuthEngine
         });
     }
 
-    private async Task<VerifiedContext> GetVerifyContext(string hash, Metadata metadata)
+    private async Task<VerifiedContext> GetVerifyContext(string hash, AuthMetadata metadata)
     {
         var context = new VerifiedContext()
         {

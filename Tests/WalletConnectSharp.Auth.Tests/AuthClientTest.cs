@@ -4,7 +4,6 @@ using Nethereum.HdWallet;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
-using WalletConnectSharp.Auth.Models.Engine;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;

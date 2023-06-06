@@ -18,6 +18,13 @@ namespace WalletConnectSharp.Sign
         {
             var target = new ExpirerTarget(e.EventData.Target);
 
+            if (target.Id != null && this.Client.PendingRequests.Keys.Contains((long)target.Id))
+            {
+                await PrivateThis.DeletePendingSessionRequest((long)target.Id,
+                    ErrorResponse.FromErrorType(ErrorType.EXPIRED), true);
+                return;
+            }
+
             if (!string.IsNullOrWhiteSpace(target.Topic))
             {
                 var topic = target.Topic;

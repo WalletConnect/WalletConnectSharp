@@ -68,5 +68,9 @@ namespace WalletConnectSharp.Sign.Interfaces
         internal Task IsValidEmit<T>(string topic, EventData<T> request, string chainId);
 
         internal Task IsValidDisconnect(string topic, ErrorResponse reason);
+
+        internal Task DeletePendingSessionRequest(long id, ErrorResponse reason, bool expirerHasDeleted = false);
+
+        internal Task SetPendingSessionRequest(PendingRequestStruct pendingRequest);
     }
 }

@@ -9,11 +9,33 @@ using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
+using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign
 {
     public partial class Engine
     {
+        async Task IEnginePrivate.DeletePendingSessionRequest(long id, ErrorResponse reason, bool expirerHasDeleted = false)
+        {
+            await Task.WhenAll(
+                this.Client.PendingRequests.Delete(id, reason),
+                expirerHasDeleted ? Task.CompletedTask : this.Client.Core.Expirer.Delete(id)
+            );
+        }
+
+        async Task IEnginePrivate.SetPendingSessionRequest(PendingRequestStruct pendingRequest)
+        {
+            var options = RpcRequestOptionsAttribute.GetOptionsForType<SessionRequest<object>>();
+            var expiry = options.TTL;
+
+            await this.Client.PendingRequests.Set(pendingRequest.Id, pendingRequest);
+
+            if (expiry != 0)
+            {
+                this.Client.Core.Expirer.Set(pendingRequest.Id, Clock.CalculateExpiry(expiry));
+            }
+        } 
+        
         async Task IEnginePrivate.DeleteSession(string topic)
         {
             var session = this.Client.Session.Get(topic);

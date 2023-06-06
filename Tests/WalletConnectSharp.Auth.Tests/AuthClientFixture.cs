@@ -17,7 +17,7 @@ public class AuthClientFixture : TwoClientsFixture<IAuthClient>
         {
             ProjectId = TestValues.TestProjectId,
             RelayUrl = TestValues.TestRelayUrl,
-            Metadata = new Metadata()
+            Metadata = new AuthMetadata()
             {
                 Description = "An example dapp to showcase WalletConnectSharpv2",
                 Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
@@ -32,7 +32,7 @@ public class AuthClientFixture : TwoClientsFixture<IAuthClient>
         {
             ProjectId = TestValues.TestProjectId,
             RelayUrl = TestValues.TestRelayUrl,
-            Metadata = new Metadata()
+            Metadata = new AuthMetadata()
             {
                 Description = "An example wallet to showcase WalletConnectSharpv2",
                 Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
@@ -43,7 +43,7 @@ public class AuthClientFixture : TwoClientsFixture<IAuthClient>
             Storage = new InMemoryStorage()
         };
 
-        ClientA = await AuthClient.Init(OptionsA);
-        ClientB = await AuthClient.Init(OptionsB);
+        ClientA = await WalletConnectAuthClient.Init(OptionsA);
+        ClientB = await WalletConnectAuthClient.Init(OptionsB);
     }
 }
