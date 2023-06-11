@@ -287,7 +287,7 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        async Task IEnginePrivate.IsValidDisconnect(string topic, ErrorResponse reason)
+        async Task IEnginePrivate.IsValidDisconnect(string topic, Error reason)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -311,9 +311,9 @@ namespace WalletConnectSharp.Sign
             return false;
         }
 
-        private ErrorResponse IsValidAccounts(string[] accounts, string context)
+        private Error IsValidAccounts(string[] accounts, string context)
         {
-            ErrorResponse error = null;
+            Error error = null;
             foreach (var account in accounts)
             {
                 if (error != null)
@@ -321,16 +321,16 @@ namespace WalletConnectSharp.Sign
 
                 if (!IsValidAccountId(account))
                 {
-                    error = ErrorResponse.FromErrorType(ErrorType.UNSUPPORTED_ACCOUNTS, $"{context}, account {account} should be a string and conform to 'namespace:chainId:address' format");
+                    error = Error.FromErrorType(ErrorType.UNSUPPORTED_ACCOUNTS, $"{context}, account {account} should be a string and conform to 'namespace:chainId:address' format");
                 }
             }
 
             return error;
         }
 
-        private ErrorResponse IsValidNamespaceAccounts(Namespaces namespaces, string method)
+        private Error IsValidNamespaceAccounts(Namespaces namespaces, string method)
         {
-            ErrorResponse error = null;
+            Error error = null;
             foreach (var ns in namespaces.Values)
             {
                 if (error != null) break;
@@ -345,9 +345,9 @@ namespace WalletConnectSharp.Sign
             return error;
         }
 
-        private ErrorResponse IsValidNamespaces(Namespaces namespaces, string method)
+        private Error IsValidNamespaces(Namespaces namespaces, string method)
         {
-            ErrorResponse error = null;
+            Error error = null;
             if (namespaces != null)
             {
                 var validAccountsError = IsValidNamespaceAccounts(namespaces, method);
@@ -358,7 +358,7 @@ namespace WalletConnectSharp.Sign
             }
             else
             {
-                error = ErrorResponse.FromErrorType(ErrorType.MISSING_OR_INVALID, $"{method}, namespaces should be an object with data");
+                error = Error.FromErrorType(ErrorType.MISSING_OR_INVALID, $"{method}, namespaces should be an object with data");
             }
 
             return error;
@@ -407,15 +407,15 @@ namespace WalletConnectSharp.Sign
             return true;
         }
 
-        private ErrorResponse IsConformingNamespaces(RequiredNamespaces requiredNamespaces, Namespaces namespaces,
+        private Error IsConformingNamespaces(RequiredNamespaces requiredNamespaces, Namespaces namespaces,
             string context)
         {
-            ErrorResponse error = null;
+            Error error = null;
             var requiredNamespaceKeys = requiredNamespaces.Keys.ToArray();
             var namespaceKeys = namespaces.Keys.ToArray();
             
             if (!HasOverlap(requiredNamespaceKeys, namespaceKeys))
-                error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces keys don't satisfy requiredNamespaces");
+                error = Error.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces keys don't satisfy requiredNamespaces");
             else
             {
                 foreach (var key in requiredNamespaceKeys)
@@ -428,15 +428,15 @@ namespace WalletConnectSharp.Sign
 
                     if (!HasOverlap(requiredNamespaceChains, namespaceChains))
                     {
-                        error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces accounts don't satisfy requiredNamespaces chains for {key}");
+                        error = Error.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces accounts don't satisfy requiredNamespaces chains for {key}");
                     } 
                     else if (!HasOverlap(requiredNamespaces[key].Methods, namespaces[key].Methods))
                     {
-                        error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces methods don't satisfy requiredNamespaces methods for {key}");
+                        error = Error.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces methods don't satisfy requiredNamespaces methods for {key}");
                     }
                     else if (!HasOverlap(requiredNamespaces[key].Events, namespaces[key].Events))
                     {
-                        error = ErrorResponse.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces events don't satisfy requiredNamespaces events for {key}");
+                        error = Error.FromErrorType(ErrorType.NON_CONFORMING_NAMESPACES, $"{context} namespaces events don't satisfy requiredNamespaces events for {key}");
                     }
                 }
             }

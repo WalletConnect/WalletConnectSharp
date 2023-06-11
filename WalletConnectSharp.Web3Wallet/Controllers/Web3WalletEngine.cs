@@ -12,7 +12,6 @@ using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Web3Wallet.Interfaces;
-using ErrorResponse = WalletConnectSharp.Network.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Web3Wallet.Controllers;
 
@@ -102,12 +101,12 @@ public class Web3WalletEngine : IWeb3WalletEngine
         return ApproveSession(param.Id, param.Namespaces, param.RelayProtocol);
     }
 
-    public Task RejectSession(long id, ErrorResponse reason)
+    public Task RejectSession(long id, Error reason)
     {
         return this.SignClient.Reject(new RejectParams() { Id = id, Reason = reason });
     }
 
-    public Task RejectSession(ProposalStruct proposal, ErrorResponse reason)
+    public Task RejectSession(ProposalStruct proposal, Error reason)
     {
         var parm = proposal.RejectProposal(reason);
         return RejectSession(parm.Id, parm.Reason);
@@ -139,7 +138,7 @@ public class Web3WalletEngine : IWeb3WalletEngine
         await this.SignClient.Emit(topic, eventData, chainId);
     }
 
-    public async Task DisconnectSession(string topic, ErrorResponse reason)
+    public async Task DisconnectSession(string topic, Error reason)
     {
         await this.SignClient.Disconnect(topic, reason);
     }

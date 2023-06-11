@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Sign.Models.Engine
 {
     /// <summary>
     /// A class that represents parameters for rejecting a session proposal. Contains the id
-    /// of the session proposal to reject and the <see cref="ErrorResponse"/> reason the session
+    /// of the session proposal to reject and the <see cref="Error"/> reason the session
     /// proposal was rejected
     /// </summary>
     public class RejectParams
@@ -17,9 +17,9 @@ namespace WalletConnectSharp.Sign.Models.Engine
         public long Id { get; set; }
         
         /// <summary>
-        /// The reason the session proposal was rejected, as an <see cref="ErrorResponse"/>
+        /// The reason the session proposal was rejected, as an <see cref="Error"/>
         /// </summary>
         [JsonProperty("reason")]
-        public ErrorResponse Reason { get; set; }
+        public Error Reason { get; set; }
     }
 }

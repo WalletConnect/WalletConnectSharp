@@ -10,7 +10,6 @@ using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
-using CommonErrorResponse = WalletConnectSharp.Network.Models.ErrorResponse;
 using ErrorResponse = WalletConnectSharp.Auth.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Auth.Controllers;
@@ -276,7 +275,7 @@ public partial class AuthEngine : IAuthEngine
             {
                 this.Client.OnAuthResponse(new AuthErrorResponse()
                 {
-                    Id = id, Topic = topic, Error = CommonErrorResponse.FromErrorType(ErrorType.GENERIC, new
+                    Id = id, Topic = topic, Error = Error.FromErrorType(ErrorType.GENERIC, new
                     {
                         Message = "Invalid signature"
                     })

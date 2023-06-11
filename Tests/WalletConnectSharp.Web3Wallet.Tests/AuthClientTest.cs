@@ -14,7 +14,7 @@ using ErrorResponse = WalletConnectSharp.Auth.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Auth.Tests
 {
-    public class AuthClientTests : IClassFixture<AuthClientFixture>
+    public class AuthClientTests : IClassFixture<Web3WalletFixture>
     {
         private static readonly RequestParams DefaultRequestParams = new RequestParams()
         {
@@ -24,7 +24,7 @@ namespace WalletConnectSharp.Auth.Tests
             Nonce = CryptoUtils.GenerateNonce()
         };
         
-        private AuthClientFixture _authFixture;
+        private Web3WalletFixture _authFixture;
         private readonly string _iss;
         private readonly Wallet _wallet;
 
@@ -52,7 +52,7 @@ namespace WalletConnectSharp.Auth.Tests
             }
         }
 
-        public AuthClientTests(AuthClientFixture authFixture)
+        public AuthClientTests(Web3WalletFixture authFixture)
         {
             this._authFixture = authFixture;
             

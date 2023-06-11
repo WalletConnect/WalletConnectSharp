@@ -322,7 +322,7 @@ namespace WalletConnectSharp.Network.Websocket
                 ? new IOException("Unavailable WS RPC url at " + _url) : e;
 
             var message = exception.Message;
-            var payload = new JsonRpcResponse<T>(ogPayload.Id, new ErrorResponse()
+            var payload = new JsonRpcResponse<T>(ogPayload.Id, new Error()
             {
                 Code = exception.HResult,
                 Data = null,

@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
-using CommonErrorResponse = WalletConnectSharp.Network.Models.ErrorResponse;
+using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Auth.Models;
 
 public class AuthErrorResponse : TopicMessage
 {
     [JsonProperty("params")]
-    public CommonErrorResponse Error { get; set; }
+    public Error Error { get; set; }
 }

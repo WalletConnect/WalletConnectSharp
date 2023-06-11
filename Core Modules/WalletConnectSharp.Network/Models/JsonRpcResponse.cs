@@ -30,7 +30,7 @@ namespace WalletConnectSharp.Network.Models
         /// The error field for this response, if one is present
         /// </summary>
         [JsonProperty("error", NullValueHandling = NullValueHandling.Ignore)]
-        public ErrorResponse Error { get; set; }
+        public Error Error { get; set; }
         
         /// <summary>
         /// The result field for this response, if one is present
@@ -64,7 +64,7 @@ namespace WalletConnectSharp.Network.Models
         /// <param name="id">The id of this json response</param>
         /// <param name="error">The error of this json response, if one is present</param>
         /// <param name="result">The result of this json response, if one is present</param>
-        public JsonRpcResponse(long id, ErrorResponse error, T result)
+        public JsonRpcResponse(long id, Error error, T result)
         {
             Id = id;
             Error = error;

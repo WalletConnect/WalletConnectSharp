@@ -7,11 +7,10 @@ using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Web3Wallet.Controllers;
 using WalletConnectSharp.Web3Wallet.Interfaces;
-using ErrorResponse = WalletConnectSharp.Network.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Web3Wallet;
 
-public class Web3Wallet : IWeb3Wallet
+public class Web3WalletClient : IWeb3Wallet
 {
     public string Name { get; }
     public string Context { get; }
@@ -53,15 +52,15 @@ public class Web3Wallet : IWeb3Wallet
     public ICore Core { get; }
     public AuthMetadata Metadata { get; }
     
-    public static async Task<Web3Wallet> Init(ICore core, AuthMetadata metadata, string name = null)
+    public static async Task<Web3WalletClient> Init(ICore core, AuthMetadata metadata, string name = null)
     {
-        var wallet = new Web3Wallet(core, metadata, name);
+        var wallet = new Web3WalletClient(core, metadata, name);
         await wallet.Initialize();
 
         return wallet;
     }
     
-    private Web3Wallet(ICore core, AuthMetadata metadata, string name = null)
+    private Web3WalletClient(ICore core, AuthMetadata metadata, string name = null)
     {
         this.Metadata = metadata;
         this.Name = string.IsNullOrWhiteSpace(name) ? "Web3Wallet" : name;
@@ -87,12 +86,12 @@ public class Web3Wallet : IWeb3Wallet
         return this.Engine.ApproveSession(proposal, approvedAddresses);
     }
 
-    public Task RejectSession(long id, ErrorResponse reason)
+    public Task RejectSession(long id, Error reason)
     {
         return this.Engine.RejectSession(id, reason);
     }
 
-    public Task RejectSession(ProposalStruct proposal, ErrorResponse reason)
+    public Task RejectSession(ProposalStruct proposal, Error reason)
     {
         return this.Engine.RejectSession(proposal, reason);
     }
@@ -122,7 +121,7 @@ public class Web3Wallet : IWeb3Wallet
         return this.Engine.EmitSessionEvent(topic, eventData, topic);
     }
 
-    public Task DisconnectSession(string topic, ErrorResponse reason)
+    public Task DisconnectSession(string topic, Error reason)
     {
         return this.Engine.DisconnectSession(topic, reason);
     }

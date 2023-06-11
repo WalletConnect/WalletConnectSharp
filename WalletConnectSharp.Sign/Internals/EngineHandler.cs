@@ -21,7 +21,7 @@ namespace WalletConnectSharp.Sign
             if (target.Id != null && this.Client.PendingRequests.Keys.Contains((long)target.Id))
             {
                 await PrivateThis.DeletePendingSessionRequest((long)target.Id,
-                    ErrorResponse.FromErrorType(ErrorType.EXPIRED), true);
+                    Error.FromErrorType(ErrorType.EXPIRED), true);
                 return;
             }
 
@@ -70,7 +70,7 @@ namespace WalletConnectSharp.Sign
             catch (WalletConnectException e)
             {
                 await MessageHandler.SendError<SessionPropose, SessionProposeResponse>(id, topic,
-                    ErrorResponse.FromException(e));
+                    Error.FromException(e));
             }
         }
 
@@ -79,7 +79,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             if (payload.IsError)
             {
-                await this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
+                await this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
                 this.Events.Trigger(EngineEvents.SessionConnect, payload);
             }
             else
@@ -134,7 +134,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionSettle, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionSettle, bool>(id, topic, Error.FromException(e));
             }
         }
 
@@ -143,7 +143,7 @@ namespace WalletConnectSharp.Sign
             var id = payload.Id;
             if (payload.IsError)
             {
-                await this.Client.Session.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
+                await this.Client.Session.Delete(topic, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
                 this.Events.Trigger($"session_approve{id}", payload);
             }
             else
@@ -179,7 +179,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionUpdate, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionUpdate, bool>(id, topic, Error.FromException(e));
             }
         }
 
@@ -205,7 +205,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionExtend, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionExtend, bool>(id, topic, Error.FromException(e));
             }
         }
 
@@ -230,7 +230,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionPing, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionPing, bool>(id, topic, Error.FromException(e));
             }
         }
 
@@ -262,7 +262,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionDelete, bool>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionDelete, bool>(id, topic, Error.FromException(e));
             }
         }
 
@@ -283,7 +283,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionRequest<T>, TR>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionRequest<T>, TR>(id, topic, Error.FromException(e));
             }
         }
 
@@ -303,7 +303,7 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
-                await MessageHandler.SendError<SessionEvent<T>, object>(id, topic, ErrorResponse.FromException(e));
+                await MessageHandler.SendError<SessionEvent<T>, object>(id, topic, Error.FromException(e));
             }
         }
     }

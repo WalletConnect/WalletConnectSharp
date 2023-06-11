@@ -29,7 +29,7 @@ namespace WalletConnectSharp.Network.Models
         /// The error field 
         /// </summary>
         [JsonProperty("error", NullValueHandling = NullValueHandling.Ignore)]
-        public ErrorResponse Error { get; set; }
+        public Error Error { get; set; }
 
         /// <summary>
         /// Create a blank JSON rpc error response
@@ -43,7 +43,7 @@ namespace WalletConnectSharp.Network.Models
         /// </summary>
         /// <param name="id">The id of the response</param>
         /// <param name="error">The error value</param>
-        public JsonRpcError(long id, ErrorResponse error)
+        public JsonRpcError(long id, Error error)
         {
             Id = id;
             Error = error;

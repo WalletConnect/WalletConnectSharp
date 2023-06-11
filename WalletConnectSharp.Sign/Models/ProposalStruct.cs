@@ -151,13 +151,13 @@ namespace WalletConnectSharp.Sign.Models
         }
 
         /// <summary>
-        /// Reject this proposal with the given <see cref="ErrorResponse"/>. This
+        /// Reject this proposal with the given <see cref="Error"/>. This
         /// will return a <see cref="RejectParams"/> which must be used in <see cref="IEngineAPI.Reject(RejectParams)"/>
         /// </summary>
         /// <param name="error">The error reason this proposal was rejected</param>
         /// <returns>A new <see cref="RejectParams"/> object which must be used in <see cref="IEngineAPI.Reject(RejectParams)"/></returns>
         /// <exception cref="Exception">If this proposal has no Id</exception>
-        public RejectParams RejectProposal(ErrorResponse error)
+        public RejectParams RejectProposal(Error error)
         {
             if (Id == null)
                 throw new Exception("Proposal has no set Id");
@@ -180,7 +180,7 @@ namespace WalletConnectSharp.Sign.Models
             if (message == null)
                 message = "Proposal denied by remote host";
             
-            return RejectProposal(new ErrorResponse()
+            return RejectProposal(new Error()
             {
                 Message = message,
                 Code = (long) ErrorType.USER_DISCONNECTED

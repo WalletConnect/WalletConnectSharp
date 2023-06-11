@@ -56,7 +56,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <summary>
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
-        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(ErrorResponse)"/>
+        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(Error)"/>
         /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineAPI.Reject(ProposalStruct, string)"/>
         /// </summary>
         /// <param name="params">The parameters of the rejection</param>
@@ -77,7 +77,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// </summary>
         /// <param name="proposalStruct">The proposal to reject</param>
         /// <param name="error">An error explaining the reason for the rejection</param>
-        Task Reject(ProposalStruct proposalStruct, ErrorResponse error);
+        Task Reject(ProposalStruct proposalStruct, Error error);
 
         /// <summary>
         /// Update a session, adding/removing additional namespaces in the given topic.
@@ -146,7 +146,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// </summary>
         /// <param name="topic">The topic of the session to disconnect</param>
         /// <param name="reason">An (optional) error reason for the disconnect</param>
-        Task Disconnect(string topic, ErrorResponse reason = null);
+        Task Disconnect(string topic, Error reason = null);
 
         /// <summary>
         /// Find all sessions that have a namespace that match the given <see cref="RequiredNamespaces"/>

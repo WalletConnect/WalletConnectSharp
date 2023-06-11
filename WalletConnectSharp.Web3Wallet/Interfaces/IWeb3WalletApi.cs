@@ -3,7 +3,6 @@ using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
-using ErrorResponse = WalletConnectSharp.Network.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Web3Wallet.Interfaces;
 
@@ -23,9 +22,9 @@ public interface IWeb3WalletApi
 
     Task<SessionStruct> ApproveSession(ProposalStruct proposal, params string[] approvedAddresses);
 
-    Task RejectSession(long id, ErrorResponse reason);
+    Task RejectSession(long id, Error reason);
 
-    Task RejectSession(ProposalStruct proposal, ErrorResponse reason);
+    Task RejectSession(ProposalStruct proposal, Error reason);
     
     
     Task RejectSession(ProposalStruct proposal, string reason);
@@ -38,7 +37,7 @@ public interface IWeb3WalletApi
     
     Task EmitSessionEvent<T>(string topic, EventData<T> eventData, string chainId);
 
-    Task DisconnectSession(string topic, ErrorResponse reason);
+    Task DisconnectSession(string topic, Error reason);
 
     Task RespondAuthRequest(ResultResponse results, string iss);
 

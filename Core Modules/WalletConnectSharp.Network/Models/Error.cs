@@ -9,7 +9,7 @@ namespace WalletConnectSharp.Network.Models
     /// <summary>
     /// Indicates an error
     /// </summary>
-    public class ErrorResponse
+    public class Error
     {
         /// <summary>
         /// The error code of this error
@@ -36,11 +36,11 @@ namespace WalletConnectSharp.Network.Models
         /// <param name="params">Extra parameters for the error message</param>
         /// <param name="extraData">Extra data that is stored in the Data field of the newly created ErrorResponse</param>
         /// <returns>A new ErrorResponse</returns>
-        public static ErrorResponse FromErrorType(ErrorType type, object @params = null, string extraData = null)
+        public static Error FromErrorType(ErrorType type, object @params = null, string extraData = null)
         {
             string message = SdkErrors.MessageFromType(type, @params);
 
-            return new ErrorResponse()
+            return new Error()
             {
                 Code = (long) type,
                 Message = message,
@@ -53,9 +53,9 @@ namespace WalletConnectSharp.Network.Models
         /// </summary>
         /// <param name="walletConnectException">The exception to grab error values from</param>
         /// <returns>A new ErrorResponse object using values from the given exception</returns>
-        public static ErrorResponse FromException(WalletConnectException walletConnectException)
+        public static Error FromException(WalletConnectException walletConnectException)
         {
-            return new ErrorResponse()
+            return new Error()
             {
                 Code = walletConnectException.Code,
                 Message = walletConnectException.Message,

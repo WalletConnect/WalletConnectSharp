@@ -395,7 +395,7 @@ namespace WalletConnectSharp.Core.Controllers
             pending.Remove(@params.Topic);
         }
 
-        protected virtual async Task OnUnsubscribe(string topic, string id, ErrorResponse reason)
+        protected virtual async Task OnUnsubscribe(string topic, string id, Error reason)
         {
             // TODO Figure out how to do this
             //Events.RemoveListener(id);
@@ -445,7 +445,7 @@ namespace WalletConnectSharp.Core.Controllers
             );
         }
 
-        protected virtual void DeleteSubscription(string id, ErrorResponse reason)
+        protected virtual void DeleteSubscription(string id, Error reason)
         {
             var subscription = GetSubscription(id);
             _subscriptions.Remove(id);
@@ -474,7 +474,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
 
             await RpcUnsubscribe(topic, id, opts.Relay);
-            ErrorResponse reason = null;
+            Error reason = null;
             await OnUnsubscribe(topic, id, reason);
         }
 

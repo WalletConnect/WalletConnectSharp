@@ -242,7 +242,7 @@ namespace WalletConnectSharp.Sign
         /// <summary>
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
-        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(ErrorResponse)"/>
+        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(Error)"/>
         /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineAPI.Reject(ProposalStruct, string)"/>
         /// </summary>
         /// <param name="params">The parameters of the rejection</param>
@@ -266,7 +266,7 @@ namespace WalletConnectSharp.Sign
             if (message == null)
                 message = "Proposal denied by remote host";
 
-            return Reject(proposalStruct, new ErrorResponse()
+            return Reject(proposalStruct, new Error()
             {
                 Message = message,
                 Code = (long) ErrorType.USER_DISCONNECTED,
@@ -279,7 +279,7 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         /// <param name="proposalStruct">The proposal to reject</param>
         /// <param name="error">An error explaining the reason for the rejection</param>
-        public Task Reject(ProposalStruct proposalStruct, ErrorResponse error)
+        public Task Reject(ProposalStruct proposalStruct, Error error)
         {
             if (proposalStruct.Id == null)
                 throw new ArgumentException("No proposal Id given");
@@ -377,7 +377,7 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         /// <param name="topic">The topic of the session to disconnect</param>
         /// <param name="reason">An (optional) error reason for the disconnect</param>
-        public Task Disconnect(string topic, ErrorResponse reason)
+        public Task Disconnect(string topic, Error reason)
         {
             return Engine.Disconnect(topic, reason);
         }

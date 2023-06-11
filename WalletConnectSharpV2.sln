@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Auth.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Web3Wallet", "WalletConnectSharp.Web3Wallet\WalletConnectSharp.Web3Wallet.csproj", "{53622C78-1162-46A2-9FFE-8E90B018A144}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletConnectSharp.Web3Wallet.Tests", "Tests\WalletConnectSharp.Web3Wallet.Tests\WalletConnectSharp.Web3Wallet.Tests.csproj", "{82C44097-B520-45A9-8228-FF35E6DDDC9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +120,10 @@ Global
 		{53622C78-1162-46A2-9FFE-8E90B018A144}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53622C78-1162-46A2-9FFE-8E90B018A144}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53622C78-1162-46A2-9FFE-8E90B018A144}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82C44097-B520-45A9-8228-FF35E6DDDC9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82C44097-B520-45A9-8228-FF35E6DDDC9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82C44097-B520-45A9-8228-FF35E6DDDC9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82C44097-B520-45A9-8228-FF35E6DDDC9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{23897558-4177-425D-B2FA-75AB0B6FEDAE} = {3A55D6C7-0EF8-4EEA-90A5-89F5AFB97BA0}
@@ -134,5 +140,6 @@ Global
 		{5C78A5E4-24ED-499C-91BC-90D16A626EFA} = {3A55D6C7-0EF8-4EEA-90A5-89F5AFB97BA0}
 		{C3CC2BC9-CD29-46B8-94DB-B104E427330B} = {3A55D6C7-0EF8-4EEA-90A5-89F5AFB97BA0}
 		{7B63C8BD-737F-403F-AF66-8A2E7ADBDBAB} = {3A55D6C7-0EF8-4EEA-90A5-89F5AFB97BA0}
+		{82C44097-B520-45A9-8228-FF35E6DDDC9D} = {3A55D6C7-0EF8-4EEA-90A5-89F5AFB97BA0}
 	EndGlobalSection
 EndGlobal

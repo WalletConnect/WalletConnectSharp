@@ -126,6 +126,6 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        Task SendError<T, TR>(long id, string topic, ErrorResponse error, EncodeOptions options = null);
+        Task SendError<T, TR>(long id, string topic, Error error, EncodeOptions options = null);
     }
 }

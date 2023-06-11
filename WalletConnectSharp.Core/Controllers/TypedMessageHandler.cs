@@ -336,7 +336,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="error">The error response to send</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        public async Task SendError<T, TR>(long id, string topic, ErrorResponse error, EncodeOptions options = null)
+        public async Task SendError<T, TR>(long id, string topic, Error error, EncodeOptions options = null)
         {
             var payload = new JsonRpcResponse<TR>(id, error, default);
             var message = await this.Core.Crypto.Encode(topic, payload, options);

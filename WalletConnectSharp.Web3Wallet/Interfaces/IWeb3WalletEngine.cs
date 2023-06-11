@@ -4,7 +4,6 @@ using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
-using ErrorResponse = WalletConnectSharp.Network.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Web3Wallet.Interfaces;
 

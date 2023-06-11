@@ -15,7 +15,7 @@ namespace WalletConnectSharp.Sign
 {
     public partial class Engine
     {
-        async Task IEnginePrivate.DeletePendingSessionRequest(long id, ErrorResponse reason, bool expirerHasDeleted = false)
+        async Task IEnginePrivate.DeletePendingSessionRequest(long id, Error reason, bool expirerHasDeleted = false)
         {
             await Task.WhenAll(
                 this.Client.PendingRequests.Delete(id, reason),
@@ -48,7 +48,7 @@ namespace WalletConnectSharp.Sign
 
             await this.Client.Core.Relayer.Unsubscribe(topic);
             await Task.WhenAll(
-                sessionDeleted ? Task.CompletedTask : this.Client.Session.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
+                sessionDeleted ? Task.CompletedTask : this.Client.Session.Delete(topic, Error.FromErrorType(ErrorType.USER_DISCONNECTED)),
                 hasKeypairDeleted ? Task.CompletedTask : this.Client.Core.Crypto.DeleteKeyPair(self.PublicKey),
                 hasSymkeyDeleted ? Task.CompletedTask : this.Client.Core.Crypto.DeleteSymKey(topic),
                 expirerHasDeleted ? Task.CompletedTask : this.Client.Core.Expirer.Delete(topic)
@@ -61,7 +61,7 @@ namespace WalletConnectSharp.Sign
             bool proposalHasDeleted = !this.Client.Proposal.Keys.Contains(id);
             
             return Task.WhenAll(
-                proposalHasDeleted ? Task.CompletedTask : this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
+                proposalHasDeleted ? Task.CompletedTask : this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED)),
                 expirerHasDeleted ? Task.CompletedTask : this.Client.Core.Expirer.Delete(id)
             );
         }

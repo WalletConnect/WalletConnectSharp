@@ -37,7 +37,7 @@ namespace WalletConnectSharp.Sign.Models
         /// to send an Error response when this event completes.
         /// This value will always override <see cref="Response"/> if the value is non-null
         /// </summary>
-        public ErrorResponse Error { get; set; }
+        public Error Error { get; set; }
 
         internal RequestEventArgs(string topic, JsonRpcRequest<T> request)
         {

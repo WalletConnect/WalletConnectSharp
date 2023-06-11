@@ -12,7 +12,7 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     [RpcMethod("wc_sessionDelete")]
     [RpcRequestOptions(Clock.ONE_DAY, 1112)]
     [RpcResponseOptions(Clock.ONE_DAY, 1113)]
-    public class SessionDelete : ErrorResponse, IWcMethod
+    public class SessionDelete : Error, IWcMethod
     {
     }
 }
