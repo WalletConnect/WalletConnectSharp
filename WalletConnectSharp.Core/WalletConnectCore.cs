@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
@@ -16,7 +14,7 @@ namespace WalletConnectSharp.Core
     /// The Core module. This module holds all Core Modules and holds configuration data
     /// required by several Core Module.
     /// </summary>
-    public class Core : ICore
+    public class WalletConnectCore : ICore
     {
         /// <summary>
         /// The prefix string used for the storage key
@@ -115,7 +113,7 @@ namespace WalletConnectSharp.Core
         /// Create a new Core with the given options.
         /// </summary>
         /// <param name="options">The options to use to configure the new Core module</param>
-        public Core(CoreOptions options = null)
+        public WalletConnectCore(CoreOptions options = null)
         {
             if (options == null)
             {
