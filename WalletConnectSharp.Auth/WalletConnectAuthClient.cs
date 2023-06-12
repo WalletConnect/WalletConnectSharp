@@ -1,6 +1,7 @@
 ﻿using WalletConnectSharp.Auth.Controllers;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Events;
@@ -99,7 +100,7 @@ public class WalletConnectAuthClient : IAuthClient
         if (string.IsNullOrWhiteSpace(options.Name))
             options.Name = $"{options.Metadata.Name}-{Name}";
         
-        Core = options.Core ?? new Core.Core(options);
+        Core = options.Core ?? new WalletConnectCore(options);
 
         AuthKeys = new Store<string, AuthData>(Core, "authKeys", AUTH_CLIENT_STORAGE_PREFIX);
         PairingTopics = new Store<string, PairingData>(Core, "pairingTopics", AUTH_CLIENT_STORAGE_PREFIX);

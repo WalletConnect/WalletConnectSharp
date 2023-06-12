@@ -14,7 +14,7 @@ using ErrorResponse = WalletConnectSharp.Auth.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Auth.Tests
 {
-    public class AuthClientTests : IClassFixture<AuthClientFixture>
+    public class AuthClientTests : IClassFixture<AuthClientFixture>, IClassFixture<CryptoWalletFixture>
     {
         private static readonly RequestParams DefaultRequestParams = new RequestParams()
         {
@@ -24,9 +24,8 @@ namespace WalletConnectSharp.Auth.Tests
             Nonce = CryptoUtils.GenerateNonce()
         };
         
-        private AuthClientFixture _authFixture;
-        private readonly string _iss;
-        private readonly Wallet _wallet;
+        private readonly AuthClientFixture _authFixture;
+        private readonly CryptoWalletFixture _cryptoWalletFixture;
 
         public IAuthClient PeerA
         {
@@ -44,20 +43,35 @@ namespace WalletConnectSharp.Auth.Tests
             }
         }
 
+        public string Iss
+        {
+            get
+            {
+                return _cryptoWalletFixture.Iss;
+            }
+        }
+
+        public Wallet CryptoWallet
+        {
+            get
+            {
+                return _cryptoWalletFixture.CryptoWallet;
+            }
+        }
+
         public string WalletAddress
         {
             get
             {
-                return _wallet.GetAddresses(1)[0];
+                return _cryptoWalletFixture.WalletAddress;
             }
         }
 
-        public AuthClientTests(AuthClientFixture authFixture)
+        public AuthClientTests(AuthClientFixture authFixture, CryptoWalletFixture cryptoFixture)
         {
             this._authFixture = authFixture;
-            
-            this._wallet = new Wallet(Wordlist.English, WordCount.Twelve);
-            this._iss = $"did:pkh:eip155:1:{this.WalletAddress}";
+
+            this._cryptoWalletFixture = cryptoFixture;
         }
 
         [Fact, Trait("Category", "unit")]
@@ -133,10 +147,10 @@ namespace WalletConnectSharp.Auth.Tests
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
-                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this._iss);
-                var signature = await _wallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new Cacao() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this._iss);
+                await PeerB.Respond(new Cacao() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
 
                 Assert.Equal(Validation.Unknown, request.VerifyContext?.Validation);
             }
@@ -226,7 +240,7 @@ namespace WalletConnectSharp.Auth.Tests
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
-                await PeerB.Respond(new ErrorResponse() { Error = new Network.Models.Error() { Code = 14001, Message = "Can not login" }, Id = request.Id }, this._iss);
+                await PeerB.Respond(new ErrorResponse() { Error = new Network.Models.Error() { Code = 14001, Message = "Can not login" }, Id = request.Id }, this.Iss);
             }
             void OnPeerAOnAuthResponded(object sender, AuthResponse response)
             {
@@ -267,10 +281,10 @@ namespace WalletConnectSharp.Auth.Tests
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
-                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this._iss);
-                var signature = await _wallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this._iss);
+                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
 
                 Assert.Equal(Validation.Unknown, request.VerifyContext?.Validation);
             }
@@ -329,10 +343,10 @@ namespace WalletConnectSharp.Auth.Tests
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
-                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this._iss);
-                var signature = await _wallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this._iss);
+                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
                 resolve3.SetResult(true);
             }
 
@@ -495,10 +509,10 @@ namespace WalletConnectSharp.Auth.Tests
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
                 receivedMetadataName = request.Parameters.Requester?.Metadata?.Name;
-                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this._iss);
-                var signature = await _wallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this._iss);
+                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
 
                 hasResponded.SetResult(true);
                 Assert.Equal(Validation.Unknown, request.VerifyContext.Validation);

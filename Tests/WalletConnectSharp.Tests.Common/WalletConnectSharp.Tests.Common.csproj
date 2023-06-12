@@ -13,4 +13,8 @@
       <ProjectReference Include="..\..\Core Modules\WalletConnectSharp.Network\WalletConnectSharp.Network.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Nethereum.HdWallet" Version="4.14.0" />
+    </ItemGroup>
+
 </Project>

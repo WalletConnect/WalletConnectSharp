@@ -1,4 +1,5 @@
-﻿using WalletConnectSharp.Core.Interfaces;
+﻿using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
@@ -55,9 +56,10 @@ public class Web3WalletFixture : TwoClientsFixture<IWeb3Wallet>
             Url = "https://walletconnect.com"
         };
 
-        CoreA = new Core.Core(OptionsA);
+        CoreA = new WalletConnectCore(OptionsA);
+        CoreB = new WalletConnectCore(OptionsB);
 
-        ClientA = await Web3WalletClient.Init(OptionsA);
-        ClientB = await Web3WalletClient.Init(OptionsB);
+        ClientA = await Web3WalletClient.Init(CoreA, MetadataA);
+        ClientB = await Web3WalletClient.Init(CoreB, MetadataB);
     }
 }
