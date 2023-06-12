@@ -141,8 +141,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         public async Task Init()
         {
-            var auth = await this.Core.Crypto.SignJwt(this.relayUrl);
-            Provider = CreateProvider(auth);
+            await CreateProvider();
 
             await Task.WhenAll(
                 Messages.Init(), TransportOpen(), Subscriber.Init()
@@ -375,17 +374,20 @@ namespace WalletConnectSharp.Core.Controllers
                         });
                 }
 
+                TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
+
                 void RejectTransportOpen(object sender, GenericEvent<object> @event)
                 {
-                    throw new Exception("closeTransport called before connection was established");
+                    task2.TrySetException(new Exception("closeTransport called before connection was established"));
                 }
 
-                async Task Task2()
+                async void Task2()
                 {
                     this.Events.ListenForOnce<object>(RelayerEvents.TransportClosed, RejectTransportOpen);
                     try
                     {
                         await this.Provider.Connect().WithTimeout(TimeSpan.FromSeconds(5), "socket stalled");
+                        task2.TrySetResult(true);
                     }
                     finally
                     {
@@ -393,7 +395,9 @@ namespace WalletConnectSharp.Core.Controllers
                     }
                 }
 
-                await Task.WhenAll(task1.Task, Task2());
+                Task2();
+
+                await Task.WhenAll(task1.Task, task2.Task);
             }
             catch (Exception e)
             {
@@ -423,9 +427,8 @@ namespace WalletConnectSharp.Core.Controllers
 
                 await Task.WhenAll(task1.Task, this.TransportClose());
             }
-            
-            var auth = await this.Core.Crypto.SignJwt(this.relayUrl);
-            Provider = CreateProvider(auth);
+
+            await CreateProvider();
             await TransportOpen();
         }
 

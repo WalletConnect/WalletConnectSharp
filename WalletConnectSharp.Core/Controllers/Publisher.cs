@@ -101,7 +101,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
 
-            return this.Relayer.Provider.Request<RelayPublishRequest, object>(request, this);
+            return this.Relayer.Request<RelayPublishRequest, object>(request, this);
         }
 
         /// <summary>

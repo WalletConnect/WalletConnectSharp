@@ -315,7 +315,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
             
-            var subscribe = _relayer.Provider.Request<JsonRpcSubscriberParams, string>(request);
+            var subscribe = _relayer.Request<JsonRpcSubscriberParams, string>(request);
             await subscribe.WithTimeout(20000);
 
             return HashUtils.HashMessage(topic + this.clientId);
@@ -334,7 +334,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
 
-            return _relayer.Provider.Request<JsonRpcUnsubscribeParams, object>(request);
+            return _relayer.Request<JsonRpcUnsubscribeParams, object>(request);
         }
 
         protected virtual void OnEnabled()
