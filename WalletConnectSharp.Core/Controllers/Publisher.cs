@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
@@ -9,7 +5,6 @@ using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -106,7 +101,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
 
-            return this.Relayer.Provider.Request<RelayPublishRequest, object>(request, this);
+            return this.Relayer.Request<RelayPublishRequest, object>(request, this);
         }
 
         /// <summary>
@@ -149,8 +144,18 @@ namespace WalletConnectSharp.Core.Controllers
 
             var hash = HashUtils.HashMessage(message);
             queue.Add(hash, @params);
-            await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay);
-            OnPublish(hash);
+            try
+            {
+                await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay)
+                    .WithTimeout(TimeSpan.FromSeconds(10));
+                this.Relayer.Events.Trigger(RelayerEvents.Publish, @params);
+                OnPublish(hash);
+            }
+            catch (Exception e)
+            {
+                this.Relayer.Events.Trigger<object>(RelayerEvents.ConnectionStalled, new object());
+                return;
+            }
         }
     }
 }

@@ -62,11 +62,15 @@ namespace WalletConnectSharp.Common.Model.Relay
         [JsonProperty("publish")]
         public abstract string Publish { get; }
         
+        public abstract string BatchPublish { get; }
+        
         /// <summary>
         /// The Subscribe action RPC method name
         /// </summary>
         [JsonProperty("subscribe")]
         public abstract string Subscribe { get; }
+        
+        public abstract string BatchSubscribe { get; }
         
         /// <summary>
         /// The Subscription action RPC method name
@@ -79,6 +83,8 @@ namespace WalletConnectSharp.Common.Model.Relay
         /// </summary>
         [JsonProperty("unsubscribe")]
         public abstract string Unsubscribe { get; }
+        
+        public abstract string BatchUnsubscribe { get; }
 
         /// <summary>
         /// A class that defines all RelayProtocol definitions for the
@@ -94,11 +100,27 @@ namespace WalletConnectSharp.Common.Model.Relay
                 }
             }
 
+            public override string BatchPublish
+            {
+                get
+                {
+                    return "waku_batchPublish";
+                }
+            }
+
             public override string Subscribe
             {
                 get
                 {
                     return "waku_subscribe";
+                }
+            }
+
+            public override string BatchSubscribe
+            {
+                get
+                {
+                    return "waku_batchSubscribe";
                 }
             }
 
@@ -117,6 +139,14 @@ namespace WalletConnectSharp.Common.Model.Relay
                     return "waku_unsubscribe";
                 }
             }
+
+            public override string BatchUnsubscribe
+            {
+                get
+                {
+                    return "waku_batchUnsubscribe";
+                }
+            }
         }
 
         /// <summary>
@@ -133,11 +163,27 @@ namespace WalletConnectSharp.Common.Model.Relay
                 }
             }
 
+            public override string BatchPublish
+            {
+                get
+                {
+                    return "irn_batchPublish";
+                }
+            }
+
             public override string Subscribe
             {
                 get
                 {
                     return "irn_subscribe";
+                }
+            }
+
+            public override string BatchSubscribe
+            {
+                get
+                {
+                    return "irn_batchSubscribe";
                 }
             }
 
@@ -156,6 +202,14 @@ namespace WalletConnectSharp.Common.Model.Relay
                     return "irn_unsubscribe";
                 }
             }
+
+            public override string BatchUnsubscribe
+            {
+                get
+                {
+                    return "irn_batchUnsubscribe";
+                }
+            }
         }
 
         /// <summary>
@@ -172,11 +226,27 @@ namespace WalletConnectSharp.Common.Model.Relay
                 }
             }
 
+            public override string BatchPublish
+            {
+                get
+                {
+                    return "iridium_batchPublish";
+                }
+            }
+
             public override string Subscribe
             {
                 get
                 {
                     return "iridium_subscribe";
+                }
+            }
+
+            public override string BatchSubscribe
+            {
+                get
+                {
+                    return "iridium_batchSubscribe";
                 }
             }
 
@@ -193,6 +263,14 @@ namespace WalletConnectSharp.Common.Model.Relay
                 get
                 {
                     return "iridium_unsubscribe";
+                }
+            }
+
+            public override string BatchUnsubscribe
+            {
+                get
+                {
+                    return "iridium_batchUnsubscribe";
                 }
             }
         }

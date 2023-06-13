@@ -48,7 +48,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             get
             {
-                return Core.STORAGE_PREFIX + Version + "//" + Name;
+                return WalletConnectCore.STORAGE_PREFIX + Version + "//" + Name;
             }
         }
 

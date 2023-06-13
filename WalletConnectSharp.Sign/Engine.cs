@@ -292,6 +292,7 @@ namespace WalletConnectSharp.Sign
         /// the proposal</returns>
         public async Task<ProposalStruct> Pair(string uri)
         {
+            this.IsInitialized();
             var pairing = await this.Client.Core.Pairing.Pair(uri);
             var topic = pairing.Topic;
 

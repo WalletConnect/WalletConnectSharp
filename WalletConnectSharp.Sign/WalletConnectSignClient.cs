@@ -1,4 +1,5 @@
 using WalletConnectSharp.Common.Model.Errors;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
@@ -168,7 +169,7 @@ namespace WalletConnectSharp.Sign
             if (options.Core != null)
                 Core = options.Core;
             else
-                Core = new Core.Core(options);
+                Core = new WalletConnectCore(options);
 
             Events = new EventDelegator(this);
             

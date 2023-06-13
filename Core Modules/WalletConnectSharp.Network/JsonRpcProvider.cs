@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
@@ -200,7 +197,9 @@ namespace WalletConnectSharp.Network
                         return;
                     
                     var result = @event.EventData;
-
+                    
+                    //Console.WriteLine($"[{Name}] Got response {JsonConvert.SerializeObject(result)}");
+                    
                     if (result.Error != null)
                     {
                         requestTask.SetException(new IOException(result.Error.Message));
@@ -217,6 +216,7 @@ namespace WalletConnectSharp.Network
                     return;
                 
                 var exception = @event.EventData;
+                //Console.WriteLine($"[{Name}] Got Response Error {exception}");
                 if (exception != null)
                 {
                     requestTask.SetException(exception);
@@ -225,6 +225,7 @@ namespace WalletConnectSharp.Network
 
             _lastId = request.Id;
             
+            //Console.WriteLine($"[{Name}] Sending request {request.Method} with data {JsonConvert.SerializeObject(request)}");
             await _connection.SendRequest(request, context);
 
             await requestTask.Task;
