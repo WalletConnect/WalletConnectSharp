@@ -111,7 +111,7 @@ namespace WalletConnectSharp.Core.Controllers
             Context = name;
             
             if (storagePrefix == null)
-                StoragePrefix = WalletConnectSharp.Core.Core.STORAGE_PREFIX;
+                StoragePrefix = WalletConnectCore.STORAGE_PREFIX;
             else
                 StoragePrefix = storagePrefix;
         }

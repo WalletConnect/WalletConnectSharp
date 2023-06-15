@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
@@ -22,6 +19,8 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Relayer : IRelayer
     {
+        private bool transportExplicityClosed = false;
+        
         /// <summary>
         /// The default relay server URL used when no relay URL is given
         /// </summary>
@@ -82,16 +81,37 @@ namespace WalletConnectSharp.Core.Controllers
         /// <summary>
         /// Whether this Relayer is connected
         /// </summary>
-        public bool Connected { get; }
-        
+        public bool Connected 
+        {
+            get
+            {
+                return this.Provider.Connection.Connected;
+            }
+        }
+
         /// <summary>
         /// Whether this Relayer is currently connecting
         /// </summary>
-        public bool Connecting { get; }
-        
+        public bool Connecting
+        {
+            get
+            {
+                return this.Provider.Connection.Connecting;
+            }
+        }
+
+        public bool TransportExplicitlyClosed
+        {
+            get
+            {
+                return transportExplicityClosed;
+            }
+        }
+
         private string relayUrl;
         private string projectId;
         private bool initialized;
+        private bool reconnecting = false;
         
         /// <summary>
         /// Create a new Relayer with the given RelayerOptions.
@@ -121,16 +141,36 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         public async Task Init()
         {
-            var auth = await this.Core.Crypto.SignJwt(this.relayUrl);
-            Provider = CreateProvider(auth);
+            await CreateProvider();
 
             await Task.WhenAll(
-                Messages.Init(), Provider.Connect(), Subscriber.Init()
+                Messages.Init(), TransportOpen(), Subscriber.Init()
             );
 
             RegisterEventListeners();
             
             initialized = true;
+
+#pragma warning disable CS4014
+            Task.Run(async () =>
+#pragma warning restore CS4014
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+
+                if (this.Subscriber.Topics.Length == 0)
+                {
+                    // No topics subscribed to after init, closing transport
+                    await this.TransportClose();
+                    this.transportExplicityClosed = false;
+                }
+            });
+        }
+
+        protected virtual async Task CreateProvider()
+        {
+            var auth = await this.Core.Crypto.SignJwt(this.relayUrl);
+            Provider = CreateProvider(auth);
+            RegisterProviderEventListeners();
         }
 
         protected virtual IJsonRpcProvider CreateProvider(string auth)
@@ -149,7 +189,7 @@ namespace WalletConnectSharp.Core.Controllers
             );
         }
 
-        protected virtual void RegisterEventListeners()
+        protected virtual void RegisterProviderEventListeners()
         {
             Provider.On<string>(ProviderEvents.RawRequestMessage, (sender, @event) =>
             {
@@ -164,16 +204,27 @@ namespace WalletConnectSharp.Core.Controllers
             Provider.On(ProviderEvents.Disconnect, async () =>
             {
                 Events.Trigger(RelayerEvents.Disconnect, new object());
-                
+
+                if (this.transportExplicityClosed)
+                    return;
                 
                 // Attempt to reconnect after one second
                 await Task.Delay(1000);
-                await Provider.Connect();
+
+                await RestartTransport();
             });
 
             Provider.On<object>(ProviderEvents.Error, (sender, @event) =>
             {
                 Events.Trigger(RelayerEvents.Error, @event.EventData);
+            });
+        }
+
+        protected virtual void RegisterEventListeners()
+        {
+            this.Events.ListenFor<object>(RelayerEvents.ConnectionStalled, async (sender, @event) =>
+            {
+                await this.RestartTransport();
             });
         }
 
@@ -251,10 +302,26 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="topic">The topic to subscribe to</param>
         /// <param name="opts">(Optional) Subscribe options that specify protocol options</param>
         /// <returns></returns>
-        public Task<string> Subscribe(string topic, SubscribeOptions opts = null)
+        public async Task<string> Subscribe(string topic, SubscribeOptions opts = null)
         {
             IsInitialized();
-            return Subscriber.Subscribe(topic, opts);
+            var ids = this.Subscriber.TopicMap.Get(topic);
+            if (ids.Length > 0)
+            {
+                return ids[0];
+            }
+
+            TaskCompletionSource<string> task1 = new TaskCompletionSource<string>();
+            this.Subscriber.Once<ActiveSubscription>(Controllers.Subscriber.SubscriberEvents.Created, (sender, @event) =>
+            {
+                if (@event.EventData.Topic == topic)
+                    task1.SetResult("");
+            });
+
+            return (await Task.WhenAll(
+                task1.Task,
+                this.Subscriber.Subscribe(topic, opts)
+            ))[1];
         }
 
         /// <summary>
@@ -269,12 +336,128 @@ namespace WalletConnectSharp.Core.Controllers
             return Subscriber.Unsubscribe(topic, opts);
         }
 
+        public async Task<TR> Request<T, TR>(IRequestArguments<T> request, object context = null)
+        {
+            await this.ToEstablishConnection();
+            return await this.Provider.Request<T, TR>(request, context);
+        }
+
+        public async Task TransportClose()
+        {
+            transportExplicityClosed = true;
+            if (Connected)
+            {
+                await this.Provider.Disconnect();
+                this.Events.Trigger(RelayerEvents.TransportClosed, new object());
+            }
+        }
+
+        public async Task TransportOpen(string relayUrl = null)
+        {
+            this.transportExplicityClosed = false;
+            if (reconnecting) return;
+            this.relayUrl = relayUrl ?? this.relayUrl;
+            this.reconnecting = true;
+            try
+            {
+                TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
+                if (!this.initialized)
+                {
+                    task1.SetResult(true);
+                }
+                else
+                {
+                    this.Subscriber.Once<object>(Controllers.Subscriber.SubscriberEvents.Resubscribed,
+                        (sender, @event) =>
+                        {
+                            task1.SetResult(true);
+                        });
+                }
+
+                TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
+
+                void RejectTransportOpen(object sender, GenericEvent<object> @event)
+                {
+                    task2.TrySetException(new Exception("closeTransport called before connection was established"));
+                }
+
+                async void Task2()
+                {
+                    this.Events.ListenForOnce<object>(RelayerEvents.TransportClosed, RejectTransportOpen);
+                    try
+                    {
+                        await this.Provider.Connect().WithTimeout(TimeSpan.FromSeconds(5), "socket stalled");
+                        task2.TrySetResult(true);
+                    }
+                    finally
+                    {
+                        this.Events.RemoveListener<object>(RelayerEvents.TransportClosed, RejectTransportOpen);
+                    }
+                }
+
+                Task2();
+
+                await Task.WhenAll(task1.Task, task2.Task);
+            }
+            catch (Exception e)
+            {
+                // TODO Check for system socket hang up message
+                if (e.Message != "socket stalled")
+                    throw;
+
+                this.Events.Trigger(RelayerEvents.TransportClosed, new object());
+            }
+            finally
+            {
+                this.reconnecting = false;
+            }
+        }
+
+        public async Task RestartTransport(string relayUrl = null)
+        {
+            if (this.transportExplicityClosed || this.reconnecting) return;
+            this.relayUrl = relayUrl ?? this.relayUrl;
+            if (this.Connected)
+            {
+                TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
+                this.Provider.Once<bool>(ProviderEvents.Disconnect, (sender, @event) =>
+                {
+                    task1.SetResult(true);
+                });
+
+                await Task.WhenAll(task1.Task, this.TransportClose());
+            }
+
+            await CreateProvider();
+            await TransportOpen();
+        }
+
         protected virtual void IsInitialized()
         {
             if (!initialized)
             {
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, Name);
             }
+        }
+
+        private async Task ToEstablishConnection()
+        {
+            if (Connected) return;
+            if (Connecting)
+            {
+                // Check for connection
+                while (Connecting)
+                {
+                    await Task.Delay(20);
+                }
+
+                if (!Connected && !Connecting)
+                    throw new IOException("Could not establish connection");
+
+                return;
+            }
+
+            await this.RestartTransport();
         }
     }
 }

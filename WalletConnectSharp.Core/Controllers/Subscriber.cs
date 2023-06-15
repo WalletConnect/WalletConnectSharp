@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -33,6 +28,7 @@ namespace WalletConnectSharp.Core.Controllers
             public static readonly string Expired = "subscription_expired";
             public static readonly string Disabled = "subscription_disabled";
             public static readonly string Sync = "subscription_sync";
+            public static readonly string Resubscribed = "subscription_resubscribed";
         }
         
         /// <summary>
@@ -160,7 +156,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             get
             {
-                return Core.STORAGE_PREFIX + Version + "//" + Name;
+                return WalletConnectCore.STORAGE_PREFIX + Version + "//" + Name;
             }
         }
 
@@ -266,21 +262,25 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual async void CheckPending()
         {
-            foreach (var @params in pending.Values)
-            {
-                var id = await RpcSubscribe<string>(@params.Topic, @params.Relay);
-                OnSubscribe(id, @params);
-            }
+            if (_relayer.TransportExplicitlyClosed)
+                return;
+
+
+            await BatchSubscribe(pending.Values.ToArray());
         }
 
         protected virtual async Task Reset()
         {
-            if (cached.Length == 0)
-                return;
-
-            await Task.WhenAll(
-                cached.Select(Resubscribe)
-            );
+            if (cached.Length > 0)
+            {
+                var batches = cached.Batch(500);
+                foreach (var batch in batches)
+                {
+                    await this.BatchSubscribe(batch.ToArray());
+                }
+            }
+            
+            this.Events.Trigger(SubscriberEvents.Resubscribed, new object());
         }
 
         protected virtual async Task Resubscribe(ActiveSubscription subscription)
@@ -298,12 +298,12 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 pending.Add(@params.Topic, @params);
 
-                var id = await RpcSubscribe<string>(@params.Topic, @params.Relay);
+                var id = await RpcSubscribe(@params.Topic, @params.Relay);
                 OnResubscribe(id, @params);
             }
         }
 
-        protected virtual async Task<string> RpcSubscribe<TR>(string topic, ProtocolOptions relay)
+        protected virtual async Task<string> RpcSubscribe(string topic, ProtocolOptions relay)
         {
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
             var request = new RequestArguments<JsonRpcSubscriberParams>()
@@ -315,7 +315,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
             
-            var subscribe = _relayer.Provider.Request<JsonRpcSubscriberParams, string>(request);
+            var subscribe = _relayer.Request<JsonRpcSubscriberParams, string>(request);
             await subscribe.WithTimeout(20000);
 
             return HashUtils.HashMessage(topic + this.clientId);
@@ -334,7 +334,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             };
 
-            return _relayer.Provider.Request<JsonRpcUnsubscribeParams, object>(request);
+            return _relayer.Request<JsonRpcUnsubscribeParams, object>(request);
         }
 
         protected virtual void OnEnabled()
@@ -540,7 +540,7 @@ namespace WalletConnectSharp.Core.Controllers
             };
             
             pending.Add(topic, @params);
-            var id = await RpcSubscribe<string>(topic, @params.Relay);
+            var id = await RpcSubscribe(topic, @params.Relay);
             OnSubscribe(id, @params);
             return id;
         }
@@ -595,6 +595,52 @@ namespace WalletConnectSharp.Core.Controllers
                     await Task.Delay(20);
                 }
             });
+        }
+
+        protected virtual async Task<string[]> RpcBatchSubscribe(string[] topics, ProtocolOptions relay)
+        {
+            if (topics.Length == 0) return Array.Empty<string>();
+
+            var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
+            var request = new RequestArguments<BatchSubscribeParams>()
+            {
+                Method = api.BatchSubscribe,
+                Params = new BatchSubscribeParams() { Topics = topics }
+            };
+            try
+            {
+                return await this._relayer.Request<BatchSubscribeParams, string[]>(request)
+                    .WithTimeout(TimeSpan.FromSeconds(10));
+            }
+            catch (Exception e)
+            {
+                this._relayer.Events.Trigger(RelayerEvents.ConnectionStalled, new object());
+                throw;
+            }
+        }
+
+        protected virtual async Task BatchSubscribe(PendingSubscription[] subscriptions)
+        {
+            if (subscriptions.Length == 0) return;
+            var topics = subscriptions.Select(s => s.Topic).ToArray();
+            var relay = subscriptions[0].Relay;
+            var result = await this.RpcBatchSubscribe(topics, relay);
+            OnBatchSubscribe(result.Select((r, i) => new ActiveSubscription()
+            {
+                Id = r,
+                Relay = relay,
+                Topic = topics[i]
+            }).ToArray());
+        }
+
+        private void OnBatchSubscribe(ActiveSubscription[] subscriptions)
+        {
+            if (subscriptions.Length == 0) return;
+            foreach (var sub in subscriptions)
+            {
+                SetSubscription(sub.Id, sub);
+                this.pending.Remove(sub.Topic);
+            }
         }
     }
 }

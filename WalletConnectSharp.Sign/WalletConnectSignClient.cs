@@ -180,7 +180,7 @@ namespace WalletConnectSharp.Sign
             if (options.Core != null)
                 Core = options.Core;
             else
-                Core = new Core.Core(options);
+                Core = new WalletConnectCore(options);
 
             Events = new EventDelegator(this);
 

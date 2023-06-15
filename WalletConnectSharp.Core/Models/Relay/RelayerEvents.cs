@@ -5,6 +5,12 @@ namespace WalletConnectSharp.Core.Models.Relay
     /// </summary>
     public static class RelayerEvents
     {
+        public static readonly string TransportClosed = "relayer_transport_closed";
+
+        public static readonly string ConnectionStalled = "relayer_connection_stalled";
+
+        public static readonly string Publish = "relayer_publish";
+
         /// <summary>
         /// The event id for the publish event
         /// </summary>
