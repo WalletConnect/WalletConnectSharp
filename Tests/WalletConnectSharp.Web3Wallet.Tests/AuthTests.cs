@@ -4,6 +4,7 @@ using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Network.Models;
+using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
 
@@ -51,14 +52,30 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             _core = new WalletConnectCore(new CoreOptions()
             {
                 ProjectId = TestValues.TestProjectId, RelayUrl = TestValues.TestRelayUrl,
+                Storage = new InMemoryStorage(),
+                Name = Guid.NewGuid().ToString(),
             });
             _dapp = await WalletConnectAuthClient.Init(new AuthOptions()
             {
                 ProjectId = TestValues.TestProjectId,
-                Metadata = new Metadata(),
-                Name = "dapp",
+                RelayUrl = TestValues.TestRelayUrl,
+                Metadata = new Metadata()
+                {
+                    Description = "An example dapp to showcase WalletConnectSharpv2",
+                    Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+                    Name = $"WalletConnectSharpv2 Dapp Example - {Guid.NewGuid().ToString()}",
+                    Url = "https://walletconnect.com"
+                },
+                Name = $"dapp-{Guid.NewGuid().ToString()}",
+                Storage = new InMemoryStorage(),
             });
-            _wallet = await Web3WalletClient.Init(_core, new Metadata(), "wallet");
+            _wallet = await Web3WalletClient.Init(_core, new Metadata()
+            {
+                Description = "An example wallet to showcase WalletConnectSharpv2",
+                Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+                Name = $"WalletConnectSharpv2 Wallet Example - {Guid.NewGuid().ToString()}",
+                Url = "https://walletconnect.com"
+            }, $"wallet-{Guid.NewGuid().ToString()}");
             
             Assert.NotNull(_wallet);
             Assert.NotNull(_dapp);

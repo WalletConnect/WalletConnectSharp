@@ -185,6 +185,10 @@ public partial class AuthEngine : IAuthEngine
         Cacao cacao;
         switch (message)
         {
+            case AuthErrorResponse errorResponse:
+                await this.SendError(id, responseTopic,
+                    new ErrorResponse() { Error = errorResponse.Error, Id = errorResponse.Id }, encodeOptions);
+                return;
             case ErrorResponse errorResponse:
                 await this.SendError(id, responseTopic, errorResponse, encodeOptions);
                 return;

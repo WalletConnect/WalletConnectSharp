@@ -13,7 +13,7 @@ namespace WalletConnectSharp.Tests.Common
         {
             get
             {
-                return _wallet.GetAddresses(0)[0];
+                return _wallet.GetAddresses(1)[0];
             }
         }
 

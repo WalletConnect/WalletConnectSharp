@@ -17,12 +17,19 @@ public class Verifier
 
     public async Task<string> Resolve(string attestationId)
     {
-        using HttpClient client = new HttpClient();
-        var url = $"{VerifyServer}/attestation/{attestationId}";
-        var results = await client.GetStringAsync(url);
+        try
+        {
+            using HttpClient client = new HttpClient();
+            var url = $"{VerifyServer}/attestation/{attestationId}";
+            var results = await client.GetStringAsync(url);
 
-        var verifiedContext = JsonConvert.DeserializeObject<VerifiedContext>(results);
+            var verifiedContext = JsonConvert.DeserializeObject<VerifiedContext>(results);
 
-        return verifiedContext != null ? verifiedContext.Origin : "";
+            return verifiedContext != null ? verifiedContext.Origin : "";
+        }
+        catch
+        {
+            return "";
+        }
     }
 }

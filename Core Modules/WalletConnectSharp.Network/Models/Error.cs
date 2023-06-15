@@ -71,5 +71,70 @@ namespace WalletConnectSharp.Network.Models
         {
             return WalletConnectException.FromType((ErrorType)Code, Message);
         }
+
+        private sealed class CodeMessageDataEqualityComparer : IEqualityComparer<Error>
+        {
+            public bool Equals(Error x, Error y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(x, null))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
+                return x.Code == y.Code && x.Message == y.Message && x.Data == y.Data;
+            }
+
+            public int GetHashCode(Error obj)
+            {
+                return HashCode.Combine(obj.Code, obj.Message, obj.Data);
+            }
+        }
+
+        public static IEqualityComparer<Error> CodeMessageDataComparer { get; } = new CodeMessageDataEqualityComparer();
+
+        protected bool Equals(Error other)
+        {
+            return Code == other.Code && Message == other.Message && Data == other.Data;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+
+            return Equals((Error)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Code, Message, Data);
+        }
     }
 }

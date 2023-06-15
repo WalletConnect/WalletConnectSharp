@@ -64,6 +64,9 @@ public class Web3WalletClient : IWeb3Wallet
     private Web3WalletClient(ICore core, Metadata metadata, string name = null)
     {
         this.Metadata = metadata;
+        if (string.IsNullOrWhiteSpace(this.Metadata.Name))
+            this.Metadata.Name = name;
+        
         this.Name = string.IsNullOrWhiteSpace(name) ? "Web3Wallet" : name;
         this.Context = $"{Name}-context";
         this.Core = core;
