@@ -58,11 +58,11 @@ namespace WalletConnectSharp.Auth.Tests
             Assert.Null(_dapp.Metadata.Redirect);
         }
 
-        public Task DisposeAsync()
+        public async Task DisposeAsync()
         {
             if (_core.Relayer.Connected)
             {
-                _core.Relayer.
+                await _core.Relayer.TransportClose();
             }
         }
     }
