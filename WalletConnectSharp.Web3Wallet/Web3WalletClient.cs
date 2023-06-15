@@ -136,6 +136,16 @@ public class Web3WalletClient : IWeb3Wallet
         return this.Engine.RespondAuthRequest(error, iss);
     }
 
+    public Task RespondAuthRequest(AuthRequest request, Error error, string iss)
+    {
+        return this.Engine.RespondAuthRequest(request, error, iss);
+    }
+
+    public Task RespondAuthRequest(AuthRequest request, string signature, string iss, bool eip191 = true)
+    {
+        return this.Engine.RespondAuthRequest(request, signature, iss, eip191);
+    }
+
     public string FormatMessage(Cacao.CacaoRequestPayload payload, string iss)
     {
         return this.Engine.FormatMessage(payload, iss);
@@ -144,5 +154,39 @@ public class Web3WalletClient : IWeb3Wallet
     private Task Initialize()
     {
         return this.Engine.Init();
+    }
+
+    public event EventHandler<AuthRequest> AuthRequested
+    {
+        add
+        {
+            Engine.AuthRequested += value;
+        }
+        remove
+        {
+            Engine.AuthRequested -= value;
+        }
+    }
+    public event EventHandler<AuthResponse> AuthResponded
+    {
+        add
+        {
+            Engine.AuthResponded += value;
+        }
+        remove
+        {
+            Engine.AuthResponded -= value;
+        }
+    }
+    public event EventHandler<AuthErrorResponse> AuthError
+    {
+        add
+        {
+            Engine.AuthError += value;
+        }
+        remove
+        {
+            Engine.AuthError -= value;
+        }
     }
 }

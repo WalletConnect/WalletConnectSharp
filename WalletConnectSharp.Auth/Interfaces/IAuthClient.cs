@@ -5,15 +5,11 @@ using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Auth.Interfaces;
 
-public interface IAuthClient : IModule, IEvents
+public interface IAuthClient : IModule, IEvents, IAuthClientEvents
 {
     string Protocol { get; }
     int Version { get; }
-
-    event EventHandler<AuthRequest> AuthRequested;
-    event EventHandler<AuthResponse> AuthResponded;
-    event EventHandler<AuthErrorResponse> AuthError;
-
+    
     ICore Core { get; set; }
     AuthMetadata Metadata { get; set; }
     string ProjectId { get; set; }
@@ -34,7 +30,6 @@ public interface IAuthClient : IModule, IEvents
     Task<IJsonRpcHistory<WcAuthRequest, Cacao>> AuthHistory();
 
     string FormatMessage(Cacao.CacaoPayload cacao);
-
     
     string FormatMessage(Cacao.CacaoRequestPayload cacao, string iss);
     

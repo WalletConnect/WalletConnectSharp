@@ -1,4 +1,5 @@
 ﻿using WalletConnectSharp.Auth;
+using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
@@ -6,7 +7,7 @@ using WalletConnectSharp.Sign.Models.Engine.Events;
 
 namespace WalletConnectSharp.Web3Wallet.Interfaces;
 
-public interface IWeb3WalletApi
+public interface IWeb3WalletApi : IAuthClientEvents
 {
     IDictionary<string, SessionStruct> ActiveSessions { get; }
 
@@ -42,6 +43,10 @@ public interface IWeb3WalletApi
     Task RespondAuthRequest(ResultResponse results, string iss);
 
     Task RespondAuthRequest(AuthErrorResponse error, string iss);
+    
+    Task RespondAuthRequest(AuthRequest request, Error error, string iss);
+
+    Task RespondAuthRequest(AuthRequest request, string signature, string iss, bool eip191 = true);
 
     string FormatMessage(Cacao.CacaoRequestPayload payload, string iss);
 }

@@ -153,6 +153,19 @@ public class Web3WalletEngine : IWeb3WalletEngine
         await this.AuthClient.Respond(error, iss);
     }
 
+    public Task RespondAuthRequest(AuthRequest request, Error error, string iss)
+    {
+        return RespondAuthRequest(new AuthErrorResponse() { Id = request.Id, Error = error, }, iss);
+    }
+
+    public Task RespondAuthRequest(AuthRequest request, string signature, string iss, bool eip191 = true)
+    {
+        Cacao.CacaoSignature sig = eip191
+            ? new Cacao.CacaoSignature.EIP191CacaoSignature(signature)
+            : new Cacao.CacaoSignature.EIP1271CacaoSignature(signature);
+        return RespondAuthRequest(new ResultResponse() { Id = request.Id, Signature = sig }, iss);
+    }
+
     public string FormatMessage(Cacao.CacaoRequestPayload payload, string iss)
     {
         return this.AuthClient.FormatMessage(payload, iss);
@@ -162,7 +175,7 @@ public class Web3WalletEngine : IWeb3WalletEngine
     {
         EventHandler<GenericEvent<object>> eventHandler = (sender, @event) =>
         {
-            this.Client.Events.Trigger(eventName, @event);
+            this.Client.Events.TriggerType(eventName, @event, @event.GetType());
         };
 
         source.On(eventName, eventHandler);
@@ -173,7 +186,11 @@ public class Web3WalletEngine : IWeb3WalletEngine
         PropagateEventToClient("session_proposal", SignClient);
         PropagateEventToClient("session_request", SignClient);
         PropagateEventToClient("session_delete", SignClient);
-        PropagateEventToClient("auth_request", AuthClient);
+        
+        // Propagate auth events 
+        AuthClient.AuthRequested += OnAuthRequest;
+        AuthClient.AuthResponded += OnAuthResponse;
+        AuthClient.AuthError += OnAuthResponse;
     }
 
     private void IsInitialized()
@@ -181,6 +198,34 @@ public class Web3WalletEngine : IWeb3WalletEngine
         if (!_initialized)
         {
             throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, "Web3WalletEngine");
+        }
+    }
+
+    public event EventHandler<AuthRequest> AuthRequested;
+    public event EventHandler<AuthResponse> AuthResponded;
+    public event EventHandler<AuthErrorResponse> AuthError;
+
+    void OnAuthRequest(object sender, AuthRequest request)
+    {
+        if (AuthRequested != null)
+        {
+            AuthRequested(sender, request);
+        }
+    }
+
+    void OnAuthResponse(object sender, AuthErrorResponse errorResponse)
+    {
+        if (AuthError != null)
+        {
+            AuthError(sender, errorResponse);
+        }
+    }
+
+    void OnAuthResponse(object sender, AuthResponse response)
+    {
+        if (AuthResponded != null)
+        {
+            AuthResponded(sender, response);
         }
     }
 }

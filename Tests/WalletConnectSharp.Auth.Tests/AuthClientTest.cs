@@ -1,5 +1,4 @@
 using System.Text;
-using NBitcoin;
 using Nethereum.HdWallet;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Internals;
@@ -9,6 +8,7 @@ using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Events;
+using WalletConnectSharp.Tests.Common;
 using Xunit;
 using ErrorResponse = WalletConnectSharp.Auth.Models.ErrorResponse;
 

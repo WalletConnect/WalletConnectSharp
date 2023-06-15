@@ -1,12 +1,13 @@
+using WalletConnectSharp.Auth;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Tests.Common;
-using WalletConnectSharp.Web3Wallet;
 using Xunit;
 
-namespace WalletConnectSharp.Auth.Tests
+namespace WalletConnectSharp.Web3Wallet.Tests
 {
     public class AuthClientTests : IClassFixture<CryptoWalletFixture>, IAsyncLifetime
     {
@@ -22,13 +23,21 @@ namespace WalletConnectSharp.Auth.Tests
         private WalletConnectCore _core;
         private WalletConnectAuthClient _dapp;
         private Web3WalletClient _wallet;
+        private string uriString;
         
-
         public string WalletAddress
         {
             get
             {
                 return _cryptoWalletFixture.WalletAddress;
+            }
+        }
+
+        public string Iss
+        {
+            get
+            {
+                return _cryptoWalletFixture.Iss;
             }
         }
 
@@ -64,6 +73,140 @@ namespace WalletConnectSharp.Auth.Tests
             {
                 await _core.Relayer.TransportClose();
             }
+        }
+
+        [Fact, Trait("Category", "unit")]
+        public async void TestRespondToAuthRequest()
+        {
+            var request = await _dapp.Request(DefaultRequestParams);
+            uriString = request.Uri;
+
+            TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
+            _wallet.AuthRequested += async (sender, authRequest) =>
+            {
+                Assert.Equal(DefaultRequestParams.Aud, authRequest.Parameters.CacaoPayload.Aud);
+                Assert.Equal(DefaultRequestParams.Domain, authRequest.Parameters.CacaoPayload.Domain);
+                Assert.Equal(DefaultRequestParams.Nonce, authRequest.Parameters.CacaoPayload.Nonce);
+
+                var message = _wallet.FormatMessage(authRequest.Parameters.CacaoPayload, Iss);
+                var signature = await _cryptoWalletFixture.SignMessage(message);
+
+                await _wallet.RespondAuthRequest(authRequest, signature, Iss);
+
+                task1.TrySetResult(true);
+            };
+
+            TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
+            _dapp.AuthResponded += (sender, response) =>
+            {
+                Assert.NotNull(response);
+                Assert.NotNull(response.Id);
+                Assert.NotNull(response.Topic);
+                Assert.NotNull(response.Topic);
+                Assert.Equal(Iss, response.Response.Result.Payload.Iss);
+                task2.TrySetResult(true);
+            };
+
+            _dapp.AuthError += (sender, response) => task1.TrySetException(response.Error.ToException());
+
+            await Task.WhenAll(
+                task1.Task,
+                task2.Task,
+                _wallet.Pair(uriString, true)
+            );
+        }
+
+        [Fact, Trait("Category", "unit")]
+        public async void TestShouldRejectAuthRequest()
+        {
+            var request = await _dapp.Request(DefaultRequestParams);
+            uriString = request.Uri;
+            var errorResponse = new Error()
+            {
+                Code = 14001,
+                Message = "Can not login"
+            };
+
+            TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
+
+            _wallet.AuthRequested += (sender, authRequest) =>
+            {
+                Assert.Equal(DefaultRequestParams.Aud, authRequest.Parameters.CacaoPayload.Aud);
+                Assert.Equal(DefaultRequestParams.Domain, authRequest.Parameters.CacaoPayload.Domain);
+                Assert.Equal(DefaultRequestParams.Nonce, authRequest.Parameters.CacaoPayload.Nonce);
+
+                _wallet.RespondAuthRequest(authRequest, errorResponse, Iss);
+
+                task1.TrySetResult(true);
+            };
+
+            TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
+            _dapp.AuthResponded += (sender, response) =>
+            {
+                task2.SetException(new Exception("Did not get an error response"));
+            };
+            
+            _dapp.AuthError += (sender, response) =>
+            {
+                Assert.NotNull(response);
+                Assert.NotNull(response.Id);
+                Assert.NotNull(response.Topic);
+                Assert.Equal(errorResponse, response.Error);
+
+                task2.TrySetResult(true);
+            };
+
+            await Task.WhenAll(
+                task1.Task,
+                task2.Task,
+                _wallet.Pair(uriString, true)
+            );
+        }
+
+        [Fact, Trait("Category", "unit")]
+        public async void TestGetPendingAuthRequest()
+        {
+            var request = await _dapp.Request(DefaultRequestParams);
+            uriString = request.Uri;
+
+            TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
+            _wallet.AuthRequested += async (sender, authRequest) =>
+            {
+                Assert.NotNull(authRequest.Id);
+                
+                var pendingRequest = _wallet.PendingAuthRequests[(long)authRequest.Id];
+                
+                
+                Assert.Equal(DefaultRequestParams.Aud, pendingRequest.CacaoPayload.Aud);
+                Assert.Equal(DefaultRequestParams.Domain, pendingRequest.CacaoPayload.Domain);
+                Assert.Equal(DefaultRequestParams.Nonce, pendingRequest.CacaoPayload.Nonce);
+
+                var message = _wallet.FormatMessage(pendingRequest.CacaoPayload, Iss);
+                var signature = await _cryptoWalletFixture.SignMessage(message);
+
+                await _wallet.RespondAuthRequest(authRequest, signature, Iss);
+
+                task1.TrySetResult(true);
+            };
+
+            TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
+            _dapp.AuthResponded += (sender, response) =>
+            {
+                Assert.NotNull(response);
+                Assert.NotNull(response.Id);
+                Assert.NotNull(response.Topic);
+                Assert.NotNull(response.Topic);
+                Assert.Equal(Iss, response.Response.Result.Payload.Iss);
+                task2.TrySetResult(true);
+            };
+
+            _dapp.AuthError += (sender, response) => task1.TrySetException(response.Error.ToException());
+            
+            await Task.WhenAll(
+                task1.Task,
+                task2.Task,
+                _wallet.Pair(uriString, true)
+            );
         }
     }
 }

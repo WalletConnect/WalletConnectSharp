@@ -1,40 +1,53 @@
-﻿using NBitcoin;
+﻿using System.Text;
+using NBitcoin;
 using Nethereum.HdWallet;
 
-namespace WalletConnectSharp.Auth.Tests;
-
-public class CryptoWalletFixture
+namespace WalletConnectSharp.Tests.Common
 {
-    private readonly Wallet _wallet;
-    private readonly string _iss;
+    public class CryptoWalletFixture
+    {
+        private readonly Wallet _wallet;
+        private readonly string _iss;
 
-    public string WalletAddress
-    {
-        get
+        public string WalletAddress
         {
-            return _wallet.GetAddresses(0)[0];
+            get
+            {
+                return _wallet.GetAddresses(0)[0];
+            }
         }
-    }
 
-    public Wallet CryptoWallet
-    {
-        get
+        public Wallet CryptoWallet
         {
-            return _wallet;
+            get
+            {
+                return _wallet;
+            }
         }
-    }
 
-    public string Iss
-    {
-        get
+        public string Iss
         {
-            return _iss;
+            get
+            {
+                return _iss;
+            }
         }
-    }
-    
-    public CryptoWalletFixture()
-    {
-        this._wallet = new Wallet(Wordlist.English, WordCount.Twelve);
-        this._iss = $"did:pkh:eip155:1:{this.WalletAddress}";
+
+        public CryptoWalletFixture()
+        {
+            this._wallet = new Wallet(Wordlist.English, WordCount.Twelve);
+            this._iss = $"did:pkh:eip155:1:{this.WalletAddress}";
+        }
+
+        public Task<string> SignMessage(string message)
+        {
+            return _wallet
+                .GetAccount(WalletAddress)
+                .AccountSigningService
+                .PersonalSign
+                .SendRequestAsync(
+                    Encoding.UTF8.GetBytes(message)
+                );
+        }
     }
 }
