@@ -53,7 +53,7 @@ public class WalletConnectAuthClient : IAuthClient
     public event EventHandler<AuthResponse> AuthResponded;
     public event EventHandler<AuthErrorResponse> AuthError;
     public ICore Core { get; set; }
-    public AuthMetadata Metadata { get; set; }
+    public Metadata Metadata { get; set; }
     public string ProjectId { get; set; }
     public IStore<string, AuthData> AuthKeys { get; set; }
     public IStore<string, PairingData> PairingTopics { get; set; }

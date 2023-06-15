@@ -25,5 +25,11 @@ namespace WalletConnectSharp.Sign.Models
         /// </summary>
         [JsonProperty("events")]
         public string[] Events { get; set; }
+
+        public Namespace WithMethod(string method)
+        {
+            Methods = Methods.Append(method).ToArray();
+            return this;
+        }
     }
 }

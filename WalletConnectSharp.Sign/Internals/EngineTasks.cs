@@ -2,9 +2,11 @@
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
@@ -95,6 +97,32 @@ namespace WalletConnectSharp.Sign
                     proposalIds.Select(id => PrivateThis.DeleteProposal(id))
                 )
             );
+        }
+
+        async Task<VerifiedContext> VerifyContext(string hash, Metadata metadata)
+        {
+            var context = new VerifiedContext()
+            {
+                VerifyUrl = metadata.VerifyUrl ?? "",
+                Validation = Validation.Unknown,
+                Origin = metadata.Url ?? ""
+            };
+
+            try
+            {
+                var origin = await this.Client.Core.Verify.Resolve(hash);
+                if (!string.IsNullOrWhiteSpace(origin))
+                {
+                    context.Origin = origin;
+                    context.Validation = origin == metadata.Url ? Validation.Valid : Validation.Invalid;
+                }
+            }
+            catch (Exception e)
+            {
+                // TODO Log to logger
+            }
+
+            return context;
         }
     }
 }

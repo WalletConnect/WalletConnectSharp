@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Auth;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Events.Interfaces;
 
@@ -11,5 +12,5 @@ public interface IWeb3Wallet : IModule, IEvents, IWeb3WalletApi
     
     ICore Core { get; }
     
-    AuthMetadata Metadata { get; }
+    Metadata Metadata { get; }
 }

@@ -64,6 +64,19 @@ namespace WalletConnectSharp.Sign.Models.Engine
 
             return this;
         }
+        
+        /// <summary>
+        /// Require a specific chain and namespace
+        /// </summary>
+        /// <param name="chain">The chain the namespace exists in</param>
+        /// <param name="requiredNamespace">The required namespace that must be present for this session</param>
+        /// <returns>This object, acts a builder function</returns>
+        public ConnectOptions UseRequireNamespaces(RequiredNamespaces requiredNamespaces)
+        {
+            RequiredNamespaces = requiredNamespaces;
+
+            return this;
+        }
 
         /// <summary>
         /// Include a pairing topic with these connect options. The pairing topic MUST exist in storage.

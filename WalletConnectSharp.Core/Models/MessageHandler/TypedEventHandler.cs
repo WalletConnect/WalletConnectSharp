@@ -1,4 +1,8 @@
-﻿using WalletConnectSharp.Core.Interfaces;
+﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Sign.Models
@@ -205,7 +209,13 @@ namespace WalletConnectSharp.Sign.Models
 
         protected virtual async Task RequestCallback(string arg1, JsonRpcRequest<T> arg2)
         {
-            var rea = new RequestEventArgs<T, TR>(arg1, arg2);
+            // Find pairing to get metadata
+            var pairing = _ref.Pairing.Store.Get(arg1);
+
+            var hash = HashUtils.HashMessage(JsonConvert.SerializeObject(arg2));
+            var verifyContext = await VerifyContext(hash, pairing.PeerMetadata);
+            
+            var rea = new RequestEventArgs<T, TR>(arg1, arg2, verifyContext);
 
             if (requestPredicate != null && !requestPredicate(rea)) return;
             if (_onRequest == null) return;
@@ -216,6 +226,32 @@ namespace WalletConnectSharp.Sign.Models
             {
                 await _ref.MessageHandler.SendResult<T, TR>(arg2.Id, arg1, rea.Response);
             }
+        }
+        
+        async Task<VerifiedContext> VerifyContext(string hash, Metadata metadata)
+        {
+            var context = new VerifiedContext()
+            {
+                VerifyUrl = metadata.VerifyUrl ?? "",
+                Validation = Validation.Unknown,
+                Origin = metadata.Url ?? ""
+            };
+
+            try
+            {
+                var origin = await _ref.Verify.Resolve(hash);
+                if (!string.IsNullOrWhiteSpace(origin))
+                {
+                    context.Origin = origin;
+                    context.Validation = origin == metadata.Url ? Validation.Valid : Validation.Invalid;
+                }
+            }
+            catch (Exception e)
+            {
+                // TODO Log to logger
+            }
+
+            return context;
         }
     }
 }

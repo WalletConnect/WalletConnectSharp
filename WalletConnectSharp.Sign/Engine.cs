@@ -7,6 +7,7 @@ using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Events.Model;
@@ -311,10 +312,16 @@ namespace WalletConnectSharp.Sign
             TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
             
             Client.Once(EngineEvents.SessionProposal,
-                delegate(object sender, GenericEvent<JsonRpcRequest<ProposalStruct>> @event)
+                delegate(object sender, GenericEvent<SessionProposalEvent> @event)
                 {
-                    var proposal = @event.EventData.Params;
-                    if (topic == proposal.PairingTopic)
+                    var proposal = @event.EventData.Proposal;
+                    if (topic != proposal.PairingTopic)
+                        return;
+
+                    if (@event.EventData.VerifiedContext.Validation == Validation.Invalid)
+                        sessionProposeTask.SetException(new Exception(
+                            $"Could not validate, invalid validation status {@event.EventData.VerifiedContext.Validation} for origin {@event.EventData.VerifiedContext.Origin}"));
+                    else
                         sessionProposeTask.SetResult(proposal);
                 });
 
@@ -597,7 +604,8 @@ namespace WalletConnectSharp.Sign
             await MessageHandler.SendRequest<SessionEvent<T>, object>(topic, new SessionEvent<T>()
             {
                 ChainId = chainId,
-                Event = @event
+                Event = @event,
+                Topic = topic,
             });
         }
 

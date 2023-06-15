@@ -55,10 +55,10 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             _dapp = await WalletConnectAuthClient.Init(new AuthOptions()
             {
                 ProjectId = TestValues.TestProjectId,
-                Metadata = new AuthMetadata(),
+                Metadata = new Metadata(),
                 Name = "dapp",
             });
-            _wallet = await Web3WalletClient.Init(_core, new AuthMetadata(), "wallet");
+            _wallet = await Web3WalletClient.Init(_core, new Metadata(), "wallet");
             
             Assert.NotNull(_wallet);
             Assert.NotNull(_dapp);

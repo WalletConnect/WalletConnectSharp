@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Auth;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
@@ -50,9 +51,9 @@ public class Web3WalletClient : IWeb3Wallet
 
     public IWeb3WalletEngine Engine { get; }
     public ICore Core { get; }
-    public AuthMetadata Metadata { get; }
+    public Metadata Metadata { get; }
     
-    public static async Task<Web3WalletClient> Init(ICore core, AuthMetadata metadata, string name = null)
+    public static async Task<Web3WalletClient> Init(ICore core, Metadata metadata, string name = null)
     {
         var wallet = new Web3WalletClient(core, metadata, name);
         await wallet.Initialize();
@@ -60,7 +61,7 @@ public class Web3WalletClient : IWeb3Wallet
         return wallet;
     }
     
-    private Web3WalletClient(ICore core, AuthMetadata metadata, string name = null)
+    private Web3WalletClient(ICore core, Metadata metadata, string name = null)
     {
         this.Metadata = metadata;
         this.Name = string.IsNullOrWhiteSpace(name) ? "Web3Wallet" : name;

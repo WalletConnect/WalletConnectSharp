@@ -1,4 +1,5 @@
-﻿using WalletConnectSharp.Network.Models;
+﻿using WalletConnectSharp.Core.Models.Verify;
+using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Sign.Models
 {
@@ -38,11 +39,14 @@ namespace WalletConnectSharp.Sign.Models
         /// This value will always override <see cref="Response"/> if the value is non-null
         /// </summary>
         public Error Error { get; set; }
+        
+        public VerifiedContext VerifiedContext { get; set; }
 
-        internal RequestEventArgs(string topic, JsonRpcRequest<T> request)
+        internal RequestEventArgs(string topic, JsonRpcRequest<T> request, VerifiedContext context)
         {
             Topic = topic;
             Request = request;
+            VerifiedContext = context;
         }
     }
 }

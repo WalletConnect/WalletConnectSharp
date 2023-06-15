@@ -13,6 +13,7 @@ using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
+using WalletConnectSharp.Sign.Models.Engine.Methods;
 using WalletConnectSharp.Storage;
 
 namespace WalletConnectSharp.Sign
@@ -390,6 +391,11 @@ namespace WalletConnectSharp.Sign
         public SessionStruct[] Find(RequiredNamespaces requiredNamespaces)
         {
             return Engine.Find(requiredNamespaces);
+        }
+
+        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
+        {
+            this.Engine.HandleEventMessageType<T>(requestCallback, responseCallback);
         }
 
         private async Task Initialize()

@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 
@@ -17,7 +18,7 @@ public class AuthClientFixture : TwoClientsFixture<IAuthClient>
         {
             ProjectId = TestValues.TestProjectId,
             RelayUrl = TestValues.TestRelayUrl,
-            Metadata = new AuthMetadata()
+            Metadata = new Metadata()
             {
                 Description = "An example dapp to showcase WalletConnectSharpv2",
                 Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
@@ -32,7 +33,7 @@ public class AuthClientFixture : TwoClientsFixture<IAuthClient>
         {
             ProjectId = TestValues.TestProjectId,
             RelayUrl = TestValues.TestRelayUrl,
-            Metadata = new AuthMetadata()
+            Metadata = new Metadata()
             {
                 Description = "An example wallet to showcase WalletConnectSharpv2",
                 Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },

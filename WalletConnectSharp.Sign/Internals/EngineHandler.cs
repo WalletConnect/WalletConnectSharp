@@ -1,4 +1,5 @@
-﻿using WalletConnectSharp.Common.Model.Errors;
+﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing.Methods;
@@ -61,10 +62,13 @@ namespace WalletConnectSharp.Sign
                     SessionProperties = @params.SessionProperties,
                 };
                 await PrivateThis.SetProposal(id, proposal);
-                this.Client.Events.Trigger(EngineEvents.SessionProposal, new JsonRpcRequest<ProposalStruct>()
+                var hash = HashUtils.HashMessage(JsonConvert.SerializeObject(payload));
+                var verifyContext = await this.VerifyContext(hash, proposal.Proposer.Metadata);
+                this.Client.Events.Trigger(EngineEvents.SessionProposal, new SessionProposalEvent()
                 {
                     Id = id,
-                    Params = proposal
+                    Proposal = proposal,
+                    VerifiedContext = verifyContext
                 });
             }
             catch (WalletConnectException e)

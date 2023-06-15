@@ -154,7 +154,7 @@ namespace WalletConnectSharp.Core.Controllers
                     // ignored if we can't find anything in the history
                 }
             }
-
+            
             Events.ListenFor<MessageEvent>($"request_{method}", RequestCallback);
             
             Events.ListenFor<MessageEvent>($"response_{method}", ResponseCallback);

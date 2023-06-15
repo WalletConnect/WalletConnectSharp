@@ -21,6 +21,9 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         [JsonProperty("chainId")]
         public string ChainId { get; set; }
         
+        [JsonProperty("topic")]
+        public string Topic { get; set; }
+        
         /// <summary>
         /// The event data
         /// </summary>

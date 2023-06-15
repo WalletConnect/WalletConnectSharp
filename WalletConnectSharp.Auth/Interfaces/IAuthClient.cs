@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Events.Interfaces;
 
@@ -11,7 +12,7 @@ public interface IAuthClient : IModule, IEvents, IAuthClientEvents
     int Version { get; }
     
     ICore Core { get; set; }
-    AuthMetadata Metadata { get; set; }
+    Metadata Metadata { get; set; }
     string ProjectId { get; set; }
     IStore<string, AuthData> AuthKeys { get; set; }
     IStore<string, PairingData> PairingTopics { get; set; }

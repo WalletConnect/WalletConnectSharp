@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using WalletConnectSharp.Core.Models;
 
 namespace WalletConnectSharp.Core
 {
@@ -31,5 +32,11 @@ namespace WalletConnectSharp.Core
         /// </summary>
         [JsonProperty("icons")]
         public string[] Icons { get; set; }
+        
+        [JsonProperty("redirect")]
+        public RedirectData Redirect { get; set; }
+    
+        [JsonProperty("verifyUrl")]
+        public string VerifyUrl { get; set; }
     }
 }

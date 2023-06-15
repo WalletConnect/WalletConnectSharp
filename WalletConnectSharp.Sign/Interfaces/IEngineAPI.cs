@@ -3,6 +3,7 @@ using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
+using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign.Interfaces
 {
@@ -154,5 +155,8 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <param name="requiredNamespaces">The required namespaces the session must have to be returned</param>
         /// <returns>All sessions that have a namespace that match the given <see cref="RequiredNamespaces"/></returns>
         SessionStruct[] Find(RequiredNamespaces requiredNamespaces);
+
+        void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
+            Func<string, JsonRpcResponse<bool>, Task> responseCallback);
     }
 }
