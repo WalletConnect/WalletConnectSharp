@@ -175,7 +175,7 @@ public class Web3WalletEngine : IWeb3WalletEngine
     {
         EventHandler<GenericEvent<object>> eventHandler = (sender, @event) =>
         {
-            this.Client.Events.TriggerType(eventName, @event, @event.GetType());
+            this.Client.Events.TriggerType(eventName, @event.EventData, @event.EventData.GetType());
         };
 
         source.On(eventName, eventHandler);

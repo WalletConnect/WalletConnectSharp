@@ -1,7 +1,7 @@
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Web3.Accounts;
 using Newtonsoft.Json;
-using WalletConnectSharp.Auth;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Model.Errors;
@@ -15,6 +15,7 @@ using WalletConnectSharp.Sign;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
+using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
 
@@ -22,7 +23,10 @@ namespace WalletConnectSharp.Web3Wallet.Tests
 {
     public class SignClientTests : IClassFixture<CryptoWalletFixture>, IAsyncLifetime
     {
-        [RpcMethod("eth_signTransaction"), RpcRequestOptions(Clock.ONE_MINUTE, 99997)]
+        [RpcMethod("eth_signTransaction"), 
+         RpcRequestOptions(Clock.ONE_MINUTE, 99997), 
+         RpcResponseOptions(Clock.ONE_MINUTE, 99996)
+        ]
         public class EthSignTransaction : List<TransactionInput>
         {
         }
@@ -134,25 +138,39 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             _core = new WalletConnectCore(new CoreOptions()
             {
                 ProjectId = TestValues.TestProjectId, RelayUrl = TestValues.TestRelayUrl,
+                Name = $"wallet-csharp-test-{Guid.NewGuid().ToString()}",
+                Storage = new InMemoryStorage(),
             });
             _dapp = await WalletConnectSignClient.Init(new SignClientOptions()
             {
                 ProjectId = TestValues.TestProjectId,
-                Metadata = new Metadata(),
-                Name = "dapp",
+                Name = $"dapp-csharp-test-{Guid.NewGuid().ToString()}",
+                RelayUrl = TestValues.TestRelayUrl,
+                Metadata = new Metadata()
+                {
+                    Description = "An example dapp to showcase WalletConnectSharpv2",
+                    Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+                    Name = $"dapp-csharp-test-{Guid.NewGuid().ToString()}",
+                    Url = "https://walletconnect.com"
+                },
+                Storage = new InMemoryStorage(),
             });
             var connectData = await _dapp.Connect(TestConnectOptions);
             uriString = connectData.Uri ?? "";
             sessionApproval = connectData.Approval;
             
-            _wallet = await Web3WalletClient.Init(_core, new Metadata(), "wallet");
+            _wallet = await Web3WalletClient.Init(_core, new Metadata()
+            {
+                Description = "An example wallet to showcase WalletConnectSharpv2",
+                Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+                Name = $"wallet-csharp-test-{Guid.NewGuid().ToString()}",
+                Url = "https://walletconnect.com",
+            }, $"wallet-csharp-test-{Guid.NewGuid().ToString()}");
             
             Assert.NotNull(_wallet);
             Assert.NotNull(_dapp);
             Assert.NotNull(_core);
             Assert.Null(_wallet.Metadata.Redirect);
-            // Compiler knows ;)
-            //Assert.Null(_dapp.Metadata.Redirect);
         }
 
         public async Task DisposeAsync()
@@ -219,8 +237,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             
             await Task.WhenAll(
                 task1.Task,
-                CheckSessionReject(),
-                _wallet.Pair(uriString)
+                _wallet.Pair(uriString),
+                CheckSessionReject()
             );
         }
 
@@ -333,20 +351,22 @@ namespace WalletConnectSharp.Web3Wallet.Tests
 
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
             _wallet.Engine.SignClient.Engine.SessionRequestEvents<EthSignTransaction, string>()
-                .OnRequest += async args =>
+                .OnRequest += args =>
             {
                 var id = args.Request.Id;
                 var @params = args.Request;
                 var verifyContext = args.VerifiedContext;
                 var signTransaction = @params.Params[0];
                 
-                Assert.Equal(verifyContext.Validation, Validation.Unknown);
+                Assert.Equal(Validation.Unknown, verifyContext.Validation);
 
-                var signature = await _cryptoWalletFixture.CryptoWallet.GetAccount(0).TransactionManager
-                    .SignTransactionAsync(signTransaction);
+                var signature = ((AccountSignerTransactionManager)_cryptoWalletFixture.CryptoWallet.GetAccount(0).TransactionManager)
+                    .SignTransaction(signTransaction);
 
                 args.Response = signature;
                 task2.TrySetResult(true);
+
+                return Task.CompletedTask;
             };
 
             async Task SendRequest()
@@ -516,7 +536,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                 var eventData = request.Params.Event;
                 var topic = request.Params.Topic;
                 Assert.Equal(session.Topic, topic);
-                Assert.Equal(sentData, eventData);
+                Assert.Equal(sentData.Name, eventData.Name);
+                Assert.Equal(sentData.Data.Test, eventData.Data.Test);
                 task2.TrySetResult(true);
             }, null);
 
@@ -564,6 +585,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             Assert.Equal(session.Topic, sessions.Values.ToArray()[0].Topic);
         }
 
+        [Fact, Trait("Category", "unit")]
         public async void TestGetPendingSessionProposals()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
@@ -582,6 +604,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             );
         }
 
+        [Fact, Trait("Category", "unit")]
         public async void TestGetPendingSessionRequests()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
@@ -629,7 +652,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
             _wallet.Engine.SignClient.Engine.SessionRequestEvents<EthSignTransaction, string>()
-                .OnRequest += async args =>
+                .OnRequest += args =>
             {
                 // Get the pending session request, since that's what we're testing
                 var pendingRequests = _wallet.PendingSessionRequests;
@@ -642,13 +665,14 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                 var signTransaction = ((EthSignTransaction)request.Parameters.Request.Params)[0];
 
                 Assert.Equal(args.Request.Id, id);
-                Assert.Equal(verifyContext.Validation, Validation.Unknown);
+                Assert.Equal(Validation.Unknown, verifyContext.Validation);
 
-                var signature = await _cryptoWalletFixture.CryptoWallet.GetAccount(0).TransactionManager
-                    .SignTransactionAsync(signTransaction);
+                var signature = ((AccountSignerTransactionManager)_cryptoWalletFixture.CryptoWallet.GetAccount(0).TransactionManager)
+                    .SignTransaction(signTransaction);
 
                 args.Response = signature;
                 task2.TrySetResult(true);
+                return Task.CompletedTask;
             };
 
             async Task SendRequest()

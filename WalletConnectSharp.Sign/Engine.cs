@@ -112,7 +112,7 @@ namespace WalletConnectSharp.Sign
         /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
         public TypedEventHandler<T, TR> SessionRequestEvents<T, TR>()
         {
-            return SessionRequestEventHandler<T, TR>.GetInstance(Client.Core);
+            return SessionRequestEventHandler<T, TR>.GetInstance(Client.Core, PrivateThis);
         }
 
         /// <summary>
@@ -588,6 +588,8 @@ namespace WalletConnectSharp.Sign
             {
                 await MessageHandler.SendResult<T, TR>(id, topic, response.Result);
             }
+
+            await PrivateThis.DeletePendingSessionRequest(id, new Error() { Code = 0, Message = "fulfilled" });
         }
 
         /// <summary>

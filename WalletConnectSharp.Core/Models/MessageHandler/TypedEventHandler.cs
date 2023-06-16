@@ -209,12 +209,17 @@ namespace WalletConnectSharp.Sign.Models
 
         protected virtual async Task RequestCallback(string arg1, JsonRpcRequest<T> arg2)
         {
-            // Find pairing to get metadata
-            var pairing = _ref.Pairing.Store.Get(arg1);
-
-            var hash = HashUtils.HashMessage(JsonConvert.SerializeObject(arg2));
-            var verifyContext = await VerifyContext(hash, pairing.PeerMetadata);
+            VerifiedContext verifyContext = new VerifiedContext() { Validation = Validation.Unknown };
             
+            // Find pairing to get metadata
+            if (_ref.Pairing.Store.Keys.Contains(arg1))
+            {
+                var pairing = _ref.Pairing.Store.Get(arg1);
+
+                var hash = HashUtils.HashMessage(JsonConvert.SerializeObject(arg2));
+                verifyContext = await VerifyContext(hash, pairing.PeerMetadata);
+            }
+
             var rea = new RequestEventArgs<T, TR>(arg1, arg2, verifyContext);
 
             if (requestPredicate != null && !requestPredicate(rea)) return;

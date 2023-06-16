@@ -7,7 +7,7 @@ using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign.Interfaces
 {
-    internal interface IEnginePrivate
+    public interface IEnginePrivate
     {
         internal Task DeleteSession(string topic);
 

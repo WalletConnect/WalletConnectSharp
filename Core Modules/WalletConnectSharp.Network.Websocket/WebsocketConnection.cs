@@ -222,6 +222,8 @@ namespace WalletConnectSharp.Network.Websocket
             }
 
             if (string.IsNullOrWhiteSpace(json)) return;
+            
+            //Console.WriteLine($"[{Name}] Got payload {json}");
 
             Events.Trigger(WebsocketConnectionEvents.Payload, json);
         }

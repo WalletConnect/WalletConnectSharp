@@ -69,5 +69,70 @@ namespace WalletConnectSharp.Sign.Models
             Events = Events.Append(@event).ToArray();
             return this;
         }
+
+        protected bool Equals(RequiredNamespace other)
+        {
+            return Equals(Chains, other.Chains) && Equals(Methods, other.Methods) && Equals(Events, other.Events);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+
+            return Equals((RequiredNamespace)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Chains, Methods, Events);
+        }
+
+        private sealed class RequiredNamespaceEqualityComparer : IEqualityComparer<RequiredNamespace>
+        {
+            public bool Equals(RequiredNamespace x, RequiredNamespace y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(x, null))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
+                return x.Chains.SequenceEqual(y.Chains) && x.Methods.SequenceEqual(y.Methods) && x.Events.SequenceEqual(y.Events);
+            }
+
+            public int GetHashCode(RequiredNamespace obj)
+            {
+                return HashCode.Combine(obj.Chains, obj.Methods, obj.Events);
+            }
+        }
+
+        public static IEqualityComparer<RequiredNamespace> RequiredNamespaceComparer { get; } = new RequiredNamespaceEqualityComparer();
     }
 }
