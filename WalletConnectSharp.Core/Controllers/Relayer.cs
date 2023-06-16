@@ -315,7 +315,7 @@ namespace WalletConnectSharp.Core.Controllers
             this.Subscriber.Once<ActiveSubscription>(Controllers.Subscriber.SubscriberEvents.Created, (sender, @event) =>
             {
                 if (@event.EventData.Topic == topic)
-                    task1.SetResult("");
+                    task1.TrySetResult("");
             });
 
             return (await Task.WhenAll(
