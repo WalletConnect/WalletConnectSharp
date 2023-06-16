@@ -3,18 +3,20 @@ using Nethereum.HdWallet;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Events;
+using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
 using ErrorResponse = WalletConnectSharp.Auth.Models.ErrorResponse;
 
 namespace WalletConnectSharp.Auth.Tests
 {
-    public class AuthClientTests : IClassFixture<AuthClientFixture>, IClassFixture<CryptoWalletFixture>
+    public class AuthClientTests : IClassFixture<CryptoWalletFixture>, IAsyncLifetime
     {
         private static readonly RequestParams DefaultRequestParams = new RequestParams()
         {
@@ -24,24 +26,10 @@ namespace WalletConnectSharp.Auth.Tests
             Nonce = CryptoUtils.GenerateNonce()
         };
         
-        private readonly AuthClientFixture _authFixture;
         private readonly CryptoWalletFixture _cryptoWalletFixture;
 
-        public IAuthClient PeerA
-        {
-            get
-            {
-                return _authFixture.ClientA;
-            }
-        }
-        
-        public IAuthClient PeerB
-        {
-            get
-            {
-                return _authFixture.ClientB;
-            }
-        }
+        private IAuthClient PeerA;
+        public IAuthClient PeerB;
 
         public string Iss
         {
@@ -67,18 +55,14 @@ namespace WalletConnectSharp.Auth.Tests
             }
         }
 
-        public AuthClientTests(AuthClientFixture authFixture, CryptoWalletFixture cryptoFixture)
+        public AuthClientTests(CryptoWalletFixture cryptoFixture)
         {
-            this._authFixture = authFixture;
-
             this._cryptoWalletFixture = cryptoFixture;
         }
 
         [Fact, Trait("Category", "unit")]
         public async void TestInit()
         {
-            await _authFixture.WaitForClientsReady();
-            
             Assert.NotNull(PeerA);
             Assert.NotNull(PeerB);
             
@@ -98,8 +82,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestPairs()
         {
-            await _authFixture.WaitForClientsReady();
-
             var ogPairSize = PeerA.Core.Pairing.Pairings.Length;
 
             TaskCompletionSource<bool> authRequested = new TaskCompletionSource<bool>();
@@ -132,8 +114,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestKnownPairings()
         {
-            await _authFixture.WaitForClientsReady();
-
             var ogSizeA = PeerA.Core.Pairing.Pairings.Length;
             var history = await PeerA.AuthHistory();
             var ogHistorySizeA = history.Keys.Length;
@@ -207,8 +187,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void HandlesAuthRequests()
         {
-            await _authFixture.WaitForClientsReady();
-
             var ogSize = PeerB.Requests.Length;
             
             TaskCompletionSource<bool> receivedAuthRequest = new TaskCompletionSource<bool>();
@@ -232,8 +210,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestErrorResponses()
         {
-            await _authFixture.WaitForClientsReady();
-
             var ogPSize = PeerA.Core.Pairing.Pairings.Length;
 
             TaskCompletionSource<bool> errorResponse = new TaskCompletionSource<bool>();
@@ -273,8 +249,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void HandlesSuccessfulResponse()
         {
-            await _authFixture.WaitForClientsReady();
-            
             var ogPSize = PeerA.Core.Pairing.Pairings.Length;
             
             TaskCompletionSource<bool> successfulResponse = new TaskCompletionSource<bool>();
@@ -319,8 +293,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestCustomRequestExpiry()
         {
-            await _authFixture.WaitForClientsReady();
-
             var uri = "";
             var expiry = 1000;
 
@@ -360,8 +332,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestGetPendingPairings()
         {
-            await _authFixture.WaitForClientsReady();
-            
             var ogCount = PeerB.PendingRequests.Count;
 
             TaskCompletionSource<bool> receivedAuthRequest = new TaskCompletionSource<bool>();
@@ -416,8 +386,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestPing()
         {
-            await _authFixture.WaitForClientsReady();
-            
             TaskCompletionSource<bool> receivedAuthRequest = new TaskCompletionSource<bool>();
             TaskCompletionSource<bool> receivedClientPing = new TaskCompletionSource<bool>();
             TaskCompletionSource<bool> receivedPeerPing = new TaskCompletionSource<bool>();
@@ -457,8 +425,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestDisconnectedPairing()
         {
-            await _authFixture.WaitForClientsReady();
-            
             var peerAOgSize = PeerA.Core.Pairing.Pairings.Length;
             var peerBOgSize = PeerB.Core.Pairing.Pairings.Length;
 
@@ -499,8 +465,6 @@ namespace WalletConnectSharp.Auth.Tests
         [Fact, Trait("Category", "unit")]
         public async void TestReceivesMetadata()
         {
-            await _authFixture.WaitForClientsReady();
-
             var receivedMetadataName = "";
             var ogPairingSize = PeerA.Core.Pairing.Pairings.Length;
 
@@ -533,6 +497,55 @@ namespace WalletConnectSharp.Auth.Tests
             Assert.True(hasResponded.Task.Result);
             Assert.Equal(PeerA.Metadata.Name, receivedMetadataName);
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
+        }
+
+        public async Task InitializeAsync()
+        {
+            var OptionsA = new AuthOptions()
+            {
+                ProjectId = TestValues.TestProjectId,
+                RelayUrl = TestValues.TestRelayUrl,
+                Metadata = new Metadata()
+                {
+                    Description = "An example dapp to showcase WalletConnectSharpv2",
+                    Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+                    Name = $"WalletConnectSharpv2 Dapp Example - {Guid.NewGuid().ToString()}",
+                    Url = "https://walletconnect.com"
+                },
+                // Omit if you want persistant storage
+                Storage = new InMemoryStorage(),
+            };
+
+            var OptionsB = new AuthOptions()
+            {
+                ProjectId = TestValues.TestProjectId,
+                RelayUrl = TestValues.TestRelayUrl,
+                Metadata = new Metadata()
+                {
+                    Description = "An example wallet to showcase WalletConnectSharpv2",
+                    Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
+                    Name = $"WalletConnectSharpv2 Wallet Example - {Guid.NewGuid().ToString()}",
+                    Url = "https://walletconnect.com"
+                },
+                // Omit if you want persistant storage
+                Storage = new InMemoryStorage()
+            };
+
+            PeerA = await WalletConnectAuthClient.Init(OptionsA);
+            PeerB = await WalletConnectAuthClient.Init(OptionsB);
+        }
+
+        public async Task DisposeAsync()
+        {
+            if (PeerA.Core.Relayer.Connected)
+            {
+                await PeerA.Core.Relayer.TransportClose();
+            }
+
+            if (PeerB.Core.Relayer.Connected)
+            {
+                await PeerB.Core.Relayer.TransportClose();
+            }
         }
     }
 }
