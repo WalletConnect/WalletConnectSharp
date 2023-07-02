@@ -640,7 +640,7 @@ namespace WalletConnectSharp.Crypto
             aead.Init(false, new ParametersWithIV(new KeyParameter(symKey.HexToByteArray()), iv));
 
             using MemoryStream rawDecrypted = new MemoryStream();
-            byte[] temp = new byte[8024];
+            byte[] temp = new byte[@sealed.Length];
             int len = aead.ProcessBytes(@sealed, 0, @sealed.Length, temp, 0);
             
             if (len > 0)
