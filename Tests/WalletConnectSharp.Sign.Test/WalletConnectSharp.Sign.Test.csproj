@@ -25,4 +25,8 @@
       <ProjectReference Include="..\WalletConnectSharp.Tests.Common\WalletConnectSharp.Tests.Common.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Shared" />
+    </ItemGroup>
+
 </Project>
