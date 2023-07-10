@@ -12,6 +12,13 @@ namespace WalletConnectSharp.Sign.Models
     /// </summary>
     public class Namespaces : Dictionary<string, Namespace>, IEquatable<Namespaces>
     {
+        public Namespaces() : base() { }
+
+        public Namespaces(Namespaces namespaces) : base(namespaces)
+        {
+            
+        }
+
         public bool Equals(Namespaces other)
         {
             return new DictionaryComparer<string, Namespace>(Namespace.NamespaceComparer).Equals(this, other);

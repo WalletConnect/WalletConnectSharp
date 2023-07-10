@@ -1,6 +1,7 @@
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
+using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using Xunit;
@@ -45,11 +46,8 @@ namespace WalletConnectSharp.Sign.Test
             this._cryptoFixture = cryptoFixture;
         }
 
-        [Fact, Trait("Category", "integration")]
-        public async void TestApproveSession()
+        public static async Task<SessionStruct> TestConnectMethod(ISignClient clientA, ISignClient clientB)
         {
-            await _cryptoFixture.WaitForClientsReady();
-            
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
             var dappConnectOptions = new ConnectOptions()
             {
@@ -79,16 +77,26 @@ namespace WalletConnectSharp.Sign.Test
                 }
             };
 
-            var dappClient = ClientA;
+            var dappClient = clientA;
             var connectData = await dappClient.Connect(dappConnectOptions);
 
-            var walletClient = ClientB;
+            var walletClient = clientB;
             var proposal = await walletClient.Pair(connectData.Uri);
 
             var approveData = await walletClient.Approve(proposal, testAddress);
 
             var sessionData = await connectData.Approval;
             await approveData.Acknowledged();
+
+            return sessionData;
+        }
+
+        [Fact, Trait("Category", "integration")]
+        public async void TestApproveSession()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+
+            await TestConnectMethod(ClientA, ClientB);
         }
         
         [Fact, Trait("Category", "integration")]
