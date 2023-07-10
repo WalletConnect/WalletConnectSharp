@@ -9,8 +9,12 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
 {
     public SignClientOptions OptionsA { get; protected set; }
     public SignClientOptions OptionsB { get;  protected set; }
+    
+    public SignClientFixture(bool initNow = true) : base(initNow)
+    {
+    }
 
-    protected override async void Init()
+    public override async Task Init()
     {
         OptionsA = new SignClientOptions()
         {
@@ -20,7 +24,7 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
             {
                 Description = "An example dapp to showcase WalletConnectSharpv2",
                 Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
-                Name = "WalletConnectSharpv2 Dapp Example",
+                Name = $"WalletConnectSharpv2 Dapp Example - {Guid.NewGuid().ToString()}",
                 Url = "https://walletconnect.com"
             },
             // Omit if you want persistant storage
@@ -35,7 +39,7 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
             {
                 Description = "An example wallet to showcase WalletConnectSharpv2",
                 Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
-                Name = "WalletConnectSharpv2 Wallet Example",
+                Name = $"WalletConnectSharpv2 Wallet Example - {Guid.NewGuid().ToString()}",
                 Url = "https://walletconnect.com"
             },
             // Omit if you want persistant storage

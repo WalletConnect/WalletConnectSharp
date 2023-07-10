@@ -39,19 +39,6 @@ namespace WalletConnectSharp.Sign.Test
             public string Data { get; set; }
         }
         
-        private static readonly string TestEthereumAddress = "0x3c582121909DE92Dc89A36898633C1aE4790382b";
-        private static readonly string TestEthereumChain = "eip155:1";
-        private static readonly string TestArbitrumChain = "eip155:42161";
-        private static readonly string TestAvalancheChain = "eip155:43114";
-
-        private static readonly string[] TestAccounts = new[]
-        {
-            $"{TestEthereumChain}:{TestEthereumAddress}", $"{TestArbitrumChain}:{TestEthereumAddress}",
-            $"{TestAvalancheChain}:{TestEthereumAddress}"
-        };
-
-        private static readonly string[] TestEvents = new[] { "chainChanged", "accountsChanged" };
-
         private ITestOutputHelper _output;
 
         public SignClientConcurrency(ITestOutputHelper output)
@@ -59,7 +46,7 @@ namespace WalletConnectSharp.Sign.Test
             this._output = output;
         }
 
-        [Fact, Trait("Category", "integration")]
+        [Fact, Trait("Category", "concurrency")]
         public async void TestConcurrentClients() => await _TestConcurrentClients().WithTimeout(TimeSpan.FromMinutes(20));
 
         private int[][] BatchArray(int[] array, int size)
@@ -76,8 +63,8 @@ namespace WalletConnectSharp.Sign.Test
 
         private async Task<SignClientFixture> InitTwoClients()
         {
-            var fixture = new SignClientFixture();
-            await fixture.WaitForClientsReady();
+            var fixture = new SignClientFixture(false);
+            await fixture.Init();
             await Task.Delay(500);
             return fixture;
         }

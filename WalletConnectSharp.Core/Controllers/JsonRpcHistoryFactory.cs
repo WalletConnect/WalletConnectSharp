@@ -23,6 +23,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <typeparam name="TR">The response type to store history for</typeparam>
         public class JsonRpcHistoryHolder<T, TR>
         {
+            private static readonly object historyLock = new object();
             private static Dictionary<string, JsonRpcHistoryHolder<T, TR>> _instance = new Dictionary<string, JsonRpcHistoryHolder<T, TR>>();
 
             /// <summary>
@@ -33,11 +34,16 @@ namespace WalletConnectSharp.Core.Controllers
             /// <returns>The singleton instance for the given ICore context</returns>
             public static async Task<JsonRpcHistoryHolder<T, TR>> InstanceForContext(ICore core)
             {
-                if (_instance.ContainsKey(core.Context))
-                    return _instance[core.Context];
+                JsonRpcHistoryHolder<T, TR> historyHolder;
+                lock (historyLock)
+                {
+                    if (_instance.ContainsKey(core.Context))
+                        return _instance[core.Context];
 
-                var historyHolder = new JsonRpcHistoryHolder<T, TR>(core);
-                _instance.Add(core.Context, historyHolder);
+                    historyHolder = new JsonRpcHistoryHolder<T, TR>(core);
+                    _instance.Add(core.Context, historyHolder);
+                }
+                
                 await historyHolder.History.Init();
                 return historyHolder;
             }

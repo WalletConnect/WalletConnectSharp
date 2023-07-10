@@ -6,12 +6,13 @@ public abstract class TwoClientsFixture<TClient>
     public TClient ClientB { get; protected set; }
     
 
-    public TwoClientsFixture()
+    public TwoClientsFixture(bool initNow = true)
     {
-        Init();
+        if (initNow)
+            Init();
     }
 
-    protected abstract void Init();
+    public abstract Task Init();
 
     public async Task WaitForClientsReady()
     {
