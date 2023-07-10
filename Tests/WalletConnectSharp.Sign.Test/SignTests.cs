@@ -56,7 +56,7 @@ namespace WalletConnectSharp.Sign.Test
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {
@@ -111,7 +111,7 @@ namespace WalletConnectSharp.Sign.Test
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {
@@ -158,7 +158,7 @@ namespace WalletConnectSharp.Sign.Test
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {

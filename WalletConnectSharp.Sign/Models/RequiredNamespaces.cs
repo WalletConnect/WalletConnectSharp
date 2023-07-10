@@ -9,5 +9,5 @@ namespace WalletConnectSharp.Sign.Models
     /// namespace:   [-a-z0-9]{3,8}
     /// reference:   [-_a-zA-Z0-9]{1,32}
     /// </summary>
-    public class RequiredNamespaces : Dictionary<string, RequiredNamespace> { }
+    public class RequiredNamespaces : Dictionary<string, ProposedNamespace> { }
 }
