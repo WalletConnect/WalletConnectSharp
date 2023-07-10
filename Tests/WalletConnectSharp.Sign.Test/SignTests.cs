@@ -56,7 +56,7 @@ namespace WalletConnectSharp.Sign.Test
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {
@@ -84,6 +84,15 @@ namespace WalletConnectSharp.Sign.Test
 
             var walletClient = ClientB;
             var proposal = await walletClient.Pair(connectData.Uri);
+            
+            Assert.NotNull(proposal.RequiredNamespaces);
+            Assert.NotNull(proposal.OptionalNamespaces);
+            Assert.NotNull(proposal.SessionProperties);
+            Assert.NotNull(proposal.Expiry);
+            Assert.NotNull(proposal.Id);
+            Assert.NotNull(proposal.Relays);
+            Assert.NotNull(proposal.Proposer);
+            Assert.NotNull(proposal.PairingTopic);
 
             var approveData = await walletClient.Approve(proposal, testAddress);
 
@@ -102,7 +111,7 @@ namespace WalletConnectSharp.Sign.Test
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {
@@ -149,7 +158,7 @@ namespace WalletConnectSharp.Sign.Test
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {

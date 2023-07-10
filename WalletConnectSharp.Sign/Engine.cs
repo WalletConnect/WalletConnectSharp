@@ -189,6 +189,8 @@ namespace WalletConnectSharp.Sign
             this.IsInitialized();
             await PrivateThis.IsValidConnect(options);
             var requiredNamespaces = options.RequiredNamespaces;
+            var optionalNamespaces = options.OptionalNamespaces;
+            var sessionProperties = options.SessionProperties; 
             var relays = options.Relays;
             var topic = options.PairingTopic;
             string uri = "";
@@ -225,7 +227,9 @@ namespace WalletConnectSharp.Sign
                 {
                     PublicKey = publicKey,
                     Metadata = this.Client.Metadata
-                }
+                },
+                OptionalNamespaces = optionalNamespaces,
+                SessionProperties = sessionProperties,
             };
 
             TaskCompletionSource<SessionStruct> approvalTask = new TaskCompletionSource<SessionStruct>();
