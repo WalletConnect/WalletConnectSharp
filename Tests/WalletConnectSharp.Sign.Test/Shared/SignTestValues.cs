@@ -36,7 +36,7 @@ namespace WalletConnectSharp.Sign.Test.Shared {
         public static readonly RequiredNamespaces TestRequiredNamespacees = new RequiredNamespaces()
         {
             {
-                "eip155", new RequiredNamespace()
+                "eip155", new ProposedNamespace()
                 {
                     Methods = TestMethods,
                     Events = TestEvents,
@@ -48,7 +48,7 @@ namespace WalletConnectSharp.Sign.Test.Shared {
         public static readonly RequiredNamespaces TestRequiredNamespaceesV2 = new RequiredNamespaces()
         {
             {
-                "eip155", new RequiredNamespace()
+                "eip155", new ProposedNamespace()
                 {
                     Methods = TestMethods,
                     Events = TestEvents,
@@ -56,7 +56,7 @@ namespace WalletConnectSharp.Sign.Test.Shared {
                 }
             },
             {
-                TestAvalancheChain, new RequiredNamespace()
+                TestAvalancheChain, new ProposedNamespace()
                 {
                     Methods = TestMethods,
                     Events = TestEvents

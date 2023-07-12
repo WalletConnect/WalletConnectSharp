@@ -31,7 +31,7 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// The optional namespaces for this session
         /// </summary>
         [JsonProperty("optionalNamespaces")]
-        public Dictionary<string, RequiredNamespace> OptionalNamespaces { get; set; }
+        public Dictionary<string, ProposedNamespace> OptionalNamespaces { get; set; }
         
         /// <summary>
         /// Custom session properties for this session

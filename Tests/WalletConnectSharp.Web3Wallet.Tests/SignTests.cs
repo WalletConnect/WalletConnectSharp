@@ -61,7 +61,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         private static readonly RequiredNamespaces TestRequiredNamespaces = new RequiredNamespaces()
         {
             {
-                "eip155", new RequiredNamespace()
+                "eip155", new ProposedNamespace()
                     .WithMethod("eth_signTransaction")
                     .WithChain("eip155:1")
                     .WithEvent("chainChanged")

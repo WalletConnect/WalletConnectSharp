@@ -7,7 +7,7 @@ namespace WalletConnectSharp.Sign.Models
     /// <summary>
     /// A required namespace that holds chains, methods and events enabled.
     /// </summary>
-    public class RequiredNamespace
+    public class ProposedNamespace
     {
         /// <summary>
         /// A list of all chains that are required to be enabled in this namespace
@@ -30,7 +30,7 @@ namespace WalletConnectSharp.Sign.Models
         /// <summary>
         /// Create a blank required namespace
         /// </summary>
-        public RequiredNamespace()
+        public ProposedNamespace()
         {
             Chains = Array.Empty<string>();
             Methods = Array.Empty<string>();
@@ -42,7 +42,7 @@ namespace WalletConnectSharp.Sign.Models
         /// </summary>
         /// <param name="chain">The chain to add</param>
         /// <returns>This object, acts as a builder function</returns>
-        public RequiredNamespace WithChain(string chain)
+        public ProposedNamespace WithChain(string chain)
         {
             Chains = Chains.Append(chain).ToArray();
             return this;
@@ -53,7 +53,7 @@ namespace WalletConnectSharp.Sign.Models
         /// </summary>
         /// <param name="method">The method name to add</param>
         /// <returns>This object, acts as a builder function</returns>
-        public RequiredNamespace WithMethod(string method)
+        public ProposedNamespace WithMethod(string method)
         {
             Methods = Methods.Append(method).ToArray();
             return this;
@@ -64,13 +64,13 @@ namespace WalletConnectSharp.Sign.Models
         /// </summary>
         /// <param name="event">The event name to add</param>
         /// <returns>This object, acts as a builder function</returns>
-        public RequiredNamespace WithEvent(string @event)
+        public ProposedNamespace WithEvent(string @event)
         {
             Events = Events.Append(@event).ToArray();
             return this;
         }
 
-        protected bool Equals(RequiredNamespace other)
+        protected bool Equals(ProposedNamespace other)
         {
             return Equals(Chains, other.Chains) && Equals(Methods, other.Methods) && Equals(Events, other.Events);
         }
@@ -92,7 +92,7 @@ namespace WalletConnectSharp.Sign.Models
                 return false;
             }
 
-            return Equals((RequiredNamespace)obj);
+            return Equals((ProposedNamespace)obj);
         }
 
         public override int GetHashCode()
@@ -100,9 +100,9 @@ namespace WalletConnectSharp.Sign.Models
             return HashCode.Combine(Chains, Methods, Events);
         }
 
-        private sealed class RequiredNamespaceEqualityComparer : IEqualityComparer<RequiredNamespace>
+        private sealed class RequiredNamespaceEqualityComparer : IEqualityComparer<ProposedNamespace>
         {
-            public bool Equals(RequiredNamespace x, RequiredNamespace y)
+            public bool Equals(ProposedNamespace x, ProposedNamespace y)
             {
                 if (ReferenceEquals(x, y))
                 {
@@ -127,12 +127,12 @@ namespace WalletConnectSharp.Sign.Models
                 return x.Chains.SequenceEqual(y.Chains) && x.Methods.SequenceEqual(y.Methods) && x.Events.SequenceEqual(y.Events);
             }
 
-            public int GetHashCode(RequiredNamespace obj)
+            public int GetHashCode(ProposedNamespace obj)
             {
                 return HashCode.Combine(obj.Chains, obj.Methods, obj.Events);
             }
         }
 
-        public static IEqualityComparer<RequiredNamespace> RequiredNamespaceComparer { get; } = new RequiredNamespaceEqualityComparer();
+        public static IEqualityComparer<ProposedNamespace> RequiredNamespaceComparer { get; } = new RequiredNamespaceEqualityComparer();
     }
 }

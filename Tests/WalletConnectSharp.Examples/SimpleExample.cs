@@ -33,7 +33,7 @@ namespace WalletConnectSharp.Examples
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new RequiredNamespace()
+                        "eip155", new ProposedNamespace()
                         {
                             Methods = new[]
                             {

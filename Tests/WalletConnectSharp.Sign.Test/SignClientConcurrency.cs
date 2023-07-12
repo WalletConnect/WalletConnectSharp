@@ -8,6 +8,7 @@ using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
+using WalletConnectSharp.Sign.Test.Shared;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
 using Xunit.Abstractions;
@@ -105,7 +106,7 @@ namespace WalletConnectSharp.Sign.Test
             }, heartbeatToken.Token);
             
             // TODO Do stuff
-            var testEventParams = new EventData<string>() { Name = TestEvents[0], Data = "" };
+            var testEventParams = new EventData<string>() { Name = SignTestValues.TestEvents[0], Data = "" };
             
             Task ProcessMessages(TestPairings data, int clientIndex)
             {
@@ -114,7 +115,7 @@ namespace WalletConnectSharp.Sign.Test
                 
                 var eventPayload = new SessionEvent<string>()
                 {
-                    ChainId = TestEthereumChain, 
+                    ChainId = SignTestValues.TestEthereumChain, 
                     Event = testEventParams,
                     Topic = sessionA.Topic,
                 };
@@ -139,7 +140,7 @@ namespace WalletConnectSharp.Sign.Test
 
                 Task Emit(ISignClient client)
                 {
-                    return client.Emit(sessionA.Topic, testEventParams, TestEthereumChain);
+                    return client.Emit(sessionA.Topic, testEventParams, SignTestValues.TestEthereumChain);
                 }
 
                 void CheckAllMessagesProcessed()
