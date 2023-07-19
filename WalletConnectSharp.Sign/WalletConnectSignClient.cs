@@ -2,8 +2,6 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models;
-using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Events;
@@ -300,9 +298,9 @@ namespace WalletConnectSharp.Sign
         /// <param name="topic">The topic to update</param>
         /// <param name="namespaces">The updated namespaces</param>
         /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
-        public Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
+        public Task<IAcknowledgement> UpdateSession(string topic, Namespaces namespaces)
         {
-            return Engine.Update(topic, namespaces);
+            return Engine.UpdateSession(topic, namespaces);
         }
 
         /// <summary>

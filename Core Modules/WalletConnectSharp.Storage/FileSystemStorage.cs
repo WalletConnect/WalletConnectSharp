@@ -119,6 +119,8 @@ namespace WalletConnectSharp.Storage
             {
                 // Move the file to a .unsupported file
                 // and start fresh
+                if (File.Exists(FilePath + ".unsupported"))
+                    File.Move(FilePath + ".unsupported", FilePath + "." + Guid.NewGuid() + ".unsupported");
                 File.Move(FilePath, FilePath + ".unsupported");
                 Entries = new Dictionary<string, object>();
             }

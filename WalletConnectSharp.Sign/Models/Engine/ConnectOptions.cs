@@ -24,7 +24,7 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// <summary>
         /// Custom session properties for this session
         /// </summary>
-        [JsonProperty("sessionProperties")]
+        [JsonProperty("sessionProperties", NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string, string> SessionProperties { get; set; }
         
         /// <summary>
@@ -48,7 +48,7 @@ namespace WalletConnectSharp.Sign.Models.Engine
         public ConnectOptions()
         {
             RequiredNamespaces = new RequiredNamespaces();
-            SessionProperties = new Dictionary<string, string>();
+            SessionProperties = null;
             OptionalNamespaces = new Dictionary<string, ProposedNamespace>();
         }
         
@@ -63,7 +63,7 @@ namespace WalletConnectSharp.Sign.Models.Engine
         {
             RequiredNamespaces = requiredNamespaces ?? new RequiredNamespaces();
             OptionalNamespaces = optionalNamespaces ?? new Dictionary<string, ProposedNamespace>();
-            SessionProperties = sessionProperties ?? new Dictionary<string, string>();
+            SessionProperties = sessionProperties ?? null;
             PairingTopic = pairingTopic ?? "";
             Relays = relays;
         }
@@ -102,6 +102,8 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// <returns>This object, acts a builder function</returns>
         public ConnectOptions AddSessionProperty(string key, string value)
         {
+            SessionProperties ??= new Dictionary<string, string>();
+            
             SessionProperties.Add(key, value);
 
             return this;

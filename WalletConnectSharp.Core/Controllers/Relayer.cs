@@ -9,7 +9,6 @@ using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
-using WalletConnectSharp.Network.Websocket;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -176,7 +175,7 @@ namespace WalletConnectSharp.Core.Controllers
         protected virtual IJsonRpcProvider CreateProvider(string auth)
         {
             return new JsonRpcProvider(
-                new WebsocketConnection(
+                BuildConnection(
                     RelayUrl.FormatRelayRpcUrl(
                         relayUrl,
                         IRelayer.Protocol,
@@ -187,6 +186,12 @@ namespace WalletConnectSharp.Core.Controllers
                     )
                 )
             );
+        }
+
+        protected virtual IJsonRpcConnection BuildConnection(string url)
+        {
+            return Core.Options.ConnectionBuilder.CreateConnection(url);
+            //return new WebsocketConnection(url);
         }
 
         protected virtual void RegisterProviderEventListeners()

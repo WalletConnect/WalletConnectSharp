@@ -8,6 +8,7 @@ using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
+using WalletConnectSharp.Network.Websocket;
 
 namespace WalletConnectSharp.Core
 {
@@ -111,6 +112,8 @@ namespace WalletConnectSharp.Core
         public IPairing Pairing { get; }
 
         public Verifier Verify { get; }
+        
+        public CoreOptions Options { get; }
 
         /// <summary>
         /// Create a new Core with the given options.
@@ -139,7 +142,10 @@ namespace WalletConnectSharp.Core
             {
                 options.KeyChain = new KeyChain(options.Storage);
             }
+            
+            options.ConnectionBuilder ??= new WebsocketConnectionBuilder();
 
+            Options = options;
             ProjectId = options.ProjectId;
             RelayUrl = options.RelayUrl;
             Crypto = new Crypto.Crypto(options.KeyChain);

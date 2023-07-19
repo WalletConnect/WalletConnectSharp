@@ -454,7 +454,7 @@ namespace WalletConnectSharp.Sign
         /// <param name="topic">The topic to update</param>
         /// <param name="namespaces">The updated namespaces</param>
         /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
-        public async Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
+        public async Task<IAcknowledgement> UpdateSession(string topic, Namespaces namespaces)
         {
             IsInitialized();
             await PrivateThis.IsValidUpdate(topic, namespaces);

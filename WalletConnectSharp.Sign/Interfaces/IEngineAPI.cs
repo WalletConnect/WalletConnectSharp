@@ -86,7 +86,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <param name="topic">The topic to update</param>
         /// <param name="namespaces">The updated namespaces</param>
         /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
-        Task<IAcknowledgement> Update(string topic, Namespaces namespaces);
+        Task<IAcknowledgement> UpdateSession(string topic, Namespaces namespaces);
 
         /// <summary>
         /// Extend a session in the given topic. 

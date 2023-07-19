@@ -120,7 +120,7 @@ public class Web3WalletEngine : IWeb3WalletEngine
 
     public async Task UpdateSession(string topic, Namespaces namespaces)
     {
-        await (await this.SignClient.Update(topic, namespaces)).Acknowledged();
+        await (await this.SignClient.UpdateSession(topic, namespaces)).Acknowledged();
     }
 
     public async Task ExtendSession(string topic)

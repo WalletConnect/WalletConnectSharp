@@ -9,8 +9,10 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
 {
     public SignClientOptions OptionsA { get; protected set; }
     public SignClientOptions OptionsB { get;  protected set; }
-    
-    public SignClientFixture(bool initNow = true) : base(initNow)
+
+    public SignClientFixture() : this(true) { }
+
+    internal SignClientFixture(bool initNow) : base(initNow)
     {
     }
 

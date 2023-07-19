@@ -2,10 +2,11 @@
 
 namespace WalletConnectSharp.Core.Models
 {
+    [Serializable]
     public class RedirectData
     {
-        [JsonProperty("native")] public string Native { get; set; }
+        [JsonProperty("native")] public string Native;
 
-        [JsonProperty("universal")] public string Universal { get; set; }
+        [JsonProperty("universal")] public string Universal;
     }
 }

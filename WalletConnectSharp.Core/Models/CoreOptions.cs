@@ -1,5 +1,7 @@
 using Newtonsoft.Json;
+using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Crypto.Interfaces;
+using WalletConnectSharp.Network.Interfaces;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
 
@@ -49,6 +51,13 @@ namespace WalletConnectSharp.Core.Models
         /// </summary>
         [JsonProperty("keychain")]
         public IKeyChain KeyChain { get; set; }
+        
+        /// <summary>
+        /// The <see cref="IConnectionBuilder"/> interface to use inside the Relayer to build
+        /// new websocket connections.
+        /// </summary>
+        [JsonProperty("connectionBuilder")]
+        public IConnectionBuilder ConnectionBuilder { get; set; }
         
     }
 }
