@@ -20,7 +20,7 @@ public partial class AuthEngine : IAuthEngine
         // const validChainId = isValidChainId(params.chainId);
         var domainInAud = @params.Aud.Contains(@params.Domain);
         var hasNonce = !string.IsNullOrWhiteSpace(@params.Nonce);
-        var hasValidType = @params.Type is { t: "eip4361" };
+        var hasValidType = @params.Type == "eip4361";
         var expiry = @params.Expiry;
         if (expiry != null && !Utils.IsValidRequestExpiry(expiry.Value, MinExpiry, MaxExpiry))
         {

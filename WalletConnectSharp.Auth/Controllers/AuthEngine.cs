@@ -73,7 +73,7 @@ public partial class AuthEngine : IAuthEngine
     {
         IsInitialized();
 
-        @params.Type ??= new Cacao.CacaoHeader();
+        @params.Type ??= "eip4361";
 
         if (!IsValidRequest(@params))
         {
@@ -112,7 +112,7 @@ public partial class AuthEngine : IAuthEngine
         {
             Payload = new PayloadParams()
             {
-                Type = @params.Type ?? new Cacao.CacaoHeader(),
+                Type = @params.Type ?? "eip4361",
                 ChainId = @params.ChainId,
                 Statement = @params.Statement,
                 Aud = @params.Aud,
@@ -140,7 +140,7 @@ public partial class AuthEngine : IAuthEngine
             {
                 Payload = new PayloadParams()
                 {
-                    Type = @params.Type ?? new Cacao.CacaoHeader(),
+                    Type = @params.Type ?? "eip4361",
                     ChainId = @params.ChainId,
                     Statement = @params.Statement,
                     Aud = @params.Aud,

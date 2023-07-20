@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Auth.Models;
 public class AuthPayload
 {
     [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
-    public Cacao.CacaoHeader? Type { get; set; }
+    public string? Type { get; set; }
     
     [JsonProperty("chainId")]
     public string ChainId { get; set; }
