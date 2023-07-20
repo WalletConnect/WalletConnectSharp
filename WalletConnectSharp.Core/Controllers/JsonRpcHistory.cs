@@ -32,7 +32,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             get
             {
-                return $"{_core.Name}-history-of-type-{typeof(T).Name}";
+                return $"{_core.Name}-history-of-type-{typeof(T).FullName}-{typeof(TR).FullName}";
             }
         }
 
