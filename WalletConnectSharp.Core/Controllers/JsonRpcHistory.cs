@@ -237,11 +237,20 @@ namespace WalletConnectSharp.Core.Controllers
         /// <returns>True if the request with the given topic and id exists, false otherwise</returns>
         public Task<bool> Exists(string topic, long id)
         {
-            IsInitialized();
-            if (_records.ContainsKey(id)) return Task.FromResult<bool>(false);
-            var record = GetRecord(id);
+            try
+            {
+                IsInitialized();
+                if (_records.ContainsKey(id)) return Task.FromResult<bool>(false);
+                var record = GetRecord(id);
 
-            return Task.FromResult(record.Topic == topic);
+                return Task.FromResult(record.Topic == topic);
+            }
+            catch (WalletConnectException e)
+            {
+                if (e.CodeType == ErrorType.NO_MATCHING_KEY)
+                    return Task.FromResult(false);
+                throw;
+            }
         }
 
         private Task SetJsonRpcRecords(JsonRpcRecord<T, TR>[] records)

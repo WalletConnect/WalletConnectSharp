@@ -1,4 +1,5 @@
-﻿using WalletConnectSharp.Common.Model.Errors;
+﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
@@ -117,11 +118,25 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 var options = DecodeOptionForTopic(topic);
 
-                var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message, options);
+                var rawResultPayload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
 
-                await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
+                var history = await this.Core.History.JsonRpcHistoryOfType<T, TR>();
+                var expectingResult = await history.Exists(topic, rawResultPayload.Id);
 
-                await responseCallback(topic, payload);
+                try
+                {
+                    var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message, options);
+                    
+                    await history.Resolve(payload);
+
+                    await responseCallback(topic, payload);
+                }
+                catch (Exception ex) when (ex is JsonReaderException or JsonSerializationException)
+                {
+                    if (!expectingResult)
+                        return;
+                    throw;
+                }
             }
 
             async void InspectResponseRaw(object sender, GenericEvent<DecodedMessageEvent> e)

@@ -66,8 +66,15 @@ namespace WalletConnectSharp.Sign.Models
 
         private async Task WrappedRefOnOnRequest(RequestEventArgs<SessionRequest<T>, TR> e)
         {
+            // Ensure that the request is for us
+            var method = RpcMethodAttribute.MethodForType<T>();
+
+            var sessionRequest = e.Request.Params.Request;
+            
+            if (sessionRequest.Method != method) return;
+
             //Set inner request id to match outer request id
-            e.Request.Params.Request.Id = e.Request.Id;
+            sessionRequest.Id = e.Request.Id;
             
             //Add to pending requests
             //We can't do a simple cast, so we need to copy all the data
@@ -78,14 +85,14 @@ namespace WalletConnectSharp.Sign.Models
                     ChainId = e.Request.Params.ChainId,
                     Request = new JsonRpcRequest<object>()
                     {
-                        Id = e.Request.Params.Request.Id,
-                        Method = e.Request.Params.Request.Method,
-                        Params = e.Request.Params.Request.Params
+                        Id = sessionRequest.Id,
+                        Method = sessionRequest.Method,
+                        Params = sessionRequest.Params
                     }
                 }, Topic = e.Topic
             });
-            
-            await base.RequestCallback(e.Topic, e.Request.Params.Request);
+
+            await base.RequestCallback(e.Topic, sessionRequest);
         }
     }
 }
