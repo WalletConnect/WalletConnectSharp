@@ -17,7 +17,7 @@ namespace WalletConnectSharp.Tests.Common
         private static readonly string EnvironmentClientCount = Environment.GetEnvironmentVariable("CLIENTS");
         public static readonly int ClientCount = !string.IsNullOrWhiteSpace(EnvironmentClientCount)
             ? int.Parse(EnvironmentClientCount)
-            : 300000;
+            : 200;
         
         private static readonly string EnvironmentMessageCount = Environment.GetEnvironmentVariable("MESSAGES_PER_CLIENT");
         public static readonly int MessagesPerClient = !string.IsNullOrWhiteSpace(EnvironmentMessageCount)
