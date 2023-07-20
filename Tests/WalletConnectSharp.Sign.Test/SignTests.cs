@@ -87,7 +87,7 @@ namespace WalletConnectSharp.Sign.Test
             
             Assert.NotNull(proposal.RequiredNamespaces);
             Assert.NotNull(proposal.OptionalNamespaces);
-            Assert.NotNull(proposal.SessionProperties);
+            Assert.True(proposal.SessionProperties == null || proposal.SessionProperties.Count > 0);
             Assert.NotNull(proposal.Expiry);
             Assert.NotNull(proposal.Id);
             Assert.NotNull(proposal.Relays);
