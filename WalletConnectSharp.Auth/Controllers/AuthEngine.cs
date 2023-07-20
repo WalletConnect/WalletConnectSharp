@@ -367,8 +367,8 @@ public partial class AuthEngine : IAuthEngine
     {
         string iss = cacao.Iss;
         var header = $"{cacao.Domain} wants you to sign in with your Ethereum account:";
-        var walletAddress = IssDidUtils.DidAddress(iss);
-        var statement = cacao.Statement;
+        var walletAddress = IssDidUtils.DidAddress(iss) + "\n" + (cacao.Statement != null ? "" : "\n");
+        var statement = cacao.Statement + "\n";
         var uri = $"URI: {cacao.Aud}";
         var version = $"Version: {cacao.Version}";
         var chainId = $"Chain ID: {IssDidUtils.DidChainId(iss)}";
@@ -379,7 +379,7 @@ public partial class AuthEngine : IAuthEngine
             : null;
 
         var message = string.Join('\n',
-            new string[] { header, walletAddress, "", statement, "", uri, version, chainId, nonce, issuedAt, resources }
+            new string[] { header, walletAddress, statement, uri, version, chainId, nonce, issuedAt, resources }
                 .Where(val => !string.IsNullOrWhiteSpace(val)));
 
         return message;
