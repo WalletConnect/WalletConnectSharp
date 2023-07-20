@@ -193,7 +193,7 @@ namespace WalletConnectSharp.Sign.Test
             }
             
             int[] arr = Enumerable.Range(0, TestValues.ClientCount+1).ToArray();
-            int[][] batches = BatchArray(arr, 100);
+            int[][] batches = BatchArray(arr, 20);
 
             async Task<TestResults> ConnectClient()
             {
