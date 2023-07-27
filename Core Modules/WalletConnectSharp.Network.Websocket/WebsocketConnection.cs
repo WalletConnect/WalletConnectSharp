@@ -180,6 +180,9 @@ namespace WalletConnectSharp.Network.Websocket
 
         private void OnOpen(WebsocketClient socket)
         {
+            if (socket == null)
+                return;
+            
             socket.MessageReceived.Subscribe(OnPayload);
             socket.DisconnectionHappened.Subscribe(OnDisconnect);
 
