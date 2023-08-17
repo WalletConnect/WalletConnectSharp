@@ -5,6 +5,7 @@ namespace WalletConnectSharp.Core.Models.Relay
     /// <summary>
     /// A class that represents options when publishing messages
     /// </summary>
+    [Serializable]
     public class PublishOptions : ProtocolOptionHolder
     {
         /// <summary>
