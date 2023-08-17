@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
@@ -106,7 +107,9 @@ namespace WalletConnectSharp.Network
             Connecting = new TaskCompletionSource<bool>();
             _connectingStarted = true;
 
+            WCLogger.Log("[JsonRpcProvider] Opening connection");
             await this._connection.Open(connection);
+            
             FinalizeConnection(this._connection);
         }
 
@@ -126,6 +129,7 @@ namespace WalletConnectSharp.Network
             Connecting = new TaskCompletionSource<bool>();
             _connectingStarted = true;
 
+            WCLogger.Log("[JsonRpcProvider] Opening connection");
             await connection.Open();
 
             FinalizeConnection(connection);
@@ -133,6 +137,7 @@ namespace WalletConnectSharp.Network
         
         private void FinalizeConnection(IJsonRpcConnection connection)
         {
+            WCLogger.Log("[JsonRpcProvider] Finalizing Connection, registering event listeners");
             this._connection = connection;
             RegisterEventListeners();
             Events.Trigger(ProviderEvents.Connect, connection);
@@ -148,6 +153,8 @@ namespace WalletConnectSharp.Network
         {
             if (_connection == null)
                 throw new Exception("No connection is set");
+            
+            WCLogger.Log("[JsonRpcProvider] Connecting with given connection object");
             await Connect(_connection);
         }
 
@@ -172,10 +179,12 @@ namespace WalletConnectSharp.Network
         /// <returns>A Task that will resolve when a response is received</returns>
         public async Task<TR> Request<T, TR>(IRequestArguments<T> requestArgs, object context = null)
         {
-            if (IsConnecting)
+            WCLogger.Log("[JsonRpcProvider] Checking if connected");
+            if (IsConnecting) 
                 await Connecting.Task;
             else if (!_connectingStarted && !_connection.Connected)
             {
+                WCLogger.Log("[JsonRpcProvider] Not connected, connecting now");
                 await Connect(_connection);
             }
 
@@ -225,9 +234,11 @@ namespace WalletConnectSharp.Network
 
             _lastId = request.Id;
             
+            WCLogger.Log($"[JsonRpcProvider] Sending request {request.Method} with data {JsonConvert.SerializeObject(request)}");
             //Console.WriteLine($"[{Name}] Sending request {request.Method} with data {JsonConvert.SerializeObject(request)}");
             await _connection.SendRequest(request, context);
 
+            WCLogger.Log("[JsonRpcProvider] Awaiting request resuult");
             await requestTask.Task;
 
             return requestTask.Task.Result;
@@ -237,6 +248,7 @@ namespace WalletConnectSharp.Network
         {
             if (_hasRegisteredEventListeners) return;
             
+            WCLogger.Log($"[JsonRpcProvider] Registering event listeners on connection object with context {_connection.Events.Context}");
             _connection.On<string>("payload", OnPayload);
             _connection.On<object>("close", OnConnectionDisconnected);
             _connection.On<Exception>("error", OnConnectionError);
@@ -256,6 +268,8 @@ namespace WalletConnectSharp.Network
         private void OnPayload(object sender, GenericEvent<string> e)
         {
             var json = e.EventData;
+            
+            WCLogger.Log($"[JsonRpcProvider] Got payload {json}");
 
             var payload = JsonConvert.DeserializeObject<JsonRpcPayload>(json);
 
@@ -266,6 +280,8 @@ namespace WalletConnectSharp.Network
 
             if (payload.Id == 0)
                 payload.Id = _lastId;
+            
+            WCLogger.Log($"[JsonRpcProvider] Payload has ID {payload.Id}");
             
             Events.Trigger(ProviderEvents.Payload, payload);
 
@@ -282,6 +298,7 @@ namespace WalletConnectSharp.Network
                 }
                 else
                 {
+                    WCLogger.Log($"Triggering event for ID {payload.Id.ToString()}");
                     Events.Trigger(payload.Id.ToString(), json);
                 }
             }

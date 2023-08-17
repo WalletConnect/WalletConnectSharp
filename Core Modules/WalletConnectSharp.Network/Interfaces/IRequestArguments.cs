@@ -11,13 +11,11 @@ namespace WalletConnectSharp.Network
         /// <summary>
         /// The method for this request
         /// </summary>
-        [JsonProperty("method")]
         string Method { get; }
         
         /// <summary>
         /// The parameter for this request
         /// </summary>
-        [JsonProperty("params")]
         T Params { get; }
     }
 }

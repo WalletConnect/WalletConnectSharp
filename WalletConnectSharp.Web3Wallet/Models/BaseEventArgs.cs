@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Web3Wallet.Models;
 public class BaseEventArgs<T> : EventArgs
 {
     [JsonProperty("id")]
-    public long Id { get; set; }
+    public long Id;
     
     [JsonProperty("topic")]
     public string Topic { get; set; }

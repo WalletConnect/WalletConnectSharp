@@ -17,12 +17,12 @@ namespace WalletConnectSharp.Sign.Models
         /// left null, then a new Core module will be created and initialized
         /// </summary>
         [JsonProperty("core")]
-        public ICore Core { get; set; }
+        public ICore Core;
         
         /// <summary>
         /// The Metadata the <see cref="BaseWalletConnectSignClient"/> should broadcast with 
         /// </summary>
         [JsonProperty("metadata")]
-        public Metadata Metadata { get; set; }
+        public Metadata Metadata;
     }
 }

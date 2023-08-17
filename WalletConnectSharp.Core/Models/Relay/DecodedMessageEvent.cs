@@ -12,6 +12,6 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// The deserialized payload that was decoded from the Message property
         /// </summary>
         [JsonProperty("payload")]
-        public JsonRpcPayload Payload { get; set; }
+        public JsonRpcPayload Payload;
     }
 }

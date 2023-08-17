@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Core.Models.Verify;
 public class VerifiedContext
 {
     [JsonProperty("origin")]
-    public string Origin { get; set; }
+    public string Origin;
 
     [JsonProperty("validation")]
     private string _validation;

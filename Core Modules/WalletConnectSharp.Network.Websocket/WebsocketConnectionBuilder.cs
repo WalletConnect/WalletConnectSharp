@@ -4,9 +4,9 @@ namespace WalletConnectSharp.Network.Websocket
 {
     public class WebsocketConnectionBuilder : IConnectionBuilder
     {
-        public IJsonRpcConnection CreateConnection(string url)
+        public Task<IJsonRpcConnection> CreateConnection(string url)
         {
-            return new WebsocketConnection(url);
+            return Task.FromResult<IJsonRpcConnection>(new WebsocketConnection(url));
         }
     }
 }

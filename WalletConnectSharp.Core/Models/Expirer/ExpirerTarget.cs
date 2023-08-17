@@ -16,14 +16,14 @@ namespace WalletConnectSharp.Core.Models.Expirer
         /// this field will be null
         /// </summary>
         [JsonProperty("id")]
-        public long? Id { get; set; }
+        public long? Id;
         
         /// <summary>
         /// The resulting Topic from the given <see cref="Expiration.Target"/>. If the <see cref="Expiration.Target"/> did not include a Topic, then
         /// this field will be null
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
 
         /// <summary>
         /// Create a new instance of this class with a given <see cref="Expiration.Target"/>. The given <see cref="Expiration.Target"/> will

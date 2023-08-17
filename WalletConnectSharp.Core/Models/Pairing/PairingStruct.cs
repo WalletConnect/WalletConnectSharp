@@ -14,7 +14,7 @@ namespace WalletConnectSharp.Core.Models.Pairing
         /// The topic the pairing took place in
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
 
         /// <summary>
         /// This is the key field, mapped to the Topic. Implemented for <see cref="IKeyHolder{TKey}"/>
@@ -33,24 +33,24 @@ namespace WalletConnectSharp.Core.Models.Pairing
         /// When this pairing expires
         /// </summary>
         [JsonProperty("expiry")]
-        public long? Expiry { get; set; }
+        public long? Expiry;
         
         /// <summary>
         /// Relay protocol options for this pairing
         /// </summary>
         [JsonProperty("relay")]
-        public ProtocolOptions Relay { get; set; }
+        public ProtocolOptions Relay;
         
         /// <summary>
         /// Whether this pairing is active or not
         /// </summary>
         [JsonProperty("active")]
-        public bool? Active { get; set; }
+        public bool? Active;
         
         /// <summary>
         /// The metadata of the peer this pairing is with
         /// </summary>
         [JsonProperty("peerMetadata")]
-        public Metadata PeerMetadata { get; set; }
+        public Metadata PeerMetadata;
     }
 }

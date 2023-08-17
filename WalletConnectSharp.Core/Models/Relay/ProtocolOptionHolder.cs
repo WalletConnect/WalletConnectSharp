@@ -11,6 +11,6 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// The relay protocol options to use for this event
         /// </summary>
         [JsonProperty("relay")]
-        public ProtocolOptions Relay { get; set; }
+        public ProtocolOptions Relay;
     }
 }

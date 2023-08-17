@@ -6,10 +6,10 @@ namespace WalletConnectSharp.Auth.Models;
 public class AuthData : IKeyHolder<string>
 {
     [JsonProperty("responseTopic")]
-    public string ResponseTopic { get; set; }
+    public string ResponseTopic;
     
     [JsonProperty("publicKey")]
-    public string PublicKey { get; set; }
+    public string PublicKey;
 
     public string Key
     {

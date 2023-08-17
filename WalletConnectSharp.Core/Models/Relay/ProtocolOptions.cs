@@ -11,12 +11,12 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// The protocol to use when communicating with the relay server
         /// </summary>
         [JsonProperty("protocol")]
-        public string Protocol { get; set; }
+        public string Protocol;
         
         /// <summary>
         /// Additional protocol data
         /// </summary>
-        [JsonProperty("data")]
-        public string Data { get; set; }
+        [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
+        public string Data;
     }
 }

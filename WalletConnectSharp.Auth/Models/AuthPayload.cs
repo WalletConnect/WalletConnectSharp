@@ -5,32 +5,32 @@ namespace WalletConnectSharp.Auth.Models;
 public class AuthPayload
 {
     [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
-    public string? Type { get; set; }
+    public string? Type;
     
     [JsonProperty("chainId")]
-    public string ChainId { get; set; }
+    public string ChainId;
 
     [JsonProperty("domain")]
-    public string Domain { get; set; }
+    public string Domain;
 
     [JsonProperty("aud")]
-    public string Aud { get; set; }
+    public string Aud;
     
     [JsonProperty("nonce")]
-    public string Nonce { get; set; }
+    public string Nonce;
     
     [JsonProperty("nbf", NullValueHandling = NullValueHandling.Ignore)]
-    public string Nbf { get; set; }
+    public string Nbf;
     
     [JsonProperty("exp", NullValueHandling = NullValueHandling.Ignore)]
-    public string Exp { get; set; }
+    public string Exp;
     
     [JsonProperty("statement", NullValueHandling = NullValueHandling.Ignore)]
-    public string Statement { get; set; }
+    public string Statement;
     
     [JsonProperty("requestId", NullValueHandling = NullValueHandling.Ignore)]
-    public string RequestId { get; set; }
+    public string RequestId;
     
     [JsonProperty("resources", NullValueHandling = NullValueHandling.Ignore)]
-    public string[] Resources { get; set; }
+    public string[] Resources;
 }

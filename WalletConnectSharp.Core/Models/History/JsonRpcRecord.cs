@@ -16,19 +16,19 @@ namespace WalletConnectSharp.Core.Models.History
         /// The id of the JSON RPC request
         /// </summary>
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id;
         
         /// <summary>
         /// The topic the request was sent in
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The request data for this JSON RPC record
         /// </summary>
         [JsonProperty("request")]
-        public IRequestArguments<T> Request { get; set; }
+        public IRequestArguments<T> Request;
         
         /// <summary>
         /// The chainId this request is intended for

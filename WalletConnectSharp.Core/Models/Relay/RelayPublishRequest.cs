@@ -12,13 +12,13 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// The topic to publish the message under
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The message to publish to the relay server
         /// </summary>
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message;
         
         /// <summary>
         /// Time To Live. How long the message will remain on the relay server without being

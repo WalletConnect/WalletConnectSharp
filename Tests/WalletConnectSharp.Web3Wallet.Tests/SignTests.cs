@@ -34,7 +34,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public class ChainChangedEvent
         {
             [JsonProperty("test")]
-            public string Test { get; set; }
+            public string Test;
         }
         
         private static readonly string TestEthereumAddress = "0x3c582121909DE92Dc89A36898633C1aE4790382b";

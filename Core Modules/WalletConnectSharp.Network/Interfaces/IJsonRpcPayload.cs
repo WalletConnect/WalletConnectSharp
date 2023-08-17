@@ -10,13 +10,11 @@ namespace WalletConnectSharp.Network
         /// <summary>
         /// The unique id for this JSON RPC payload
         /// </summary>
-        [JsonProperty("id")]
         long Id { get; }
         
         /// <summary>
         /// The version of this JSON RPC payload
         /// </summary>
-        [JsonProperty("jsonrpc")]
         string JsonRPC { get; }
     }
 }

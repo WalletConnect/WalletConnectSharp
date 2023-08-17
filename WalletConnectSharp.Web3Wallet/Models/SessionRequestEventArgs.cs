@@ -7,5 +7,5 @@ namespace WalletConnectSharp.Web3Wallet.Models;
 public class SessionRequestEventArgs<T> : BaseEventArgs<SessionRequest<T>>
 {
     [JsonProperty("verifyContext")]
-    public VerifiedContext VerifyContext { get; set; }
+    public VerifiedContext VerifyContext;
 }

@@ -12,7 +12,7 @@ namespace WalletConnectSharp.Core.Models.Subscriber
         /// The topic the message came from
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The message as a string

@@ -6,7 +6,7 @@ namespace WalletConnectSharp.Auth.Models;
 public class PairingData : IKeyHolder<string>
 {
     [JsonProperty("topic")]
-    public string Topic { get; set; }
+    public string Topic;
     
     [JsonProperty("pairingTopic")]
     public string PairingTopic { get; set; }

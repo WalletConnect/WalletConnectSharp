@@ -11,12 +11,12 @@ namespace WalletConnectSharp.Crypto.Models
         /// The Iridium JWT header data
         /// </summary>
         [JsonProperty("header")]
-        public IridiumJWTHeader Header { get; set; }
+        public IridiumJWTHeader Header;
         
         /// <summary>
         /// The Iridium JWT payload
         /// </summary>
         [JsonProperty("payload")]
-        public IridiumJWTPayload Payload { get; set; }
+        public IridiumJWTPayload Payload;
     }
 }

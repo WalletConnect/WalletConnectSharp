@@ -6,5 +6,5 @@ namespace WalletConnectSharp.Auth.Models;
 public class AuthResponse : TopicMessage
 {
     [JsonProperty("params")]
-    public JsonRpcResponse<Cacao> Response { get; set; }
+    public JsonRpcResponse<Cacao> Response;
 }

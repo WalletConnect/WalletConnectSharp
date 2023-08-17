@@ -14,12 +14,12 @@ namespace WalletConnectSharp.Core.Models.Pairing
         /// The ID of the JSON Rpc request that triggered this session event
         /// </summary>
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id;
         
         /// <summary>
         /// The topic of the session this event took place in
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
     }
 }

@@ -11,15 +11,27 @@ namespace WalletConnectSharp.Network.Models
     /// </summary>
     public class JsonRpcPayload : IJsonRpcPayload
     {
+        [JsonProperty("id")]
+        private long _id;
+        
+        [JsonProperty("jsonrpc")]
+        private string _jsonRPC = "2.0";
+
         /// <summary>
         /// The JSON RPC id for this payload
         /// </summary>
-        public long Id { get; set; }
-        
+        [JsonIgnore]
+        public long Id
+        {
+            get => _id;
+            set => _id = value;
+        }
+
         /// <summary>
         /// The JSON RPC version for this payload
         /// </summary>
-        public string JsonRPC { get; set; }
+        [JsonIgnore]
+        public string JsonRPC => _jsonRPC;
         
         [JsonExtensionData]
 #pragma warning disable CS0649

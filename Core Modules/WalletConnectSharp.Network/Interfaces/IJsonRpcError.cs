@@ -11,7 +11,6 @@ namespace WalletConnectSharp.Network
         /// <summary>
         /// The error for this JSON RPC response or null if no error is present
         /// </summary>
-        [JsonProperty("error")]
         Error Error { get; }
     }
 }

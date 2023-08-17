@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Auth.Models;
 public class PayloadParams : AuthPayload
 {
     [JsonProperty("version")]
-    public string Version { get; set; }
+    public string Version;
     
     [JsonProperty("iat")]
     public string Iat { get; set; }

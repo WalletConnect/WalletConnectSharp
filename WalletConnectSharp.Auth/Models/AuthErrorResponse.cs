@@ -6,5 +6,5 @@ namespace WalletConnectSharp.Auth.Models;
 public class AuthErrorResponse : TopicMessage
 {
     [JsonProperty("params")]
-    public Error Error { get; set; }
+    public Error Error;
 }

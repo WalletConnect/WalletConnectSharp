@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Auth.Models;
 public class PendingRequest : Message
 {
     [JsonProperty("pairingTopic")]
-    public string PairingTopic { get; set; }
+    public string PairingTopic;
     
     [JsonProperty("requester")]
     public Requester Requester { get; set; }

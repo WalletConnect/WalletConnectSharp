@@ -6,12 +6,12 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
     public class SessionProposalEvent
     {
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id;
         
         [JsonProperty("params")]
-        public ProposalStruct Proposal { get; set; }
+        public ProposalStruct Proposal;
         
         [JsonProperty("verifyContext")]
-        public VerifiedContext VerifiedContext { get; set; }
+        public VerifiedContext VerifiedContext;
     }
 }

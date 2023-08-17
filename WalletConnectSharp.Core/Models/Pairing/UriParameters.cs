@@ -13,30 +13,30 @@ namespace WalletConnectSharp.Core.Models.Pairing
         /// The protocol being used for this session (as a protocol string)
         /// </summary>
         [JsonProperty("protocol")]
-        public string Protocol { get; set; }
+        public string Protocol;
         
         /// <summary>
         /// The protocol version being used for this session
         /// </summary>
         [JsonProperty("version")]
-        public int Version { get; set; }
+        public int Version;
         
         /// <summary>
         /// The pairing topic that should be used to retrieve the session proposal
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The sym key used to encrypt the session proposal
         /// </summary>
         [JsonProperty("symKey")]
-        public string SymKey { get; set; }
+        public string SymKey;
         
         /// <summary>
         /// Any protocol options that should be used when pairing / approving the session
         /// </summary>
         [JsonProperty("relay")]
-        public ProtocolOptions Relay { get; set; }
+        public ProtocolOptions Relay;
     }
 }

@@ -22,13 +22,13 @@ public class Cacao : Message
     public class CacaoRequestPayload
     {
         [JsonProperty("domain")]
-        public string Domain { get; set; }
+        public string Domain;
         
         [JsonProperty("aud")]
-        public string Aud { get; set; }
+        public string Aud;
         
         [JsonProperty("version")]
-        public string Version { get; set; }
+        public string Version;
         
         [JsonProperty("nonce")]
         public string Nonce { get; set; }

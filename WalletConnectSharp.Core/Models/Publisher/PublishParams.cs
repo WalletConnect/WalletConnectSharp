@@ -12,18 +12,18 @@ namespace WalletConnectSharp.Core.Models.Publisher
         /// The topic to publish the message to
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The message to publish in the set topic
         /// </summary>
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message;
         
         /// <summary>
         /// The required PublishOptions to use when publishing
         /// </summary>
         [JsonProperty("opts")]
-        public PublishOptions Options { get; set; }
+        public PublishOptions Options;
     }
 }

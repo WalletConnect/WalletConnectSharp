@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace WalletConnectSharp.Network.Models
 {
     /// <summary>
@@ -8,14 +10,30 @@ namespace WalletConnectSharp.Network.Models
     /// <typeparam name="T">The type of the parameter in this request</typeparam>
     public class RequestArguments<T> : IRequestArguments<T>
     {
+        [JsonProperty("method")]
+        private string _method;
+        
+        [JsonProperty("params")]
+        private T _params;
+
         /// <summary>
         /// The method to use
         /// </summary>
-        public string Method { get; set; }
-        
+        [JsonIgnore]
+        public string Method
+        {
+            get => _method;
+            set => _method = value;
+        }
+
         /// <summary>
         /// The method for this request
         /// </summary>
-        public T Params { get; set; }
+        [JsonIgnore]
+        public T Params
+        {
+            get => _params;
+            set => _params = value;
+        }
     }
 }
