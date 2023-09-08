@@ -90,7 +90,7 @@ namespace WalletConnectSharp.Sign
         Task IEnginePrivate.Cleanup()
         {
             List<string> sessionTopics = (from session in this.Client.Session.Values.Where(e => e.Expiry != null) where Clock.IsExpired(session.Expiry.Value) select session.Topic).ToList();
-            List<long> proposalIds = (from p in this.Client.Proposal.Values.Where(e => e.Expiry != null) where Clock.IsExpired(p.Expiry.Value) select p.Id.Value).ToList();
+            List<long> proposalIds = (from p in this.Client.Proposal.Values.Where(e => e.Expiry != null) where Clock.IsExpired(p.Expiry.Value) select p.Id).ToList();
 
             return Task.WhenAll(
                 sessionTopics.Select(t => PrivateThis.DeleteSession(t)).Concat(

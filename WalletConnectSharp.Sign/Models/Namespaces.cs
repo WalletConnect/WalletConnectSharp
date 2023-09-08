@@ -19,6 +19,16 @@ namespace WalletConnectSharp.Sign.Models
             
         }
 
+        public Namespaces(RequiredNamespaces requiredNamespaces)
+        {
+            WithProposedNamespaces(requiredNamespaces);
+        }
+        
+        public Namespaces(Dictionary<string, ProposedNamespace> proposedNamespaces)
+        {
+            WithProposedNamespaces(proposedNamespaces);
+        }
+
         public bool Equals(Namespaces other)
         {
             return new DictionaryComparer<string, Namespace>(Namespace.NamespaceComparer).Equals(this, other);
@@ -47,6 +57,30 @@ namespace WalletConnectSharp.Sign.Models
         public override int GetHashCode()
         {
             throw new NotImplementedException();
+        }
+
+        public Namespaces WithNamespace(string chainNamespace, Namespace nm)
+        {
+            Add(chainNamespace, nm);
+            return this;
+        }
+
+        public Namespace At(string chainNamespace)
+        {
+            return this[chainNamespace];
+        }
+        
+        public Namespaces WithProposedNamespaces(Dictionary<string, ProposedNamespace> proposedNamespaces)
+        {
+            foreach (var pair in proposedNamespaces)
+            {
+                var chainNamespace = pair.Key;
+                var requiredNamespace = pair.Value;
+                
+                Add(chainNamespace, new Namespace(requiredNamespace));
+            }
+
+            return this;
         }
     }
 }

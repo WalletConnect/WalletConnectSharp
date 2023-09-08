@@ -70,6 +70,11 @@ namespace WalletConnectSharp.Sign.Models
             return this;
         }
 
+        public Namespace WithAccount(string account)
+        {
+            return new Namespace(this).WithAccount(account);
+        }
+
         protected bool Equals(ProposedNamespace other)
         {
             return Equals(Chains, other.Chains) && Equals(Methods, other.Methods) && Equals(Events, other.Events);

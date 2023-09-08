@@ -139,6 +139,10 @@ namespace WalletConnectSharp.Auth.Tests
 
             void OnPeerAOnAuthResponded(object sender, AuthResponse args)
             {
+                var sessionTopic = args.Topic;
+                var cacao = args.Response.Result;
+                var signature = cacao.Signature;
+                Console.WriteLine($"{sessionTopic}: {signature}");
                 responses.Add(args);
                 responseTask.SetResult(args);
             }
@@ -147,6 +151,9 @@ namespace WalletConnectSharp.Auth.Tests
 
             void OnPeerAOnAuthError(object sender, AuthErrorResponse args)
             {
+                var sessionTopic = args.Topic;
+                var error = args.Error;
+                Console.WriteLine($"{sessionTopic}: {error}");
                 responses.Add(args);
                 responseTask.SetResult(args);
             }

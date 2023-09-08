@@ -22,7 +22,7 @@ namespace WalletConnectSharp.Sign.Models
         /// The id of this proposal
         /// </summary>
         [JsonProperty("id")]
-        public long? Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// This is the key field, mapped to the Id. Implemented for <see cref="IKeyHolder{TKey}"/>
@@ -143,7 +143,7 @@ namespace WalletConnectSharp.Sign.Models
 
             return new ApproveParams()
             {
-                Id = Id.Value,
+                Id = Id,
                 RelayProtocol = relayProtocol,
                 Namespaces = namespaces,
                 SessionProperties = SessionProperties,
@@ -162,7 +162,7 @@ namespace WalletConnectSharp.Sign.Models
             if (Id == null)
                 throw new Exception("Proposal has no set Id");
 
-            return new RejectParams() {Id = Id.Value, Reason = error};
+            return new RejectParams() {Id = Id, Reason = error};
         }
 
         /// <summary>
@@ -174,9 +174,6 @@ namespace WalletConnectSharp.Sign.Models
         /// <exception cref="Exception">If this proposal has no Id</exception>
         public RejectParams RejectProposal(string message = null)
         {
-            if (Id == null)
-                throw new Exception("Proposal has no set Id");
-            
             if (message == null)
                 message = "Proposal denied by remote host";
             

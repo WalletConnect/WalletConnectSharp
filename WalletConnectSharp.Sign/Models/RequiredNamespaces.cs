@@ -52,5 +52,11 @@ namespace WalletConnectSharp.Sign.Models
         {
             throw new NotImplementedException();
         }
+
+        public RequiredNamespaces WithProposedNamespace(string chainNamespace, ProposedNamespace proposedNamespace)
+        {
+            Add(chainNamespace, proposedNamespace);
+            return this;
+        }
     }
 }
