@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using WalletConnectSharp.Common.Logging;
 
 namespace WalletConnectSharp.Storage
 {
@@ -119,6 +120,8 @@ namespace WalletConnectSharp.Storage
             {
                 // Move the file to a .unsupported file
                 // and start fresh
+                WCLogger.LogError(e);
+                WCLogger.LogError("Cannot load JSON file, moving data to .unsupported file to force continue");
                 if (File.Exists(FilePath + ".unsupported"))
                     File.Move(FilePath + ".unsupported", FilePath + "." + Guid.NewGuid() + ".unsupported");
                 File.Move(FilePath, FilePath + ".unsupported");
