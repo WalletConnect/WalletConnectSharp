@@ -2,6 +2,6 @@
 {
     public interface IConnectionBuilder
     {
-        IJsonRpcConnection CreateConnection(string url);
+        Task<IJsonRpcConnection> CreateConnection(string url);
     }
 }

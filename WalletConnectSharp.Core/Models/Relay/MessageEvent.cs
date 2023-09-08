@@ -12,12 +12,12 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// The topic the message was sent / received in
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The message that was sent / received
         /// </summary>
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message;
     }
 }

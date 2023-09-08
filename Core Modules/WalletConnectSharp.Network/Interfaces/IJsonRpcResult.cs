@@ -12,7 +12,6 @@ namespace WalletConnectSharp.Network
         /// <summary>
         /// The result data of the response to the request
         /// </summary>
-        [JsonProperty("result")]
         T Result { get; }
     }
 }

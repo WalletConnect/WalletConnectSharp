@@ -31,16 +31,16 @@ namespace WalletConnectSharp.Sign.Models
         /// If the <see cref="Error"/> field is non-null, then this field will not be sent and the
         /// <see cref="Error"/> will be sent instead
         /// </summary>
-        public TR Response { get; set; }
+        public TR Response;
         
         /// <summary>
         /// The current error to send when this event finishes propagating. You can set this value
         /// to send an Error response when this event completes.
         /// This value will always override <see cref="Response"/> if the value is non-null
         /// </summary>
-        public Error Error { get; set; }
+        public Error Error;
         
-        public VerifiedContext VerifiedContext { get; set; }
+        public VerifiedContext VerifiedContext;
 
         internal RequestEventArgs(string topic, JsonRpcRequest<T> request, VerifiedContext context)
         {

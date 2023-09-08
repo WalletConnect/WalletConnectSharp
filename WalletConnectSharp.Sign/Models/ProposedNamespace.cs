@@ -13,13 +13,13 @@ namespace WalletConnectSharp.Sign.Models
         /// A list of all chains that are required to be enabled in this namespace
         /// </summary>
         [JsonProperty("chains")]
-        public string[] Chains { get; set; }
+        public string[] Chains;
         
         /// <summary>
         /// A list of all methods that are required to be enabled in this namespace
         /// </summary>
         [JsonProperty("methods")]
-        public string[] Methods { get; set; }
+        public string[] Methods;
         
         /// <summary>
         /// A list of all events that are required to be enabled in this namespace

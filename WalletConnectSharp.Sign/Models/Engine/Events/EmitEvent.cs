@@ -13,6 +13,6 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
         /// The wc_sessionEvent request that triggered this event
         /// </summary>
         [JsonProperty("params")]
-        public SessionEvent<T> Params { get; set; }
+        public SessionEvent<T> Params;
     }
 }

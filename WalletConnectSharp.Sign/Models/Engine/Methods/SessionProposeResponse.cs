@@ -15,12 +15,12 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// The protocol options that should be used in this session
         /// </summary>
         [JsonProperty("relay")]
-        public ProtocolOptions Relay { get; set; }
+        public ProtocolOptions Relay;
         
         /// <summary>
         /// The public key of the responder to this session proposal
         /// </summary>
         [JsonProperty("responderPublicKey")]
-        public string ResponderPublicKey { get; set; }
+        public string ResponderPublicKey;
     }
 }

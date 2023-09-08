@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -214,6 +216,8 @@ namespace WalletConnectSharp.Sign
                 var pairing = this.Client.Core.Pairing.Store.Get(topic);
                 if (pairing.Active != null)
                     active = pairing.Active.Value;
+                
+                WCLogger.Log($"Loaded pairing for {topic}");
             }
 
             if (string.IsNullOrEmpty(topic) || !active)
@@ -221,6 +225,8 @@ namespace WalletConnectSharp.Sign
                 var CreatePairing = await this.Client.Core.Pairing.Create();
                 topic = CreatePairing.Topic;
                 uri = CreatePairing.Uri;
+                
+                WCLogger.Log($"Created pairing for new topic: {topic}");
             }
 
             var publicKey = await this.Client.Core.Crypto.GenerateKeyPair();
@@ -244,6 +250,8 @@ namespace WalletConnectSharp.Sign
                 OptionalNamespaces = optionalNamespaces,
                 SessionProperties = sessionProperties,
             };
+            
+            WCLogger.Log($"Created public key pair");
 
             TaskCompletionSource<SessionStruct> approvalTask = new TaskCompletionSource<SessionStruct>();
             this.Events.ListenForOnce<SessionStruct>("session_connect", async (sender, e) =>
@@ -279,6 +287,8 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, $"connect() pairing topic: {topic}");
             }
 
+            WCLogger.Log($"Sending request JSON {JsonConvert.SerializeObject(proposal)} to topic {topic}");
+            
             var id = await MessageHandler.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
 

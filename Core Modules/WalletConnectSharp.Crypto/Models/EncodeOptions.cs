@@ -11,18 +11,18 @@ namespace WalletConnectSharp.Crypto.Models
         /// The envelope type to use
         /// </summary>
         [JsonProperty("type")]
-        public int Type { get; set; }
+        public int Type;
         
         /// <summary>
         /// The public key that is sending the encoded message
         /// </summary>
         [JsonProperty("senderPublicKey")]
-        public string SenderPublicKey { get; set; }
+        public string SenderPublicKey;
         
         /// <summary>
         /// The public key that is receiving the encoded message
         /// </summary>
         [JsonProperty("receiverPublicKey")]
-        public string ReceiverPublicKey { get; set; }
+        public string ReceiverPublicKey;
     }
 }

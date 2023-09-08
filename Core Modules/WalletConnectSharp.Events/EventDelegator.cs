@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model;
 using WalletConnectSharp.Events.Model;
 
@@ -74,7 +75,7 @@ namespace WalletConnectSharp.Events
         /// <param name="callback">The callback to invoke when the event is triggered</param>
         /// <typeparam name="T">The type of event data the callback MUST be given</typeparam>
         public void ListenFor<T>(string eventId, EventHandler<GenericEvent<T>> callback)
-        {  
+        {
             EventManager<T, GenericEvent<T>>.InstanceOf(Context).EventTriggers[eventId] += callback;
         }
 
@@ -231,8 +232,10 @@ namespace WalletConnectSharp.Events
                     propagateEventMethod.Invoke(genericProvider, new object[] { eventId, eventData });
                     wasTriggered = true;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    WCLogger.LogError(e);
+                    WCLogger.Log($"[EventDelegator] Error Invoking EventFactory<{type.FullName}>.Provider.PropagateEvent({eventId}, {eventData})");
                     if (raiseOnException)
                         throw;
                 }

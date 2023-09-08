@@ -6,7 +6,7 @@ namespace WalletConnectSharp.Auth.Models;
 public class Message : IKeyHolder<long>
 {
     [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
-    public long? Id { get; set; }
+    public long? Id;
 
     public long Key
     {

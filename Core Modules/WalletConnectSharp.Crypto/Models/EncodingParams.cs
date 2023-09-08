@@ -12,24 +12,24 @@ namespace WalletConnectSharp.Crypto.Models
         /// The envelope type as raw bytes 
         /// </summary>
         [JsonProperty("type")]
-        public byte[] Type { get; set; }
+        public byte[] Type;
         
         /// <summary>
         /// The sealed encoded message as raw bytes
         /// </summary>
         [JsonProperty("sealed")]
-        public byte[] Sealed { get; set; }
+        public byte[] Sealed;
         
         /// <summary>
         /// The IV of the encoded message as raw bytes
         /// </summary>
         [JsonProperty("iv")]
-        public byte[] Iv { get; set; }
+        public byte[] Iv;
         
         /// <summary>
         /// The public key of the sender as raw bytes
         /// </summary>
         [JsonProperty("senderPublicKey")]
-        public byte[] SenderPublicKey { get; set; }
+        public byte[] SenderPublicKey;
     }
 }

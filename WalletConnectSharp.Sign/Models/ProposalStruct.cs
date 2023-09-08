@@ -22,7 +22,7 @@ namespace WalletConnectSharp.Sign.Models
         /// The id of this proposal
         /// </summary>
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id;
 
         /// <summary>
         /// This is the key field, mapped to the Id. Implemented for <see cref="IKeyHolder{TKey}"/>
@@ -41,43 +41,43 @@ namespace WalletConnectSharp.Sign.Models
         /// When this proposal expires
         /// </summary>
         [JsonProperty("expiry")]
-        public long? Expiry { get; set; }
+        public long? Expiry;
         
         /// <summary>
         /// Relay protocol options for this proposal
         /// </summary>
         [JsonProperty("relays")]
-        public ProtocolOptions[] Relays { get; set; }
+        public ProtocolOptions[] Relays;
         
         /// <summary>
         /// The participant that created this proposal
         /// </summary>
         [JsonProperty("proposer")]
-        public Participant Proposer { get; set; }
+        public Participant Proposer;
         
         /// <summary>
         /// The required namespaces for this proposal requests
         /// </summary>
         [JsonProperty("requiredNamespaces")]
-        public RequiredNamespaces RequiredNamespaces { get; set; }
+        public RequiredNamespaces RequiredNamespaces;
         
         /// <summary>
         /// The optional namespaces for this proposal requests
         /// </summary>
         [JsonProperty("optionalNamespaces")]
-        public Dictionary<string, ProposedNamespace> OptionalNamespaces { get; set; }
+        public Dictionary<string, ProposedNamespace> OptionalNamespaces;
         
         /// <summary>
         /// Custom session properties for this proposal request
         /// </summary>
         [JsonProperty("sessionProperties")]
-        public Dictionary<string, string> SessionProperties { get; set; }
+        public Dictionary<string, string> SessionProperties;
 
         /// <summary>
         /// The pairing topic this proposal lives in
         /// </summary>
         [JsonProperty("pairingTopic")]
-        public string PairingTopic { get; set; }
+        public string PairingTopic;
 
         /// <summary>
         /// Approve this proposal with a single address and (optional) protocol options. The

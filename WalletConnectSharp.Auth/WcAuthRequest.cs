@@ -11,7 +11,7 @@ namespace WalletConnectSharp.Auth;
 public class WcAuthRequest
 {
     [JsonProperty("payloadParams")]
-    public PayloadParams Payload { get; set; }
+    public PayloadParams Payload;
     
     [JsonProperty("requester")]
     public Requester Requester { get; set; }

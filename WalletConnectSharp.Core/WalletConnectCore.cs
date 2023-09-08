@@ -138,18 +138,28 @@ namespace WalletConnectSharp.Core
                 options.Storage = new FileSystemStorage();
             }
 
-            if (options.KeyChain == null)
-            {
-                options.KeyChain = new KeyChain(options.Storage);
-            }
-            
+
             options.ConnectionBuilder ??= new WebsocketConnectionBuilder();
 
             Options = options;
             ProjectId = options.ProjectId;
             RelayUrl = options.RelayUrl;
-            Crypto = new Crypto.Crypto(options.KeyChain);
             Storage = options.Storage;
+            
+            if (options.CryptoModule != null)
+            {
+                Crypto = options.CryptoModule;
+            }
+            else
+            {
+                if (options.KeyChain == null)
+                {
+                    options.KeyChain = new KeyChain(options.Storage);
+                }
+                
+                Crypto = new Crypto.Crypto(options.KeyChain);
+            }
+            
             HeartBeat = new HeartBeat();
             _optName = options.Name;
             Events = new EventDelegator(this);

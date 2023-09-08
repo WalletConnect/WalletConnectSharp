@@ -6,8 +6,8 @@ namespace WalletConnectSharp.Auth.Models;
 public class Requester
 {
     [JsonProperty("metadata")]
-    public Metadata Metadata { get; set; }
+    public Metadata Metadata;
     
     [JsonProperty("publicKey")]
-    public string PublicKey { get; set; }
+    public string PublicKey;
 }

@@ -34,10 +34,10 @@ namespace WalletConnectSharp.Sign.Test
         public class TestEmitData
         {
             [JsonProperty("name")]
-            public string Name { get; set; }
+            public string Name;
             
             [JsonProperty("data")]
-            public string Data { get; set; }
+            public string Data;
         }
         
         private ITestOutputHelper _output;

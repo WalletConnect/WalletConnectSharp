@@ -13,12 +13,12 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
         /// The chainId this request should be performed in
         /// </summary>
         [JsonProperty("chainId")]
-        public string ChainId { get; set; }
+        public string ChainId;
         
         /// <summary>
         /// The request arguments of this session request
         /// </summary>
         [JsonProperty("request")]
-        public IRequestArguments<T> Request { get; set; }
+        public IRequestArguments<T> Request;
     }
 }

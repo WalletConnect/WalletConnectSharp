@@ -19,15 +19,15 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// The chainId this event took place in
         /// </summary>
         [JsonProperty("chainId")]
-        public string ChainId { get; set; }
+        public string ChainId;
         
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The event data
         /// </summary>
         [JsonProperty("event")]
-        public EventData<T> Event { get; set; }
+        public EventData<T> Event;
     }
 }

@@ -21,25 +21,24 @@ namespace WalletConnectSharp.Sign.Models
         /// An array of all accounts enabled in this namespace
         /// </summary>
         [JsonProperty("accounts")]
-        public string[] Accounts { get; set; }
+        public string[] Accounts;
         
         /// <summary>
         /// An array of all methods enabled in this namespace
         /// </summary>
         [JsonProperty("methods")]
-        public string[] Methods { get; set; }
+        public string[] Methods;
         
         /// <summary>
         /// An array of all events enabled in this namespace
         /// </summary>
         [JsonProperty("events")]
-        public string[] Events { get; set; }
-        
+        public string[] Events;
+
         /// <summary>
         /// An array of all chains enabled in this namespace
         /// </summary>
-        [JsonProperty("chains")]
-        public string[] Chains { get; set; }
+        [JsonProperty("chains")] public string[] Chains;
 
         public Namespace WithMethod(string method)
         {

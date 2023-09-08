@@ -9,35 +9,59 @@ namespace WalletConnectSharp.Network.Models
     /// <typeparam name="T">The parameter type for this JSON RPC request</typeparam>
     public class JsonRpcRequest<T> : IJsonRpcRequest<T>
     {
+        [JsonProperty("method")]
+        private string _method;
+        
         /// <summary>
         /// The method of this Json rpc request
         /// </summary>
-        public string Method { get; set; }
-        
+        [JsonIgnore]
+        public string Method
+        {
+            get => _method;
+            set => _method = value;
+        }
+
+        [JsonProperty("params")]
+        private T _params;
+
         /// <summary>
         /// The parameters of this Json rpc request
         /// </summary>
-        public T Params { get; set; }
-        
+        [JsonIgnore]
+        public T Params
+        {
+            get => _params;
+            set => _params = value;
+        }
+
+        [JsonProperty("id")]
+        private long _id;
+
         /// <summary>
         /// The id of this Json rpc request
         /// </summary>
-        public long Id { get; set; }
-
-        /// <summary>
-        /// The jsonrpc field
-        /// </summary>
-        public string JsonRPC
+        [JsonIgnore]
+        public long Id
         {
-            get
-            {
-                return "2.0";
-            }
+            get => _id;
+            set => _id = value;
         }
+
+        [JsonProperty("jsonrpc")]
+        private string _jsonRPC = "2.0";
+        
+        /// <summary>
+        /// The JSON RPC version for this payload
+        /// </summary>
+        [JsonIgnore]
+        public string JsonRPC => _jsonRPC;
+        
 
         /// <summary>
         /// Create a blank Json rpc request
         /// </summary>
+        [JsonConstructor]
         public JsonRpcRequest()
         {
         }
@@ -56,9 +80,9 @@ namespace WalletConnectSharp.Network.Models
                 id = RpcPayloadId.Generate();
             }
 
-            this.Method = method;
-            this.Params = param;
-            this.Id = (long)id;
+            this._method = method;
+            this._params = param;
+            this._id = (long)id;
         }
     }
 }

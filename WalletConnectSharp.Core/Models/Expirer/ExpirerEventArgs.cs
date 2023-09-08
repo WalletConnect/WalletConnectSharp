@@ -11,12 +11,12 @@ namespace WalletConnectSharp.Core.Models.Expirer
         /// The target this expiration is for
         /// </summary>
         [JsonProperty("target")]
-        public string Target { get; set; }
+        public string Target;
         
         /// <summary>
         /// The expiration data for this event
         /// </summary>
         [JsonProperty("expiration")]
-        public Expiration Expiration { get; set; }
+        public Expiration Expiration;
     }
 }

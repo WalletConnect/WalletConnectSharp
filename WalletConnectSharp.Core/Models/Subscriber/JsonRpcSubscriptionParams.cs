@@ -12,12 +12,12 @@ namespace WalletConnectSharp.Core.Models.Subscriber
         /// The id of the subscription the message came from
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id;
         
         /// <summary>
         /// The message data
         /// </summary>
         [JsonProperty("data")]
-        public MessageData Data { get; set; }
+        public MessageData Data;
     }
 }

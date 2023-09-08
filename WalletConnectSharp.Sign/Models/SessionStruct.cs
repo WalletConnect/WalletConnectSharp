@@ -14,55 +14,55 @@ namespace WalletConnectSharp.Sign.Models
         /// The topic of this session
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The relay protocol options this session is using
         /// </summary>
         [JsonProperty("relay")]
-        public ProtocolOptions Relay { get; set; }
+        public ProtocolOptions Relay;
         
         /// <summary>
         /// When this session expires
         /// </summary>
         [JsonProperty("expiry")]
-        public long? Expiry { get; set; }
+        public long? Expiry;
         
         /// <summary>
         /// Whether this session has been acknowledged or not
         /// </summary>
         [JsonProperty("acknowledged")]
-        public bool? Acknowledged { get; set; }
+        public bool? Acknowledged;
         
         /// <summary>
         /// The public key of the current controller for this session
         /// </summary>
         [JsonProperty("controller")]
-        public string Controller { get; set; }
+        public string Controller;
         
         /// <summary>
         /// The enabled namespaces this session uses
         /// </summary>
         [JsonProperty("namespaces")]
-        public Namespaces Namespaces { get; set; }
+        public Namespaces Namespaces;
         
         /// <summary>
         /// The required enabled namespaces this session uses
         /// </summary>
         [JsonProperty("requiredNamespaces")]
-        public RequiredNamespaces RequiredNamespaces { get; set; }
+        public RequiredNamespaces RequiredNamespaces;
    
         /// <summary>
         /// The <see cref="Participant"/> data that represents ourselves in this session
         /// </summary>
         [JsonProperty("self")]
-        public Participant Self { get; set; }
+        public Participant Self;
         
         /// <summary>
         /// The <see cref="Participant"/> data that represents the peer in this session
         /// </summary>
         [JsonProperty("peer")]
-        public Participant Peer { get; set; }
+        public Participant Peer;
 
         /// <summary>
         /// This is the key field, mapped to the Topic. Implemented for <see cref="IKeyHolder{TKey}"/>

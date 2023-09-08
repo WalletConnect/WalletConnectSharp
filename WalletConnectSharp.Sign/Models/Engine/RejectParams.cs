@@ -14,12 +14,12 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// The id of the session proposal to reject
         /// </summary>
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id;
         
         /// <summary>
         /// The reason the session proposal was rejected, as an <see cref="Error"/>
         /// </summary>
         [JsonProperty("reason")]
-        public Error Reason { get; set; }
+        public Error Reason;
     }
 }

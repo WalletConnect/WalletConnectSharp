@@ -12,6 +12,6 @@ namespace WalletConnectSharp.Core.Models.Subscriber
         /// The reason why the subscription was deleted
         /// </summary>
         [JsonProperty("reason")]
-        public Error Reason { get; set; }
+        public Error Reason;
     }
 }

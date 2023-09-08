@@ -13,19 +13,19 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// The required namespaces that will be required for this session
         /// </summary>
         [JsonProperty("requiredNamespaces")]
-        public RequiredNamespaces RequiredNamespaces { get; set; }
+        public RequiredNamespaces RequiredNamespaces;
         
         /// <summary>
         /// The optional namespaces for this session
         /// </summary>
         [JsonProperty("optionalNamespaces")]
-        public Dictionary<string, ProposedNamespace> OptionalNamespaces { get; set; }
+        public Dictionary<string, ProposedNamespace> OptionalNamespaces;
         
         /// <summary>
         /// Custom session properties for this session
         /// </summary>
         [JsonProperty("sessionProperties", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, string> SessionProperties { get; set; }
+        public Dictionary<string, string> SessionProperties;
         
         /// <summary>
         /// The pairing topic to be used to store the session proposal. By default, this should be left blank so
@@ -33,14 +33,14 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// that pairing topic can be used, however the pairing topic MUST exist in storage.
         /// </summary>
         [JsonProperty("pairingTopic")]
-        public string PairingTopic { get; set; }
+        public string PairingTopic;
         
         /// <summary>
         /// The protocol options to use for this session. This is optional and defaults to <see cref="RelayProtocols.Default"/>
         /// value is set.
         /// </summary>
         [JsonProperty("relays")]
-        public ProtocolOptions Relays { get; set; }
+        public ProtocolOptions Relays;
 
         /// <summary>
         /// Create blank options with no required namespaces

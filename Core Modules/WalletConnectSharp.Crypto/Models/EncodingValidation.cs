@@ -11,18 +11,18 @@ namespace WalletConnectSharp.Crypto.Models
         /// The envelope type to validate
         /// </summary>
         [JsonProperty("type")]
-        public int Type { get; set; }
+        public int Type;
         
         /// <summary>
         /// The sender public key to validate
         /// </summary>
         [JsonProperty("senderPublicKey")]
-        public string SenderPublicKey { get; set; }
+        public string SenderPublicKey;
         
         /// <summary>
         /// The receiver public key to validate
         /// </summary>
         [JsonProperty("receiverPublicKey")]
-        public string ReceiverPublicKey { get; set; }
+        public string ReceiverPublicKey;
     }
 }
