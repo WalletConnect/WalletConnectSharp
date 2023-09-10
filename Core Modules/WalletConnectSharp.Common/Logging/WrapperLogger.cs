@@ -13,16 +13,19 @@ public class WrapperLogger : ILogger
 
     public void Log(string message)
     {
+        if (_logger == null) return;
         _logger.Log($"[{prefix}] {message}");
     }
 
     public void LogError(string message)
     {
+        if (_logger == null) return;
         _logger.LogError($"[{prefix}] {message}");
     }
 
     public void LogError(Exception e)
     {
+        if (_logger == null) return;
         _logger.LogError(e);
     }
 }
