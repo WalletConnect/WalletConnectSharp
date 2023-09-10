@@ -272,7 +272,10 @@ namespace WalletConnectSharp.Core.Controllers
 
             if (!_records.ContainsKey(id))
             {
-                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new {Tag = $"{Name}: {id}"});
+                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new Dictionary<string, object>()
+                {
+                    {"Tag", $"{Name}: {id}"}
+                });
             }
 
             return _records[id];

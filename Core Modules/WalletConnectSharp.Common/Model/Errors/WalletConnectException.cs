@@ -84,9 +84,9 @@ namespace WalletConnectSharp.Common.Model.Errors
         /// <param name="type">The error type of the exception</param>
         /// <param name="params">Additional (optional) parameters for the generated error message</param>
         /// <returns>A new exception</returns>
-        public static WalletConnectException FromType(ErrorType type, object @params = null)
+        public static WalletConnectException FromType(ErrorType type, Dictionary<string, object> @params = null)
         {
-            return FromType(type, null, @params.AsDictionary());
+            return FromType(type, null, @params);
         }
     }
 }

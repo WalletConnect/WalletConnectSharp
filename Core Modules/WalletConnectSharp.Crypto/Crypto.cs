@@ -578,7 +578,10 @@ namespace WalletConnectSharp.Crypto
         {
             if (!this._initialized)
             {
-                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new {Name});
+                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new Dictionary<string, object>()
+                {
+                    { "Name", Name }
+                });
             }
         }
 

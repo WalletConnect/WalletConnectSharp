@@ -28,6 +28,17 @@ namespace WalletConnectSharp.Network.Models
         /// </summary>
         [JsonProperty("data")]
         public string Data;
+        
+        /// <summary>
+        /// Create an ErrorResponse with a given ErrorType and (optional) parameters
+        /// </summary>
+        /// <param name="type">The error type of the ErrorResponse to create</param>
+        /// <param name="message">The message to attach to the error</param>
+        /// <returns>A new ErrorResponse</returns>
+        public static Error FromErrorType(ErrorType type, string message)
+        {
+            return FromErrorType(type, new Dictionary<string, object>() { { "message", message } });
+        }
 
         /// <summary>
         /// Create an ErrorResponse with a given ErrorType and (optional) parameters
@@ -36,7 +47,7 @@ namespace WalletConnectSharp.Network.Models
         /// <param name="params">Extra parameters for the error message</param>
         /// <param name="extraData">Extra data that is stored in the Data field of the newly created ErrorResponse</param>
         /// <returns>A new ErrorResponse</returns>
-        public static Error FromErrorType(ErrorType type, object @params = null, string extraData = null)
+        public static Error FromErrorType(ErrorType type, Dictionary<string, object> @params = null, string extraData = null)
         {
             string message = SdkErrors.MessageFromType(type, @params);
 

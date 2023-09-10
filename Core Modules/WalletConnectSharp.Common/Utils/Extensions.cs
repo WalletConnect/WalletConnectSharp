@@ -12,34 +12,6 @@ namespace WalletConnectSharp.Common.Utils
     public static class Extensions
     {
         /// <summary>
-        /// Convert an anonymous type to a Dictionary
-        /// </summary>
-        /// <param name="obj">The anonymous type instance to convert to a dictionary</param>
-        /// <param name="enforceLowercase">Enforce all keys to be lowercased</param>
-        /// <returns>A dictionary where each key is the property name of the anonymous type
-        /// and each value is the property's value</returns>
-        public static Dictionary<string, object> AsDictionary(this object obj, bool enforceLowercase = true)
-        {
-            if (obj is Dictionary<string, object> objects)
-                return objects;
-            
-            var dict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-            if (obj != null)
-            {
-                foreach (PropertyInfo propertyDescriptor in obj.GetType().GetProperties())
-                {
-                    object value = propertyDescriptor.GetValue(obj, null);
-                    var key = enforceLowercase ? propertyDescriptor.Name.ToLower() : propertyDescriptor.Name;
-                    
-                    dict.Add(key, value);
-                }
-            }
-
-            return dict;
-        }
-        
-        /// <summary>
         /// Returns true if the given object is a numeric type
         /// </summary>
         /// <param name="o">The object to check</param>

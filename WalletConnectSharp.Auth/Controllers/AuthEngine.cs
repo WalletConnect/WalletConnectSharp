@@ -280,9 +280,9 @@ public partial class AuthEngine : IAuthEngine
             {
                 this.Client.OnAuthResponse(new AuthErrorResponse()
                 {
-                    Id = id, Topic = topic, Error = Error.FromErrorType(ErrorType.GENERIC, new
+                    Id = id, Topic = topic, Error = Error.FromErrorType(ErrorType.GENERIC, new Dictionary<string, object>()
                     {
-                        Message = "Invalid signature"
+                        {"Message", "Invalid signature"}
                     })
                 });
             }
