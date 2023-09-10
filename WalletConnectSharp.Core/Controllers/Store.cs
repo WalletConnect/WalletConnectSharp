@@ -206,6 +206,22 @@ namespace WalletConnectSharp.Core.Controllers
                     }
                 }
                 
+                var fields = t.GetFields();
+
+                // Loop through all of them
+                foreach (var prop in fields)
+                {
+                    // Grab the updated value
+                    var @value = prop.GetValue(update);
+                    // If it exists (its not null), then set it
+                    if (@value != null)
+                    {
+                        object test = previousValue;
+                        prop.SetValue(test, @value);
+                        previousValue = (TValue)test;
+                    }
+                }
+                
                 // Now, set the update variable to be the new modified 
                 // previousValue object
                 update = previousValue;
