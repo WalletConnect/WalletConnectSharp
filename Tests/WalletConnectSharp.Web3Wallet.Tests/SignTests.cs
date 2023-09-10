@@ -217,14 +217,6 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             {
                 var proposal = @event.EventData.Proposal;
 
-                await _wallet.ApproveSession(proposal, "eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb");
-
-                var requiredNamespaces = proposal.RequiredNamespaces;
-                var approvedNamespaces = new Namespaces(requiredNamespaces);
-                approvedNamespaces["eip155"].WithAccount("eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb");
-
-                await _wallet.ApproveSession(proposal.Id, approvedNamespaces);
-
                 var id = @event.EventData.Id;
                 Assert.Equal(TestRequiredNamespaces, proposal.RequiredNamespaces);
 
