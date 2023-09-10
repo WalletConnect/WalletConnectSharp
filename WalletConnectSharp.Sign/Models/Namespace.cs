@@ -8,6 +8,15 @@ namespace WalletConnectSharp.Sign.Models
     /// </summary>
     public class Namespace
     {
+        public Namespace(ProposedNamespace proposedNamespace)
+        {
+            this.Methods = proposedNamespace.Methods;
+            this.Chains = proposedNamespace.Chains;
+            this.Events = proposedNamespace.Events;
+        }
+
+        public Namespace() { }
+
         /// <summary>
         /// An array of all accounts enabled in this namespace
         /// </summary>
@@ -26,9 +35,32 @@ namespace WalletConnectSharp.Sign.Models
         [JsonProperty("events")]
         public string[] Events;
 
+        /// <summary>
+        /// An array of all chains enabled in this namespace
+        /// </summary>
+        [JsonProperty("chains")] public string[] Chains;
+
         public Namespace WithMethod(string method)
         {
             Methods = Methods.Append(method).ToArray();
+            return this;
+        }
+
+        public Namespace WithChain(string chain)
+        {
+            Chains = Chains.Append(chain).ToArray();
+            return this;
+        }
+        
+        public Namespace WithEvent(string @event)
+        {
+            Events = Events.Append(@event).ToArray();
+            return this;
+        }
+
+        public Namespace WithAccount(string account)
+        {
+            Accounts = Accounts.Append(account).ToArray();
             return this;
         }
 
