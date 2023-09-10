@@ -119,9 +119,10 @@ namespace WalletConnectSharp.Network
         /// <param name="connection">The connection object to use to connect</param>
         public async Task Connect(IJsonRpcConnection connection)
         {
-            if (this._connection == connection && connection.Connected) return;
+            if (this._connection.Url == connection.Url && connection.Connected) return;
             if (this._connection.Connected)
             {
+                WCLogger.Log("Current connection still open, closing connection");
                 await this._connection.Close();
             }
             

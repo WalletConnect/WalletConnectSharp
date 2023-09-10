@@ -63,6 +63,8 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        private ILogger logger { get; }
+
         /// <summary>
         /// Create a new Engine with the given <see cref="ISignClient"/> module
         /// </summary>
@@ -71,6 +73,8 @@ namespace WalletConnectSharp.Sign
         {
             this.Client = client;
             Events = new EventDelegator(this);
+
+            logger = WCLogger.WithContext(Context);
         }
 
         /// <summary>
@@ -256,9 +260,13 @@ namespace WalletConnectSharp.Sign
             TaskCompletionSource<SessionStruct> approvalTask = new TaskCompletionSource<SessionStruct>();
             this.Events.ListenForOnce<SessionStruct>("session_connect", async (sender, e) =>
             {
+                logger.Log("Got session_connect event for session struct");
                 if (approvalTask.Task.IsCompleted)
+                {
+                    logger.Log("approval already received though, skipping");
                     return;
-                
+                }
+
                 var session = e.EventData;
                 session.Self.PublicKey = publicKey;
                 var completeSession = session with { RequiredNamespaces = requiredNamespaces };
@@ -274,10 +282,16 @@ namespace WalletConnectSharp.Sign
             
             this.Events.ListenForOnce<JsonRpcResponse<SessionProposeResponse>>("session_connect", (sender, e) =>
             {
+                logger.Log("Got session_connect event for rpc response");
                 if (approvalTask.Task.IsCompleted)
+                {
+                    logger.Log("approval already received though, skipping");
                     return;
+                }
+                
                 if (e.EventData.IsError)
                 {
+                    logger.LogError("Got session_connect error " + e.EventData.Error.Message);
                     approvalTask.SetException(e.EventData.Error.ToException());
                 }
             });
@@ -287,9 +301,12 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, $"connect() pairing topic: {topic}");
             }
 
-            WCLogger.Log($"Sending request JSON {JsonConvert.SerializeObject(proposal)} to topic {topic}");
+            logger.Log($"Sending request JSON {JsonConvert.SerializeObject(proposal)} to topic {topic}");
             
             var id = await MessageHandler.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
+            
+            logger.Log($"Got back {id} as request pending id");
+            
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
 
             await PrivateThis.SetProposal(id, new ProposalStruct()

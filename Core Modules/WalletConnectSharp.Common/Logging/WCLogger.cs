@@ -4,6 +4,11 @@
     {
         public static ILogger Logger;
 
+        public static ILogger WithContext(string context)
+        {
+            return new WrapperLogger(Logger, context);
+        }
+
         public static void Log(string message)
         {
             if (Logger == null)

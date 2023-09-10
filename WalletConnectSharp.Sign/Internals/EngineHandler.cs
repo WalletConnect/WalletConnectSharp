@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Expirer;
@@ -81,13 +82,16 @@ namespace WalletConnectSharp.Sign
         async Task IEnginePrivate.OnSessionProposeResponse(string topic, JsonRpcResponse<SessionProposeResponse> payload)
         {
             var id = payload.Id;
+            logger.Log($"Got session propose response with id {id}");
             if (payload.IsError)
             {
+                logger.LogError("response was error");
                 await this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
                 this.Events.Trigger(EngineEvents.SessionConnect, payload);
             }
             else
             {
+                logger.Log("response was success");
                 var result = payload.Result;
                 var proposal = this.Client.Proposal.Get(id);
                 var selfPublicKey = proposal.Proposer.PublicKey;
@@ -97,8 +101,28 @@ namespace WalletConnectSharp.Sign
                     selfPublicKey,
                     peerPublicKey
                 );
-                var subscriptionId = await this.Client.Core.Relayer.Subscribe(sessionTopic);
                 await this.Client.Core.Pairing.Activate(topic);
+                logger.Log($"pairing activated for topic {topic}");
+                
+                // try to do this a couple of times .. do it until it works?
+                int attempts = 5;
+                do
+                {
+                    try
+                    {
+                        var subscriptionId = await this.Client.Core.Relayer.Subscribe(sessionTopic);
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        WCLogger.LogError($"Got error subscribing to topic, attempts left: {attempts}");
+                        WCLogger.LogError(e);
+                        attempts--;
+                        await Task.Yield();
+                    }
+                } while (attempts > 0);
+
+                throw new IOException($"Could not subscribe to session topic {sessionTopic}");
             }
         }
 
@@ -106,6 +130,7 @@ namespace WalletConnectSharp.Sign
         {
             var id = payload.Id;
             var @params = payload.Params;
+            logger.Log($"got session settle request with {id}");
             try
             {
                 await PrivateThis.IsValidSessionSettleRequest(@params);
@@ -138,6 +163,8 @@ namespace WalletConnectSharp.Sign
             }
             catch (WalletConnectException e)
             {
+                logger.LogError("got error while performing session settle");
+                logger.LogError(e);
                 await MessageHandler.SendError<SessionSettle, bool>(id, topic, Error.FromException(e));
             }
         }

@@ -236,6 +236,9 @@ namespace WalletConnectSharp.Core.Controllers
         {
             this.Events.ListenFor<object>(RelayerEvents.ConnectionStalled, async (sender, @event) =>
             {
+                if (this.Provider.Connection.IsPaused)
+                    return;
+                
                 await this.RestartTransport();
             });
         }
@@ -457,14 +460,22 @@ namespace WalletConnectSharp.Core.Controllers
 
         private async Task ToEstablishConnection()
         {
-            if (Connected) return;
+            if (Connected)
+            {
+                while (Provider.Connection.IsPaused)
+                {
+                    WCLogger.Log("[Relayer] Waiting for connection to unpause");
+                    await Task.Delay(2);
+                }
+                return;
+            }
             if (Connecting)
             {
                 // Check for connection
                 while (Connecting)
                 {
                     WCLogger.Log("[Relayer] Waiting for connection to open");
-                    await Task.Delay(20);
+                    await Task.Delay(2);
                 }
 
                 if (!Connected && !Connecting)

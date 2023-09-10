@@ -147,7 +147,7 @@ namespace WalletConnectSharp.Core.Controllers
             try
             {
                 await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay)
-                    .WithTimeout(TimeSpan.FromSeconds(10));
+                    .WithTimeout(TimeSpan.FromSeconds(45));
                 this.Relayer.Events.Trigger(RelayerEvents.Publish, @params);
                 OnPublish(hash);
             }

@@ -36,6 +36,12 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        public bool IsPaused
+        {
+            get;
+            internal set;
+        }
+
         /// <summary>
         /// The name of this websocket connection module
         /// </summary>
