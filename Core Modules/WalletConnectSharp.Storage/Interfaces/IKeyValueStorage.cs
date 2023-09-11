@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Storage.Interfaces
     /// <summary>
     /// The storage module handles the storing by key value pairing. All of the functions are asynchronous 
     /// </summary>
-    public interface IKeyValueStorage
+    public interface IKeyValueStorage : IDisposable
     {
         /// <summary>
         /// Initialize the storage. This should load any data or prepare any connection required by the

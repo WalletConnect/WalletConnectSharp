@@ -362,5 +362,10 @@ namespace WalletConnectSharp.Core.Controllers
             await this.Core.Relayer.Publish(topic, message, opts);
             await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+        }
     }
 }

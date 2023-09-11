@@ -7,7 +7,7 @@ namespace WalletConnectSharp.Events
     /// A mapping of eventIds to EventHandler objects. This using a Dictionary as the backing datastore
     /// </summary>
     /// <typeparam name="TEventArgs">The type of EventHandler's argument to store</typeparam>
-    public class EventHandlerMap<TEventArgs>
+    public class EventHandlerMap<TEventArgs> : IDisposable
     {
         private Dictionary<string, EventHandler<TEventArgs>> mapping =
             new Dictionary<string, EventHandler<TEventArgs>>();
@@ -93,6 +93,12 @@ namespace WalletConnectSharp.Events
                     mapping.Remove(eventId);
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            mapping.Clear();
+            mapping = null;
         }
     }
 }

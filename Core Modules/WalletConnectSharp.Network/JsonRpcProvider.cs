@@ -304,5 +304,11 @@ namespace WalletConnectSharp.Network
                 }
             }
         }
+
+        public void Dispose()
+        {
+            _connection?.Dispose();
+            _delegator?.Dispose();
+        }
     }
 }

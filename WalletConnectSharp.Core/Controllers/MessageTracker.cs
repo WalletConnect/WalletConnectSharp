@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
@@ -186,6 +182,11 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, this.Name);
             }
+        }
+
+        public void Dispose()
+        {
+            _core?.Dispose();
         }
     }
 }

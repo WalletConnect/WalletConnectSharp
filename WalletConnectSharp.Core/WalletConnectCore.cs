@@ -1,3 +1,4 @@
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
@@ -36,6 +37,7 @@ namespace WalletConnectSharp.Core
             }
         }
 
+        private string guid = "";
         /// <summary>
         /// The current context of this module instance. 
         /// </summary>
@@ -43,7 +45,7 @@ namespace WalletConnectSharp.Core
         {
             get
             {
-                return Name;
+                return $"{Name}{guid}";
             }
         }
 
@@ -162,7 +164,24 @@ namespace WalletConnectSharp.Core
             
             HeartBeat = new HeartBeat();
             _optName = options.Name;
-            Events = new EventDelegator(this);
+
+            try
+            {
+                Events = new EventDelegator(this);
+            }
+            catch (ArgumentException)
+            {
+                // the context is likely being re-used. Let's randomize the context
+                // and log an error
+                WCLogger.LogError("The WalletConnectCore class is being re-initialized! It's likely a previous " +
+                                  "instance was not disposed of. It's recommended to re-use the same WalletConnectCore " +
+                                  "instance for the same project in the same runtime, event listener leaking can occur.");
+
+                guid = $"-{Guid.NewGuid().ToString()}";
+
+                Events = new EventDelegator(this);
+            }
+
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
             Verify = new Verifier();
@@ -199,6 +218,18 @@ namespace WalletConnectSharp.Core
             await Expirer.Init();
             await MessageHandler.Init();
             await Pairing.Init();
+        }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            HeartBeat?.Dispose();
+            Crypto?.Dispose();
+            Relayer?.Dispose();
+            Storage?.Dispose();
+            MessageHandler?.Dispose();
+            Expirer?.Dispose();
+            Pairing?.Dispose();
         }
     }
 }

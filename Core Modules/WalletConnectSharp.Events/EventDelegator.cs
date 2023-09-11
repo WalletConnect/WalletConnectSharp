@@ -243,5 +243,38 @@ namespace WalletConnectSharp.Events
 
             return wasTriggered;
         }
+
+        public void Dispose()
+        {
+            // loop through all cached types and remove all listeners
+            foreach (var eventType in _typeToTriggerTypes.Keys)
+            {
+                var allPossibleTypes = _typeToTriggerTypes[eventType];
+                
+                // loop through all possible types of an event type, since
+                // event listeners can be anywhere
+                foreach (var type in allPossibleTypes)
+                {
+                    var genericFactoryType = typeof(EventFactory<>).MakeGenericType(type);
+
+                    var instanceProperty = genericFactoryType.GetMethod("InstanceOf");
+                    if (instanceProperty == null) continue;
+
+                    var genericFactory = instanceProperty.Invoke(null, new object[] { Context });
+
+                    var genericProviderProperty = genericFactoryType.GetProperty("Provider");
+                    if (genericProviderProperty == null) continue;
+
+                    var genericProvider = genericProviderProperty.GetValue(genericFactory);
+                    if (genericProvider == null) continue;
+
+                    // type of IEventProvider is IDisposable
+                    IDisposable disposable = (IDisposable)genericProvider;
+
+                    // dispose of this provider
+                    disposable.Dispose();
+                }
+            }
+        }
     }
 }

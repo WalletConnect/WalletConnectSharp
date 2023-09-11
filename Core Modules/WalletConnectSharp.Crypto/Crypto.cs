@@ -684,5 +684,10 @@ namespace WalletConnectSharp.Crypto
 
             return seed.HexToByteArray();
         }
+
+        public void Dispose()
+        {
+            KeyChain?.Dispose();
+        }
     }
 }

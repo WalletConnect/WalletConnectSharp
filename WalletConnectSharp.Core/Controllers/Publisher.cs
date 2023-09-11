@@ -157,5 +157,11 @@ namespace WalletConnectSharp.Core.Controllers
                 return;
             }
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            Relayer?.Dispose();
+        }
     }
 }

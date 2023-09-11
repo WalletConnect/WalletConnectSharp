@@ -193,4 +193,10 @@ public class Web3WalletClient : IWeb3Wallet
             Engine.AuthError -= value;
         }
     }
+
+    public void Dispose()
+    {
+        Events?.Dispose();
+        Core?.Dispose();
+    }
 }
