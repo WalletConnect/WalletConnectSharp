@@ -20,6 +20,7 @@ namespace WalletConnectSharp.Events
     /// </summary>
     public class EventDelegator : IModule
     {
+        private static readonly object _contextLock = new object();
         private static HashSet<string> contextInstances = new HashSet<string>();
 
         private readonly object _cacheLock = new object();
@@ -47,11 +48,14 @@ namespace WalletConnectSharp.Events
             this.Name = parent + ":event-delegator";
             this.Context = parent.Context;
 
-            if (contextInstances.Contains(Context))
-                throw new ArgumentException(
-                    $"The module {parent.Name} with context {Context} is attempting to create a new EventDelegator that overlaps with an existing EventDelegator");
-            
-            contextInstances.Add(Context);
+            lock (_contextLock)
+            {
+                if (contextInstances.Contains(Context))
+                    throw new ArgumentException(
+                        $"The module {parent.Name} with context {Context} is attempting to create a new EventDelegator that overlaps with an existing EventDelegator");
+
+                contextInstances.Add(Context);
+            }
         }
 
         /// <summary>
@@ -246,34 +250,43 @@ namespace WalletConnectSharp.Events
 
         public void Dispose()
         {
-            // loop through all cached types and remove all listeners
-            foreach (var eventType in _typeToTriggerTypes.Keys)
+            lock (_cacheLock)
             {
-                var allPossibleTypes = _typeToTriggerTypes[eventType];
-                
-                // loop through all possible types of an event type, since
-                // event listeners can be anywhere
-                foreach (var type in allPossibleTypes)
+                // loop through all cached types and remove all listeners
+                foreach (var eventType in _typeToTriggerTypes.Keys)
                 {
-                    var genericFactoryType = typeof(EventFactory<>).MakeGenericType(type);
+                    var allPossibleTypes = _typeToTriggerTypes[eventType];
 
-                    var instanceProperty = genericFactoryType.GetMethod("InstanceOf");
-                    if (instanceProperty == null) continue;
+                    // loop through all possible types of an event type, since
+                    // event listeners can be anywhere
+                    foreach (var type in allPossibleTypes)
+                    {
+                        var genericFactoryType = typeof(EventFactory<>).MakeGenericType(type);
 
-                    var genericFactory = instanceProperty.Invoke(null, new object[] { Context });
+                        var instanceProperty = genericFactoryType.GetMethod("InstanceOf");
+                        if (instanceProperty == null) continue;
 
-                    var genericProviderProperty = genericFactoryType.GetProperty("Provider");
-                    if (genericProviderProperty == null) continue;
+                        var genericFactory = instanceProperty.Invoke(null, new object[] { Context });
 
-                    var genericProvider = genericProviderProperty.GetValue(genericFactory);
-                    if (genericProvider == null) continue;
+                        var genericProviderProperty = genericFactoryType.GetProperty("Provider");
+                        if (genericProviderProperty == null) continue;
 
-                    // type of IEventProvider is IDisposable
-                    IDisposable disposable = (IDisposable)genericProvider;
+                        var genericProvider = genericProviderProperty.GetValue(genericFactory);
+                        if (genericProvider == null) continue;
 
-                    // dispose of this provider
-                    disposable.Dispose();
+                        // type of IEventProvider is IDisposable
+                        IDisposable disposable = (IDisposable)genericProvider;
+
+                        // dispose of this provider
+                        disposable.Dispose();
+                    }
                 }
+            }
+
+            lock (_contextLock)
+            {
+                if (contextInstances.Contains(Context))
+                    contextInstances.Remove(Context);
             }
         }
     }

@@ -97,8 +97,10 @@ namespace WalletConnectSharp.Events
 
         public void Dispose()
         {
-            mapping.Clear();
-            mapping = null;
+            lock (_mappingLock)
+            {
+                mapping.Clear();
+            }
         }
     }
 }

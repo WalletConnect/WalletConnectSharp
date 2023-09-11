@@ -72,12 +72,20 @@ namespace WalletConnectSharp.Core.Controllers
             
             foreach (var key in keys)
             {
-                if (!queue.ContainsKey(key)) continue;
-                var @params = queue[key];
-                
-                var hash = HashUtils.HashMessage(@params.Message);
-                await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay);
-                OnPublish(hash);
+                try
+                {
+                    if (!queue.ContainsKey(key)) continue;
+                    var @params = queue[key];
+
+                    var hash = HashUtils.HashMessage(@params.Message);
+                    await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag,
+                        @params.Options.Relay);
+                    OnPublish(hash);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // ignore ..
+                }
             }
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model;
 using WalletConnectSharp.Events.Model;
 using Xunit;
@@ -172,6 +173,90 @@ namespace WalletConnectSharp.Events.Tests
             
             Assert.Equal(result1.test1, testData1.test1);
             Assert.Equal(result1.test2, testData1.test2);
+        }
+        
+        public class TestModule : IModule
+        {
+            public void Dispose()
+            {
+                // TODO release managed resources here
+            }
+
+            public string Name
+            {
+                get
+                {
+                    return "test";
+                }
+            }
+
+            public string Context
+            {
+                get
+                {
+                    return $"{Name}-context";
+                }
+            }
+        }
+        
+        [Fact, Trait("Category", "unit")]
+        public void TestContextSharingWithoutDisposingFails()
+        {
+            var module = new TestModule();
+            var events = new EventDelegator(module);
+
+            Assert.Equal(module.Context, events.Context);
+            
+            Assert.Throws<ArgumentException>(() => new EventDelegator(module));
+            
+            events.Dispose();
+
+            events = new EventDelegator(module);
+            
+            Assert.Equal(module.Context, events.Context);
+            
+            events.Dispose();
+        }
+
+        [Fact, Trait("Category", "unit")]
+        public void TestEventsDontLeakWhenDisposed()
+        {
+            var module = new TestModule();
+            var events = new EventDelegator(module);
+
+            Assert.Equal(module.Context, events.Context);
+            
+            Assert.Throws<ArgumentException>(() => new EventDelegator(module));
+            
+            TestEventData result1 = null;
+            
+            events.ListenForAndDeserialize<TestEventData>("abc", delegate(object sender, GenericEvent<TestEventData> @event)
+            {
+                result1 = @event.EventData;
+            });
+            
+            var testData1 = new TestEventData()
+            {
+                test1 = 11,
+                test2 = "abccc"
+            };
+
+            var json = JsonConvert.SerializeObject(testData1);
+
+            events.Trigger("abc", json);
+            
+            Assert.Equal(result1.test1, testData1.test1);
+            Assert.Equal(result1.test2, testData1.test2);
+            
+            events.Dispose();
+            result1 = null;
+
+            events = new EventDelegator(module);
+            events.Trigger("abc", json);
+            
+            Assert.Null(result1);
+            
+            events.Dispose();
         }
     }
 }
