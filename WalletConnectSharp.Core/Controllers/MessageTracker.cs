@@ -50,7 +50,8 @@ namespace WalletConnectSharp.Core.Controllers
 
         private bool initialized;
         private ICore _core;
-        
+
+        private readonly object _messageLock = new object();
         /// <summary>
         /// A mapping of MessageRecords by a topic string key. Each MessageRecord
         /// stores a list of hashed messages sent in the topic string key
@@ -98,18 +99,22 @@ namespace WalletConnectSharp.Core.Controllers
             var hash = HashUtils.HashMessage(message);
             
             MessageRecord messages;
-            if (Messages.ContainsKey(topic))
-                messages = Messages[topic];
-            else
+            lock (_messageLock)
             {
-                messages = new MessageRecord();
-                Messages.Add(topic, messages);
+                if (Messages.ContainsKey(topic))
+                    messages = Messages[topic];
+                else
+                {
+                    messages = new MessageRecord();
+                    Messages.Add(topic, messages);
+                }
+
+                if (messages.ContainsKey(hash))
+                    return hash;
+
+                messages.Add(hash, message);
             }
 
-            if (messages.ContainsKey(hash))
-                return hash;
-            
-            messages.Add(hash, message);
             await Persist();
             return hash;
         }
@@ -123,7 +128,13 @@ namespace WalletConnectSharp.Core.Controllers
         {
             IsInitialized();
 
-            return Task.FromResult(Messages.ContainsKey(topic) ? Messages[topic] : new MessageRecord());
+            MessageRecord messageRecord;
+            lock (_messageLock)
+            {
+                messageRecord = Messages.TryGetValue(topic, out var message) ? message : new MessageRecord();
+            }
+
+            return Task.FromResult(messageRecord);
         }
 
         /// <summary>
@@ -137,11 +148,14 @@ namespace WalletConnectSharp.Core.Controllers
         {
             IsInitialized();
 
-            if (!Messages.ContainsKey(topic)) return false;
-            
-            var hash = HashUtils.HashMessage(message);
+            lock (_messageLock)
+            {
+                if (!Messages.ContainsKey(topic)) return false;
 
-            return Messages[topic].ContainsKey(hash);
+                var hash = HashUtils.HashMessage(message);
+
+                return Messages[topic].ContainsKey(hash);
+            }
 
         }
 
@@ -153,7 +167,10 @@ namespace WalletConnectSharp.Core.Controllers
         {
             IsInitialized();
 
-            Messages.Remove(topic);
+            lock (_messageLock)
+            {
+                Messages.Remove(topic);
+            }
 
             await Persist();
         }
@@ -173,7 +190,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         private Task Persist()
         {
-            return SetRelayerMessages(Messages);
+            lock (_messageLock)
+            {
+                return SetRelayerMessages(Messages);
+            }
         }
 
         private void IsInitialized()
