@@ -14,14 +14,14 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// module requires the core modules to function properly
         /// </summary>
         [JsonProperty("core")]
-        public ICore Core { get; set; }
+        public ICore Core;
 
         /// <summary>
         /// The URL of the Relay server to connect to. This should not include any auth information, the Relayer module
         /// will construct it's own auth token using the project ID specified
         /// </summary>
         [JsonProperty("relayUrl")]
-        public string RelayUrl { get; set; }
+        public string RelayUrl;
         
         /// <summary>
         /// The project ID to use for Relay authentication

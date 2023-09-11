@@ -324,7 +324,7 @@ namespace WalletConnectSharp.Core.Controllers
 
             if (Store.Keys.Contains(topic))
             {
-                var error = ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED);
+                var error = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
                 await Core.MessageHandler.SendRequest<PairingDelete, bool>(topic,
                     new PairingDelete() {Code = error.Code, Message = error.Message});
                 await DeletePairing(topic);
@@ -351,7 +351,7 @@ namespace WalletConnectSharp.Core.Controllers
             
             await this.Core.Relayer.Unsubscribe(topic);
             await Task.WhenAll(
-                pairingHasDeleted ? Task.CompletedTask : this.Store.Delete(topic, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED)),
+                pairingHasDeleted ? Task.CompletedTask : this.Store.Delete(topic, Error.FromErrorType(ErrorType.USER_DISCONNECTED)),
                 symKeyHasDeleted ? Task.CompletedTask : this.Core.Crypto.DeleteSymKey(topic),
                 expirerHasDeleted ? Task.CompletedTask : this.Core.Expirer.Delete(topic)
             );
@@ -430,7 +430,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
             catch (WalletConnectException e)
             {
-                await Core.MessageHandler.SendError<PairingPing, bool>(id, topic, ErrorResponse.FromException(e));
+                await Core.MessageHandler.SendError<PairingPing, bool>(id, topic, Error.FromException(e));
             }
         }
 
@@ -462,11 +462,11 @@ namespace WalletConnectSharp.Core.Controllers
             }
             catch (WalletConnectException e)
             {
-                await Core.MessageHandler.SendError<PairingDelete, bool>(id, topic, ErrorResponse.FromException(e));
+                await Core.MessageHandler.SendError<PairingDelete, bool>(id, topic, Error.FromException(e));
             }
         }
         
-        private async Task IsValidDisconnect(string topic, ErrorResponse reason)
+        private async Task IsValidDisconnect(string topic, Error reason)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {

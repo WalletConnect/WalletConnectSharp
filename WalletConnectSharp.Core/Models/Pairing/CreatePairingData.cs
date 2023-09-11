@@ -12,12 +12,12 @@ namespace WalletConnectSharp.Core.Models.Pairing
         /// The new pairing topic
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The URI the wallet should use to pair & retrieve the session proposal
         /// </summary>
         [JsonProperty("uri")]
-        public string Uri { get; set; }
+        public string Uri;
     }
 }

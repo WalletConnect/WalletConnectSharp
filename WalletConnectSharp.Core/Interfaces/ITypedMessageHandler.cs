@@ -1,5 +1,6 @@
 ﻿using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network.Models;
 
@@ -75,15 +76,35 @@ namespace WalletConnectSharp.Core.Interfaces
         PublishOptions RpcResponseOptionsForType<T>();
 
         /// <summary>
+        /// Set the decode options that should be used whenever a message in the given
+        /// topic is received. By default, no decode options are used when a message is received.
+        /// Use this function to set decode options for Type1 messages inside a specific topic
+        /// </summary>
+        /// <param name="options">The decode options to use for all messages received in a specific topic</param>
+        /// <param name="topic">The topic to set the given decode options for</param>
+        void SetDecodeOptionsForTopic(DecodeOptions options, string topic);
+
+        /// <summary>
+        /// Get the decode options for the given topic, all messages received in the given topic
+        /// will be decoded using these decode options. If no decode options are set for the given
+        /// topic, then null is returned.
+        /// </summary>
+        /// <param name="topic">The topic to get decode options for</param>
+        /// <returns>The decode options set for the given topic. If no decode options
+        /// are set for the given topic, then null is returned.</returns>
+        DecodeOptions DecodeOptionForTopic(string topic);
+
+        /// <summary>
         /// Send a typed request message with the given request / response type pair T, TR to the given topic
         /// </summary>
         /// <param name="topic">The topic to send the request in</param>
         /// <param name="parameters">The typed request message to send</param>
         /// <param name="expiry">An override to specify how long this request will live for. If null is given, then expiry will be taken from either T or TR attributed options</param>
+        /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
         /// <returns>The id of the request sent</returns>
-        Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null);
+        Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null, EncodeOptions options = null);
 
         /// <summary>
         /// Send a typed response message with the given request / response type pair T, TR to the given topic
@@ -91,9 +112,10 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="id">The id of the request to respond to</param>
         /// <param name="topic">The topic to send the response in</param>
         /// <param name="result">The typed response message to send</param>
+        /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        Task SendResult<T, TR>(long id, string topic, TR result);
+        Task SendResult<T, TR>(long id, string topic, TR result, EncodeOptions options = null);
 
         /// <summary>
         /// Send an error response message with the given request / response type pair T, TR to the given topic
@@ -101,8 +123,9 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="id">The id of the request to respond to</param>
         /// <param name="topic">The topic to send the response in</param>
         /// <param name="error">The error response to send</param>
+        /// <param name="options">(optional) Crypto Encoding options</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        Task SendError<T, TR>(long id, string topic, ErrorResponse error);
+        Task SendError<T, TR>(long id, string topic, Error error, EncodeOptions options = null);
     }
 }

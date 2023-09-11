@@ -2,8 +2,6 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models;
-using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Events;
@@ -13,6 +11,7 @@ using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
+using WalletConnectSharp.Sign.Models.Engine.Methods;
 using WalletConnectSharp.Storage;
 
 namespace WalletConnectSharp.Sign
@@ -91,6 +90,8 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         public IProposal Proposal { get; }
 
+        public IPendingRequests PendingRequests { get; }
+
         /// <summary>
         /// The <see cref="SignClientOptions"/> this Sign Client was initialized with. 
         /// </summary>
@@ -115,6 +116,15 @@ namespace WalletConnectSharp.Sign
             get
             {
                 return VERSION;
+            }
+        }
+        
+        
+        public PendingRequestStruct[] PendingSessionRequests
+        {
+            get
+            {
+                return Engine.PendingSessionRequests;
             }
         }
 
@@ -172,7 +182,8 @@ namespace WalletConnectSharp.Sign
                 Core = new WalletConnectCore(options);
 
             Events = new EventDelegator(this);
-            
+
+            PendingRequests = new PendingRequests(Core);
             PairingStore = new PairingStore(Core);
             Session = new Session(Core);
             Proposal = new Proposal(Core);
@@ -230,7 +241,7 @@ namespace WalletConnectSharp.Sign
         /// <summary>
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
-        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(ErrorResponse)"/>
+        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(Error)"/>
         /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineAPI.Reject(ProposalStruct, string)"/>
         /// </summary>
         /// <param name="params">The parameters of the rejection</param>
@@ -254,7 +265,7 @@ namespace WalletConnectSharp.Sign
             if (message == null)
                 message = "Proposal denied by remote host";
 
-            return Reject(proposalStruct, new ErrorResponse()
+            return Reject(proposalStruct, new Error()
             {
                 Message = message,
                 Code = (long) ErrorType.USER_DISCONNECTED,
@@ -267,7 +278,7 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         /// <param name="proposalStruct">The proposal to reject</param>
         /// <param name="error">An error explaining the reason for the rejection</param>
-        public Task Reject(ProposalStruct proposalStruct, ErrorResponse error)
+        public Task Reject(ProposalStruct proposalStruct, Error error)
         {
             if (proposalStruct.Id == null)
                 throw new ArgumentException("No proposal Id given");
@@ -287,9 +298,9 @@ namespace WalletConnectSharp.Sign
         /// <param name="topic">The topic to update</param>
         /// <param name="namespaces">The updated namespaces</param>
         /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
-        public Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
+        public Task<IAcknowledgement> UpdateSession(string topic, Namespaces namespaces)
         {
-            return Engine.Update(topic, namespaces);
+            return Engine.UpdateSession(topic, namespaces);
         }
 
         /// <summary>
@@ -365,7 +376,7 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         /// <param name="topic">The topic of the session to disconnect</param>
         /// <param name="reason">An (optional) error reason for the disconnect</param>
-        public Task Disconnect(string topic, ErrorResponse reason)
+        public Task Disconnect(string topic, Error reason)
         {
             return Engine.Disconnect(topic, reason);
         }
@@ -380,9 +391,15 @@ namespace WalletConnectSharp.Sign
             return Engine.Find(requiredNamespaces);
         }
 
+        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
+        {
+            this.Engine.HandleEventMessageType<T>(requestCallback, responseCallback);
+        }
+
         private async Task Initialize()
         {
             await this.Core.Start();
+            await PendingRequests.Init();
             await PairingStore.Init();
             await Session.Init();
             await Proposal.Init();

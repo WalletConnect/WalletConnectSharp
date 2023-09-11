@@ -332,7 +332,8 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void CheckExpirations()
         {
-            foreach (var target in _expirations.Keys)
+            var clonedArray = _expirations.Keys.ToArray();
+            foreach (var target in clonedArray)
             {
                 var expiration = _expirations[target];
                 CheckExpiry(target, expiration);

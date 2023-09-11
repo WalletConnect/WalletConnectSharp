@@ -43,8 +43,8 @@ namespace WalletConnectSharp.Crypto
         private static readonly Encoding DATA_ENCODING = Encoding.UTF8;
         private static readonly Encoding JSON_ENCODING = Encoding.UTF8;
 
-        private const int TYPE_0 = 0;
-        private const int TYPE_1 = 1;
+        public const int TYPE_0 = 0;
+        public const int TYPE_1 = 1;
         private const int TYPE_LENGTH = 1;
         private const int IV_LENGTH = 12;
         private const int KEY_LENGTH = 32;
@@ -578,11 +578,20 @@ namespace WalletConnectSharp.Crypto
         {
             if (!this._initialized)
             {
-                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new {Name});
+                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new Dictionary<string, object>()
+                {
+                    { "Name", Name }
+                });
             }
         }
 
-        private string HashKey(string key)
+        /// <summary>
+        /// Hash a hex key string using SHA256. The input key string must be a hex
+        /// string and the returned hash is represented as a hex string
+        /// </summary>
+        /// <param name="key">The input hex key string to hash using SHA256</param>
+        /// <returns>The hash of the given input as a hex string</returns>
+        public string HashKey(string key)
         {
             using (SHA256 sha256 = SHA256.Create())
             {

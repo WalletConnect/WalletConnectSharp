@@ -13,19 +13,19 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// The required namespaces that will be required for this session
         /// </summary>
         [JsonProperty("requiredNamespaces")]
-        public RequiredNamespaces RequiredNamespaces { get; set; }
+        public RequiredNamespaces RequiredNamespaces;
         
         /// <summary>
         /// The optional namespaces for this session
         /// </summary>
         [JsonProperty("optionalNamespaces")]
-        public Dictionary<string, ProposedNamespace> OptionalNamespaces { get; set; }
+        public Dictionary<string, ProposedNamespace> OptionalNamespaces;
         
         /// <summary>
         /// Custom session properties for this session
         /// </summary>
-        [JsonProperty("sessionProperties")]
-        public Dictionary<string, string> SessionProperties { get; set; }
+        [JsonProperty("sessionProperties", NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, string> SessionProperties;
         
         /// <summary>
         /// The pairing topic to be used to store the session proposal. By default, this should be left blank so
@@ -33,14 +33,14 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// that pairing topic can be used, however the pairing topic MUST exist in storage.
         /// </summary>
         [JsonProperty("pairingTopic")]
-        public string PairingTopic { get; set; }
+        public string PairingTopic;
         
         /// <summary>
         /// The protocol options to use for this session. This is optional and defaults to <see cref="RelayProtocols.Default"/>
         /// value is set.
         /// </summary>
         [JsonProperty("relays")]
-        public ProtocolOptions Relays { get; set; }
+        public ProtocolOptions Relays;
 
         /// <summary>
         /// Create blank options with no required namespaces
@@ -48,7 +48,7 @@ namespace WalletConnectSharp.Sign.Models.Engine
         public ConnectOptions()
         {
             RequiredNamespaces = new RequiredNamespaces();
-            SessionProperties = new Dictionary<string, string>();
+            SessionProperties = null;
             OptionalNamespaces = new Dictionary<string, ProposedNamespace>();
         }
         
@@ -63,7 +63,7 @@ namespace WalletConnectSharp.Sign.Models.Engine
         {
             RequiredNamespaces = requiredNamespaces ?? new RequiredNamespaces();
             OptionalNamespaces = optionalNamespaces ?? new Dictionary<string, ProposedNamespace>();
-            SessionProperties = sessionProperties ?? new Dictionary<string, string>();
+            SessionProperties = sessionProperties ?? null;
             PairingTopic = pairingTopic ?? "";
             Relays = relays;
         }
@@ -102,6 +102,8 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// <returns>This object, acts a builder function</returns>
         public ConnectOptions AddSessionProperty(string key, string value)
         {
+            SessionProperties ??= new Dictionary<string, string>();
+            
             SessionProperties.Add(key, value);
 
             return this;
@@ -116,6 +118,19 @@ namespace WalletConnectSharp.Sign.Models.Engine
         public ConnectOptions WithSessionProperties(Dictionary<string, string> properties)
         {
             SessionProperties = properties;
+
+            return this;
+        }
+        
+        /// <summary>
+        /// Require a specific chain and namespace
+        /// </summary>
+        /// <param name="chain">The chain the namespace exists in</param>
+        /// <param name="requiredNamespace">The required namespace that must be present for this session</param>
+        /// <returns>This object, acts a builder function</returns>
+        public ConnectOptions UseRequireNamespaces(RequiredNamespaces requiredNamespaces)
+        {
+            RequiredNamespaces = requiredNamespaces;
 
             return this;
         }

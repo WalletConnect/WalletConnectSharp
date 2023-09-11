@@ -11,12 +11,12 @@ namespace WalletConnectSharp.Core.Models.Subscriber
         /// The subscription id to unsubscribe from
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id;
         
         /// <summary>
         /// The topic the subscription exists in
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
     }
 }

@@ -19,6 +19,16 @@
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACE
+WC_DEF_WEBSOCKET</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DefineConstants>TRACE
+WC_DEF_WEBSOCKET</DefineConstants>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\WalletConnectSharp.Network\WalletConnectSharp.Network.csproj" />
     </ItemGroup>

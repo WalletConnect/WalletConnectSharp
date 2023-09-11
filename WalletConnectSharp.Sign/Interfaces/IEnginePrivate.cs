@@ -7,7 +7,7 @@ using WalletConnectSharp.Sign.Models.Engine.Methods;
 
 namespace WalletConnectSharp.Sign.Interfaces
 {
-    internal interface IEnginePrivate
+    public interface IEnginePrivate
     {
         internal Task DeleteSession(string topic);
 
@@ -67,6 +67,10 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task IsValidEmit<T>(string topic, EventData<T> request, string chainId);
 
-        internal Task IsValidDisconnect(string topic, ErrorResponse reason);
+        internal Task IsValidDisconnect(string topic, Error reason);
+
+        internal Task DeletePendingSessionRequest(long id, Error reason, bool expirerHasDeleted = false);
+
+        internal Task SetPendingSessionRequest(PendingRequestStruct pendingRequest);
     }
 }

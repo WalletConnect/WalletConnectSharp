@@ -18,24 +18,24 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// The protocol options that should be used in this session
         /// </summary>
         [JsonProperty("relay")]
-        public ProtocolOptions Relay { get; set; }
+        public ProtocolOptions Relay;
         
         /// <summary>
         /// All namespaces that are enabled in this session
         /// </summary>
         [JsonProperty("namespaces")]
-        public Namespaces Namespaces { get; set; }
+        public Namespaces Namespaces;
         
         /// <summary>
         /// When this session will expire
         /// </summary>
         [JsonProperty("expiry")]
-        public long Expiry { get; set; }
+        public long Expiry;
         
         /// <summary>
         /// The controlling <see cref="Participant"/> in this session. In most cases, this is the dApp.
         /// </summary>
         [JsonProperty("controller")]
-        public Participant Controller { get; set; }
+        public Participant Controller;
     }
 }

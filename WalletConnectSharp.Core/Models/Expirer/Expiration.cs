@@ -13,13 +13,11 @@ namespace WalletConnectSharp.Core.Models.Expirer
         /// * id:123
         /// * topic:my_topic_string
         /// </summary>
-        [JsonProperty("target")]
-        public string Target { get; set; }
-        
+        [JsonProperty("target")] public string Target;
+
         /// <summary>
         /// The expiration date, as a unix timestamp (seconds)
         /// </summary>
-        [JsonProperty("expiry")]
-        public long Expiry { get; set; }
+        [JsonProperty("expiry")] public long Expiry;
     }
 }

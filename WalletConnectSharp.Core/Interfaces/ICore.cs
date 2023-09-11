@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Storage.Interfaces;
@@ -30,6 +32,11 @@ namespace WalletConnectSharp.Core.Interfaces
         /// The project id this Core module will use
         /// </summary>
         public string ProjectId { get; }
+        
+        /// <summary>
+        /// The CoreOptions this Core module was initialized with
+        /// </summary>
+        public CoreOptions Options { get; }
         
         //TODO Add logger
         
@@ -77,6 +84,8 @@ namespace WalletConnectSharp.Core.Interfaces
         /// with each other and keeping track of pairing state
         /// </summary>
         IPairing Pairing { get; }
+        
+        Verifier Verify { get; }
 
         /// <summary>
         /// Start the Core module, which will initialize all modules the Core module uses 

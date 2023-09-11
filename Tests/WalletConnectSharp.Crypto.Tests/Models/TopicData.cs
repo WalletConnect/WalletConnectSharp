@@ -5,6 +5,6 @@ namespace WalletConnectSharp.Crypto.Tests.Models
     public class TopicData
     {
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
     }
 }

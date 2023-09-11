@@ -121,5 +121,13 @@ namespace WalletConnectSharp.Crypto.Interfaces
         /// </summary>
         /// <returns>The client id as a string</returns>
         Task<string> GetClientId();
+
+        /// <summary>
+        /// Hash a hex key string using SHA256. The input key string must be a hex
+        /// string and the returned hash is represented as a hex string
+        /// </summary>
+        /// <param name="key">The input hex key string to hash using SHA256</param>
+        /// <returns>The hash of the given input as a hex string</returns>
+        string HashKey(string key);
     }
 }

@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -7,6 +9,7 @@ using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Events.Model;
@@ -60,6 +63,8 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        private ILogger logger { get; }
+
         /// <summary>
         /// Create a new Engine with the given <see cref="ISignClient"/> module
         /// </summary>
@@ -68,6 +73,8 @@ namespace WalletConnectSharp.Sign
         {
             this.Client = client;
             Events = new EventDelegator(this);
+
+            logger = WCLogger.WithContext(Context);
         }
 
         /// <summary>
@@ -111,7 +118,7 @@ namespace WalletConnectSharp.Sign
         /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
         public TypedEventHandler<T, TR> SessionRequestEvents<T, TR>()
         {
-            return SessionRequestEventHandler<T, TR>.GetInstance(Client.Core);
+            return SessionRequestEventHandler<T, TR>.GetInstance(Client.Core, PrivateThis);
         }
 
         /// <summary>
@@ -179,6 +186,18 @@ namespace WalletConnectSharp.Sign
         }
 
         /// <summary>
+        /// Get all pending session requests
+        /// </summary>
+        public PendingRequestStruct[] PendingSessionRequests
+        {
+            get
+            {
+                this.IsInitialized();
+                return this.Client.PendingRequests.Values;
+            }
+        }
+
+        /// <summary>
         /// Connect (a dApp) with the given ConnectOptions. At a minimum, you must specified a RequiredNamespace. 
         /// </summary>
         /// <param name="options"></param>
@@ -201,6 +220,8 @@ namespace WalletConnectSharp.Sign
                 var pairing = this.Client.Core.Pairing.Store.Get(topic);
                 if (pairing.Active != null)
                     active = pairing.Active.Value;
+                
+                WCLogger.Log($"Loaded pairing for {topic}");
             }
 
             if (string.IsNullOrEmpty(topic) || !active)
@@ -208,6 +229,8 @@ namespace WalletConnectSharp.Sign
                 var CreatePairing = await this.Client.Core.Pairing.Create();
                 topic = CreatePairing.Topic;
                 uri = CreatePairing.Uri;
+                
+                WCLogger.Log($"Created pairing for new topic: {topic}");
             }
 
             var publicKey = await this.Client.Core.Crypto.GenerateKeyPair();
@@ -231,13 +254,19 @@ namespace WalletConnectSharp.Sign
                 OptionalNamespaces = optionalNamespaces,
                 SessionProperties = sessionProperties,
             };
+            
+            WCLogger.Log($"Created public key pair");
 
             TaskCompletionSource<SessionStruct> approvalTask = new TaskCompletionSource<SessionStruct>();
             this.Events.ListenForOnce<SessionStruct>("session_connect", async (sender, e) =>
             {
+                logger.Log("Got session_connect event for session struct");
                 if (approvalTask.Task.IsCompleted)
+                {
+                    logger.Log("approval already received though, skipping");
                     return;
-                
+                }
+
                 var session = e.EventData;
                 session.Self.PublicKey = publicKey;
                 var completeSession = session with { RequiredNamespaces = requiredNamespaces };
@@ -253,10 +282,16 @@ namespace WalletConnectSharp.Sign
             
             this.Events.ListenForOnce<JsonRpcResponse<SessionProposeResponse>>("session_connect", (sender, e) =>
             {
+                logger.Log("Got session_connect event for rpc response");
                 if (approvalTask.Task.IsCompleted)
+                {
+                    logger.Log("approval already received though, skipping");
                     return;
+                }
+                
                 if (e.EventData.IsError)
                 {
+                    logger.LogError("Got session_connect error " + e.EventData.Error.Message);
                     approvalTask.SetException(e.EventData.Error.ToException());
                 }
             });
@@ -266,7 +301,12 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, $"connect() pairing topic: {topic}");
             }
 
+            logger.Log($"Sending request JSON {JsonConvert.SerializeObject(proposal)} to topic {topic}");
+            
             var id = await MessageHandler.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
+            
+            logger.Log($"Got back {id} as request pending id");
+            
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
 
             await PrivateThis.SetProposal(id, new ProposalStruct()
@@ -303,10 +343,16 @@ namespace WalletConnectSharp.Sign
             TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
             
             Client.Once(EngineEvents.SessionProposal,
-                delegate(object sender, GenericEvent<JsonRpcRequest<ProposalStruct>> @event)
+                delegate(object sender, GenericEvent<SessionProposalEvent> @event)
                 {
-                    var proposal = @event.EventData.Params;
-                    if (topic == proposal.PairingTopic)
+                    var proposal = @event.EventData.Proposal;
+                    if (topic != proposal.PairingTopic)
+                        return;
+
+                    if (@event.EventData.VerifiedContext.Validation == Validation.Invalid)
+                        sessionProposeTask.SetException(new Exception(
+                            $"Could not validate, invalid validation status {@event.EventData.VerifiedContext.Validation} for origin {@event.EventData.VerifiedContext.Origin}"));
+                    else
                         sessionProposeTask.SetResult(proposal);
                 });
 
@@ -398,7 +444,7 @@ namespace WalletConnectSharp.Sign
                         },
                         ResponderPublicKey = selfPublicKey
                     });
-                await this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
+                await this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
                 await this.Client.Core.Pairing.Activate(pairingTopic);
             }
             
@@ -408,7 +454,7 @@ namespace WalletConnectSharp.Sign
         /// <summary>
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
-        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(ErrorResponse)"/>
+        /// Use <see cref="ProposalStruct.RejectProposal(string)"/> or <see cref="ProposalStruct.RejectProposal(Error)"/>
         /// to generate a <see cref="RejectParams"/> object, or use the alias function <see cref="IEngineAPI.Reject(ProposalStruct, string)"/>
         /// </summary>
         /// <param name="params">The parameters of the rejection</param>
@@ -425,7 +471,7 @@ namespace WalletConnectSharp.Sign
             if (!string.IsNullOrWhiteSpace(pairingTopic))
             {
                 await MessageHandler.SendError<SessionPropose, SessionProposeResponse>(id, pairingTopic, reason);
-                await this.Client.Proposal.Delete(id, ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED));
+                await this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
             }
         }
 
@@ -435,7 +481,7 @@ namespace WalletConnectSharp.Sign
         /// <param name="topic">The topic to update</param>
         /// <param name="namespaces">The updated namespaces</param>
         /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
-        public async Task<IAcknowledgement> Update(string topic, Namespaces namespaces)
+        public async Task<IAcknowledgement> UpdateSession(string topic, Namespaces namespaces)
         {
             IsInitialized();
             await PrivateThis.IsValidUpdate(topic, namespaces);
@@ -534,9 +580,9 @@ namespace WalletConnectSharp.Sign
                 .OnResponse += args =>
             {
                 if (args.Response.IsError)
-                    taskSource.SetException(args.Response.Error.ToException());
+                    taskSource.TrySetException(args.Response.Error.ToException());
                 else
-                    taskSource.SetResult(args.Response.Result);
+                    taskSource.TrySetResult(args.Response.Result);
 
                 return Task.CompletedTask;
             };
@@ -573,6 +619,8 @@ namespace WalletConnectSharp.Sign
             {
                 await MessageHandler.SendResult<T, TR>(id, topic, response.Result);
             }
+
+            await PrivateThis.DeletePendingSessionRequest(id, new Error() { Code = 0, Message = "fulfilled" });
         }
 
         /// <summary>
@@ -589,7 +637,8 @@ namespace WalletConnectSharp.Sign
             await MessageHandler.SendRequest<SessionEvent<T>, object>(topic, new SessionEvent<T>()
             {
                 ChainId = chainId,
-                Event = @event
+                Event = @event,
+                Topic = topic,
             });
         }
 
@@ -626,10 +675,10 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         /// <param name="topic">The topic of the session to disconnect</param>
         /// <param name="reason">An (optional) error reason for the disconnect</param>
-        public async Task Disconnect(string topic, ErrorResponse reason)
+        public async Task Disconnect(string topic, Error reason)
         {
             IsInitialized();
-            var error = reason ?? ErrorResponse.FromErrorType(ErrorType.USER_DISCONNECTED);
+            var error = reason ?? Error.FromErrorType(ErrorType.USER_DISCONNECTED);
             await PrivateThis.IsValidDisconnect(topic, error);
             
             if (this.Client.Session.Keys.Contains(topic))
@@ -688,7 +737,7 @@ namespace WalletConnectSharp.Sign
         /// </summary>
         /// <param name="proposalStruct">The proposal to reject</param>
         /// <param name="error">An error explaining the reason for the rejection</param>
-        public Task Reject(ProposalStruct proposalStruct, ErrorResponse error)
+        public Task Reject(ProposalStruct proposalStruct, Error error)
         {
             return Reject(proposalStruct.RejectProposal(error));
         }

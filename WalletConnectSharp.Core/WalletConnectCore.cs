@@ -2,11 +2,13 @@ using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
+using WalletConnectSharp.Network.Websocket;
 
 namespace WalletConnectSharp.Core
 {
@@ -109,6 +111,10 @@ namespace WalletConnectSharp.Core
         /// </summary>
         public IPairing Pairing { get; }
 
+        public Verifier Verify { get; }
+        
+        public CoreOptions Options { get; }
+
         /// <summary>
         /// Create a new Core with the given options.
         /// </summary>
@@ -132,20 +138,34 @@ namespace WalletConnectSharp.Core
                 options.Storage = new FileSystemStorage();
             }
 
-            if (options.KeyChain == null)
-            {
-                options.KeyChain = new KeyChain(options.Storage);
-            }
 
+            options.ConnectionBuilder ??= new WebsocketConnectionBuilder();
+
+            Options = options;
             ProjectId = options.ProjectId;
             RelayUrl = options.RelayUrl;
-            Crypto = new Crypto.Crypto(options.KeyChain);
             Storage = options.Storage;
+            
+            if (options.CryptoModule != null)
+            {
+                Crypto = options.CryptoModule;
+            }
+            else
+            {
+                if (options.KeyChain == null)
+                {
+                    options.KeyChain = new KeyChain(options.Storage);
+                }
+                
+                Crypto = new Crypto.Crypto(options.KeyChain);
+            }
+            
             HeartBeat = new HeartBeat();
             _optName = options.Name;
             Events = new EventDelegator(this);
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
+            Verify = new Verifier();
             
             Relayer = new Relayer(new RelayerOptions()
             {

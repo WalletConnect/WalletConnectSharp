@@ -11,25 +11,35 @@ namespace WalletConnectSharp.Network.Models
         /// The id field
         /// </summary>
         [JsonProperty("id")]
-        public long Id { get; set; }
+        private long _id;
+
+        [JsonIgnore]
+        public long Id => _id;
+
+        [JsonProperty("jsonrpc")]
+        private string _jsonRpc = "2.0";
 
         /// <summary>
         /// The jsonrpc field
         /// </summary>
-        [JsonProperty("jsonrpc")]
+        [JsonIgnore]
         public string JsonRPC
         {
             get
             {
-                return "2.0";
+                return _jsonRpc;
             }
         }
+
+
+        [JsonProperty("error", NullValueHandling = NullValueHandling.Ignore)]
+        private Error _error;
 
         /// <summary>
         /// The error field 
         /// </summary>
-        [JsonProperty("error", NullValueHandling = NullValueHandling.Ignore)]
-        public ErrorResponse Error { get; set; }
+        [JsonIgnore]
+        public Error Error => _error;
 
         /// <summary>
         /// Create a blank JSON rpc error response
@@ -43,10 +53,10 @@ namespace WalletConnectSharp.Network.Models
         /// </summary>
         /// <param name="id">The id of the response</param>
         /// <param name="error">The error value</param>
-        public JsonRpcError(long id, ErrorResponse error)
+        public JsonRpcError(long id, Error error)
         {
-            Id = id;
-            Error = error;
+            _id = id;
+            _error = error;
         }
     }
 }

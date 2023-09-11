@@ -12,6 +12,6 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
         /// The wc_sessionUpdate request that triggered this event
         /// </summary>
         [JsonProperty("params")]
-        public SessionUpdate Params { get; set; }
+        public SessionUpdate Params;
     }
 }

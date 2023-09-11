@@ -12,6 +12,6 @@ namespace WalletConnectSharp.Core.Models.Subscriber
         /// The topic that will be subscribed to
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
     }
 }

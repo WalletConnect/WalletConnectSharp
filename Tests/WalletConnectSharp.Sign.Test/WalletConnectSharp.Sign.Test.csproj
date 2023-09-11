@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Core Modules\WalletConnectSharp.Network.Websocket\WalletConnectSharp.Network.Websocket.csproj" />
       <ProjectReference Include="..\..\WalletConnectSharp.Sign\WalletConnectSharp.Sign.csproj" />
       <ProjectReference Include="..\WalletConnectSharp.Tests.Common\WalletConnectSharp.Tests.Common.csproj" />
     </ItemGroup>

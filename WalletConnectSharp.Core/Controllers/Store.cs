@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using WalletConnectSharp.Common;
@@ -199,7 +200,25 @@ namespace WalletConnectSharp.Core.Controllers
                     // If it exists (its not null), then set it
                     if (@value != null)
                     {
-                        prop.SetValue(previousValue, null);
+                        object test = previousValue;
+                        prop.SetValue(test, @value, null);
+                        previousValue = (TValue)test;
+                    }
+                }
+                
+                var fields = t.GetFields();
+
+                // Loop through all of them
+                foreach (var prop in fields)
+                {
+                    // Grab the updated value
+                    var @value = prop.GetValue(update);
+                    // If it exists (its not null), then set it
+                    if (@value != null)
+                    {
+                        object test = previousValue;
+                        prop.SetValue(test, @value);
+                        previousValue = (TValue)test;
                     }
                 }
                 
@@ -224,7 +243,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="key">The key to delete</param>
         /// <param name="reason">The reason this key was deleted using an ErrorResponse</param>
         /// <returns></returns>
-        public Task Delete(TKey key, ErrorResponse reason)
+        public Task Delete(TKey key, Error reason)
         {
             IsInitialized();
 
@@ -233,6 +252,13 @@ namespace WalletConnectSharp.Core.Controllers
             map.Remove(key);
 
             return Persist();
+        }
+
+        public IDictionary<TKey, TValue> ToDictionary()
+        {
+            IsInitialized();
+
+            return new ReadOnlyDictionary<TKey, TValue>(map);
         }
 
         protected virtual Task SetDataStore(TValue[] data)

@@ -8,6 +8,6 @@ namespace WalletConnectSharp.Crypto.Models
     public class IridiumJWTSigned : IridiumJWTData
     {
         [JsonProperty("signature")]
-        public byte[] Signature { get; set; }
+        public byte[] Signature;
     }
 }

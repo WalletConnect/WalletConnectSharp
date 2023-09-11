@@ -12,12 +12,11 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
         /// The name of the event
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; set; }
-        
+        public string Name;
+
         /// <summary>
         /// The event data associated with this event
         /// </summary>
-        [JsonProperty("data")]
-        public T Data { get; set; }
+        [JsonProperty("data")] public T Data;
     }
 }

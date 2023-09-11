@@ -24,6 +24,8 @@ namespace WalletConnectSharp.Network
         /// </summary>
         string Url { get; }
 
+        bool IsPaused { get; }
+
         /// <summary>
         /// Open this connection
         /// </summary>

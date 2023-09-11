@@ -27,9 +27,9 @@ namespace WalletConnectSharp.Common.Model.Errors
         /// <param name="type">The error type message to generate</param>
         /// <param name="params">A dictionary (or anonymous type) of parameters for the error message</param>
         /// <returns>The error message as a string</returns>
-        public static string MessageFromType(ErrorType type, object @params = null)
+        public static string MessageFromType(ErrorType type, Dictionary<string, object> @params = null)
         {
-            return MessageFromType(type, null, @params.AsDictionary());
+            return MessageFromType(type, null, @params);
         }
         
         /// <summary>
@@ -47,8 +47,8 @@ namespace WalletConnectSharp.Common.Model.Errors
                 @params = new Dictionary<string, object>();
             }
             
-            if (!string.IsNullOrWhiteSpace(message) && !@params.ContainsKey("message"))
-                @params.Add("message", message);
+            if (!string.IsNullOrWhiteSpace(message))
+                @params.TryAdd("message", message);
             
             string errorMessage;
             switch (type)
