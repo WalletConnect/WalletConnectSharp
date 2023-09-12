@@ -15,19 +15,19 @@ namespace WalletConnectSharp.Core.Models.History
         /// The topic the request was sent in
         /// </summary>
         [JsonProperty("topic")]
-        public string Topic { get; set; }
+        public string Topic;
         
         /// <summary>
         /// The request parameters sent
         /// </summary>
         [JsonProperty("request")]
-        public IRequestArguments<T> Request { get; set; }
+        public IRequestArguments<T> Request;
         
         /// <summary>
         /// The chainId this request is intended for
         /// </summary>
         [JsonProperty("chainId")]
-        public string ChainId { get; set; }
+        public string ChainId;
 
         /// <summary>
         /// A helper function to create a new RequestEvent from a <see cref="JsonRpcRecord{T,R}"/> 

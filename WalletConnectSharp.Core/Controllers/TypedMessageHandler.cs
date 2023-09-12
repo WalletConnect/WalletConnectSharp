@@ -1,6 +1,9 @@
-﻿using WalletConnectSharp.Common.Model.Errors;
+﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Logging;
+using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
@@ -10,7 +13,8 @@ namespace WalletConnectSharp.Core.Controllers
     public class TypedMessageHandler : ITypedMessageHandler
     {
         private bool _initialized = false;
-        
+        private Dictionary<string, DecodeOptions> _decodeOptionsMap = new Dictionary<string, DecodeOptions>();
+
         public EventDelegator Events { get; }
         
         public ICore Core { get; }
@@ -59,7 +63,9 @@ namespace WalletConnectSharp.Core.Controllers
             var topic = e.EventData.Topic;
             var message = e.EventData.Message;
 
-            var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message);
+            var options = DecodeOptionForTopic(topic);
+
+            var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
             if (payload.IsRequest)
             {
                 Events.Trigger($"request_{payload.Method}", e.EventData);
@@ -94,8 +100,10 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 var topic = e.EventData.Topic;
                 var message = e.EventData.Message;
+                
+                var options = DecodeOptionForTopic(topic);
 
-                var payload = await this.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message);
+                var payload = await this.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message, options);
                 
                 (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
 
@@ -108,12 +116,28 @@ namespace WalletConnectSharp.Core.Controllers
                 
                 var topic = e.EventData.Topic;
                 var message = e.EventData.Message;
+                
+                var options = DecodeOptionForTopic(topic);
 
-                var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message);
+                var rawResultPayload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
 
-                await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
+                var history = await this.Core.History.JsonRpcHistoryOfType<T, TR>();
+                var expectingResult = await history.Exists(topic, rawResultPayload.Id);
 
-                await responseCallback(topic, payload);
+                try
+                {
+                    var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message, options);
+                    
+                    await history.Resolve(payload);
+
+                    await responseCallback(topic, payload);
+                }
+                catch (Exception ex) when (ex is JsonReaderException or JsonSerializationException)
+                {
+                    if (!expectingResult)
+                        return;
+                    throw;
+                }
             }
 
             async void InspectResponseRaw(object sender, GenericEvent<DecodedMessageEvent> e)
@@ -146,7 +170,7 @@ namespace WalletConnectSharp.Core.Controllers
                     // ignored if we can't find anything in the history
                 }
             }
-
+            
             Events.ListenFor<MessageEvent>($"request_{method}", RequestCallback);
             
             Events.ListenFor<MessageEvent>($"response_{method}", ResponseCallback);
@@ -255,7 +279,19 @@ namespace WalletConnectSharp.Core.Controllers
                 TTL = opts.TTL
             };
         }
-        
+
+        public void SetDecodeOptionsForTopic(DecodeOptions options, string topic)
+        {
+            _decodeOptionsMap.Add(topic, options);
+        }
+
+        public DecodeOptions DecodeOptionForTopic(string topic)
+        {
+            if (_decodeOptionsMap.ContainsKey(topic))
+                return _decodeOptionsMap[topic];
+            return null;
+        }
+
         /// <summary>
         /// Send a typed request message with the given request / response type pair T, TR to the given topic
         /// </summary>
@@ -265,13 +301,15 @@ namespace WalletConnectSharp.Core.Controllers
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
         /// <returns>The id of the request sent</returns>
-        public async Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null)
+        public async Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null, EncodeOptions options = null)
         {
             var method = RpcMethodAttribute.MethodForType<T>();
 
             var payload = new JsonRpcRequest<T>(method, parameters);
+            
+            WCLogger.Log(JsonConvert.SerializeObject(payload));
 
-            var message = await this.Core.Crypto.Encode(topic, payload);
+            var message = await this.Core.Crypto.Encode(topic, payload, options);
 
             var opts = RpcRequestOptionsFromType<T, TR>();
 
@@ -299,10 +337,10 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="result">The typed response message to send</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        public async Task SendResult<T, TR>(long id, string topic, TR result)
+        public async Task SendResult<T, TR>(long id, string topic, TR result, EncodeOptions options = null)
         {
             var payload = new JsonRpcResponse<TR>(id, null, result);
-            var message = await this.Core.Crypto.Encode(topic, payload);
+            var message = await this.Core.Crypto.Encode(topic, payload, options);
             var opts = RpcResponseOptionsFromTypes<T, TR>();
             await this.Core.Relayer.Publish(topic, message, opts);
             await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
@@ -316,13 +354,18 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="error">The error response to send</param>
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
-        public async Task SendError<T, TR>(long id, string topic, ErrorResponse error)
+        public async Task SendError<T, TR>(long id, string topic, Error error, EncodeOptions options = null)
         {
             var payload = new JsonRpcResponse<TR>(id, error, default);
-            var message = await this.Core.Crypto.Encode(topic, payload);
+            var message = await this.Core.Crypto.Encode(topic, payload, options);
             var opts = RpcResponseOptionsFromTypes<T, TR>();
             await this.Core.Relayer.Publish(topic, message, opts);
             await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
+        }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
         }
     }
 }

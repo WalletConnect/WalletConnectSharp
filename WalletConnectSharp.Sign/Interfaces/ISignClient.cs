@@ -1,4 +1,5 @@
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
@@ -37,6 +38,8 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// The <see cref="IProposal"/> module this Sign Client is using to store Proposal data
         /// </summary>
         IProposal Proposal { get; }
+        
+        IPendingRequests PendingRequests { get; }
 
         /// <summary>
         /// The options this Sign Client was initialized with

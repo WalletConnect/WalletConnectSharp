@@ -18,12 +18,12 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// The chainId this request should be performed in
         /// </summary>
         [JsonProperty("chainId")]
-        public string ChainId { get; set; }
+        public string ChainId;
         
         /// <summary>
         /// The JSON RPC request to send to the peer
         /// </summary>
         [JsonProperty("request")]
-        public JsonRpcRequest<T> Request { get; set; }
+        public JsonRpcRequest<T> Request;
     }
 }

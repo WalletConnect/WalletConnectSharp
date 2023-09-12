@@ -18,6 +18,6 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// The updated namespaces that are enabled for this session
         /// </summary>
         [JsonProperty("namespaces")]
-        public Namespaces Namespaces { get; set; }
+        public Namespaces Namespaces;
     }
 }

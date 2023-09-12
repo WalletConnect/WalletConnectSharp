@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Events
     /// provider can trigger any event for a given event data type.
     /// </summary>
     /// <typeparam name="T">The event data type this class triggers events with</typeparam>
-    public interface IEventProvider<in T>
+    public interface IEventProvider<in T> : IDisposable
     {
         /// <summary>
         /// Trigger the given event (using the event id) with the given event data.

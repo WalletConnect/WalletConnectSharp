@@ -1,3 +1,4 @@
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -72,6 +73,8 @@ namespace WalletConnectSharp.Core.Controllers
         private Dictionary<string, ActiveSubscription> _subscriptions = new Dictionary<string, ActiveSubscription>();
         private Dictionary<string, PendingSubscription> pending = new Dictionary<string, PendingSubscription>();
         private TaskCompletionSource<bool> restartTask = null;
+
+        private event EventHandler onSubscriberReady;
 
         public bool RestartInProgress
         {
@@ -163,6 +166,7 @@ namespace WalletConnectSharp.Core.Controllers
         private IRelayer _relayer;
         private bool initialized;
         private string clientId;
+        private ILogger logger;
         private ActiveSubscription[] cached = Array.Empty<ActiveSubscription>();
 
         /// <summary>
@@ -174,6 +178,8 @@ namespace WalletConnectSharp.Core.Controllers
             _relayer = relayer;
             
             Events = new EventDelegator(this);
+
+            logger = WCLogger.WithContext(Context);
         }
         
         /// <summary>
@@ -341,6 +347,9 @@ namespace WalletConnectSharp.Core.Controllers
         {
             cached = Array.Empty<ActiveSubscription>();
             initialized = true;
+            
+            if (onSubscriberReady != null)
+                onSubscriberReady(this, EventArgs.Empty);
         }
 
         protected virtual void OnDisconnect()
@@ -350,6 +359,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void OnDisable()
         {
+            logger.Log("OnDisable invoked");
             cached = Values;
             _subscriptions.Clear();
             _topicMap.Clear();
@@ -364,11 +374,13 @@ namespace WalletConnectSharp.Core.Controllers
             OnEnabled();
         }
 
-        private Task RestartToComplete()
+        private async Task RestartToComplete()
         {
-            if (!RestartInProgress) return Task.CompletedTask;
+            if (!RestartInProgress) return;
 
-            return restartTask.Task;
+            logger.Log("waiting for restart");
+            await restartTask.Task;
+            logger.Log("restart completed");
         }
 
         protected virtual void OnSubscribe(string id, PendingSubscription @params)
@@ -395,7 +407,7 @@ namespace WalletConnectSharp.Core.Controllers
             pending.Remove(@params.Topic);
         }
 
-        protected virtual async Task OnUnsubscribe(string topic, string id, ErrorResponse reason)
+        protected virtual async Task OnUnsubscribe(string topic, string id, Error reason)
         {
             // TODO Figure out how to do this
             //Events.RemoveListener(id);
@@ -445,7 +457,7 @@ namespace WalletConnectSharp.Core.Controllers
             );
         }
 
-        protected virtual void DeleteSubscription(string id, ErrorResponse reason)
+        protected virtual void DeleteSubscription(string id, Error reason)
         {
             var subscription = GetSubscription(id);
             _subscriptions.Remove(id);
@@ -474,7 +486,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
 
             await RpcUnsubscribe(topic, id, opts.Relay);
-            ErrorResponse reason = null;
+            Error reason = null;
             await OnUnsubscribe(topic, id, reason);
         }
 
@@ -610,7 +622,7 @@ namespace WalletConnectSharp.Core.Controllers
             try
             {
                 return await this._relayer.Request<BatchSubscribeParams, string[]>(request)
-                    .WithTimeout(TimeSpan.FromSeconds(10));
+                    .WithTimeout(TimeSpan.FromSeconds(45));
             }
             catch (Exception e)
             {
@@ -641,6 +653,12 @@ namespace WalletConnectSharp.Core.Controllers
                 SetSubscription(sub.Id, sub);
                 this.pending.Remove(sub.Topic);
             }
+        }
+
+        public void Dispose()
+        {
+            _relayer?.Dispose();
+            Events?.Dispose();
         }
     }
 }

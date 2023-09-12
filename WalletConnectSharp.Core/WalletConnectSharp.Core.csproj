@@ -7,7 +7,7 @@
         <FileVersion>$(DefaultVersion)</FileVersion>
         <PackageId>WalletConnect.Core</PackageId>
         <Title>WalletConnectSharp.Core</Title>
-        <Authors>pedrouid, gigajuwels, edkek</Authors>
+        <Authors>pedrouid, gigajuwels</Authors>
         <Description>A port of the TypeScript SDK to C#. A complete implementation of the WalletConnect v2 protocol that can be used to connect to external wallets or connect a wallet to an external Dapp</Description>
         <Copyright>Copyright (c) WalletConnect 2023</Copyright>
         <PackageProjectUrl>https://walletconnect.org/</PackageProjectUrl>
@@ -22,6 +22,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Core Modules\WalletConnectSharp.Crypto\WalletConnectSharp.Crypto.csproj" />
       <ProjectReference Include="..\Core Modules\WalletConnectSharp.Network.Websocket\WalletConnectSharp.Network.Websocket.csproj" />
+      <ProjectReference Include="..\Core Modules\WalletConnectSharp.Network\WalletConnectSharp.Network.csproj" />
     </ItemGroup>
 
     <ItemGroup>

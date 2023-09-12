@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model;
 using WalletConnectSharp.Events.Model;
 
@@ -19,6 +20,7 @@ namespace WalletConnectSharp.Events
     /// </summary>
     public class EventDelegator : IModule
     {
+        private static readonly object _contextLock = new object();
         private static HashSet<string> contextInstances = new HashSet<string>();
 
         private readonly object _cacheLock = new object();
@@ -46,11 +48,14 @@ namespace WalletConnectSharp.Events
             this.Name = parent + ":event-delegator";
             this.Context = parent.Context;
 
-            if (contextInstances.Contains(Context))
-                throw new ArgumentException(
-                    $"The module {parent.Name} with context {Context} is attempting to create a new EventDelegator that overlaps with an existing EventDelegator");
-            
-            contextInstances.Add(Context);
+            lock (_contextLock)
+            {
+                if (contextInstances.Contains(Context))
+                    throw new ArgumentException(
+                        $"The module {parent.Name} with context {Context} is attempting to create a new EventDelegator that overlaps with an existing EventDelegator");
+
+                contextInstances.Add(Context);
+            }
         }
 
         /// <summary>
@@ -74,7 +79,7 @@ namespace WalletConnectSharp.Events
         /// <param name="callback">The callback to invoke when the event is triggered</param>
         /// <typeparam name="T">The type of event data the callback MUST be given</typeparam>
         public void ListenFor<T>(string eventId, EventHandler<GenericEvent<T>> callback)
-        {  
+        {
             EventManager<T, GenericEvent<T>>.InstanceOf(Context).EventTriggers[eventId] += callback;
         }
 
@@ -231,14 +236,58 @@ namespace WalletConnectSharp.Events
                     propagateEventMethod.Invoke(genericProvider, new object[] { eventId, eventData });
                     wasTriggered = true;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    WCLogger.LogError(e);
+                    WCLogger.Log($"[EventDelegator] Error Invoking EventFactory<{type.FullName}>.Provider.PropagateEvent({eventId}, {eventData})");
                     if (raiseOnException)
                         throw;
                 }
             }
 
             return wasTriggered;
+        }
+
+        public void Dispose()
+        {
+            lock (_cacheLock)
+            {
+                // loop through all cached types and remove all listeners
+                foreach (var eventType in _typeToTriggerTypes.Keys)
+                {
+                    var allPossibleTypes = _typeToTriggerTypes[eventType];
+
+                    // loop through all possible types of an event type, since
+                    // event listeners can be anywhere
+                    foreach (var type in allPossibleTypes)
+                    {
+                        var genericFactoryType = typeof(EventFactory<>).MakeGenericType(type);
+
+                        var instanceProperty = genericFactoryType.GetMethod("InstanceOf");
+                        if (instanceProperty == null) continue;
+
+                        var genericFactory = instanceProperty.Invoke(null, new object[] { Context });
+
+                        var genericProviderProperty = genericFactoryType.GetProperty("Provider");
+                        if (genericProviderProperty == null) continue;
+
+                        var genericProvider = genericProviderProperty.GetValue(genericFactory);
+                        if (genericProvider == null) continue;
+
+                        // type of IEventProvider is IDisposable
+                        IDisposable disposable = (IDisposable)genericProvider;
+
+                        // dispose of this provider
+                        disposable.Dispose();
+                    }
+                }
+            }
+
+            lock (_contextLock)
+            {
+                if (contextInstances.Contains(Context))
+                    contextInstances.Remove(Context);
+            }
         }
     }
 }

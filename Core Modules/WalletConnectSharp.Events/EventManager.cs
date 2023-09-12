@@ -85,5 +85,15 @@ namespace WalletConnectSharp.Events
                 }
             }
         }
+
+        public void Dispose()
+        {
+            EventTriggers.Dispose();
+            lock (_managerLock)
+            {
+                if (_instances.ContainsKey(Context))
+                    _instances.Remove(Context);
+            }
+        }
     }
 }

@@ -11,6 +11,6 @@ namespace WalletConnectSharp.Crypto.Models
         /// The public key that received this encoded message
         /// </summary>
         [JsonProperty("receiverPublicKey")]
-        public string ReceiverPublicKey { get; set; }
+        public string ReceiverPublicKey;
     }
 }

@@ -1,12 +1,15 @@
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
+using WalletConnectSharp.Network.Websocket;
 
 namespace WalletConnectSharp.Core
 {
@@ -34,6 +37,7 @@ namespace WalletConnectSharp.Core
             }
         }
 
+        private string guid = "";
         /// <summary>
         /// The current context of this module instance. 
         /// </summary>
@@ -41,7 +45,7 @@ namespace WalletConnectSharp.Core
         {
             get
             {
-                return Name;
+                return $"{Name}{guid}";
             }
         }
 
@@ -109,6 +113,10 @@ namespace WalletConnectSharp.Core
         /// </summary>
         public IPairing Pairing { get; }
 
+        public Verifier Verify { get; }
+        
+        public CoreOptions Options { get; }
+
         /// <summary>
         /// Create a new Core with the given options.
         /// </summary>
@@ -132,20 +140,51 @@ namespace WalletConnectSharp.Core
                 options.Storage = new FileSystemStorage();
             }
 
-            if (options.KeyChain == null)
-            {
-                options.KeyChain = new KeyChain(options.Storage);
-            }
 
+            options.ConnectionBuilder ??= new WebsocketConnectionBuilder();
+
+            Options = options;
             ProjectId = options.ProjectId;
             RelayUrl = options.RelayUrl;
-            Crypto = new Crypto.Crypto(options.KeyChain);
             Storage = options.Storage;
+            
+            if (options.CryptoModule != null)
+            {
+                Crypto = options.CryptoModule;
+            }
+            else
+            {
+                if (options.KeyChain == null)
+                {
+                    options.KeyChain = new KeyChain(options.Storage);
+                }
+                
+                Crypto = new Crypto.Crypto(options.KeyChain);
+            }
+            
             HeartBeat = new HeartBeat();
             _optName = options.Name;
-            Events = new EventDelegator(this);
+
+            try
+            {
+                Events = new EventDelegator(this);
+            }
+            catch (ArgumentException)
+            {
+                // the context is likely being re-used. Let's randomize the context
+                // and log an error
+                WCLogger.LogError("The WalletConnectCore class is being re-initialized! It's likely a previous " +
+                                  "instance was not disposed of. It's recommended to re-use the same WalletConnectCore " +
+                                  "instance for the same project in the same runtime, event listener leaking can occur.");
+
+                guid = $"-{Guid.NewGuid().ToString()}";
+
+                Events = new EventDelegator(this);
+            }
+
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
+            Verify = new Verifier();
             
             Relayer = new Relayer(new RelayerOptions()
             {
@@ -179,6 +218,18 @@ namespace WalletConnectSharp.Core
             await Expirer.Init();
             await MessageHandler.Init();
             await Pairing.Init();
+        }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            HeartBeat?.Dispose();
+            Crypto?.Dispose();
+            Relayer?.Dispose();
+            Storage?.Dispose();
+            MessageHandler?.Dispose();
+            Expirer?.Dispose();
+            Pairing?.Dispose();
         }
     }
 }

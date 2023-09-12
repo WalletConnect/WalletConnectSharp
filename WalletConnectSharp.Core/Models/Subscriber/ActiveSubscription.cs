@@ -11,6 +11,6 @@ namespace WalletConnectSharp.Core.Models.Subscriber
         /// The id of the subscription
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id;
     }
 }

@@ -9,7 +9,7 @@ namespace WalletConnectSharp.Core.Models.Pairing.Methods
     [RpcMethod("wc_pairingDelete")]
     [RpcRequestOptions(Clock.ONE_DAY, 1000)]
     [RpcResponseOptions(Clock.ONE_DAY, 1001)]
-    public class PairingDelete : ErrorResponse
+    public class PairingDelete : Error
     {
     }
 }

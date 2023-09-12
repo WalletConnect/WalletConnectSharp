@@ -1,6 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using WalletConnectSharp.Core.Interfaces;
+﻿using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 
@@ -13,7 +12,9 @@ namespace WalletConnectSharp.Sign.Models
     /// <typeparam name="T">The type of the session request</typeparam>
     /// <typeparam name="TR">The type of the response for the session request</typeparam>
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
-    { 
+    {
+        private IEnginePrivate _enginePrivate;
+        
         /// <summary>
         /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
         /// string of the given <see cref="IEngine"/> will be used to determine the singleton instance to
@@ -23,26 +24,27 @@ namespace WalletConnectSharp.Sign.Models
         /// <param name="engine">The engine this singleton instance is for, and where the context string will
         /// be read from</param>
         /// <returns>The singleton instance to use for request/response event handlers</returns>
-        public static new TypedEventHandler<T, TR> GetInstance(ICore engine)
+        public static new TypedEventHandler<T, TR> GetInstance(ICore engine, IEnginePrivate _enginePrivate)
         {
             var context = engine.Context;
             
             if (_instances.ContainsKey(context)) return _instances[context];
 
-            var _instance = new SessionRequestEventHandler<T, TR>(engine);
+            var _instance = new SessionRequestEventHandler<T, TR>(engine, _enginePrivate);
             
             _instances.Add(context, _instance);
 
             return _instance;
         }
         
-        protected SessionRequestEventHandler(ICore engine) : base(engine)
+        protected SessionRequestEventHandler(ICore engine, IEnginePrivate enginePrivate) : base(engine)
         {
+            this._enginePrivate = enginePrivate;
         }
 
         protected override TypedEventHandler<T, TR> BuildNew(ICore _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
-            return new SessionRequestEventHandler<T, TR>(_ref)
+            return new SessionRequestEventHandler<T, TR>(_ref, _enginePrivate)
             {
                 requestPredicate = requestPredicate,
                 responsePredicate = responsePredicate
@@ -62,12 +64,35 @@ namespace WalletConnectSharp.Sign.Models
             return base.ResponseCallback(e.Topic, e.Response);
         }
 
-        private Task WrappedRefOnOnRequest(RequestEventArgs<SessionRequest<T>, TR> e)
+        private async Task WrappedRefOnOnRequest(RequestEventArgs<SessionRequest<T>, TR> e)
         {
-            //Set inner request id to match outer request id
-            e.Request.Params.Request.Id = e.Request.Id;
+            // Ensure that the request is for us
+            var method = RpcMethodAttribute.MethodForType<T>();
+
+            var sessionRequest = e.Request.Params.Request;
             
-            return base.RequestCallback(e.Topic, e.Request.Params.Request);
+            if (sessionRequest.Method != method) return;
+
+            //Set inner request id to match outer request id
+            sessionRequest.Id = e.Request.Id;
+            
+            //Add to pending requests
+            //We can't do a simple cast, so we need to copy all the data
+            await _enginePrivate.SetPendingSessionRequest(new PendingRequestStruct()
+            {
+                Id = e.Request.Id, Parameters = new SessionRequest<object>()
+                {
+                    ChainId = e.Request.Params.ChainId,
+                    Request = new JsonRpcRequest<object>()
+                    {
+                        Id = sessionRequest.Id,
+                        Method = sessionRequest.Method,
+                        Params = sessionRequest.Params
+                    }
+                }, Topic = e.Topic
+            });
+
+            await base.RequestCallback(e.Topic, sessionRequest);
         }
     }
 }

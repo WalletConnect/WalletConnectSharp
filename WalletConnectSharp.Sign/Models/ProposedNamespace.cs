@@ -13,13 +13,13 @@ namespace WalletConnectSharp.Sign.Models
         /// A list of all chains that are required to be enabled in this namespace
         /// </summary>
         [JsonProperty("chains")]
-        public string[] Chains { get; set; }
+        public string[] Chains;
         
         /// <summary>
         /// A list of all methods that are required to be enabled in this namespace
         /// </summary>
         [JsonProperty("methods")]
-        public string[] Methods { get; set; }
+        public string[] Methods;
         
         /// <summary>
         /// A list of all events that are required to be enabled in this namespace
@@ -69,5 +69,75 @@ namespace WalletConnectSharp.Sign.Models
             Events = Events.Append(@event).ToArray();
             return this;
         }
+
+        public Namespace WithAccount(string account)
+        {
+            return new Namespace(this).WithAccount(account);
+        }
+
+        protected bool Equals(ProposedNamespace other)
+        {
+            return Equals(Chains, other.Chains) && Equals(Methods, other.Methods) && Equals(Events, other.Events);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+
+            return Equals((ProposedNamespace)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Chains, Methods, Events);
+        }
+
+        private sealed class RequiredNamespaceEqualityComparer : IEqualityComparer<ProposedNamespace>
+        {
+            public bool Equals(ProposedNamespace x, ProposedNamespace y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(x, null))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
+                return x.Chains.SequenceEqual(y.Chains) && x.Methods.SequenceEqual(y.Methods) && x.Events.SequenceEqual(y.Events);
+            }
+
+            public int GetHashCode(ProposedNamespace obj)
+            {
+                return HashCode.Combine(obj.Chains, obj.Methods, obj.Events);
+            }
+        }
+
+        public static IEqualityComparer<ProposedNamespace> RequiredNamespaceComparer { get; } = new RequiredNamespaceEqualityComparer();
     }
 }

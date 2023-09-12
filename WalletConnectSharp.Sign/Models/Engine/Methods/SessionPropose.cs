@@ -19,30 +19,30 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
         /// Protocol options that should be used during the session
         /// </summary>
         [JsonProperty("relays")]
-        public ProtocolOptions[] Relays { get; set; }
+        public ProtocolOptions[] Relays;
         
         /// <summary>
         /// The required namespaces this session will require
         /// </summary>
         [JsonProperty("requiredNamespaces")]
-        public RequiredNamespaces RequiredNamespaces { get; set; }
+        public RequiredNamespaces RequiredNamespaces;
         
         /// <summary>
         /// The optional namespaces for this session
         /// </summary>
         [JsonProperty("optionalNamespaces")]
-        public Dictionary<string, ProposedNamespace> OptionalNamespaces { get; set; }
+        public Dictionary<string, ProposedNamespace> OptionalNamespaces;
         
         /// <summary>
         /// Custom session properties for this session
         /// </summary>
         [JsonProperty("sessionProperties")]
-        public Dictionary<string, string> SessionProperties { get; set; }
+        public Dictionary<string, string> SessionProperties;
         
         /// <summary>
         /// The <see cref="Participant"/> that created this session proposal
         /// </summary>
         [JsonProperty("proposer")]
-        public Participant Proposer { get; set; }
+        public Participant Proposer;
     }
 }

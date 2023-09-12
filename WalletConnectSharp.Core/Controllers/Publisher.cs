@@ -46,6 +46,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        private readonly object _queueLock = new object();
         protected Dictionary<string, PublishParams> queue = new Dictionary<string, PublishParams>();
 
         /// <summary>
@@ -67,23 +68,48 @@ namespace WalletConnectSharp.Core.Controllers
 
         private async void CheckQueue()
         {
-            // Unroll here so we don't deal with "collection modified" errors
-            var keys = queue.Keys.ToArray();
-            
-            foreach (var key in keys)
+            List<PublishParams> temp = new List<PublishParams>();
+            lock (_queueLock)
             {
-                if (!queue.ContainsKey(key)) continue;
-                var @params = queue[key];
-                
+                var keys = queue.Keys.ToArray();
+
+                foreach (var key in keys)
+                {
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(key)) continue;
+                        if (!queue.ContainsKey(key)) continue;
+                        var @params = queue[key];
+
+                        temp.Add(@params);
+                        
+                        var hash = HashUtils.HashMessage(@params.Message);
+                        this.queue.Remove(hash);
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        // ignore ..
+                    }
+                }
+            }
+
+            foreach (var @params in temp)
+            {
                 var hash = HashUtils.HashMessage(@params.Message);
-                await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay);
+                await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag,
+                    @params.Options.Relay);
                 OnPublish(hash);
             }
         }
 
         private void OnPublish(string hash)
         {
-            this.queue.Remove(hash);
+            lock (_queueLock)
+            {
+                if (!this.queue.ContainsKey(hash)) return;
+                
+                this.queue.Remove(hash);
+            }
         }
 
         protected Task RpcPublish(string topic, string message, long ttl, long tag, ProtocolOptions relay)
@@ -143,11 +169,15 @@ namespace WalletConnectSharp.Core.Controllers
             };
 
             var hash = HashUtils.HashMessage(message);
-            queue.Add(hash, @params);
+            lock (_queueLock)
+            {
+                queue.Add(hash, @params);
+            }
+
             try
             {
                 await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay)
-                    .WithTimeout(TimeSpan.FromSeconds(10));
+                    .WithTimeout(TimeSpan.FromSeconds(45));
                 this.Relayer.Events.Trigger(RelayerEvents.Publish, @params);
                 OnPublish(hash);
             }
@@ -156,6 +186,12 @@ namespace WalletConnectSharp.Core.Controllers
                 this.Relayer.Events.Trigger<object>(RelayerEvents.ConnectionStalled, new object());
                 return;
             }
+        }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            Relayer?.Dispose();
         }
     }
 }

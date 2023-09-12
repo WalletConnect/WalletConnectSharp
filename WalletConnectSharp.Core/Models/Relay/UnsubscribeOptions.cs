@@ -11,6 +11,6 @@ namespace WalletConnectSharp.Core.Models.Relay
         /// The id of the subscription to unsubscribe from
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id;
     }
 }

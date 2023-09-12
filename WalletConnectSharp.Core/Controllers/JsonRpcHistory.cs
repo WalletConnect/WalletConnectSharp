@@ -32,7 +32,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             get
             {
-                return $"{_core.Name}-history-of-type-{typeof(T).Name}";
+                return $"{_core.Name}-history-of-type-{typeof(T).FullName}-{typeof(TR).FullName}";
             }
         }
 
@@ -179,10 +179,12 @@ namespace WalletConnectSharp.Core.Controllers
             IsInitialized();
 
             var record = GetRecord(id);
-            if (topic != record.Topic)
+            
+            // TODO Log
+            /*if (topic != record.Topic)
             {
                 throw WalletConnectException.FromType(ErrorType.MISMATCHED_TOPIC, $"{Name}: {id}");
-            }
+            }*/
             
             return Task.FromResult<JsonRpcRecord<T, TR>>(record);
         }
@@ -235,11 +237,20 @@ namespace WalletConnectSharp.Core.Controllers
         /// <returns>True if the request with the given topic and id exists, false otherwise</returns>
         public Task<bool> Exists(string topic, long id)
         {
-            IsInitialized();
-            if (_records.ContainsKey(id)) return Task.FromResult<bool>(false);
-            var record = GetRecord(id);
+            try
+            {
+                IsInitialized();
+                if (_records.ContainsKey(id)) return Task.FromResult<bool>(false);
+                var record = GetRecord(id);
 
-            return Task.FromResult(record.Topic == topic);
+                return Task.FromResult(record.Topic == topic);
+            }
+            catch (WalletConnectException e)
+            {
+                if (e.CodeType == ErrorType.NO_MATCHING_KEY)
+                    return Task.FromResult(false);
+                throw;
+            }
         }
 
         private Task SetJsonRpcRecords(JsonRpcRecord<T, TR>[] records)
@@ -261,7 +272,10 @@ namespace WalletConnectSharp.Core.Controllers
 
             if (!_records.ContainsKey(id))
             {
-                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new {Tag = $"{Name}: {id}"});
+                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new Dictionary<string, object>()
+                {
+                    {"Tag", $"{Name}: {id}"}
+                });
             }
 
             return _records[id];
@@ -308,6 +322,12 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, Name);
             }
+        }
+
+        public void Dispose()
+        {
+            _core?.Dispose();
+            Events?.Dispose();
         }
     }
 }

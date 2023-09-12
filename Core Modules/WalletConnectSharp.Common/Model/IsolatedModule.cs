@@ -38,5 +38,7 @@ namespace WalletConnectSharp.Common.Model
 
             activeModules.Add(_guid);
         }
+
+        public void Dispose() { }
     }
 }

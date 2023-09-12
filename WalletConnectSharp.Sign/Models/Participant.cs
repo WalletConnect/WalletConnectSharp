@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
 
@@ -14,12 +15,12 @@ namespace WalletConnectSharp.Sign.Models
         /// The public key of this participant, encoded as a hex string
         /// </summary>
         [JsonProperty("publicKey")]
-        public string PublicKey { get; set; }
+        public string PublicKey;
         
         /// <summary>
         /// The metadata for this participant
         /// </summary>
         [JsonProperty("metadata")]
-        public Metadata Metadata { get; set; }
+        public Metadata Metadata;
     }
 }

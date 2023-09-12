@@ -36,6 +36,12 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
+        public bool IsPaused
+        {
+            get;
+            internal set;
+        }
+
         /// <summary>
         /// The name of this websocket connection module
         /// </summary>
@@ -180,6 +186,9 @@ namespace WalletConnectSharp.Network.Websocket
 
         private void OnOpen(WebsocketClient socket)
         {
+            if (socket == null)
+                return;
+            
             socket.MessageReceived.Subscribe(OnPayload);
             socket.DisconnectionHappened.Subscribe(OnDisconnect);
 
@@ -222,6 +231,8 @@ namespace WalletConnectSharp.Network.Websocket
             }
 
             if (string.IsNullOrWhiteSpace(json)) return;
+            
+            //Console.WriteLine($"[{Name}] Got payload {json}");
 
             Events.Trigger(WebsocketConnectionEvents.Payload, json);
         }
@@ -322,7 +333,7 @@ namespace WalletConnectSharp.Network.Websocket
                 ? new IOException("Unavailable WS RPC url at " + _url) : e;
 
             var message = exception.Message;
-            var payload = new JsonRpcResponse<T>(ogPayload.Id, new ErrorResponse()
+            var payload = new JsonRpcResponse<T>(ogPayload.Id, new Error()
             {
                 Code = exception.HResult,
                 Data = null,

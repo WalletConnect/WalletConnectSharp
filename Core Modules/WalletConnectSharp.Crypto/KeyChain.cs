@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Crypto.Interfaces;
@@ -142,7 +138,10 @@ namespace WalletConnectSharp.Crypto
 
             if (!await Has(tag))
             {
-                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new {tag});
+                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new Dictionary<string, object>()
+                {
+                    {"tag", tag}
+                });
             }
 
             return this._keyChain[tag];
@@ -160,7 +159,10 @@ namespace WalletConnectSharp.Crypto
             
             if (!await Has(tag))
             {
-                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new {tag});
+                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new Dictionary<string, object>()
+                {
+                    {"tag", tag}
+                });
             }
 
             _keyChain.Remove(tag);
@@ -172,7 +174,10 @@ namespace WalletConnectSharp.Crypto
         {
             if (!this._initialized)
             {
-                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new {Name});
+                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new Dictionary<string, object>()
+                {
+                    {"Name", Name}
+                });
             }
         }
         
@@ -189,6 +194,12 @@ namespace WalletConnectSharp.Crypto
         private async Task SaveKeyChain()
         {
             await Storage.SetItem(StorageKey, this._keyChain);
+        }
+
+        public void Dispose()
+        {
+            _keyChain?.Clear();
+            Storage?.Dispose();
         }
     }
 }

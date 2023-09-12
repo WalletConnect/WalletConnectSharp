@@ -11,30 +11,30 @@ namespace WalletConnectSharp.Crypto.Models
         /// The message to encrypt
         /// </summary>
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message;
         
         /// <summary>
         /// The Sym key to use for encrypting
         /// </summary>
         [JsonProperty("symKey")]
-        public string SymKey { get; set; }
+        public string SymKey;
         
         /// <summary>
         /// The envelope type to use when encrypting
         /// </summary>
         [JsonProperty("type")]
-        public int Type { get; set; }
+        public int Type;
         
         /// <summary>
         /// The IV to use for the encryption
         /// </summary>
         [JsonProperty("iv")]
-        public string Iv { get; set; }
+        public string Iv;
         
         /// <summary>
         /// The public key of the sender of this encrypted message
         /// </summary>
         [JsonProperty("senderPublicKey")]
-        public string SenderPublicKey { get; set; }
+        public string SenderPublicKey;
     }
 }

@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
@@ -9,7 +10,6 @@ using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
-using WalletConnectSharp.Network.Websocket;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -141,12 +141,18 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         public async Task Init()
         {
+            WCLogger.Log("[Relayer] Creating provider");
             await CreateProvider();
 
+            WCLogger.Log("[Relayer] Opening transport");
+            await TransportOpen();
+            
+            WCLogger.Log("[Relayer] Init MessageHandler and Subscriber");
             await Task.WhenAll(
-                Messages.Init(), TransportOpen(), Subscriber.Init()
+                Messages.Init(), Subscriber.Init()
             );
 
+            WCLogger.Log("[Relayer] Registering event listeners");
             RegisterEventListeners();
             
             initialized = true;
@@ -169,24 +175,30 @@ namespace WalletConnectSharp.Core.Controllers
         protected virtual async Task CreateProvider()
         {
             var auth = await this.Core.Crypto.SignJwt(this.relayUrl);
-            Provider = CreateProvider(auth);
+            Provider = await CreateProvider(auth);
             RegisterProviderEventListeners();
         }
 
-        protected virtual IJsonRpcProvider CreateProvider(string auth)
+        protected virtual async Task<IJsonRpcProvider> CreateProvider(string auth)
         {
-            return new JsonRpcProvider(
-                new WebsocketConnection(
-                    RelayUrl.FormatRelayRpcUrl(
-                        relayUrl,
-                        IRelayer.Protocol,
-                        IRelayer.Version.ToString(),
-                        SDKConstants.SDK_VERSION,
-                        projectId,
-                        auth
-                    )
+            var connection = await BuildConnection(
+                RelayUrl.FormatRelayRpcUrl(
+                    relayUrl,
+                    IRelayer.Protocol,
+                    IRelayer.Version.ToString(),
+                    SDKConstants.SDK_VERSION,
+                    projectId,
+                    auth
                 )
             );
+            
+            return new JsonRpcProvider(connection);
+        }
+
+        protected virtual Task<IJsonRpcConnection> BuildConnection(string url)
+        {
+            return Core.Options.ConnectionBuilder.CreateConnection(url);
+            //return new WebsocketConnection(url);
         }
 
         protected virtual void RegisterProviderEventListeners()
@@ -224,6 +236,9 @@ namespace WalletConnectSharp.Core.Controllers
         {
             this.Events.ListenFor<object>(RelayerEvents.ConnectionStalled, async (sender, @event) =>
             {
+                if (this.Provider.Connection.IsPaused)
+                    return;
+                
                 await this.RestartTransport();
             });
         }
@@ -315,7 +330,7 @@ namespace WalletConnectSharp.Core.Controllers
             this.Subscriber.Once<ActiveSubscription>(Controllers.Subscriber.SubscriberEvents.Created, (sender, @event) =>
             {
                 if (@event.EventData.Topic == topic)
-                    task1.SetResult("");
+                    task1.TrySetResult("");
             });
 
             return (await Task.WhenAll(
@@ -338,7 +353,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         public async Task<TR> Request<T, TR>(IRequestArguments<T> request, object context = null)
         {
+            WCLogger.Log("[Relayer] Checking for established connection");
             await this.ToEstablishConnection();
+            
+            WCLogger.Log("[Relayer] Sending request through provider");
             return await this.Provider.Request<T, TR>(request, context);
         }
 
@@ -442,13 +460,22 @@ namespace WalletConnectSharp.Core.Controllers
 
         private async Task ToEstablishConnection()
         {
-            if (Connected) return;
+            if (Connected)
+            {
+                while (Provider.Connection.IsPaused)
+                {
+                    WCLogger.Log("[Relayer] Waiting for connection to unpause");
+                    await Task.Delay(2);
+                }
+                return;
+            }
             if (Connecting)
             {
                 // Check for connection
                 while (Connecting)
                 {
-                    await Task.Delay(20);
+                    WCLogger.Log("[Relayer] Waiting for connection to open");
+                    await Task.Delay(2);
                 }
 
                 if (!Connected && !Connecting)
@@ -457,7 +484,17 @@ namespace WalletConnectSharp.Core.Controllers
                 return;
             }
 
+            WCLogger.Log("[Relayer] Restarting transport");
             await this.RestartTransport();
+        }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            // Core?.Dispose();
+            Subscriber?.Dispose();
+            Publisher?.Dispose();
+            Messages?.Dispose();
         }
     }
 }
