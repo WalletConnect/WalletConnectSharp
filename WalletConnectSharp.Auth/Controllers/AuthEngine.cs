@@ -392,4 +392,8 @@ public partial class AuthEngine : IAuthEngine
             throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, Name);
         }
     }
+
+    public void Dispose()
+    {
+    }
 }

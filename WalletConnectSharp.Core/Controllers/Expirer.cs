@@ -377,5 +377,10 @@ namespace WalletConnectSharp.Core.Controllers
             
             return $"{targetType}:{key}";
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+        }
     }
 }

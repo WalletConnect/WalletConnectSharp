@@ -162,4 +162,14 @@ public class WalletConnectAuthClient : IAuthClient
 
         return false;
     }
+
+    public void Dispose()
+    {
+        Events?.Dispose();
+        Core?.Dispose();
+        AuthKeys?.Dispose();
+        PairingTopics?.Dispose();
+        Requests?.Dispose();
+        Engine?.Dispose();
+    }
 }

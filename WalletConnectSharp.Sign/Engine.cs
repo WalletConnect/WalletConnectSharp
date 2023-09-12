@@ -741,5 +741,11 @@ namespace WalletConnectSharp.Sign
         {
             return Reject(proposalStruct.RejectProposal(error));
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            Client?.Dispose();
+        }
     }
 }

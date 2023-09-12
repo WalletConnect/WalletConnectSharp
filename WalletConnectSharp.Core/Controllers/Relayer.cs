@@ -487,5 +487,14 @@ namespace WalletConnectSharp.Core.Controllers
             WCLogger.Log("[Relayer] Restarting transport");
             await this.RestartTransport();
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            // Core?.Dispose();
+            Subscriber?.Dispose();
+            Publisher?.Dispose();
+            Messages?.Dispose();
+        }
     }
 }

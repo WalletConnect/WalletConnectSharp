@@ -75,5 +75,10 @@ namespace WalletConnectSharp.Storage
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, "Storage");
             }
         }
+
+        public void Dispose()
+        {
+            Entries?.Clear();
+        }
     }
 }

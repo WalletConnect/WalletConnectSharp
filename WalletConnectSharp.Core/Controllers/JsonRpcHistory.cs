@@ -323,5 +323,11 @@ namespace WalletConnectSharp.Core.Controllers
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, Name);
             }
         }
+
+        public void Dispose()
+        {
+            _core?.Dispose();
+            Events?.Dispose();
+        }
     }
 }

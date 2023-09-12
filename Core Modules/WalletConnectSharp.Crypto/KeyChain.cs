@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Crypto.Interfaces;
@@ -198,6 +194,12 @@ namespace WalletConnectSharp.Crypto
         private async Task SaveKeyChain()
         {
             await Storage.SetItem(StorageKey, this._keyChain);
+        }
+
+        public void Dispose()
+        {
+            _keyChain?.Clear();
+            Storage?.Dispose();
         }
     }
 }

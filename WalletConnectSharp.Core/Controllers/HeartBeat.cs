@@ -1,10 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -98,6 +94,11 @@ namespace WalletConnectSharp.Core.Controllers
         private void Pulse()
         {
             Events.Trigger(HeartbeatEvents.Pulse, PULSE_OBJECT);
+        }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
         }
     }
 }

@@ -654,5 +654,11 @@ namespace WalletConnectSharp.Core.Controllers
                 this.pending.Remove(sub.Topic);
             }
         }
+
+        public void Dispose()
+        {
+            _relayer?.Dispose();
+            Events?.Dispose();
+        }
     }
 }

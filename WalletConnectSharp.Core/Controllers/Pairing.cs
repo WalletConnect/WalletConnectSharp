@@ -492,5 +492,11 @@ namespace WalletConnectSharp.Core.Controllers
                 });
             }
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            Store?.Dispose();
+        }
     }
 }

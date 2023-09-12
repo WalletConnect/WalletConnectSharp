@@ -405,5 +405,15 @@ namespace WalletConnectSharp.Sign
             await Proposal.Init();
             await Engine.Init();
         }
+
+        public void Dispose()
+        {
+            Events?.Dispose();
+            Core?.Dispose();
+            PairingStore?.Dispose();
+            Session?.Dispose();
+            Proposal?.Dispose();
+            PendingRequests?.Dispose();
+        }
     }
 }

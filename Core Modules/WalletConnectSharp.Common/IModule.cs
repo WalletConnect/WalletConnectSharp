@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Common
     /// <summary>
     /// An interface that represents a module
     /// </summary>
-    public interface IModule /* : IDisposable */
+    public interface IModule : IDisposable
     {
         /// <summary>
         /// The name of this module

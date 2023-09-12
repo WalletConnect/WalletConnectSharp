@@ -78,17 +78,21 @@ namespace WalletConnectSharp.Sign.Test
                 if (client == null)
                     continue;
 
-                // TODO Remove event data
                 if (client.Core.Relayer.Connected)
                 {
                     await client.Core.Relayer.TransportClose();
                 }
+                
+                client.Dispose();
             }
         }
         
         private async Task _TestConcurrentClients()
         {
+            object pairingLock = new object();
             List<TestPairings> pairings = new List<TestPairings>();
+
+            object messageLock = new object();
             List<List<SessionEvent>> messagesReceived = new List<List<SessionEvent>>();
 
             CancellationTokenSource heartbeatToken = new CancellationTokenSource();
@@ -99,8 +103,11 @@ namespace WalletConnectSharp.Sign.Test
             {
                 while (!heartbeatToken.Token.IsCancellationRequested)
                 {
-                    Log($"initialized pairs - {pairings.Count}");
-                    
+                    lock (pairingLock)
+                    {
+                        Log($"initialized pairs - {pairings.Count}");
+                    }
+
                     await Task.Delay(TestValues.HeartbeatInterval);
                 }
             }, heartbeatToken.Token);
@@ -119,8 +126,11 @@ namespace WalletConnectSharp.Sign.Test
                     Event = testEventParams,
                     Topic = sessionA.Topic,
                 };
-                
-                messagesReceived.Insert(clientIndex, new List<SessionEvent>());
+
+                lock (messageLock)
+                {
+                    messagesReceived.Insert(clientIndex, new List<SessionEvent>());
+                }
 
                 TaskCompletionSource<bool> task = new TaskCompletionSource<bool>();
 
@@ -145,9 +155,12 @@ namespace WalletConnectSharp.Sign.Test
 
                 void CheckAllMessagesProcessed()
                 {
-                    if (messagesReceived[clientIndex].Count >= TestValues.MessagesPerClient)
+                    lock (messageLock)
                     {
-                        task.TrySetResult(true);
+                        if (messagesReceived[clientIndex].Count >= TestValues.MessagesPerClient)
+                        {
+                            task.TrySetResult(true);
+                        }
                     }
                 }
 
@@ -156,7 +169,11 @@ namespace WalletConnectSharp.Sign.Test
                     client.On<SessionEvent>(EngineEvents.SessionPing, (sender, @event) =>
                     {
                         Assert.Equal(sessionA.Topic, @event.EventData.Topic);
-                        messagesReceived[clientIndex].Add(@event.EventData);
+                        lock (messageLock)
+                        {
+                            messagesReceived[clientIndex].Add(@event.EventData);
+                        }
+
                         CheckAllMessagesProcessed();
                     });
 
@@ -164,14 +181,21 @@ namespace WalletConnectSharp.Sign.Test
                     {
                         Assert.Equal(testEventParams.Data, @event.EventData.Params.Event.Data);
                         Assert.Equal(eventPayload.Topic, @event.EventData.Topic);
-                        messagesReceived[clientIndex].Add(@event.EventData);
+                        lock (messageLock)
+                        {
+                            messagesReceived[clientIndex].Add(@event.EventData);
+                        }
+
                         CheckAllMessagesProcessed();
                     });
 
                     client.On<SessionUpdateEvent>(EngineEvents.SessionUpdate, (sender, @event) =>
                     {
                         Assert.Equal(client.Session.Get(sessionA.Topic).Namespaces, namespacesAfter);
-                        messagesReceived[clientIndex].Add(@event.EventData);
+                        lock (messageLock)
+                        {
+                            messagesReceived[clientIndex].Add(@event.EventData);
+                        }
                         CheckAllMessagesProcessed();
                     });
                 }
@@ -192,7 +216,7 @@ namespace WalletConnectSharp.Sign.Test
                 return task.Task;
             }
             
-            int[] arr = Enumerable.Range(0, TestValues.ClientCount+1).ToArray();
+            int[] arr = Enumerable.Range(0, TestValues.ClientCount).ToArray();
             int[][] batches = BatchArray(arr, 20);
 
             async Task<TestResults> ConnectClient()
@@ -200,16 +224,16 @@ namespace WalletConnectSharp.Sign.Test
                 var now = Clock.NowMilliseconds();
                 var clients = await InitTwoClients();
                 var handshakeLatencyMs = Clock.NowMilliseconds() - now;
-                await Task.Delay(10);
                 Assert.IsType<WalletConnectSignClient>(clients.ClientA);
                 Assert.IsType<WalletConnectSignClient>(clients.ClientB);
 
                 var sessionA = await SignTests.TestConnectMethod(clients.ClientA, clients.ClientB);
-                pairings.Add(new TestPairings()
+
+                lock (pairingLock)
                 {
-                    clients = clients,
-                    sessionA = sessionA
-                });
+                    pairings.Add(new TestPairings() { clients = clients, sessionA = sessionA });
+                }
+
                 var pairingLatencyMs = Clock.NowMilliseconds() - now;
                 return new TestResults()
                 {
@@ -217,6 +241,7 @@ namespace WalletConnectSharp.Sign.Test
                 };
             }
 
+            Log("Setting up clients in batches");
             foreach (int[] batch in batches)
             {
                 var connections = (await Task.WhenAll(
@@ -224,7 +249,7 @@ namespace WalletConnectSharp.Sign.Test
                     {
                         try
                         {
-                            return await ConnectClient().WithTimeout(120000);
+                            return await ConnectClient().WithTimeout(TimeSpan.FromMinutes(2));
                         }
                         catch (TimeoutException)
                         {
@@ -247,12 +272,18 @@ namespace WalletConnectSharp.Sign.Test
                 // TODO uploadLoadTestConnectionDataToCloudWatch
             }
             
-            await Task.WhenAll(
-                pairings.Select(async delegate(TestPairings testPairings, int i)
+            Log("Processing messages between clients");
+
+            IEnumerable<Task> tasks;
+            lock (pairingLock)
+            {
+                tasks = pairings.Select(async delegate(TestPairings testPairings, int i)
                 {
                     await ProcessMessages(testPairings, i);
-                })
-            );
+                });
+            }
+
+            await Task.WhenAll(tasks);
 
             foreach (var data in pairings)
             {
