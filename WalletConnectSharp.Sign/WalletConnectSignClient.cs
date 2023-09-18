@@ -1,10 +1,10 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Controllers;
 using WalletConnectSharp.Sign.Interfaces;
@@ -181,7 +181,7 @@ namespace WalletConnectSharp.Sign
             else
                 Core = new WalletConnectCore(options);
 
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
 
             PendingRequests = new PendingRequests(Core);
             PairingStore = new PairingStore(Core);

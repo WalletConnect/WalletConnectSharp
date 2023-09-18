@@ -23,4 +23,12 @@
       <None Include="..\..\resources\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="EventEmitter.NET" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\WalletConnectSharp.Common\WalletConnectSharp.Common.csproj" />
+    </ItemGroup>
+
 </Project>

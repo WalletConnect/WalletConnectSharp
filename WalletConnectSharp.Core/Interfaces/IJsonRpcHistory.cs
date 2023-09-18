@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.History;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
 

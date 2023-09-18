@@ -1,7 +1,7 @@
-﻿using WalletConnectSharp.Common;
+﻿using EventEmitter.NET;
+using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Interfaces

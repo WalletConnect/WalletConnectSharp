@@ -1,9 +1,9 @@
+using EventEmitter.NET;
+using EventEmitter.NET.Model;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Network
@@ -84,7 +84,7 @@ namespace WalletConnectSharp.Network
         public JsonRpcProvider(IJsonRpcConnection connection)
         {
             _context = Guid.NewGuid();
-            this._delegator = new EventDelegator(this);
+            this._delegator = new EventDelegator(Context);
             this._connection = connection;
             if (this._connection.Connected)
             {

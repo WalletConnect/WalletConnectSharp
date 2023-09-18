@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using EventEmitter.NET;
+using EventEmitter.NET.Model;
+using Newtonsoft.Json;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -44,7 +44,7 @@ namespace WalletConnectSharp.Core.Controllers
         public TypedMessageHandler(ICore core)
         {
             this.Core = core;
-            this.Events = new EventDelegator(this);
+            this.Events = new EventDelegator(Context);
         }
         
         public Task Init()

@@ -1,6 +1,6 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Heartbeat;
-using WalletConnectSharp.Events;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -63,7 +63,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="interval">The interval to emit the <see cref="HeartbeatEvents.Pulse"/> event at</param>
         public HeartBeat(int interval = 5000)
         {
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
 
             Interval = interval;
         }

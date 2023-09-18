@@ -1,8 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using EventEmitter.NET;
+using Newtonsoft.Json;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;

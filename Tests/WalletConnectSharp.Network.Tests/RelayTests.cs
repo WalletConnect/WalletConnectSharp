@@ -1,11 +1,11 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Network.Tests.Models;
 using WalletConnectSharp.Network.Websocket;

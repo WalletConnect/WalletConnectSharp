@@ -1,10 +1,10 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -56,7 +56,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Publisher(IRelayer relayer)
         {
             Relayer = relayer;
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
             
             RegisterEventListeners();
         }

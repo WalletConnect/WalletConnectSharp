@@ -1,3 +1,5 @@
+using EventEmitter.NET;
+using EventEmitter.NET.Model;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Logging;
@@ -6,8 +8,6 @@ using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
 
@@ -121,7 +121,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Relayer(RelayerOptions opts)
         {
             Core = opts.Core;
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
             Messages = new MessageTracker(Core);
             Subscriber = new Subscriber(this);
             Publisher = new Publisher(this);

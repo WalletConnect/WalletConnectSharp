@@ -5,11 +5,8 @@ using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core;
-using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto.Models;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using ErrorResponse = WalletConnectSharp.Auth.Models.ErrorResponse;
 

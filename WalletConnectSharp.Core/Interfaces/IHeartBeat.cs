@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
+using EventEmitter.NET;
 using WalletConnectSharp.Common;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
 {

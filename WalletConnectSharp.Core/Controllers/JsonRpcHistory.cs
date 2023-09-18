@@ -1,8 +1,8 @@
+using EventEmitter.NET;
+using EventEmitter.NET.Model;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.History;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -123,7 +123,7 @@ namespace WalletConnectSharp.Core.Controllers
         public JsonRpcHistory(ICore core)
         {
             _core = core;
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
         }
 
         /// <summary>

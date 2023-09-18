@@ -1,10 +1,10 @@
-﻿using WalletConnectSharp.Auth.Controllers;
+﻿using EventEmitter.NET;
+using WalletConnectSharp.Auth.Controllers;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Events;
 
 namespace WalletConnectSharp.Auth;
 
@@ -107,7 +107,7 @@ public class WalletConnectAuthClient : IAuthClient
         Requests = new Store<long, Message>(Core, "requests", AUTH_CLIENT_STORAGE_PREFIX);
 
         Engine = new AuthEngine(this);
-        Events = new EventDelegator(this);
+        Events = new EventDelegator(Context);
     }
     
     public Task<RequestUri> Request(RequestParams @params, string topic = null)
