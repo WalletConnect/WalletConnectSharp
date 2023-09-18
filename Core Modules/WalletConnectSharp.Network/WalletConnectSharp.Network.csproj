@@ -20,10 +20,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\WalletConnectSharp.Events\WalletConnectSharp.Events.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Include="..\..\resources\icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 

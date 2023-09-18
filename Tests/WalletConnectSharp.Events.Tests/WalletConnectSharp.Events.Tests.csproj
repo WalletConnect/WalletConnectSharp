@@ -22,7 +22,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core Modules\WalletConnectSharp.Common\WalletConnectSharp.Common.csproj" />
-      <ProjectReference Include="..\..\Core Modules\WalletConnectSharp.Events\WalletConnectSharp.Events.csproj" />
     </ItemGroup>
 
 </Project>
