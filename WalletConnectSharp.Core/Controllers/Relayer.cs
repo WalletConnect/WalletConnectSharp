@@ -79,6 +79,12 @@ namespace WalletConnectSharp.Core.Controllers
         public IJsonRpcProvider Provider { get; private set; }
         
         /// <summary>
+        /// How long the <see cref="IRelayer"/> should wait before throwing a <see cref="TimeoutException"/> during
+        /// the connection phase. If this field is null, then the timeout will be infinite.
+        /// </summary>
+        public TimeSpan? ConnectionTimeout { get; set; }
+        
+        /// <summary>
         /// Whether this Relayer is connected
         /// </summary>
         public bool Connected 
@@ -133,6 +139,8 @@ namespace WalletConnectSharp.Core.Controllers
             }
 
             projectId = opts.ProjectId;
+
+            ConnectionTimeout = opts.ConnectionTimeout;
         }
         
         /// <summary>
@@ -404,7 +412,11 @@ namespace WalletConnectSharp.Core.Controllers
                     this.Events.ListenForOnce<object>(RelayerEvents.TransportClosed, RejectTransportOpen);
                     try
                     {
-                        await this.Provider.Connect().WithTimeout(TimeSpan.FromSeconds(5), "socket stalled");
+                        var connectionTask = this.Provider.Connect();
+                        if (ConnectionTimeout != null)
+                            connectionTask = connectionTask.WithTimeout((TimeSpan)ConnectionTimeout, "socket stalled");
+                        
+                        await connectionTask;
                         task2.TrySetResult(true);
                     }
                     finally

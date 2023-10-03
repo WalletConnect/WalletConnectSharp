@@ -65,6 +65,12 @@ namespace WalletConnectSharp.Core.Models
         /// with either the KeyChain option or a default keychain
         /// </summary>
         public ICrypto CryptoModule;
-        
+
+        /// <summary>
+        /// How long the <see cref="IRelayer"/> should wait before throwing a <see cref="TimeoutException"/> during
+        /// the connection phase. If this field is null, then the timeout will be infinite.
+        /// </summary>
+        public TimeSpan? ConnectionTimeout = TimeSpan.FromSeconds(30);
+
     }
 }
