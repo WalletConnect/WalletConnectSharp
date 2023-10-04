@@ -164,5 +164,17 @@ namespace WalletConnectSharp.Sign.Models.Engine
             Relays = options;
             return this;
         }
+
+        public ConnectOptions WithExpiry(long seconds)
+        {
+            Expiry = seconds;
+            return this;
+        }
+        
+        public ConnectOptions WithExpiry(TimeSpan expiry)
+        {
+            Expiry = (long)expiry.TotalSeconds;
+            return this;
+        }
     }
 }
