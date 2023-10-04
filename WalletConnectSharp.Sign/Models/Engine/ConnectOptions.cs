@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using WalletConnectSharp.Common.Model.Relay;
+using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Relay;
 
 namespace WalletConnectSharp.Sign.Models.Engine
@@ -41,6 +42,13 @@ namespace WalletConnectSharp.Sign.Models.Engine
         /// </summary>
         [JsonProperty("relays")]
         public ProtocolOptions Relays;
+
+        /// <summary>
+        /// How long the session will be open before it's considered expired. If the session
+        /// is expired, then Extend must be called on the session to extend the expiry
+        /// </summary>
+        [JsonProperty("expiry")]
+        public long Expiry = Clock.FIVE_MINUTES;
 
         /// <summary>
         /// Create blank options with no required namespaces
