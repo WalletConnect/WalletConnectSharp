@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Events.Interfaces;
 
@@ -11,6 +12,8 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     public interface IPublisher : IEvents, IModule
     {
+        event EventHandler<PublishParams> OnPublishedMessage;
+        
         /// <summary>
         /// The IRelayer instance this publisher is using to publish messages
         /// </summary>

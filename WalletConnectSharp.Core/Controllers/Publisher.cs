@@ -18,7 +18,9 @@ namespace WalletConnectSharp.Core.Controllers
         /// The EventDelegator this publisher module is using
         /// </summary>
         public EventDelegator Events { get; }
-        
+
+        public event EventHandler<PublishParams> OnPublishedMessage;
+
         /// <summary>
         /// The Relayer this publisher module uses to publish messages
         /// </summary>
@@ -63,6 +65,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void RegisterEventListeners()
         {
+#pragma warning disable CS0618 // Old event system
+            this.OnPublishedMessage += Relayer.WrapEventHandler<PublishParams>(RelayerEvents.Publish);
+#pragma warning restore CS0618 // Old event system
+            
             Relayer.Core.HeartBeat.OnPulse += (_, _) => CheckQueue();
         }
 
@@ -98,6 +104,7 @@ namespace WalletConnectSharp.Core.Controllers
                 var hash = HashUtils.HashMessage(@params.Message);
                 await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag,
                     @params.Options.Relay);
+                this.OnPublishedMessage?.Invoke(this, @params);
                 OnPublish(hash);
             }
         }
@@ -178,6 +185,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay)
                     .WithTimeout(TimeSpan.FromSeconds(45));
+                this.OnPublishedMessage?.Invoke(this, @params);
                 OnPublish(hash);
             }
             catch (Exception e)

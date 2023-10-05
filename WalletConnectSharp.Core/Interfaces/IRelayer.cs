@@ -18,8 +18,6 @@ namespace WalletConnectSharp.Core.Interfaces
 
         event EventHandler<Exception> OnErrored;
 
-        event EventHandler<object> OnPublishedMessage;  
-
         event EventHandler<MessageEvent> OnMessageReceived;
 
         event EventHandler OnTransportClosed;

@@ -117,7 +117,7 @@ namespace WalletConnectSharp.Network.Tests
             var expectedDisconnectCount = 3;
             var disconnectCount = 0;
 
-            provider.On<DisconnectionInfo>("disconnect", (_, __) => disconnectCount++);
+            provider.Disconnected += (_, _) => disconnectCount++;
 
             await provider.Connect();
             await provider.Disconnect();

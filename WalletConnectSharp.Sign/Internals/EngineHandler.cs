@@ -177,6 +177,8 @@ namespace WalletConnectSharp.Sign
                 var error = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
                 await this.Client.Session.Delete(topic, error);
                 this.SessionRejected?.Invoke(this, session);
+                
+                // Still used do not remove
                 this.Events.Trigger($"session_approve{id}", payload);
             }
             else
@@ -225,6 +227,7 @@ namespace WalletConnectSharp.Sign
                 Id = id,
                 Topic = topic,
             });
+            // Still used, do not remove
             this.Events.Trigger($"session_update{id}", payload);
         }
 
@@ -256,6 +259,7 @@ namespace WalletConnectSharp.Sign
                 Topic = topic,
                 Id = id
             });
+            // Still used, do not remove
             this.Events.Trigger($"session_extend{id}", payload);
         }
 
@@ -292,6 +296,7 @@ namespace WalletConnectSharp.Sign
                 Topic = topic
             });
 
+            // Still used, do not remove
             this.Events.Trigger($"session_ping{id}", payload);
         }
 

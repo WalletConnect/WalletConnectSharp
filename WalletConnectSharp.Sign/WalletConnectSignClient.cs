@@ -210,6 +210,8 @@ namespace WalletConnectSharp.Sign
             Session = new Session(Core);
             Proposal = new Proposal(Core);
             Engine = new Engine(this);
+            
+            SetupEvents();
         }
 
         private void SetupEvents()

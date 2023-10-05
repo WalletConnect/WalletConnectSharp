@@ -56,7 +56,6 @@ namespace WalletConnectSharp.Core.Controllers
         public event EventHandler OnConnected;
         public event EventHandler OnDisconnected;
         public event EventHandler<Exception> OnErrored;
-        public event EventHandler<object> OnPublishedMessage;
         public event EventHandler<MessageEvent> OnMessageReceived;
         public event EventHandler OnTransportClosed;
         public event EventHandler OnConnectionStalled;
@@ -189,7 +188,6 @@ namespace WalletConnectSharp.Core.Controllers
         {
             this.OnTransportClosed += this.WrapEventHandler(RelayerEvents.TransportClosed);
             this.OnConnectionStalled += this.WrapEventHandler(RelayerEvents.ConnectionStalled);
-            this.OnPublishedMessage += this.WrapEventHandler<object>(RelayerEvents.Publish);
             this.OnMessageReceived += this.WrapEventHandler<MessageEvent>(RelayerEvents.Message);
             this.OnConnected += this.WrapEventHandler(RelayerEvents.Connect);
             this.OnDisconnected += this.WrapEventHandler(RelayerEvents.Disconnect);
@@ -382,8 +380,6 @@ namespace WalletConnectSharp.Core.Controllers
             
             WCLogger.Log("[Relayer] Sending request through provider");
             var result = await this.Provider.Request<T, TR>(request, context);
-            
-            this.OnPublishedMessage?.Invoke(this, request);
 
             return result;
         }

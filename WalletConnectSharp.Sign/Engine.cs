@@ -309,7 +309,7 @@ namespace WalletConnectSharp.Sign
             WCLogger.Log($"Created public key pair");
 
             TaskCompletionSource<SessionStruct> approvalTask = new TaskCompletionSource<SessionStruct>();
-            this.Events.ListenForOnce<SessionStruct>("session_connect", async (sender, e) =>
+            this.SessionConnected += async (sender, session) =>
             {
                 logger.Log("Got session_connect event for session struct");
                 if (approvalTask.Task.IsCompleted)
@@ -318,7 +318,6 @@ namespace WalletConnectSharp.Sign
                     return;
                 }
 
-                var session = e.EventData;
                 session.Self.PublicKey = publicKey;
                 var completeSession = session with { RequiredNamespaces = requiredNamespaces };
                 await PrivateThis.SetExpiry(session.Topic, session.Expiry.Value);
@@ -329,9 +328,9 @@ namespace WalletConnectSharp.Sign
                     await this.Client.Core.Pairing.UpdateMetadata(topic, session.Peer.Metadata);
                 }
                 approvalTask.SetResult(completeSession);
-            });
-            
-            this.Events.ListenForOnce<JsonRpcResponse<SessionProposeResponse>>("session_connect", (sender, e) =>
+            };
+
+            this.SessionConnectionErrored += (sender, exception) =>
             {
                 logger.Log("Got session_connect event for rpc response");
                 if (approvalTask.Task.IsCompleted)
@@ -339,13 +338,15 @@ namespace WalletConnectSharp.Sign
                     logger.Log("approval already received though, skipping");
                     return;
                 }
-                
-                if (e.EventData.IsError)
+
+                if (exception == null)
                 {
-                    logger.LogError("Got session_connect error " + e.EventData.Error.Message);
-                    approvalTask.SetException(e.EventData.Error.ToException());
+                    return;
                 }
-            });
+
+                logger.LogError("Got session_connect error " + exception.Message);
+                approvalTask.SetException(exception);
+            };
 
             if (string.IsNullOrWhiteSpace(topic))
             {

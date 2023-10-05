@@ -307,11 +307,9 @@ namespace WalletConnectSharp.Auth.Tests
 
             TaskCompletionSource<bool> resolve1 = new TaskCompletionSource<bool>();
 
-            PeerA.Core.Relayer.ListenOnce<object>(nameof(PeerA.Core.Relayer.OnPublishedMessage), (sender, args) =>
+            PeerA.Core.Relayer.Publisher.ListenOnce<PublishParams>(nameof(PeerA.Core.Relayer.Publisher.OnPublishedMessage), (sender, args) =>
             {
-                var @event = (RequestArguments<RelayPublishRequest>)args;
-                
-                Assert.Equal(expiry, @event.Params.TTL);
+                Assert.Equal(expiry, args.Options.TTL);
                 resolve1.SetResult(true);
             });
            
@@ -409,7 +407,7 @@ namespace WalletConnectSharp.Auth.Tests
                 receivedPeerPing.SetResult(true);
             });
             
-            PeerA.Core.Pairing.ListenOnce(nameof(PeerA.Core.Pairing.PairingPinged), (sender, args) =>
+            PeerA.Core.Pairing.ListenOnce<PairingEvent>(nameof(PeerA.Core.Pairing.PairingPinged), (sender, args) =>
             {
                 receivedClientPing.SetResult(true);
             });
@@ -445,7 +443,7 @@ namespace WalletConnectSharp.Auth.Tests
 
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
-            PeerB.Core.Pairing.ListenOnce(nameof(PeerB.Core.Pairing.PairingDeleted), (sender, args) =>
+            PeerB.Core.Pairing.ListenOnce<PairingEvent>(nameof(PeerB.Core.Pairing.PairingDeleted), (sender, args) =>
             {
                 peerDeletedPairing.SetResult(true);
             });
