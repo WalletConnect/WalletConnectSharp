@@ -74,7 +74,14 @@ namespace WalletConnectSharp.Network.Websocket
                 return _delegator;
             }
         }
-        
+
+        public event EventHandler<string> PayloadReceived;
+        public event EventHandler Closed;
+        public event EventHandler<DisconnectionInfo> WebsocketClosed;
+        public event EventHandler<Exception> ErrorReceived;
+        public event EventHandler<object> Opened;
+        public event EventHandler<Exception> RegisterErrored;
+
         /// <summary>
         /// Whether this websocket connection is connected
         /// </summary>
@@ -110,6 +117,20 @@ namespace WalletConnectSharp.Network.Websocket
             _context = Guid.NewGuid();
             this._url = url;
             _delegator = new EventDelegator(this);
+            
+#pragma warning disable CS0618 // Old event system
+            WrapOldEvents();
+#pragma warning restore CS0618 // Old event system
+        }
+
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        private void WrapOldEvents()
+        {
+            this.PayloadReceived += this.WrapEventHandler<string>(WebsocketConnectionEvents.Payload);
+            this.WebsocketClosed += this.WrapEventHandler<DisconnectionInfo>(WebsocketConnectionEvents.Close);
+            this.RegisterErrored += this.WrapEventHandler<Exception>(WebsocketConnectionEvents.RegisterError);
+            this.Opened += this.WrapEventHandler<object>(WebsocketConnectionEvents.Open);
+            this.ErrorReceived += this.WrapEventHandler<Exception>(WebsocketConnectionEvents.Error);
         }
 
         /// <summary>
@@ -177,7 +198,7 @@ namespace WalletConnectSharp.Network.Websocket
             }
             catch (Exception e)
             {
-                Events.Trigger(WebsocketConnectionEvents.RegisterError, e);
+                this.RegisterErrored?.Invoke(this, e);
                 OnClose(new DisconnectionInfo(DisconnectionType.Error, WebSocketCloseStatus.Empty, e.Message, null, e));
 
                 throw;
@@ -194,13 +215,13 @@ namespace WalletConnectSharp.Network.Websocket
 
             this._socket = socket;
             this._registering = false;
-            Events.Trigger(WebsocketConnectionEvents.Open, _socket);
+            this.Opened?.Invoke(this, _socket);
         }
 
         private void OnDisconnect(DisconnectionInfo obj)
         {
             if (obj.Exception != null)
-                Events.Trigger(WebsocketConnectionEvents.Error, obj.Exception);
+                this.ErrorReceived?.Invoke(this, obj.Exception);
             
             OnClose(obj);
         }
@@ -213,7 +234,8 @@ namespace WalletConnectSharp.Network.Websocket
             //_socket.Dispose();
             this._socket = null;
             this._registering = false;
-            Events.Trigger(WebsocketConnectionEvents.Close, obj);
+            this.Closed?.Invoke(this, EventArgs.Empty);
+            this.WebsocketClosed?.Invoke(this, obj);
         }
 
         private void OnPayload(ResponseMessage obj)
@@ -234,7 +256,7 @@ namespace WalletConnectSharp.Network.Websocket
             
             //Console.WriteLine($"[{Name}] Got payload {json}");
 
-            Events.Trigger(WebsocketConnectionEvents.Payload, json);
+            this.PayloadReceived?.Invoke(this, json);
         }
 
         /// <summary>
@@ -341,7 +363,7 @@ namespace WalletConnectSharp.Network.Websocket
             }, default(T));
 
             //Trigger the payload event, converting the new JsonRpcResponse object to JSON string
-            Events.Trigger(WebsocketConnectionEvents.Payload, JsonConvert.SerializeObject(payload));
+            this.PayloadReceived?.Invoke(this, JsonConvert.SerializeObject(payload));
         }
     }
 }

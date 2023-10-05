@@ -3,6 +3,7 @@ namespace WalletConnectSharp.Core.Models.Expirer
     /// <summary>
     /// A static class that holds all event ids of events the <see cref="IExpirer"/> module emits
     /// </summary>
+    [Obsolete("These events have been replaced by C# events")]
     public static class ExpirerEvents
     {
         public static readonly string Created = "expirer_created";

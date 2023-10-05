@@ -166,18 +166,18 @@ namespace WalletConnectSharp.Sign.Test
 
                 foreach (var client in clientsArr)
                 {
-                    client.On<SessionEvent>(EngineEvents.SessionPing, (sender, @event) =>
+                    client.SessionPinged += (sender, @event) =>
                     {
-                        Assert.Equal(sessionA.Topic, @event.EventData.Topic);
+                        Assert.Equal(sessionA.Topic, @event.Topic);
                         lock (messageLock)
                         {
-                            messagesReceived[clientIndex].Add(@event.EventData);
+                            messagesReceived[clientIndex].Add(@event);
                         }
 
                         CheckAllMessagesProcessed();
-                    });
+                    };
 
-                    client.On<EmitEvent<string>>(EngineEvents.SessionEvent, (sender, @event) =>
+                    client.On<EmitEvent<string>>("session_event", (sender, @event) =>
                     {
                         Assert.Equal(testEventParams.Data, @event.EventData.Params.Event.Data);
                         Assert.Equal(eventPayload.Topic, @event.EventData.Topic);
@@ -189,15 +189,16 @@ namespace WalletConnectSharp.Sign.Test
                         CheckAllMessagesProcessed();
                     });
 
-                    client.On<SessionUpdateEvent>(EngineEvents.SessionUpdate, (sender, @event) =>
+                    client.SessionUpdateRequest += (sender, @event) =>
                     {
                         Assert.Equal(client.Session.Get(sessionA.Topic).Namespaces, namespacesAfter);
                         lock (messageLock)
                         {
-                            messagesReceived[clientIndex].Add(@event.EventData);
+                            messagesReceived[clientIndex].Add(@event);
                         }
+
                         CheckAllMessagesProcessed();
-                    });
+                    };
                 }
 
                 async void SendMessages()
@@ -291,11 +292,11 @@ namespace WalletConnectSharp.Sign.Test
                 var sessionA = data.sessionA;
 
                 TaskCompletionSource<bool> clientBDisconnected = new TaskCompletionSource<bool>();
-                clients.ClientB.On<SessionEvent>(EngineEvents.SessionDelete, (sender, @event) =>
+                clients.ClientB.SessionDeleted += (sender, @event) =>
                 {
-                    Assert.Equal(sessionA.Topic, @event.EventData.Topic);
+                    Assert.Equal(sessionA.Topic, @event.Topic);
                     clientBDisconnected.TrySetResult(true);
-                });
+                };
 
                 await Task.WhenAll(
                     clientBDisconnected.Task,

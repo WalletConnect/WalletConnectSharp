@@ -14,9 +14,9 @@ namespace WalletConnectSharp.Sign
 {
     public partial class Engine
     {
-        async void ExpiredCallback(object sender, GenericEvent<Expiration> e)
+        async void ExpiredCallback(object sender, ExpirerEventArgs e)
         {
-            var target = new ExpirerTarget(e.EventData.Target);
+            var target = new ExpirerTarget(e.Target);
 
             if (target.Id != null && this.Client.PendingRequests.Keys.Contains((long)target.Id))
             {
@@ -33,8 +33,9 @@ namespace WalletConnectSharp.Sign
                     return;
                 }
 
+                var session = this.Client.Session.Get(topic);
                 await PrivateThis.DeleteSession(topic);
-                this.Client.Events.Trigger(EngineEvents.SessionExpire, topic);
+                this.SessionExpired?.Invoke(this, session);
             } 
             else if (target.Id != null)
             {
@@ -63,7 +64,7 @@ namespace WalletConnectSharp.Sign
                 await PrivateThis.SetProposal(id, proposal);
                 var hash = HashUtils.HashMessage(JsonConvert.SerializeObject(payload));
                 var verifyContext = await this.VerifyContext(hash, proposal.Proposer.Metadata);
-                this.Client.Events.Trigger(EngineEvents.SessionProposal, new SessionProposalEvent()
+                this.SessionProposed?.Invoke(this, new SessionProposalEvent()
                 {
                     Id = id,
                     Proposal = proposal,
@@ -85,7 +86,7 @@ namespace WalletConnectSharp.Sign
             {
                 logger.LogError("response was error");
                 await this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
-                this.Events.Trigger(EngineEvents.SessionConnect, payload);
+                this.SessionConnectionErrored?.Invoke(this, payload.Error.ToException());
             }
             else
             {
@@ -157,7 +158,7 @@ namespace WalletConnectSharp.Sign
                     }
                 };
                 await MessageHandler.SendResult<SessionSettle, bool>(payload.Id, topic, true);
-                this.Events.Trigger(EngineEvents.SessionConnect, session);
+                this.SessionConnected?.Invoke(this, session);
             }
             catch (WalletConnectException e)
             {
@@ -170,9 +171,12 @@ namespace WalletConnectSharp.Sign
         async Task IEnginePrivate.OnSessionSettleResponse(string topic, JsonRpcResponse<bool> payload)
         {
             var id = payload.Id;
+            var session = this.Client.Session.Get(topic);
             if (payload.IsError)
             {
-                await this.Client.Session.Delete(topic, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
+                var error = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
+                await this.Client.Session.Delete(topic, error);
+                this.SessionRejected?.Invoke(this, session);
                 this.Events.Trigger($"session_approve{id}", payload);
             }
             else
@@ -181,6 +185,7 @@ namespace WalletConnectSharp.Sign
                 {
                     Acknowledged = true
                 });
+                this.SessionApproved?.Invoke(this, session);
                 this.Events.Trigger($"session_approve{id}", payload); 
             }
         }
@@ -199,7 +204,7 @@ namespace WalletConnectSharp.Sign
                 });
 
                 await MessageHandler.SendResult<SessionUpdate, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.SessionUpdate, new SessionUpdateEvent()
+                this.SessionUpdateRequest?.Invoke(this, new SessionUpdateEvent()
                 {
                     Id = id,
                     Topic = topic,
@@ -215,6 +220,11 @@ namespace WalletConnectSharp.Sign
         async Task IEnginePrivate.OnSessionUpdateResponse(string topic, JsonRpcResponse<bool> payload)
         {
             var id = payload.Id;
+            this.SessionUpdated?.Invoke(this, new SessionEvent()
+            {
+                Id = id,
+                Topic = topic,
+            });
             this.Events.Trigger($"session_update{id}", payload);
         }
 
@@ -226,7 +236,7 @@ namespace WalletConnectSharp.Sign
                 await PrivateThis.IsValidExtend(topic);
                 await PrivateThis.SetExpiry(topic, Clock.CalculateExpiry(SessionExpiry));
                 await MessageHandler.SendResult<SessionExtend, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.SessionExtend, new SessionEvent()
+                this.SessionExtendRequest?.Invoke(this, new SessionEvent()
                 {
                     Id = id,
                     Topic = topic
@@ -241,6 +251,11 @@ namespace WalletConnectSharp.Sign
         async Task IEnginePrivate.OnSessionExtendResponse(string topic, JsonRpcResponse<bool> payload)
         {
             var id = payload.Id;
+            this.SessionExtended?.Invoke(this, new SessionEvent()
+            {
+                Topic = topic,
+                Id = id
+            });
             this.Events.Trigger($"session_extend{id}", payload);
         }
 
@@ -251,7 +266,7 @@ namespace WalletConnectSharp.Sign
             {
                 await PrivateThis.IsValidPing(topic);
                 await MessageHandler.SendResult<SessionPing, bool>(id, topic, true);
-                this.Client.Events.Trigger(EngineEvents.SessionPing, new SessionEvent()
+                this.SessionPinged?.Invoke(this, new SessionEvent()
                 {
                     Id = id,
                     Topic = topic
@@ -270,6 +285,12 @@ namespace WalletConnectSharp.Sign
             // put at the end of the stack to avoid a race condition
             // where session_ping listener is not yet initialized
             await Task.Delay(500);
+            
+            this.SessionPinged?.Invoke(this, new SessionEvent()
+            {
+                Id = id,
+                Topic = topic
+            });
 
             this.Events.Trigger($"session_ping{id}", payload);
         }
@@ -283,7 +304,7 @@ namespace WalletConnectSharp.Sign
 
                 await MessageHandler.SendResult<SessionDelete, bool>(id, topic, true);
                 await PrivateThis.DeleteSession(topic);
-                this.Client.Events.Trigger(EngineEvents.SessionDelete, new SessionEvent()
+                this.SessionDeleted?.Invoke(this, new SessionEvent()
                 {
                     Topic = topic,
                     Id = id
@@ -302,7 +323,7 @@ namespace WalletConnectSharp.Sign
             try
             {
                 await PrivateThis.IsValidRequest(topic, @params.Request, @params.ChainId);
-                this.Client.Events.Trigger(EngineEvents.SessionRequest, new SessionRequestEvent<T>()
+                this.Client.Events.Trigger("session_request", new SessionRequestEvent<T>()
                 {
                     Topic = topic,
                     Id = id,
@@ -323,7 +344,7 @@ namespace WalletConnectSharp.Sign
             try
             {
                 await PrivateThis.IsValidEmit(topic, @params.Event, @params.ChainId);
-                this.Client.Events.Trigger(EngineEvents.SessionEvent, new EmitEvent<T>()
+                this.Client.Events.Trigger("session_event", new EmitEvent<T>()
                 {
                     Topic = topic,
                     Id = id,

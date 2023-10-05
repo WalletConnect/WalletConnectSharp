@@ -86,6 +86,8 @@ namespace WalletConnectSharp.Sign
         {
             if (!this._initialized)
             {
+                SetupEvents();
+                
                 await PrivateThis.Cleanup();
                 this.RegisterRelayerEvents();
                 this.RegisterExpirerEvents();
@@ -93,9 +95,43 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        private void SetupEvents()
+        {
+            WrapPairingEvents();
+            
+#pragma warning disable CS0618 // Old event system
+            WrapOldEvents(this);
+#pragma warning restore CS0618 // Old event system
+        }
+
+        private void WrapPairingEvents()
+        {
+            this.Client.Core.Pairing.PairingPinged += (sender, @event) => this.PairingPinged?.Invoke(sender, @event);
+            this.Client.Core.Pairing.PairingDeleted += (sender, @event) => this.PairingDeleted?.Invoke(sender, @event);
+        }
+        
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        internal void WrapOldEvents(IEngineAPI source)
+        {
+            source.SessionExpired += source.WrapEventHandler<SessionStruct>(EngineEvents.SessionExpire);
+            source.PairingExpired += source.WrapEventHandler<PairingStruct>(EngineEvents.PairingExpire);
+            source.SessionProposed += source.WrapEventHandler<SessionProposalEvent>(EngineEvents.SessionProposal);
+            
+            // both events were triggered for error / normal connection
+            source.SessionConnected += source.WrapEventHandler<SessionStruct>(EngineEvents.SessionConnect);
+            source.SessionConnectionErrored += source.WrapEventHandler<Exception>(EngineEvents.SessionConnect);
+
+            source.SessionUpdateRequest += source.WrapEventHandler<SessionUpdateEvent>(EngineEvents.SessionUpdate);
+            source.SessionExtendRequest += source.WrapEventHandler<SessionEvent>(EngineEvents.SessionExtend);
+            source.SessionPinged += source.WrapEventHandler<SessionEvent>(EngineEvents.SessionPing);
+            source.PairingPinged += source.WrapEventHandler<PairingEvent>(EngineEvents.PairingPing);
+            source.SessionDeleted += source.WrapEventHandler<SessionEvent>(EngineEvents.SessionDelete);
+            source.PairingDeleted += source.WrapEventHandler<PairingEvent>(EngineEvents.PairingDelete);
+        }
+
         private void RegisterExpirerEvents()
         {
-            this.Client.Core.Expirer.On<Expiration>(ExpirerEvents.Expired, ExpiredCallback);
+            this.Client.Core.Expirer.Expired += ExpiredCallback;
         }
 
         private void RegisterRelayerEvents()
@@ -108,6 +144,22 @@ namespace WalletConnectSharp.Sign
             MessageHandler.HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null);
             MessageHandler.HandleMessageType<SessionPing, bool>(PrivateThis.OnSessionPingRequest, PrivateThis.OnSessionPingResponse);
         }
+
+        public event EventHandler<SessionStruct> SessionExpired;
+        public event EventHandler<PairingStruct> PairingExpired;
+        public event EventHandler<SessionProposalEvent> SessionProposed;
+        public event EventHandler<SessionStruct> SessionConnected;
+        public event EventHandler<Exception> SessionConnectionErrored;
+        public event EventHandler<SessionUpdateEvent> SessionUpdateRequest;
+        public event EventHandler<SessionEvent> SessionExtendRequest;
+        public event EventHandler<SessionEvent> SessionUpdated;
+        public event EventHandler<SessionEvent> SessionExtended;
+        public event EventHandler<SessionEvent> SessionPinged;
+        public event EventHandler<SessionEvent> SessionDeleted;
+        public event EventHandler<SessionStruct> SessionRejected;
+        public event EventHandler<SessionStruct> SessionApproved;
+        public event EventHandler<PairingEvent> PairingPinged;
+        public event EventHandler<PairingEvent> PairingDeleted;
 
         /// <summary>
         /// Get static event handlers for requests / responses for the given type T, TR. This is similar to
@@ -141,7 +193,6 @@ namespace WalletConnectSharp.Sign
         /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for. Will be wrapped in <see cref="SessionEvent{T}"/></typeparam>
-        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
         public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
             Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
@@ -341,20 +392,19 @@ namespace WalletConnectSharp.Sign
             var topic = pairing.Topic;
 
             TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
-            
-            Client.Once(EngineEvents.SessionProposal,
-                delegate(object sender, GenericEvent<SessionProposalEvent> @event)
-                {
-                    var proposal = @event.EventData.Proposal;
-                    if (topic != proposal.PairingTopic)
-                        return;
 
-                    if (@event.EventData.VerifiedContext.Validation == Validation.Invalid)
-                        sessionProposeTask.SetException(new Exception(
-                            $"Could not validate, invalid validation status {@event.EventData.VerifiedContext.Validation} for origin {@event.EventData.VerifiedContext.Origin}"));
-                    else
-                        sessionProposeTask.SetResult(proposal);
-                });
+            Client.ListenOnce<SessionProposalEvent>(nameof(Client.SessionProposed), (sender, args) =>
+            {
+                var proposal = args.Proposal;
+                if (topic != proposal.PairingTopic)
+                    return;
+
+                if (args.VerifiedContext.Validation == Validation.Invalid)
+                    sessionProposeTask.SetException(new Exception(
+                        $"Could not validate, invalid validation status {args.VerifiedContext.Validation} for origin {args.VerifiedContext.Origin}"));
+                else
+                    sessionProposeTask.SetResult(proposal);
+            });
 
             return await sessionProposeTask.Task;
         }

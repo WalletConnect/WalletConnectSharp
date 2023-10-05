@@ -3,12 +3,14 @@ using Nethereum.HdWallet;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Events;
+using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
@@ -304,13 +306,14 @@ namespace WalletConnectSharp.Auth.Tests
             var expiry = 1000;
 
             TaskCompletionSource<bool> resolve1 = new TaskCompletionSource<bool>();
-            
-            PeerA.Core.Relayer.Once<PublishParams>(RelayerEvents.Publish, (sender, @event) =>
+
+            PeerA.Core.Relayer.ListenOnce<object>(nameof(PeerA.Core.Relayer.OnPublishedMessage), (sender, args) =>
             {
-                Assert.Equal(expiry, @event.EventData.Options?.TTL);
+                var @event = (RequestArguments<RelayPublishRequest>)args;
+                
+                Assert.Equal(expiry, @event.Params.TTL);
                 resolve1.SetResult(true);
             });
-
            
             await Task.WhenAll(resolve1.Task, Task.Run(async () =>
             {
@@ -401,12 +404,12 @@ namespace WalletConnectSharp.Auth.Tests
 
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
-            PeerB.Core.Pairing.Once<object>(PairingEvents.PairingPing, (sender, @event) =>
+            PeerB.Core.Pairing.ListenOnce<PairingEvent>(nameof(PeerB.Core.Pairing.PairingPinged), (sender, @event) =>
             {
                 receivedPeerPing.SetResult(true);
             });
             
-            PeerA.Core.Pairing.Once<object>(PairingEvents.PairingPing, (sender, @event) =>
+            PeerA.Core.Pairing.ListenOnce(nameof(PeerA.Core.Pairing.PairingPinged), (sender, args) =>
             {
                 receivedClientPing.SetResult(true);
             });
@@ -442,7 +445,7 @@ namespace WalletConnectSharp.Auth.Tests
 
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
-            PeerB.Core.Pairing.Once<object>(PairingEvents.PairingDelete, (sender, @event) =>
+            PeerB.Core.Pairing.ListenOnce(nameof(PeerB.Core.Pairing.PairingDeleted), (sender, args) =>
             {
                 peerDeletedPairing.SetResult(true);
             });

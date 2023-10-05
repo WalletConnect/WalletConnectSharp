@@ -20,7 +20,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <summary>
         /// The <see cref="ISignClient"/> this Engine is using
         /// </summary>
-        ISignClient Client { get; }
+        ISignClient Client { get; } 
 
         /// <summary>
         /// Initialize the Engine. This loads any persistant state and connects to the WalletConnect
@@ -28,15 +28,6 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// </summary>
         /// <returns></returns>
         Task Init();
-
-        /// <summary>
-        /// Get static event handlers for requests / responses for the given type T, TR. This is similar to
-        /// <see cref="IEngine.HandleMessageType{T,TR}"/> but uses EventHandler rather than callback functions
-        /// </summary>
-        /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
-        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
-        /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
-        TypedEventHandler<T, TR> SessionRequestEvents<T, TR>();
 
         /// <summary>
         /// Parse a session proposal URI and return all information in the URI. 

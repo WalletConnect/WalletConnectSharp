@@ -53,6 +53,14 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        public event EventHandler OnConnected;
+        public event EventHandler OnDisconnected;
+        public event EventHandler<Exception> OnErrored;
+        public event EventHandler<object> OnPublishedMessage;
+        public event EventHandler<MessageEvent> OnMessageReceived;
+        public event EventHandler OnTransportClosed;
+        public event EventHandler OnConnectionStalled;
+
         /// <summary>
         /// The ICore module that is using this Relayer module
         /// </summary>
@@ -141,6 +149,10 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         public async Task Init()
         {
+#pragma warning disable CS0618 // Old event system
+            WrapOldEvents();
+#pragma warning restore CS0618 // Old event system
+            
             WCLogger.Log("[Relayer] Creating provider");
             await CreateProvider();
 
@@ -170,6 +182,18 @@ namespace WalletConnectSharp.Core.Controllers
                     this.transportExplicityClosed = false;
                 }
             });
+        }
+
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        private void WrapOldEvents()
+        {
+            this.OnTransportClosed += this.WrapEventHandler(RelayerEvents.TransportClosed);
+            this.OnConnectionStalled += this.WrapEventHandler(RelayerEvents.ConnectionStalled);
+            this.OnPublishedMessage += this.WrapEventHandler<object>(RelayerEvents.Publish);
+            this.OnMessageReceived += this.WrapEventHandler<MessageEvent>(RelayerEvents.Message);
+            this.OnConnected += this.WrapEventHandler(RelayerEvents.Connect);
+            this.OnDisconnected += this.WrapEventHandler(RelayerEvents.Disconnect);
+            this.OnErrored += this.WrapEventHandler<Exception>(RelayerEvents.Error);
         }
 
         protected virtual async Task CreateProvider()
@@ -203,19 +227,19 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterProviderEventListeners()
         {
-            Provider.On<string>(ProviderEvents.RawRequestMessage, (sender, @event) =>
+            Provider.RawMessageReceived += (sender, s) =>
             {
-                OnProviderPayload(@event.EventData);
-            });
-            
-            Provider.On(ProviderEvents.Connect, () =>
+                OnProviderPayload(s);
+            };
+
+            Provider.Connected += (sender, connection) =>
             {
-                Events.Trigger(RelayerEvents.Connect, new object());
-            });
-            
-            Provider.On(ProviderEvents.Disconnect, async () =>
+                this.OnConnected?.Invoke(this, EventArgs.Empty);
+            };
+
+            Provider.Disconnected += async (sender, args) =>
             {
-                Events.Trigger(RelayerEvents.Disconnect, new object());
+                this.OnDisconnected?.Invoke(this, EventArgs.Empty);
 
                 if (this.transportExplicityClosed)
                     return;
@@ -224,23 +248,23 @@ namespace WalletConnectSharp.Core.Controllers
                 await Task.Delay(1000);
 
                 await RestartTransport();
-            });
+            };
 
-            Provider.On<object>(ProviderEvents.Error, (sender, @event) =>
+            Provider.ErrorReceived += (sender, args) =>
             {
-                Events.Trigger(RelayerEvents.Error, @event.EventData);
-            });
+                this.OnErrored?.Invoke(this, args);
+            };
         }
 
         protected virtual void RegisterEventListeners()
         {
-            this.Events.ListenFor<object>(RelayerEvents.ConnectionStalled, async (sender, @event) =>
+            this.OnConnectionStalled += async (sender, args) =>
             {
                 if (this.Provider.Connection.IsPaused)
                     return;
-                
+
                 await this.RestartTransport();
-            });
+            };
         }
 
         protected virtual async void OnProviderPayload(string payloadJson)
@@ -279,7 +303,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (await ShouldIgnoreMessageEvent(messageEvent)) return;
 
-            Events.Trigger(RelayerEvents.Message, messageEvent);
+            this.OnMessageReceived?.Invoke(this, messageEvent);
             await RecordMessageEvent(messageEvent);
         }
 
@@ -327,9 +351,9 @@ namespace WalletConnectSharp.Core.Controllers
             }
 
             TaskCompletionSource<string> task1 = new TaskCompletionSource<string>();
-            this.Subscriber.Once<ActiveSubscription>(Controllers.Subscriber.SubscriberEvents.Created, (sender, @event) =>
+            this.Subscriber.ListenOnce<ActiveSubscription>(nameof(this.Subscriber.Created), (sender, subscription) =>
             {
-                if (@event.EventData.Topic == topic)
+                if (subscription.Topic == topic)
                     task1.TrySetResult("");
             });
 
@@ -357,7 +381,11 @@ namespace WalletConnectSharp.Core.Controllers
             await this.ToEstablishConnection();
             
             WCLogger.Log("[Relayer] Sending request through provider");
-            return await this.Provider.Request<T, TR>(request, context);
+            var result = await this.Provider.Request<T, TR>(request, context);
+            
+            this.OnPublishedMessage?.Invoke(this, request);
+
+            return result;
         }
 
         public async Task TransportClose()
@@ -366,7 +394,7 @@ namespace WalletConnectSharp.Core.Controllers
             if (Connected)
             {
                 await this.Provider.Disconnect();
-                this.Events.Trigger(RelayerEvents.TransportClosed, new object());
+                this.OnTransportClosed?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -385,23 +413,22 @@ namespace WalletConnectSharp.Core.Controllers
                 }
                 else
                 {
-                    this.Subscriber.Once<object>(Controllers.Subscriber.SubscriberEvents.Resubscribed,
-                        (sender, @event) =>
-                        {
-                            task1.SetResult(true);
-                        });
+                    this.Subscriber.ListenOnce(nameof(this.Subscriber.Resubscribed), (sender, args) =>
+                    {
+                        task1.TrySetResult(true);
+                    });
                 }
 
                 TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
 
-                void RejectTransportOpen(object sender, GenericEvent<object> @event)
+                void RejectTransportOpen(object sender, EventArgs @event)
                 {
                     task2.TrySetException(new Exception("closeTransport called before connection was established"));
                 }
 
                 async void Task2()
                 {
-                    this.Events.ListenForOnce<object>(RelayerEvents.TransportClosed, RejectTransportOpen);
+                    var cleanupEvent = this.ListenOnce(nameof(OnTransportClosed), RejectTransportOpen);
                     try
                     {
                         await this.Provider.Connect().WithTimeout(TimeSpan.FromSeconds(5), "socket stalled");
@@ -409,7 +436,7 @@ namespace WalletConnectSharp.Core.Controllers
                     }
                     finally
                     {
-                        this.Events.RemoveListener<object>(RelayerEvents.TransportClosed, RejectTransportOpen);
+                        cleanupEvent();
                     }
                 }
 
@@ -423,7 +450,7 @@ namespace WalletConnectSharp.Core.Controllers
                 if (e.Message != "socket stalled")
                     throw;
 
-                this.Events.Trigger(RelayerEvents.TransportClosed, new object());
+                this.OnTransportClosed?.Invoke(this, EventArgs.Empty);
             }
             finally
             {
@@ -438,9 +465,9 @@ namespace WalletConnectSharp.Core.Controllers
             if (this.Connected)
             {
                 TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-                this.Provider.Once<bool>(ProviderEvents.Disconnect, (sender, @event) =>
+                this.Provider.ListenOnce(nameof(this.Provider.Disconnected), (sender, args) =>
                 {
-                    task1.SetResult(true);
+                    task1.TrySetResult(true);
                 });
 
                 await Task.WhenAll(task1.Task, this.TransportClose());
@@ -448,6 +475,11 @@ namespace WalletConnectSharp.Core.Controllers
 
             await CreateProvider();
             await TransportOpen();
+        }
+
+        void IRelayer.TriggerConnectionStalled()
+        {
+            this.OnConnectionStalled?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void IsInitialized()

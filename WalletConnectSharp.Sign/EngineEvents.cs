@@ -7,6 +7,7 @@ namespace WalletConnectSharp.Sign
     /// A static class that holds all event ids the <see cref="Engine"/> module
     /// will emit
     /// </summary>
+    [Obsolete("These events have been replaced by C# events")]
     public static class EngineEvents
     {
         /// <summary>
@@ -68,20 +69,5 @@ namespace WalletConnectSharp.Sign
         /// when a pairing has been deleted
         /// </summary>
         public const string PairingDelete = "pairing_delete";
-        
-        /// <summary>
-        /// The event id for the session request event. Triggered
-        /// when ANY session request is received during a session
-        /// </summary>
-        public const string SessionRequest = "session_request";
-        
-        /// <summary>
-        /// The event id for the session event event. Triggered
-        /// when ANY session event is received during a session
-        ///
-        /// NOTE: Session events are only received/triggered through the
-        /// <see cref="IEngineAPI.Emit{T}(string, EventData{T}, string)"/> function.
-        /// </summary>
-        public const string SessionEvent = "session_event";
     }
 }

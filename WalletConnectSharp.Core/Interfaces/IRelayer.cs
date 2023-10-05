@@ -12,6 +12,20 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     public interface IRelayer : IEvents, IModule
     {
+        event EventHandler OnConnected;
+
+        event EventHandler OnDisconnected;
+
+        event EventHandler<Exception> OnErrored;
+
+        event EventHandler<object> OnPublishedMessage;  
+
+        event EventHandler<MessageEvent> OnMessageReceived;
+
+        event EventHandler OnTransportClosed;
+
+        event EventHandler OnConnectionStalled;
+        
         /// <summary>
         /// 
         /// </summary>
@@ -107,5 +121,7 @@ namespace WalletConnectSharp.Core.Interfaces
         public Task TransportOpen(string relayUrl = null);
 
         public Task RestartTransport(string relayUrl = null);
+
+        internal void TriggerConnectionStalled();
     }
 }

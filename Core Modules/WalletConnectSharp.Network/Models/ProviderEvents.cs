@@ -3,6 +3,7 @@ namespace WalletConnectSharp.Network.Models
     /// <summary>
     /// Event id constants for JsonRpcProvider
     /// </summary>
+    [Obsolete("These events have been replaced by C# events")]
     public static class ProviderEvents
     {
         /// <summary>

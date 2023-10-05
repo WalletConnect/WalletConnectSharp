@@ -16,7 +16,8 @@ namespace WalletConnectSharp.Core.Controllers
         private Dictionary<string, DecodeOptions> _decodeOptionsMap = new Dictionary<string, DecodeOptions>();
 
         public EventDelegator Events { get; }
-        
+
+        public event EventHandler<DecodedMessageEvent> RawMessage;
         public ICore Core { get; }
 
         /// <summary>
@@ -51,28 +52,28 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!_initialized)
             {
-                this.Core.Relayer.On<MessageEvent>(RelayerEvents.Message, RelayerMessageCallback);
+                this.Core.Relayer.OnMessageReceived += RelayerMessageCallback;
             }
 
             _initialized = true;
             return Task.CompletedTask;
         }
         
-        async void RelayerMessageCallback(object sender, GenericEvent<MessageEvent> e)
+        async void RelayerMessageCallback(object sender, MessageEvent e)
         {
-            var topic = e.EventData.Topic;
-            var message = e.EventData.Message;
+            var topic = e.Topic;
+            var message = e.Message;
 
             var options = DecodeOptionForTopic(topic);
 
             var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
             if (payload.IsRequest)
             {
-                Events.Trigger($"request_{payload.Method}", e.EventData);
+                Events.Trigger($"request_{payload.Method}", e);
             }
             else if (payload.IsResponse)
             {
-                Events.Trigger($"response_raw", new DecodedMessageEvent()
+                this.RawMessage?.Invoke(this, new DecodedMessageEvent()
                 {
                     Topic = topic,
                     Message = message,
@@ -140,12 +141,12 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             }
 
-            async void InspectResponseRaw(object sender, GenericEvent<DecodedMessageEvent> e)
+            async void InspectResponseRaw(object sender, DecodedMessageEvent e)
             {
-                var topic = e.EventData.Topic;
-                var message = e.EventData.Message;
+                var topic = e.Topic;
+                var message = e.Message;
 
-                var payload = e.EventData.Payload;
+                var payload = e.Payload;
 
                 try
                 {
@@ -177,7 +178,7 @@ namespace WalletConnectSharp.Core.Controllers
             
             // Handle response_raw in this context
             // This will allow us to examine response_raw in every typed context registered
-            Events.ListenFor<DecodedMessageEvent>($"response_raw", InspectResponseRaw);
+            this.RawMessage += InspectResponseRaw;
         }
 
         /// <summary>

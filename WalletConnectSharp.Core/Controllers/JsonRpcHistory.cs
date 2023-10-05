@@ -63,6 +63,11 @@ namespace WalletConnectSharp.Core.Controllers
         private bool initialized = false;
         private ICore _core;
 
+        public event EventHandler<JsonRpcRecord<T, TR>> Created;
+        public event EventHandler<JsonRpcRecord<T, TR>> Updated;
+        public event EventHandler<JsonRpcRecord<T, TR>> Deleted;
+        public event EventHandler Sync;
+
         /// <summary>
         /// A mapping of Json RPC Records to their corresponding Json RPC id
         /// </summary>
@@ -134,6 +139,10 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!initialized)
             {
+#pragma warning disable CS0618 // Old event system
+                WrapOldEvents();
+#pragma warning restore CS0618 // Old event system
+                
                 await Restore();
                 foreach (var record in _cached)
                 {
@@ -144,6 +153,15 @@ namespace WalletConnectSharp.Core.Controllers
                 RegisterEventListeners();
                 initialized = true;
             }
+        }
+
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        private void WrapOldEvents()
+        {
+            this.Created += this.WrapEventHandler<JsonRpcRecord<T, TR>>(HistoryEvents.Created);
+            this.Updated += this.WrapEventHandler<JsonRpcRecord<T, TR>>(HistoryEvents.Updated);
+            this.Deleted += this.WrapEventHandler<JsonRpcRecord<T, TR>>(HistoryEvents.Deleted);
+            this.Sync += this.WrapEventHandler(HistoryEvents.Sync);
         }
 
         /// <summary>
@@ -165,7 +183,7 @@ namespace WalletConnectSharp.Core.Controllers
                 ChainId = chainId,
             };
             _records.Add(record.Id, record);
-            Events.Trigger(HistoryEvents.Created, record);
+            this.Created?.Invoke(this, record);
         }
 
         /// <summary>
@@ -205,7 +223,7 @@ namespace WalletConnectSharp.Core.Controllers
             if (record.Response != null) return Task.CompletedTask;
 
             record.Response = response;
-            Events.Trigger(HistoryEvents.Updated, record);
+            this.Updated?.Invoke(this, record);
             return Task.CompletedTask;
         }
 
@@ -224,7 +242,7 @@ namespace WalletConnectSharp.Core.Controllers
                 {
                     if (id != null && record.Id != id) continue;
                     _records.Remove(record.Id);
-                    Events.Trigger(HistoryEvents.Deleted, record);
+                    this.Deleted?.Invoke(this, record);
                 }
             }
         }
@@ -284,7 +302,7 @@ namespace WalletConnectSharp.Core.Controllers
         private async Task Persist()
         {
             await SetJsonRpcRecords(Values);
-            Events.Trigger(HistoryEvents.Sync, new object());
+            this.Sync?.Invoke(this, EventArgs.Empty);
         }
 
         private async Task Restore()
@@ -304,14 +322,12 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void RegisterEventListeners()
         {
-            this.On<JsonRpcRecord<T, TR>>(HistoryEvents.Created, SaveRecordCallback);
-
-            this.On<JsonRpcRecord<T, TR>>(HistoryEvents.Updated, SaveRecordCallback);
-
-            this.On<JsonRpcRecord<T, TR>>(HistoryEvents.Deleted, SaveRecordCallback);
+            this.Created += SaveRecordCallback;
+            this.Updated += SaveRecordCallback;
+            this.Deleted += SaveRecordCallback;
         }
 
-        private async void SaveRecordCallback(object sender, GenericEvent<JsonRpcRecord<T, TR>> @event)
+        private async void SaveRecordCallback(object sender, JsonRpcRecord<T, TR> @event)
         {
             await Persist();
         }

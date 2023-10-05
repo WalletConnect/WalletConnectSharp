@@ -9,6 +9,16 @@ namespace WalletConnectSharp.Network
     /// </summary>
     public interface IJsonRpcConnection : IEvents, IDisposable
     {
+        event EventHandler<string> PayloadReceived;
+
+        event EventHandler Closed;
+
+        event EventHandler<Exception> ErrorReceived;
+
+        event EventHandler<object> Opened;
+
+        event EventHandler<Exception> RegisterErrored;
+        
         /// <summary>
         /// Whether this connection is active and connected
         /// </summary>

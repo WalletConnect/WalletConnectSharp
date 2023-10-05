@@ -5,6 +5,7 @@ namespace WalletConnectSharp.Core.Models.History
     /// <summary>
     /// A class containing all events emitted by the JsonRpcHistory module
     /// </summary>
+    [Obsolete("These events have been replaced by C# events")]
     public static class HistoryEvents
     {
         /// <summary>

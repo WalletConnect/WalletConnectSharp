@@ -1,5 +1,6 @@
 ﻿namespace WalletConnectSharp.Core.Models.Pairing
 {
+    [Obsolete("These events have been replaced by C# events")]
     public static class PairingEvents
     {
         /// <summary>

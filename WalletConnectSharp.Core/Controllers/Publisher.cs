@@ -63,7 +63,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void RegisterEventListeners()
         {
-            Relayer.Core.HeartBeat.On<object>(HeartbeatEvents.Pulse, (_, __) => CheckQueue());
+            Relayer.Core.HeartBeat.OnPulse += (_, _) => CheckQueue();
         }
 
         private async void CheckQueue()
@@ -178,12 +178,11 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay)
                     .WithTimeout(TimeSpan.FromSeconds(45));
-                this.Relayer.Events.Trigger(RelayerEvents.Publish, @params);
                 OnPublish(hash);
             }
             catch (Exception e)
             {
-                this.Relayer.Events.Trigger<object>(RelayerEvents.ConnectionStalled, new object());
+                this.Relayer.TriggerConnectionStalled();
                 return;
             }
         }

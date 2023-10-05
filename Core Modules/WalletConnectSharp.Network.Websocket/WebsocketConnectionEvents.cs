@@ -3,6 +3,7 @@ namespace WalletConnectSharp.Network.Websocket
     /// <summary>
     /// Constants defining WebsocketConnection eventIds
     /// </summary>
+    [Obsolete("These events have been replaced by C# events")]
     public static class WebsocketConnectionEvents
     {
         /// <summary>

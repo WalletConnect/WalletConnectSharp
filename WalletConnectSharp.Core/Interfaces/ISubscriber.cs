@@ -13,7 +13,12 @@ namespace WalletConnectSharp.Core.Interfaces
     /// the backing Relayer connection disconnects
     /// </summary>
     public interface ISubscriber : IEvents, IModule
-    {
+    { 
+        event EventHandler Sync;
+        event EventHandler Resubscribed;
+        event EventHandler<ActiveSubscription> Created;
+        event EventHandler<DeletedSubscription> Deleted; 
+        
         /// <summary>
         /// A dictionary of active subscriptions where the key is the id of the Subscription
         /// </summary>

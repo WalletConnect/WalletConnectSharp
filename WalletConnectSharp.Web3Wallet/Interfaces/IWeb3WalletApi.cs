@@ -9,6 +9,22 @@ namespace WalletConnectSharp.Web3Wallet.Interfaces;
 
 public interface IWeb3WalletApi : IAuthClientEvents
 {
+    event EventHandler<SessionStruct> SessionExpired;
+    
+    event EventHandler<SessionProposalEvent> SessionProposed;
+    
+    event EventHandler<SessionStruct> SessionConnected;
+
+    event EventHandler<Exception> SessionConnectionErrored;
+
+    event EventHandler<SessionUpdateEvent> SessionUpdated;
+
+    event EventHandler<SessionEvent> SessionExtended;
+
+    event EventHandler<SessionEvent> SessionPinged;
+
+    event EventHandler<SessionEvent> SessionDeleted;
+    
     IDictionary<string, SessionStruct> ActiveSessions { get; }
 
     IDictionary<long, ProposalStruct> PendingSessionProposals { get; }

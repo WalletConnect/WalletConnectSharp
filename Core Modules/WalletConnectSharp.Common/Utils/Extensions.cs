@@ -108,5 +108,31 @@ namespace WalletConnectSharp.Common.Utils
             return new HashSet<T>(second, comparer ?? EqualityComparer<T>.Default)
                 .SetEquals(first);
         }
+        
+        public static Action ListenOnce(this object eventSource, string eventName, EventHandler handler) {
+            var eventInfo = eventSource.GetType().GetEvent(eventName);
+            EventHandler internalHandler = null;
+            internalHandler = (src, args) => {
+                eventInfo.RemoveEventHandler(eventSource, internalHandler);
+                handler(src, args);
+            };
+            void RemoveListener()
+            {
+                eventInfo.RemoveEventHandler(eventSource, internalHandler);
+            }
+            eventInfo.AddEventHandler(eventSource, internalHandler);
+
+            return RemoveListener;
+        }
+
+        public static void ListenOnce<TEventArgs>(this object eventSource, string eventName, EventHandler<TEventArgs> handler) {
+            var eventInfo = eventSource.GetType().GetEvent(eventName);
+            EventHandler<TEventArgs> internalHandler = null;
+            internalHandler = (src, args) => {
+                eventInfo.RemoveEventHandler(eventSource, internalHandler);
+                handler(src, args);
+            };
+            eventInfo.AddEventHandler(eventSource, internalHandler);
+        }
     }
 }

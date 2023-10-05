@@ -22,12 +22,11 @@ namespace WalletConnectSharp.Core.Controllers
         /// <summary>
         /// Constants that define eventIds for the Subscriber events
         /// </summary>
+        [Obsolete("These events have been replaced by C# events")]
         public static class SubscriberEvents
         {
             public static readonly string Created = "subscription_created";
             public static readonly string Deleted = "subscription_deleted";
-            public static readonly string Expired = "subscription_expired";
-            public static readonly string Disabled = "subscription_disabled";
             public static readonly string Sync = "subscription_sync";
             public static readonly string Resubscribed = "subscription_resubscribed";
         }
@@ -36,6 +35,15 @@ namespace WalletConnectSharp.Core.Controllers
         /// The EventDelegator this module is using
         /// </summary>
         public EventDelegator Events { get; }
+
+        #region Events
+
+        public event EventHandler Sync;
+        public event EventHandler Resubscribed;
+        public event EventHandler<ActiveSubscription> Created;
+        public event EventHandler<DeletedSubscription> Deleted; 
+
+        #endregion
 
         /// <summary>
         /// The name of this Subscriber
@@ -190,11 +198,25 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!initialized)
             {
+                this.clientId = await this._relayer.Core.Crypto.GetClientId();
+                
+#pragma warning disable CS0618 // Old event system setup
+                WrapOldEvents();
+#pragma warning restore CS0618 // Old event system setup
+                
                 await Restart();
                 RegisterEventListeners();
                 OnEnabled();
-                this.clientId = await this._relayer.Core.Crypto.GetClientId();
             }
+        }
+
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        private void WrapOldEvents()
+        {
+            this.Created += this.WrapEventHandler<ActiveSubscription>(SubscriberEvents.Created);
+            this.Deleted += this.WrapEventHandler<DeletedSubscription>(SubscriberEvents.Deleted);
+            this.Resubscribed += this.WrapEventHandler(SubscriberEvents.Resubscribed);
+            this.Sync += this.WrapEventHandler(SubscriberEvents.Sync);
         }
 
         private async Task Restart()
@@ -207,27 +229,27 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterEventListeners()
         {
-            _relayer.Core.HeartBeat.On<object>(HeartbeatEvents.Pulse, (sender, @event) =>
+            _relayer.Core.HeartBeat.OnPulse += (sender, @event) =>
             {
                 CheckPending();
-            });
-            
-            _relayer.Provider.On<object>(ProviderEvents.Connect, (sender, @event) =>
+            };
+
+            _relayer.Provider.Connected += (sender, connection) =>
             {
                 OnConnect();
-            });
-            
-            _relayer.Provider.On<object>(ProviderEvents.Disconnect, (sender, @event) =>
+            };
+
+            _relayer.Provider.Disconnected += (sender, args) =>
             {
                 OnDisconnect();
-            });
-            
-            this.On<object>(SubscriberEvents.Created, AsyncPersist);
+            };
 
-            this.On<object>(SubscriberEvents.Deleted, AsyncPersist);
+            this.Created += AsyncPersist;
+
+            this.Deleted += AsyncPersist;
         }
 
-        protected virtual async void AsyncPersist(object sender, GenericEvent<object> @event)
+        protected virtual async void AsyncPersist(object sender, object @event)
         {
             await Persist();
         }
@@ -236,7 +258,7 @@ namespace WalletConnectSharp.Core.Controllers
         protected virtual async Task Persist()
         {
             await SetRelayerSubscriptions(Values);
-            Events.Trigger(SubscriberEvents.Sync, new object());
+            this.Sync?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual async Task<ActiveSubscription[]> GetRelayerSubscriptions()
@@ -286,7 +308,7 @@ namespace WalletConnectSharp.Core.Controllers
                 }
             }
             
-            this.Events.Trigger(SubscriberEvents.Resubscribed, new object());
+            this.Resubscribed?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual async Task Resubscribe(ActiveSubscription subscription)
@@ -434,7 +456,7 @@ namespace WalletConnectSharp.Core.Controllers
             
             _subscriptions.Add(id, subscription);
             _topicMap.Set(subscription.Topic, id);
-            Events.Trigger(SubscriberEvents.Created, subscription);
+           this.Created?.Invoke(this, subscription);
         }
 
         protected virtual Task UnsubscribeByTopic(string topic, UnsubscribeOptions opts = null)
@@ -462,7 +484,7 @@ namespace WalletConnectSharp.Core.Controllers
             var subscription = GetSubscription(id);
             _subscriptions.Remove(id);
             _topicMap.Delete(subscription.Topic, id);
-            Events.Trigger(SubscriberEvents.Deleted, new DeletedSubscription()
+            this.Deleted?.Invoke(this, new DeletedSubscription()
             {
                 Id = id,
                 Reason = reason,
@@ -626,7 +648,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
             catch (Exception e)
             {
-                this._relayer.Events.Trigger(RelayerEvents.ConnectionStalled, new object());
+                this._relayer.TriggerConnectionStalled();
                 throw;
             }
         }

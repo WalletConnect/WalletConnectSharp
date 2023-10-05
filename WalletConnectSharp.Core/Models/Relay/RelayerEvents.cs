@@ -3,6 +3,7 @@ namespace WalletConnectSharp.Core.Models.Relay
     /// <summary>
     /// A static class that contains the several event ids emitted by the Relayer module
     /// </summary>
+    [Obsolete("These events have been replaced by C# events")]
     public static class RelayerEvents
     {
         public static readonly string TransportClosed = "relayer_transport_closed";

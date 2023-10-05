@@ -1,4 +1,6 @@
+using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
+using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -11,8 +13,47 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// An interface that represents functions the Sign client Engine can perform. These
     /// functions exist in both the Engine and in the Sign client. 
     /// </summary>
-    public interface IEngineAPI
+    public interface IEngineAPI : IEvents
     {
+        event EventHandler<SessionStruct> SessionExpired;
+
+        event EventHandler<PairingStruct> PairingExpired;
+
+        event EventHandler<SessionProposalEvent> SessionProposed;
+
+        event EventHandler<SessionStruct> SessionConnected;
+
+        event EventHandler<Exception> SessionConnectionErrored;
+
+        event EventHandler<SessionUpdateEvent> SessionUpdateRequest;
+
+        event EventHandler<SessionEvent> SessionExtendRequest;
+        
+        event EventHandler<SessionEvent> SessionUpdated;
+
+        event EventHandler<SessionEvent> SessionExtended;
+
+        event EventHandler<SessionEvent> SessionPinged;
+
+        event EventHandler<SessionEvent> SessionDeleted;
+
+        event EventHandler<SessionStruct> SessionRejected;
+
+        event EventHandler<SessionStruct> SessionApproved; 
+
+        event EventHandler<PairingEvent> PairingPinged;
+
+        event EventHandler<PairingEvent> PairingDeleted;
+        
+        /// <summary>
+        /// Get static event handlers for requests / responses for the given type T, TR. This is similar to
+        /// <see cref="IEngine.HandleMessageType{T,TR}"/> but uses EventHandler rather than callback functions
+        /// </summary>
+        /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
+        /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
+        /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
+        TypedEventHandler<T, TR> SessionRequestEvents<T, TR>();
+        
         /// <summary>
         /// Get all pending session requests as an array
         /// </summary>

@@ -83,5 +83,22 @@ namespace WalletConnectSharp.Events
 
             return eventEmitter;
         }
+
+        private static readonly object emptyObject = new();
+        public static EventHandler WrapEventHandler(this IEvents eventEmitter, string eventId)
+        {
+            return delegate
+            {
+                eventEmitter.Events.Trigger(eventId, emptyObject);
+            };
+        }
+
+        public static EventHandler<T> WrapEventHandler<T>(this IEvents eventEmitter, string eventId)
+        {
+            return delegate(object _, T t)
+            {
+                eventEmitter.Events.Trigger(eventId, t);
+            };
+        }
     }
 }

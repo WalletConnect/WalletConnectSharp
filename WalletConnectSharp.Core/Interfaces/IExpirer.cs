@@ -10,6 +10,14 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     public interface IExpirer : IModule, IEvents
     {
+        event EventHandler<ExpirerEventArgs> Created;
+
+        event EventHandler<ExpirerEventArgs> Deleted;
+
+        event EventHandler<ExpirerEventArgs> Expired;
+
+        event EventHandler Sync;
+        
         /// <summary>
         /// The number of expirations this module is tracking
         /// </summary>

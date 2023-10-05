@@ -19,6 +19,15 @@ public class Web3WalletEngine : IWeb3WalletEngine
 {
     private bool _initialized;
 
+    public event EventHandler<SessionStruct> SessionExpired;
+    public event EventHandler<SessionProposalEvent> SessionProposed;
+    public event EventHandler<SessionStruct> SessionConnected;
+    public event EventHandler<Exception> SessionConnectionErrored;
+    public event EventHandler<SessionUpdateEvent> SessionUpdated;
+    public event EventHandler<SessionEvent> SessionExtended;
+    public event EventHandler<SessionEvent> SessionPinged;
+    public event EventHandler<SessionEvent> SessionDeleted;
+
     public IDictionary<string, SessionStruct> ActiveSessions
     {
         get
@@ -183,9 +192,19 @@ public class Web3WalletEngine : IWeb3WalletEngine
 
     private void InitializeEventListeners()
     {
-        PropagateEventToClient("session_proposal", SignClient);
+        // Propagate sign events
+        SignClient.SessionProposed += (sender, @event) => this.SessionProposed?.Invoke(sender, @event);
+        SignClient.SessionDeleted += (sender, @event) => this.SessionDeleted?.Invoke(sender, @event);
+        SignClient.SessionPinged += (sender, @event) => this.SessionPinged?.Invoke(sender, @event);
+        SignClient.SessionExtendRequest += (sender, @event) => this.SessionExtended?.Invoke(sender, @event);
+        SignClient.SessionExpired += (sender, @struct) => this.SessionExpired?.Invoke(sender, @struct);
+        SignClient.SessionConnected += (sender, @struct) => this.SessionConnected?.Invoke(sender, @struct);
+        SignClient.SessionConnectionErrored +=
+            (sender, exception) => this.SessionConnectionErrored?.Invoke(sender, exception);
+        SignClient.SessionUpdateRequest += (sender, @event) => this.SessionUpdated?.Invoke(sender, @event);
+        
         PropagateEventToClient("session_request", SignClient);
-        PropagateEventToClient("session_delete", SignClient);
+        PropagateEventToClient("session_event", SignClient);
         
         // Propagate auth events 
         AuthClient.AuthRequested += OnAuthRequest;

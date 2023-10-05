@@ -12,6 +12,8 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     public interface ITypedMessageHandler : IModule, IEvents
     {
+        event EventHandler<DecodedMessageEvent> RawMessage;
+        
         /// <summary>
         /// The <see cref="IRelayer"/> this module is using to send / listen for messages
         /// </summary>

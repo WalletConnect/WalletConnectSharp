@@ -21,6 +21,16 @@ namespace WalletConnectSharp.Network
         private TaskCompletionSource<bool> Connecting = new TaskCompletionSource<bool>();
         private long _lastId;
 
+        public event EventHandler<JsonRpcPayload> PayloadReceived;
+
+        public event EventHandler<IJsonRpcConnection> Connected;
+
+        public event EventHandler Disconnected;
+
+        public event EventHandler<Exception> ErrorReceived;
+
+        public event EventHandler<string> RawMessageReceived;
+
         /// <summary>
         /// Whether the provider is currently connecting or not
         /// </summary>
@@ -90,6 +100,20 @@ namespace WalletConnectSharp.Network
             {
                 RegisterEventListeners();
             }
+            
+#pragma warning disable CS0618 // Old event system
+            WrapOldEvents();
+#pragma warning restore CS0618 // Old event system
+        }
+
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        private void WrapOldEvents()
+        {
+            this.PayloadReceived += this.WrapEventHandler<JsonRpcPayload>(ProviderEvents.Payload);
+            this.RawMessageReceived += this.WrapEventHandler<string>(ProviderEvents.RawRequestMessage);
+            this.Connected += this.WrapEventHandler<IJsonRpcConnection>(ProviderEvents.Connect);
+            this.Disconnected += this.WrapEventHandler(ProviderEvents.Disconnect);
+            this.ErrorReceived += this.WrapEventHandler<Exception>(ProviderEvents.Error);
         }
 
         /// <summary>
@@ -141,7 +165,7 @@ namespace WalletConnectSharp.Network
             WCLogger.Log("[JsonRpcProvider] Finalizing Connection, registering event listeners");
             this._connection = connection;
             RegisterEventListeners();
-            Events.Trigger(ProviderEvents.Connect, connection);
+            this.Connected?.Invoke(this, connection);
             Connecting.SetResult(true);
             _connectingStarted = false;
         }
@@ -250,26 +274,28 @@ namespace WalletConnectSharp.Network
             if (_hasRegisteredEventListeners) return;
             
             WCLogger.Log($"[JsonRpcProvider] Registering event listeners on connection object with context {_connection.Events.Context}");
-            _connection.On<string>("payload", OnPayload);
+            _connection.PayloadReceived += OnPayload;
+            _connection.Closed += OnConnectionDisconnected;
+            _connection.ErrorReceived += OnConnectionError;
+            
+            /*_connection.On<string>("payload", OnPayload);
             _connection.On<object>("close", OnConnectionDisconnected);
-            _connection.On<Exception>("error", OnConnectionError);
+            _connection.On<Exception>("error", OnConnectionError);*/
             _hasRegisteredEventListeners = true;
         }
 
-        private void OnConnectionError(object sender, GenericEvent<Exception> e)
+        private void OnConnectionError(object sender, Exception e)
         {
-            Events.Trigger(ProviderEvents.Error, e.EventData);
+            this.ErrorReceived?.Invoke(this, e);
         }
 
-        private void OnConnectionDisconnected(object sender, GenericEvent<object> e)
+        private void OnConnectionDisconnected(object sender, EventArgs e)
         {
-            Events.TriggerType(ProviderEvents.Disconnect, e.EventData, e.EventData.GetType());
+            this.Disconnected?.Invoke(this, e);
         }
 
-        private void OnPayload(object sender, GenericEvent<string> e)
+        private void OnPayload(object sender, string json)
         {
-            var json = e.EventData;
-            
             WCLogger.Log($"[JsonRpcProvider] Got payload {json}");
 
             var payload = JsonConvert.DeserializeObject<JsonRpcPayload>(json);
@@ -284,11 +310,11 @@ namespace WalletConnectSharp.Network
             
             WCLogger.Log($"[JsonRpcProvider] Payload has ID {payload.Id}");
             
-            Events.Trigger(ProviderEvents.Payload, payload);
+            this.PayloadReceived?.Invoke(this, payload);
 
             if (payload.IsRequest)
             {
-                Events.Trigger(ProviderEvents.RawRequestMessage, json);
+                this.RawMessageReceived?.Invoke(this, json);
             }
             else
             {

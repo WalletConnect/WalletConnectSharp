@@ -49,7 +49,11 @@ namespace WalletConnectSharp.Core.Controllers
         /// The EventDelegator this module is using for events
         /// </summary>
         public EventDelegator Events { get; }
-        
+
+        public event EventHandler<PairingEvent> PairingExpired;
+        public event EventHandler<PairingEvent> PairingPinged;
+        public event EventHandler<PairingEvent> PairingDeleted;
+
         /// <summary>
         /// Get the <see cref="IStore{TKey,TValue}"/> module that is handling the storage of
         /// <see cref="PairingStruct"/> 
@@ -91,6 +95,10 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!_initialized)
             {
+#pragma warning disable CS0618 // Old event system
+                WrapOldEvents();
+#pragma warning restore CS0618 // Old event system
+                
                 await this.Store.Init();
                 await Cleanup();
                 RegisterTypedMessages();
@@ -99,9 +107,17 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
+        [Obsolete("TODO: This needs to be removed in future versions")]
+        private void WrapOldEvents()
+        {
+            this.PairingExpired += this.WrapEventHandler<PairingEvent>(PairingEvents.PairingExpire);
+            this.PairingPinged += this.WrapEventHandler<PairingEvent>(PairingEvents.PairingPing);
+            this.PairingDeleted += this.WrapEventHandler<PairingEvent>(PairingEvents.PairingDelete);
+        }
+
         private void RegisterExpirerEvents()
         {
-            this.Core.Expirer.On<Expiration>(ExpirerEvents.Expired, ExpiredCallback);
+            this.Core.Expirer.Expired += ExpiredCallback;
         }
 
         private void RegisterTypedMessages()
@@ -422,7 +438,7 @@ namespace WalletConnectSharp.Core.Controllers
                 await IsValidPairingTopic(topic);
 
                 await Core.MessageHandler.SendResult<PairingPing, bool>(id, topic, true);
-                this.Events.Trigger(PairingEvents.PairingPing, new PairingEvent()
+                this.PairingPinged?.Invoke(this, new PairingEvent()
                 {
                     Topic = topic,
                     Id = id
@@ -442,6 +458,12 @@ namespace WalletConnectSharp.Core.Controllers
             // where session_ping listener is not yet initialized
             await Task.Delay(500);
 
+            this.PairingPinged?.Invoke(this, new PairingEvent()
+            {
+                Id = id,
+                Topic = topic
+            });
+            
             this.Events.Trigger($"pairing_ping{id}", payload);
         }
         
@@ -454,7 +476,7 @@ namespace WalletConnectSharp.Core.Controllers
 
                 await Core.MessageHandler.SendResult<PairingDelete, bool>(id, topic, true);
                 await DeletePairing(topic);
-                this.Events.Trigger(PairingEvents.PairingDelete, new PairingEvent()
+                this.PairingDeleted?.Invoke(this, new PairingEvent()
                 {
                     Topic = topic,
                     Id = id
@@ -476,9 +498,9 @@ namespace WalletConnectSharp.Core.Controllers
             await IsValidPairingTopic(topic);
         }
         
-        private async void ExpiredCallback(object sender, GenericEvent<Expiration> e)
+        private async void ExpiredCallback(object sender, ExpirerEventArgs e)
         {
-            var target = new ExpirerTarget(e.EventData.Target);
+            var target = new ExpirerTarget(e.Target);
 
             if (string.IsNullOrWhiteSpace(target.Topic)) return;
 
@@ -486,7 +508,7 @@ namespace WalletConnectSharp.Core.Controllers
             if (this.Store.Keys.Contains(topic))
             {
                 await DeletePairing(topic);
-                this.Events.Trigger(PairingEvents.PairingExpire, new PairingEvent()
+                this.PairingExpired?.Invoke(this, new PairingEvent()
                 {
                     Topic = topic,
                 });

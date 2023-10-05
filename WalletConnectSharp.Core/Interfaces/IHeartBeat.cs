@@ -10,6 +10,8 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     public interface IHeartBeat : IEvents, IModule
     {
+        event EventHandler OnPulse;
+        
         /// <summary>
         /// The interval (in milliseconds) the Pulse event gets emitted/triggered
         /// </summary>

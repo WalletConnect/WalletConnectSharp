@@ -9,6 +9,12 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     public interface IPairing : IModule, IEvents
     {
+        event EventHandler<PairingEvent> PairingExpired;
+
+        event EventHandler<PairingEvent> PairingPinged;
+
+        event EventHandler<PairingEvent> PairingDeleted;
+        
         /// <summary>
         /// Get the <see cref="IStore{TKey,TValue}"/> module that is handling the storage of
         /// <see cref="PairingStruct"/> 

@@ -16,6 +16,14 @@ namespace WalletConnectSharp.Core.Interfaces
     /// <typeparam name="TR">The JSON RPC Response type</typeparam>
     public interface IJsonRpcHistory<T, TR> : IModule, IEvents
     {
+        event EventHandler<JsonRpcRecord<T, TR>> Created;
+
+        event EventHandler<JsonRpcRecord<T, TR>> Updated;
+
+        event EventHandler<JsonRpcRecord<T, TR>> Deleted;
+
+        event EventHandler Sync;
+        
         /// <summary>
         /// A mapping of Json RPC Records to their corresponding Json RPC id
         /// </summary>
