@@ -156,20 +156,6 @@ namespace WalletConnectSharp.Core.Controllers
             RegisterEventListeners();
             
             initialized = true;
-
-#pragma warning disable CS4014
-            Task.Run(async () =>
-#pragma warning restore CS4014
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10));
-
-                if (this.Subscriber.Topics.Length == 0)
-                {
-                    // No topics subscribed to after init, closing transport
-                    await this.TransportClose();
-                    this.transportExplicityClosed = false;
-                }
-            });
         }
 
         protected virtual async Task CreateProvider()
