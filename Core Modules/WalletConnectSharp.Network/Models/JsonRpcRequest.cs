@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using WalletConnectSharp.Events.Utils;
+using WalletConnectSharp.Common.Utils;
 
 namespace WalletConnectSharp.Network.Models
 {

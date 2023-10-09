@@ -1,9 +1,9 @@
 using System.Net.WebSockets;
+using EventEmitter.NET;
+using EventEmitter.NET.Model;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using Websocket.Client;
 
@@ -116,7 +116,7 @@ namespace WalletConnectSharp.Network.Websocket
             
             _context = Guid.NewGuid();
             this._url = url;
-            _delegator = new EventDelegator(this);
+            _delegator = new EventDelegator(Context);
             
 #pragma warning disable CS0618 // Old event system
             WrapOldEvents();

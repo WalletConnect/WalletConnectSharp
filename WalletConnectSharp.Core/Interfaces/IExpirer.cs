@@ -1,6 +1,6 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Expirer;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
 {

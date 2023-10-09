@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.Web;
+using EventEmitter.NET;
 
 namespace WalletConnectSharp.Common.Utils
 {
@@ -133,6 +130,23 @@ namespace WalletConnectSharp.Common.Utils
                 handler(src, args);
             };
             eventInfo.AddEventHandler(eventSource, internalHandler);
+        }
+        
+        private static readonly object emptyObject = new();
+        public static EventHandler WrapEventHandler(this IEvents eventEmitter, string eventId)
+        {
+            return delegate
+            {
+                eventEmitter.Events.Trigger(eventId, emptyObject);
+            };
+        }
+
+        public static EventHandler<T> WrapEventHandler<T>(this IEvents eventEmitter, string eventId)
+        {
+            return delegate(object _, T t)
+            {
+                eventEmitter.Events.Trigger(eventId, t);
+            };
         }
     }
 }

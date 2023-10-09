@@ -1,8 +1,8 @@
-﻿using WalletConnectSharp.Auth;
+﻿using EventEmitter.NET;
+using WalletConnectSharp.Auth;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
@@ -80,7 +80,7 @@ public class Web3WalletClient : IWeb3Wallet
         this.Context = $"{Name}-context";
         this.Core = core;
         
-        this.Events = new EventDelegator(this);
+        this.Events = new EventDelegator(Context);
         this.Engine = new Web3WalletEngine(this);
         
         WrapEngineEvents();

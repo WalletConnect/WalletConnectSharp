@@ -1,8 +1,8 @@
-﻿using WalletConnectSharp.Auth.Models;
+﻿using EventEmitter.NET;
+using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Auth.Interfaces;
 

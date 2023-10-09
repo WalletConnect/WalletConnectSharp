@@ -1,9 +1,8 @@
-using System.Threading.Tasks;
+using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto.Interfaces;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Storage.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces

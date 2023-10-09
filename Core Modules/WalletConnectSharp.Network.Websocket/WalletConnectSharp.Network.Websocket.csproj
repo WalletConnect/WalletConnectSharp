@@ -30,6 +30,7 @@ WC_DEF_WEBSOCKET</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\WalletConnectSharp.Common\WalletConnectSharp.Common.csproj" />
       <ProjectReference Include="..\WalletConnectSharp.Network\WalletConnectSharp.Network.csproj" />
     </ItemGroup>
 

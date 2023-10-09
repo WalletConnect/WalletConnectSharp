@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -8,8 +9,6 @@ using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Pairing.Methods;
 using WalletConnectSharp.Core.Models.Relay;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -83,7 +82,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Pairing(ICore core)
         {
             this.Core = core;
-            this.Events = new EventDelegator(this);
+            this.Events = new EventDelegator(Context);
             this.Store = new PairingStore(core);
         }
 

@@ -14,5 +14,6 @@
     <PackageVersion Include="coverlet.collector" Version="3.1.0" />
     <PackageVersion Include="Nethereum.Signer" Version="4.14.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+    <PackageVersion Include="EventEmitter.NET" Version="1.0.0" />
   </ItemGroup>
 </Project>

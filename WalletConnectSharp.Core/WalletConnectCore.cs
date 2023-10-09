@@ -1,3 +1,4 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
@@ -6,7 +7,6 @@ using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Crypto.Interfaces;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
 using WalletConnectSharp.Network.Websocket;
@@ -167,7 +167,7 @@ namespace WalletConnectSharp.Core
 
             try
             {
-                Events = new EventDelegator(this);
+                Events = new EventDelegator(Context);
             }
             catch (ArgumentException)
             {
@@ -179,7 +179,7 @@ namespace WalletConnectSharp.Core
 
                 guid = $"-{Guid.NewGuid().ToString()}";
 
-                Events = new EventDelegator(this);
+                Events = new EventDelegator(Context);
             }
 
             Expirer = new Expirer(this);

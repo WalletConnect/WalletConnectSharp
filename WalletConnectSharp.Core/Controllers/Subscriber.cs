@@ -1,13 +1,11 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -185,7 +183,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             _relayer = relayer;
             
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
 
             logger = WCLogger.WithContext(Context);
         }

@@ -20,6 +20,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="EventEmitter.NET" />
       <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
 

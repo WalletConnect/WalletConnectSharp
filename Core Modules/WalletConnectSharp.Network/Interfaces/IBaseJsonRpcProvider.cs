@@ -1,5 +1,4 @@
-using System.Threading.Tasks;
-using WalletConnectSharp.Events.Interfaces;
+using EventEmitter.NET;
 
 namespace WalletConnectSharp.Network
 {

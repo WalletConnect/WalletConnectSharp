@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using EventEmitter.NET;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Logging;
@@ -6,13 +7,9 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Interfaces;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
@@ -72,7 +69,7 @@ namespace WalletConnectSharp.Sign
         public Engine(ISignClient client)
         {
             this.Client = client;
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
 
             logger = WCLogger.WithContext(Context);
         }

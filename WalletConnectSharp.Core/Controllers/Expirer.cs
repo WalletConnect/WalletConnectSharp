@@ -1,9 +1,8 @@
+using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Expirer;
-using WalletConnectSharp.Core.Models.Heartbeat;
-using WalletConnectSharp.Events;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -107,7 +106,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Expirer(ICore core)
         {
             this._core = core;
-            Events = new EventDelegator(this);
+            Events = new EventDelegator(Context);
         }
 
         /// <summary>
