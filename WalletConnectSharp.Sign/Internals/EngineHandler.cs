@@ -132,6 +132,7 @@ namespace WalletConnectSharp.Sign
             try
             {
                 await PrivateThis.IsValidSessionSettleRequest(@params);
+                var pairingTopic = @params.PairingTopic;
                 var relay = @params.Relay;
                 var controller = @params.Controller;
                 var expiry = @params.Expiry;
@@ -140,6 +141,7 @@ namespace WalletConnectSharp.Sign
                 var session = new SessionStruct()
                 {
                     Topic = topic,
+                    PairingTopic = pairingTopic,
                     Relay = relay,
                     Expiry = expiry,
                     Namespaces = namespaces,
