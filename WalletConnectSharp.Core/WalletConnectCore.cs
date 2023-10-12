@@ -190,7 +190,8 @@ namespace WalletConnectSharp.Core
             {
                 Core = this,
                 ProjectId = ProjectId,
-                RelayUrl = options.RelayUrl
+                RelayUrl = options.RelayUrl,
+                ConnectionTimeout = options.ConnectionTimeout,
             });
 
             MessageHandler = new TypedMessageHandler(this);

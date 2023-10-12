@@ -52,6 +52,12 @@ namespace WalletConnectSharp.Core.Interfaces
         public IJsonRpcProvider Provider { get; }
         
         /// <summary>
+        /// How long the <see cref="IRelayer"/> should wait before throwing a <see cref="TimeoutException"/> during
+        /// the connection phase. If this field is null, then the timeout will be infinite.
+        /// </summary>
+        public TimeSpan? ConnectionTimeout { get; set; }
+        
+        /// <summary>
         /// Whether this Relayer is connected to the WalletConnect relay server
         /// </summary>
         public bool Connected { get; }
