@@ -15,6 +15,12 @@ namespace WalletConnectSharp.Sign.Models.Engine.Methods
     public class SessionSettle : IWcMethod
     {
         /// <summary>
+        /// Pairing topic for this session
+        /// </summary>
+        [JsonProperty("pairingTopic")]
+        public string PairingTopic;
+        
+        /// <summary>
         /// The protocol options that should be used in this session
         /// </summary>
         [JsonProperty("relay")]
