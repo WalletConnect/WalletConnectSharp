@@ -451,7 +451,7 @@ namespace WalletConnectSharp.Core.Controllers
                 while (Provider.Connection.IsPaused)
                 {
                     WCLogger.Log("[Relayer] Waiting for connection to unpause");
-                    await Task.Delay(2);
+                    await Task.Delay(TimeSpan.FromSeconds(1));
                 }
                 return;
             }
