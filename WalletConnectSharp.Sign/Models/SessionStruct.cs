@@ -17,6 +17,12 @@ namespace WalletConnectSharp.Sign.Models
         public string Topic;
         
         /// <summary>
+        /// The pairing topic of this session
+        /// </summary>
+        [JsonProperty("pairingTopic")]
+        public string PairingTopic;
+        
+        /// <summary>
         /// The relay protocol options this session is using
         /// </summary>
         [JsonProperty("relay")]
