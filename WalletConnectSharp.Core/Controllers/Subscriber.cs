@@ -212,12 +212,12 @@ namespace WalletConnectSharp.Core.Controllers
                 CheckPending();
             });
             
-            _relayer.Provider.On<object>(ProviderEvents.Connect, (sender, @event) =>
+            _relayer.On<object>(RelayerEvents.Connect, (sender, @event) =>
             {
                 OnConnect();
             });
             
-            _relayer.Provider.On<object>(ProviderEvents.Disconnect, (sender, @event) =>
+            _relayer.On<object>(RelayerEvents.Disconnect, (sender, @event) =>
             {
                 OnDisconnect();
             });
@@ -359,7 +359,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void OnDisable()
         {
-            logger.Log("OnDisable invoked");
             cached = Values;
             _subscriptions.Clear();
             _topicMap.Clear();
