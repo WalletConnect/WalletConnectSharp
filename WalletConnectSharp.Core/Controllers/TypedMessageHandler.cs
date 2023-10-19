@@ -3,6 +3,7 @@ using EventEmitter.NET.Model;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
+using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
@@ -14,6 +15,7 @@ namespace WalletConnectSharp.Core.Controllers
     {
         private bool _initialized = false;
         private Dictionary<string, DecodeOptions> _decodeOptionsMap = new Dictionary<string, DecodeOptions>();
+        private HashSet<string> _typeSafeCache = new HashSet<string>();
 
         public EventDelegator Events { get; }
 
@@ -304,6 +306,8 @@ namespace WalletConnectSharp.Core.Controllers
         /// <returns>The id of the request sent</returns>
         public async Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null, EncodeOptions options = null)
         {
+            EnsureTypeIsSerializerSafe(parameters);
+            
             var method = RpcMethodAttribute.MethodForType<T>();
 
             var payload = new JsonRpcRequest<T>(method, parameters);
@@ -340,6 +344,8 @@ namespace WalletConnectSharp.Core.Controllers
         /// <typeparam name="TR">The response type</typeparam>
         public async Task SendResult<T, TR>(long id, string topic, TR result, EncodeOptions options = null)
         {
+            EnsureTypeIsSerializerSafe(result);
+            
             var payload = new JsonRpcResponse<TR>(id, null, result);
             var message = await this.Core.Crypto.Encode(topic, payload, options);
             var opts = RpcResponseOptionsFromTypes<T, TR>();
@@ -357,6 +363,9 @@ namespace WalletConnectSharp.Core.Controllers
         /// <typeparam name="TR">The response type</typeparam>
         public async Task SendError<T, TR>(long id, string topic, Error error, EncodeOptions options = null)
         {
+            // Type Error is always serializer safe
+            // EnsureTypeIsSerializerSafe(error);
+            
             var payload = new JsonRpcResponse<TR>(id, error, default);
             var message = await this.Core.Crypto.Encode(topic, payload, options);
             var opts = RpcResponseOptionsFromTypes<T, TR>();
@@ -367,6 +376,19 @@ namespace WalletConnectSharp.Core.Controllers
         public void Dispose()
         {
             Events?.Dispose();
+        }
+
+        private void EnsureTypeIsSerializerSafe<T>(T testObject)
+        {
+            var typeString = typeof(T).FullName;
+            if (_typeSafeCache.Contains(typeString))
+                return;
+            
+            // Throw any serialization exceptions now
+            // before it's too late
+            TypeSafety.EnsureTypeSerializerSafe(testObject);
+
+            _typeSafeCache.Add(typeString);
         }
     }
 }

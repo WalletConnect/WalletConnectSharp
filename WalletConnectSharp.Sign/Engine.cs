@@ -332,8 +332,8 @@ namespace WalletConnectSharp.Sign
             var id = await MessageHandler.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
             
             logger.Log($"Got back {id} as request pending id");
-            
-            var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
+
+            var expiry = Clock.CalculateExpiry(options.Expiry);
 
             await PrivateThis.SetProposal(id, new ProposalStruct()
             {

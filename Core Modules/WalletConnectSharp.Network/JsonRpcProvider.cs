@@ -250,7 +250,7 @@ namespace WalletConnectSharp.Network
             //Console.WriteLine($"[{Name}] Sending request {request.Method} with data {JsonConvert.SerializeObject(request)}");
             await _connection.SendRequest(request, context);
 
-            WCLogger.Log("[JsonRpcProvider] Awaiting request resuult");
+            WCLogger.Log("[JsonRpcProvider] Awaiting request result");
             await requestTask.Task;
 
             return requestTask.Task.Result;

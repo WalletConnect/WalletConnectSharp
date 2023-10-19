@@ -85,6 +85,12 @@ namespace WalletConnectSharp.Core.Controllers
         public IJsonRpcProvider Provider { get; private set; }
         
         /// <summary>
+        /// How long the <see cref="IRelayer"/> should wait before throwing a <see cref="TimeoutException"/> during
+        /// the connection phase. If this field is null, then the timeout will be infinite.
+        /// </summary>
+        public TimeSpan? ConnectionTimeout { get; set; }
+        
+        /// <summary>
         /// Whether this Relayer is connected
         /// </summary>
         public bool Connected 
@@ -139,6 +145,8 @@ namespace WalletConnectSharp.Core.Controllers
             }
 
             projectId = opts.ProjectId;
+
+            ConnectionTimeout = opts.ConnectionTimeout;
         }
         
         /// <summary>
@@ -162,20 +170,6 @@ namespace WalletConnectSharp.Core.Controllers
             RegisterEventListeners();
             
             initialized = true;
-
-#pragma warning disable CS4014
-            Task.Run(async () =>
-#pragma warning restore CS4014
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10));
-
-                if (this.Subscriber.Topics.Length == 0)
-                {
-                    // No topics subscribed to after init, closing transport
-                    await this.TransportClose();
-                    this.transportExplicityClosed = false;
-                }
-            });
         }
 
         protected virtual async Task CreateProvider()
@@ -411,7 +405,11 @@ namespace WalletConnectSharp.Core.Controllers
                     var cleanupEvent = this.ListenOnce(nameof(OnTransportClosed), RejectTransportOpen);
                     try
                     {
-                        await this.Provider.Connect().WithTimeout(TimeSpan.FromSeconds(5), "socket stalled");
+                        var connectionTask = this.Provider.Connect();
+                        if (ConnectionTimeout != null)
+                            connectionTask = connectionTask.WithTimeout((TimeSpan)ConnectionTimeout, "socket stalled");
+                        
+                        await connectionTask;
                         task2.TrySetResult(true);
                     }
                     finally
@@ -477,7 +475,7 @@ namespace WalletConnectSharp.Core.Controllers
                 while (Provider.Connection.IsPaused)
                 {
                     WCLogger.Log("[Relayer] Waiting for connection to unpause");
-                    await Task.Delay(2);
+                    await Task.Delay(TimeSpan.FromSeconds(1));
                 }
                 return;
             }
