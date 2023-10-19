@@ -117,20 +117,6 @@ namespace WalletConnectSharp.Network.Websocket
             _context = Guid.NewGuid();
             this._url = url;
             _delegator = new EventDelegator(Context);
-            
-#pragma warning disable CS0618 // Old event system
-            WrapOldEvents();
-#pragma warning restore CS0618 // Old event system
-        }
-
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        private void WrapOldEvents()
-        {
-            this.PayloadReceived += this.WrapEventHandler<string>(WebsocketConnectionEvents.Payload);
-            this.WebsocketClosed += this.WrapEventHandler<DisconnectionInfo>(WebsocketConnectionEvents.Close);
-            this.RegisterErrored += this.WrapEventHandler<Exception>(WebsocketConnectionEvents.RegisterError);
-            this.Opened += this.WrapEventHandler<object>(WebsocketConnectionEvents.Open);
-            this.ErrorReceived += this.WrapEventHandler<Exception>(WebsocketConnectionEvents.Error);
         }
 
         /// <summary>

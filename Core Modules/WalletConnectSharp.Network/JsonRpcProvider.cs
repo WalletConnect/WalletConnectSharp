@@ -101,20 +101,6 @@ namespace WalletConnectSharp.Network
             {
                 RegisterEventListeners();
             }
-            
-#pragma warning disable CS0618 // Old event system
-            WrapOldEvents();
-#pragma warning restore CS0618 // Old event system
-        }
-
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        private void WrapOldEvents()
-        {
-            this.PayloadReceived += this.WrapEventHandler<JsonRpcPayload>(ProviderEvents.Payload);
-            this.RawMessageReceived += this.WrapEventHandler<string>(ProviderEvents.RawRequestMessage);
-            this.Connected += this.WrapEventHandler<IJsonRpcConnection>(ProviderEvents.Connect);
-            this.Disconnected += this.WrapEventHandler(ProviderEvents.Disconnect);
-            this.ErrorReceived += this.WrapEventHandler<Exception>(ProviderEvents.Error);
         }
 
         /// <summary>

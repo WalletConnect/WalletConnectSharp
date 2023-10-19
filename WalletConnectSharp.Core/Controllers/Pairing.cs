@@ -94,24 +94,12 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!_initialized)
             {
-#pragma warning disable CS0618 // Old event system
-                WrapOldEvents();
-#pragma warning restore CS0618 // Old event system
-                
                 await this.Store.Init();
                 await Cleanup();
                 RegisterTypedMessages();
                 RegisterExpirerEvents();
                 this._initialized = true;
             }
-        }
-
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        private void WrapOldEvents()
-        {
-            this.PairingExpired += this.WrapEventHandler<PairingEvent>(PairingEvents.PairingExpire);
-            this.PairingPinged += this.WrapEventHandler<PairingEvent>(PairingEvents.PairingPing);
-            this.PairingDeleted += this.WrapEventHandler<PairingEvent>(PairingEvents.PairingDelete);
         }
 
         private void RegisterExpirerEvents()

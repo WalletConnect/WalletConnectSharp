@@ -95,35 +95,12 @@ namespace WalletConnectSharp.Sign
         private void SetupEvents()
         {
             WrapPairingEvents();
-            
-#pragma warning disable CS0618 // Old event system
-            WrapOldEvents(this);
-#pragma warning restore CS0618 // Old event system
         }
 
         private void WrapPairingEvents()
         {
             this.Client.Core.Pairing.PairingPinged += (sender, @event) => this.PairingPinged?.Invoke(sender, @event);
             this.Client.Core.Pairing.PairingDeleted += (sender, @event) => this.PairingDeleted?.Invoke(sender, @event);
-        }
-        
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        internal void WrapOldEvents(IEngineAPI source)
-        {
-            source.SessionExpired += source.WrapEventHandler<SessionStruct>(EngineEvents.SessionExpire);
-            source.PairingExpired += source.WrapEventHandler<PairingStruct>(EngineEvents.PairingExpire);
-            source.SessionProposed += source.WrapEventHandler<SessionProposalEvent>(EngineEvents.SessionProposal);
-            
-            // both events were triggered for error / normal connection
-            source.SessionConnected += source.WrapEventHandler<SessionStruct>(EngineEvents.SessionConnect);
-            source.SessionConnectionErrored += source.WrapEventHandler<Exception>(EngineEvents.SessionConnect);
-
-            source.SessionUpdateRequest += source.WrapEventHandler<SessionUpdateEvent>(EngineEvents.SessionUpdate);
-            source.SessionExtendRequest += source.WrapEventHandler<SessionEvent>(EngineEvents.SessionExtend);
-            source.SessionPinged += source.WrapEventHandler<SessionEvent>(EngineEvents.SessionPing);
-            source.PairingPinged += source.WrapEventHandler<PairingEvent>(EngineEvents.PairingPing);
-            source.SessionDeleted += source.WrapEventHandler<SessionEvent>(EngineEvents.SessionDelete);
-            source.PairingDeleted += source.WrapEventHandler<PairingEvent>(EngineEvents.PairingDelete);
         }
 
         private void RegisterExpirerEvents()

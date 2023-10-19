@@ -139,10 +139,6 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!initialized)
             {
-#pragma warning disable CS0618 // Old event system
-                WrapOldEvents();
-#pragma warning restore CS0618 // Old event system
-                
                 await Restore();
                 foreach (var record in _cached)
                 {
@@ -153,15 +149,6 @@ namespace WalletConnectSharp.Core.Controllers
                 RegisterEventListeners();
                 initialized = true;
             }
-        }
-
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        private void WrapOldEvents()
-        {
-            this.Created += this.WrapEventHandler<JsonRpcRecord<T, TR>>(HistoryEvents.Created);
-            this.Updated += this.WrapEventHandler<JsonRpcRecord<T, TR>>(HistoryEvents.Updated);
-            this.Deleted += this.WrapEventHandler<JsonRpcRecord<T, TR>>(HistoryEvents.Deleted);
-            this.Sync += this.WrapEventHandler(HistoryEvents.Sync);
         }
 
         /// <summary>

@@ -1,7 +1,5 @@
 using EventEmitter.NET;
-using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models.Heartbeat;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -74,10 +72,6 @@ namespace WalletConnectSharp.Core.Controllers
         /// <returns></returns>
         public Task Init()
         {
-#pragma warning disable CS0618 // Old event system
-            this.OnPulse += this.WrapEventHandler(HeartbeatEvents.Pulse);
-#pragma warning restore CS0618 // Old event system
-            
             HeartBeatCancellationToken = new CancellationToken();
 
             Task.Run(async () =>

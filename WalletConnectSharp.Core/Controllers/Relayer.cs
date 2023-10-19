@@ -147,10 +147,6 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         public async Task Init()
         {
-#pragma warning disable CS0618 // Old event system
-            WrapOldEvents();
-#pragma warning restore CS0618 // Old event system
-            
             WCLogger.Log("[Relayer] Creating provider");
             await CreateProvider();
 
@@ -180,17 +176,6 @@ namespace WalletConnectSharp.Core.Controllers
                     this.transportExplicityClosed = false;
                 }
             });
-        }
-
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        private void WrapOldEvents()
-        {
-            this.OnTransportClosed += this.WrapEventHandler(RelayerEvents.TransportClosed);
-            this.OnConnectionStalled += this.WrapEventHandler(RelayerEvents.ConnectionStalled);
-            this.OnMessageReceived += this.WrapEventHandler<MessageEvent>(RelayerEvents.Message);
-            this.OnConnected += this.WrapEventHandler(RelayerEvents.Connect);
-            this.OnDisconnected += this.WrapEventHandler(RelayerEvents.Disconnect);
-            this.OnErrored += this.WrapEventHandler<Exception>(RelayerEvents.Error);
         }
 
         protected virtual async Task CreateProvider()

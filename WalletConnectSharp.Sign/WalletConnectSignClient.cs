@@ -217,10 +217,6 @@ namespace WalletConnectSharp.Sign
         private void SetupEvents()
         {
             WrapEngineEvents();
-            
-#pragma warning disable CS0618 // Old event system
-            ((Engine)this.Engine).WrapOldEvents(this);
-#pragma warning restore CS0618 // Old event system
         }
 
         private void WrapEngineEvents()

@@ -18,18 +18,6 @@ namespace WalletConnectSharp.Core.Controllers
     public class Subscriber : ISubscriber
     {
         /// <summary>
-        /// Constants that define eventIds for the Subscriber events
-        /// </summary>
-        [Obsolete("These events have been replaced by C# events")]
-        public static class SubscriberEvents
-        {
-            public static readonly string Created = "subscription_created";
-            public static readonly string Deleted = "subscription_deleted";
-            public static readonly string Sync = "subscription_sync";
-            public static readonly string Resubscribed = "subscription_resubscribed";
-        }
-        
-        /// <summary>
         /// The EventDelegator this module is using
         /// </summary>
         public EventDelegator Events { get; }
@@ -198,23 +186,10 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 this.clientId = await this._relayer.Core.Crypto.GetClientId();
                 
-#pragma warning disable CS0618 // Old event system setup
-                WrapOldEvents();
-#pragma warning restore CS0618 // Old event system setup
-                
                 await Restart();
                 RegisterEventListeners();
                 OnEnabled();
             }
-        }
-
-        [Obsolete("TODO: This needs to be removed in future versions")]
-        private void WrapOldEvents()
-        {
-            this.Created += this.WrapEventHandler<ActiveSubscription>(SubscriberEvents.Created);
-            this.Deleted += this.WrapEventHandler<DeletedSubscription>(SubscriberEvents.Deleted);
-            this.Resubscribed += this.WrapEventHandler(SubscriberEvents.Resubscribed);
-            this.Sync += this.WrapEventHandler(SubscriberEvents.Sync);
         }
 
         private async Task Restart()

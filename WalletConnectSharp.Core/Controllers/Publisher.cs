@@ -64,10 +64,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void RegisterEventListeners()
         {
-#pragma warning disable CS0618 // Old event system
-            this.OnPublishedMessage += Relayer.WrapEventHandler<PublishParams>(RelayerEvents.Publish);
-#pragma warning restore CS0618 // Old event system
-            
             Relayer.Core.HeartBeat.OnPulse += (_, _) => CheckQueue();
         }
 
