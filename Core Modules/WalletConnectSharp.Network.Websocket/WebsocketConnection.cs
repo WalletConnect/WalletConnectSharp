@@ -170,6 +170,7 @@ namespace WalletConnectSharp.Network.Websocket
             try
             {
                 _socket = new WebsocketClient(new Uri(_url));
+                _socket.ReconnectTimeout = null;
 
                 await _socket.Start().WithTimeout(OpenTimeout, "Unavailable WS RPC url at " + _url);
                 OnOpen(_socket);

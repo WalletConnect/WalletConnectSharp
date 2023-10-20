@@ -163,11 +163,11 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
-        private IRelayer _relayer;
-        private bool initialized;
-        private string clientId;
-        private ILogger logger;
-        private ActiveSubscription[] cached = Array.Empty<ActiveSubscription>();
+        private readonly IRelayer _relayer;
+        private bool _initialized;
+        private string _clientId;
+        private readonly ILogger _logger;
+        private ActiveSubscription[] _cached = Array.Empty<ActiveSubscription>();
 
         /// <summary>
         /// Create a new Subscriber module using a backing Relayer
@@ -179,7 +179,7 @@ namespace WalletConnectSharp.Core.Controllers
             
             Events = new EventDelegator(this);
 
-            logger = WCLogger.WithContext(Context);
+            _logger = WCLogger.WithContext(Context);
         }
         
         /// <summary>
@@ -188,12 +188,12 @@ namespace WalletConnectSharp.Core.Controllers
         /// </summary>
         public async Task Init()
         {
-            if (!initialized)
+            if (!_initialized)
             {
                 await Restart();
                 RegisterEventListeners();
                 OnEnabled();
-                this.clientId = await this._relayer.Core.Crypto.GetClientId();
+                this._clientId = await this._relayer.Core.Crypto.GetClientId();
             }
         }
 
@@ -212,12 +212,12 @@ namespace WalletConnectSharp.Core.Controllers
                 CheckPending();
             });
             
-            _relayer.Provider.On<object>(ProviderEvents.Connect, (sender, @event) =>
+            _relayer.On<object>(RelayerEvents.Connect, (sender, @event) =>
             {
                 OnConnect();
             });
             
-            _relayer.Provider.On<object>(ProviderEvents.Disconnect, (sender, @event) =>
+            _relayer.On<object>(RelayerEvents.Disconnect, (sender, @event) =>
             {
                 OnDisconnect();
             });
@@ -263,7 +263,7 @@ namespace WalletConnectSharp.Core.Controllers
                 throw WalletConnectException.FromType(ErrorType.RESTORE_WILL_OVERRIDE, Name);
             }
 
-            cached = persisted;
+            _cached = persisted;
         }
 
         protected virtual async void CheckPending()
@@ -277,9 +277,9 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual async Task Reset()
         {
-            if (cached.Length > 0)
+            if (_cached.Length > 0)
             {
-                var batches = cached.Batch(500);
+                var batches = _cached.Batch(500);
                 foreach (var batch in batches)
                 {
                     await this.BatchSubscribe(batch.ToArray());
@@ -324,7 +324,7 @@ namespace WalletConnectSharp.Core.Controllers
             var subscribe = _relayer.Request<JsonRpcSubscriberParams, string>(request);
             await subscribe.WithTimeout(20000);
 
-            return HashUtils.HashMessage(topic + this.clientId);
+            return HashUtils.HashMessage(topic + this._clientId);
         }
 
         protected virtual Task RpcUnsubscribe(string topic, string id, ProtocolOptions relay)
@@ -345,8 +345,8 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void OnEnabled()
         {
-            cached = Array.Empty<ActiveSubscription>();
-            initialized = true;
+            _cached = Array.Empty<ActiveSubscription>();
+            _initialized = true;
             
             if (onSubscriberReady != null)
                 onSubscriberReady(this, EventArgs.Empty);
@@ -359,11 +359,10 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void OnDisable()
         {
-            logger.Log("OnDisable invoked");
-            cached = Values;
+            _cached = Values;
             _subscriptions.Clear();
             _topicMap.Clear();
-            initialized = false;
+            _initialized = false;
         }
 
         protected virtual async void OnConnect()
@@ -378,9 +377,9 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!RestartInProgress) return;
 
-            logger.Log("waiting for restart");
+            _logger.Log("waiting for restart");
             await restartTask.Task;
-            logger.Log("restart completed");
+            _logger.Log("restart completed");
         }
 
         protected virtual void OnSubscribe(string id, PendingSubscription @params)
@@ -516,7 +515,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void IsInitialized()
         {
-            if (!initialized)
+            if (!_initialized)
             {
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, Name);
             }
