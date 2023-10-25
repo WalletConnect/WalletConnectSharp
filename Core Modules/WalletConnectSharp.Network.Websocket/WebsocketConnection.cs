@@ -63,7 +63,6 @@ namespace WalletConnectSharp.Network.Websocket
 
         public event EventHandler<string> PayloadReceived;
         public event EventHandler Closed;
-        public event EventHandler<DisconnectionInfo> WebsocketClosed;
         public event EventHandler<Exception> ErrorReceived;
         public event EventHandler<object> Opened;
         public event EventHandler<Exception> RegisterErrored;
@@ -204,7 +203,6 @@ namespace WalletConnectSharp.Network.Websocket
             this._socket = null;
             this._registering = false;
             this.Closed?.Invoke(this, EventArgs.Empty);
-            this.WebsocketClosed?.Invoke(this, obj);
         }
 
         private void OnPayload(ResponseMessage obj)
