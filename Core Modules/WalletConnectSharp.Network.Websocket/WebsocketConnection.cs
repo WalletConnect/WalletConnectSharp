@@ -1,6 +1,4 @@
 using System.Net.WebSockets;
-using EventEmitter.NET;
-using EventEmitter.NET.Model;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Utils;
@@ -14,7 +12,6 @@ namespace WalletConnectSharp.Network.Websocket
     /// </summary>
     public class WebsocketConnection : IJsonRpcConnection, IModule
     {
-        private EventDelegator _delegator;
         private WebsocketClient _socket;
         private string _url;
         private bool _registering;
@@ -64,17 +61,6 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
-        /// <summary>
-        /// The EventDelegator this Websocket connection module is using
-        /// </summary>
-        public EventDelegator Events
-        {
-            get
-            {
-                return _delegator;
-            }
-        }
-
         public event EventHandler<string> PayloadReceived;
         public event EventHandler Closed;
         public event EventHandler<DisconnectionInfo> WebsocketClosed;
@@ -116,7 +102,6 @@ namespace WalletConnectSharp.Network.Websocket
             
             _context = Guid.NewGuid();
             this._url = url;
-            _delegator = new EventDelegator(Context);
         }
 
         /// <summary>
@@ -153,18 +138,16 @@ namespace WalletConnectSharp.Network.Websocket
             {
                 TaskCompletionSource<WebsocketClient> registeringTask =
                     new TaskCompletionSource<WebsocketClient>(TaskCreationOptions.None);
-                
-                Events.ListenForOnce("register_error",
-                    delegate(object sender, GenericEvent<Exception> @event)
-                    {
-                        registeringTask.SetException(@event.EventData);
-                    });
-                
-                Events.ListenForOnce("open",
-                    delegate(object sender, GenericEvent<WebsocketClient> @event)
-                    {
-                        registeringTask.SetResult(@event.EventData);
-                    });
+
+                this.ListenOnce<Exception>(nameof(RegisterErrored), (sender, args) =>
+                {
+                    registeringTask.SetException(args);
+                });
+
+                this.ListenOnce<WebsocketClient>(nameof(Opened), (sender, args) =>
+                {
+                    registeringTask.SetResult(args);
+                });
 
                 await registeringTask.Task;
 

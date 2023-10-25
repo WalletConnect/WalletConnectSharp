@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using EventEmitter.NET;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Events;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
@@ -22,16 +22,11 @@ namespace WalletConnectSharp.Sign
     /// <summary>
     /// The Engine for running the Sign client protocol and code flow.
     /// </summary>
-    public partial class Engine : IEnginePrivate, IEngine, IModule, IEvents
+    public partial class Engine : IEnginePrivate, IEngine, IModule
     {
         private const long ProposalExpiry = Clock.THIRTY_DAYS;
         private const long SessionExpiry = Clock.SEVEN_DAYS;
         private const int KeyLength = 32;
-        
-        /// <summary>
-        /// The EventDelegator that should be used to listen to (or trigger) events
-        /// </summary>
-        public EventDelegator Events { get; }
 
         private bool _initialized = false;
         
@@ -43,6 +38,8 @@ namespace WalletConnectSharp.Sign
         private IEnginePrivate PrivateThis => this;
 
         private ITypedMessageHandler MessageHandler => Client.Core.MessageHandler;
+
+        private EventHandlerMap<JsonRpcResponse<bool>> sessionEventsHandlerMap = new();
 
         /// <summary>
         /// The name of this Engine module
@@ -69,7 +66,6 @@ namespace WalletConnectSharp.Sign
         public Engine(ISignClient client)
         {
             this.Client = client;
-            Events = new EventDelegator(Context);
 
             logger = WCLogger.WithContext(Context);
         }
@@ -431,11 +427,11 @@ namespace WalletConnectSharp.Sign
             var requestId = await MessageHandler.SendRequest<SessionSettle, bool>(sessionTopic, sessionSettle);
 
             var acknowledgedTask = new TaskCompletionSource<SessionStruct>();
-            
-            this.Events.ListenForOnce<JsonRpcResponse<bool>>($"session_approve{requestId}", (sender, e) =>
+
+            this.sessionEventsHandlerMap.ListenOnce($"session_approve{requestId}", (sender, args) =>
             {
-                if (e.EventData.IsError)
-                    acknowledgedTask.SetException(e.EventData.Error.ToException());
+                if (args.IsError)
+                    acknowledgedTask.SetException(args.Error.ToException());
                 else
                     acknowledgedTask.SetResult(this.Client.Session.Get(sessionTopic));
             });
@@ -516,12 +512,12 @@ namespace WalletConnectSharp.Sign
             });
 
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
-            this.Events.ListenForOnce<JsonRpcResponse<bool>>($"session_update{id}", (sender, e) =>
+            this.sessionEventsHandlerMap.ListenOnce($"session_update{id}", (sender, args) =>
             {
-                if (e.EventData.IsError)
-                    acknowledgedTask.SetException(e.EventData.Error.ToException());
+                if (args.IsError)
+                    acknowledgedTask.SetException(args.Error.ToException());
                 else
-                    acknowledgedTask.SetResult(e.EventData.Result);
+                    acknowledgedTask.SetResult(args.Result);
             });
 
             await this.Client.Session.Update(topic, new SessionStruct()
@@ -544,12 +540,13 @@ namespace WalletConnectSharp.Sign
             var id = await MessageHandler.SendRequest<SessionExtend, bool>(topic, new SessionExtend());
             
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
-            this.Events.ListenForOnce<JsonRpcResponse<bool>>($"session_extend{id}", (sender, e) =>
+
+            this.sessionEventsHandlerMap.ListenOnce($"session_extend{id}", (sender, args) =>
             {
-                if (e.EventData.IsError)
-                    acknowledgedTask.SetException(e.EventData.Error.ToException());
+                if (args.IsError)
+                    acknowledgedTask.SetException(args.Error.ToException());
                 else
-                    acknowledgedTask.SetResult(e.EventData.Result);
+                    acknowledgedTask.SetResult(args.Result);
             });
 
             await PrivateThis.SetExpiry(topic, Clock.CalculateExpiry(SessionExpiry));
@@ -680,12 +677,12 @@ namespace WalletConnectSharp.Sign
             {
                 var id = await MessageHandler.SendRequest<SessionPing, bool>(topic, new SessionPing());
                 var done = new TaskCompletionSource<bool>();
-                this.Events.ListenForOnce<JsonRpcResponse<bool>>($"session_ping{id}", (sender, e) =>
+                this.sessionEventsHandlerMap.ListenOnce($"session_ping{id}", (sender, args) =>
                 {
-                    if (e.EventData.IsError)
-                        done.SetException(e.EventData.Error.ToException());
+                    if (args.IsError)
+                        done.SetException(args.Error.ToException());
                     else
-                        done.SetResult(e.EventData.Result);
+                        done.SetResult(args.Result);
                 });
                 await done.Task;
             } 
@@ -769,7 +766,6 @@ namespace WalletConnectSharp.Sign
 
         public void Dispose()
         {
-            Events?.Dispose();
             Client?.Dispose();
         }
     }

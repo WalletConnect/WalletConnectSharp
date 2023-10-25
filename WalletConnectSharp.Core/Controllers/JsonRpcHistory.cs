@@ -1,6 +1,4 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Errors;
-using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.History;
 using WalletConnectSharp.Network;
@@ -19,11 +17,6 @@ namespace WalletConnectSharp.Core.Controllers
         /// The storage version of this module
         /// </summary>
         public static readonly string Version = "0.3";
-        
-        /// <summary>
-        /// The <see cref="EventDelegator"/> this module is using to emit events
-        /// </summary>
-        public EventDelegator Events { get; }
         
         /// <summary>
         /// The name of this module instance
@@ -128,7 +121,6 @@ namespace WalletConnectSharp.Core.Controllers
         public JsonRpcHistory(ICore core)
         {
             _core = core;
-            Events = new EventDelegator(Context);
         }
 
         /// <summary>
@@ -330,7 +322,6 @@ namespace WalletConnectSharp.Core.Controllers
         public void Dispose()
         {
             _core?.Dispose();
-            Events?.Dispose();
         }
     }
 }

@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Core.Interfaces;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -9,11 +8,6 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class HeartBeat : IHeartBeat
     {
-        /// <summary>
-        /// The EventDelegator this module is using
-        /// </summary>
-        public EventDelegator Events { get; }
-        
         /// <summary>
         /// The CancellationToken that stops the Heartbeat module
         /// </summary>
@@ -59,8 +53,6 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="interval">The interval to emit the <see cref="IHeartBeat.OnPulse"/> event at</param>
         public HeartBeat(int interval = 5000)
         {
-            Events = new EventDelegator(Context);
-
             Interval = interval;
         }
 
@@ -94,7 +86,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }

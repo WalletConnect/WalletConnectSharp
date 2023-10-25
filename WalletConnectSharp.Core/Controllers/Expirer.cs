@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
@@ -43,11 +42,6 @@ namespace WalletConnectSharp.Core.Controllers
                 return Name;
             }
         }
-
-        /// <summary>
-        /// The <see cref="EventDelegator"/> this module uses to emit events
-        /// </summary>
-        public EventDelegator Events { get; }
 
         /// <summary>
         /// The string key value this module will use when storing data in the <see cref="ICore.Storage"/> module
@@ -106,7 +100,6 @@ namespace WalletConnectSharp.Core.Controllers
         public Expirer(ICore core)
         {
             this._core = core;
-            Events = new EventDelegator(Context);
         }
 
         /// <summary>
@@ -385,7 +378,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }

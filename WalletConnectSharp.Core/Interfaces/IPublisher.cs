@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
@@ -9,7 +8,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// An interface for the Publisher module. The Publisher module is responsible for sending messages to the
     /// WalletConnect relay server.
     /// </summary>
-    public interface IPublisher : IEvents, IModule
+    public interface IPublisher : IModule
     {
         event EventHandler<PublishParams> OnPublishedMessage;
         

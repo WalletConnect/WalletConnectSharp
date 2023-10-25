@@ -1,5 +1,4 @@
-﻿using EventEmitter.NET;
-using WalletConnectSharp.Common;
+﻿using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Pairing;
 
 namespace WalletConnectSharp.Core.Interfaces
@@ -7,7 +6,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// <summary>
     /// The interface for a module that handles pairing two peers and storing related data
     /// </summary>
-    public interface IPairing : IModule, IEvents
+    public interface IPairing : IModule
     {
         event EventHandler<PairingEvent> PairingExpired;
 

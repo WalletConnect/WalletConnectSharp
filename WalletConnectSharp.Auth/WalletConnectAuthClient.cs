@@ -1,5 +1,4 @@
-﻿using EventEmitter.NET;
-using WalletConnectSharp.Auth.Controllers;
+﻿using WalletConnectSharp.Auth.Controllers;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
@@ -30,8 +29,6 @@ public class WalletConnectAuthClient : IAuthClient
             return $"{Name}-{Version}-context";
         }
     }
-
-    public EventDelegator Events { get; }
 
     public string Protocol
     {
@@ -107,7 +104,6 @@ public class WalletConnectAuthClient : IAuthClient
         Requests = new Store<long, Message>(Core, "requests", AUTH_CLIENT_STORAGE_PREFIX);
 
         Engine = new AuthEngine(this);
-        Events = new EventDelegator(Context);
     }
     
     public Task<RequestUri> Request(RequestParams @params, string topic = null)
@@ -165,7 +161,6 @@ public class WalletConnectAuthClient : IAuthClient
 
     public void Dispose()
     {
-        Events?.Dispose();
         Core?.Dispose();
         AuthKeys?.Dispose();
         PairingTopics?.Dispose();

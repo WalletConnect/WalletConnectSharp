@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Logging;
@@ -24,11 +23,6 @@ namespace WalletConnectSharp.Core.Controllers
         /// The default relay server URL used when no relay URL is given
         /// </summary>
         public static readonly string DEFAULT_RELAY_URL = "wss://relay.walletconnect.com";
-        
-        /// <summary>
-        /// The EventDelegaor this Relayer module is using
-        /// </summary>
-        public EventDelegator Events { get; }
 
         /// <summary>
         /// The Name of this Relayer module
@@ -133,7 +127,6 @@ namespace WalletConnectSharp.Core.Controllers
         public Relayer(RelayerOptions opts)
         {
             Core = opts.Core;
-            Events = new EventDelegator(Context);
             Messages = new MessageTracker(Core);
             Subscriber = new Subscriber(this);
             Publisher = new Publisher(this);
@@ -500,8 +493,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
-            // Core?.Dispose();
             Subscriber?.Dispose();
             Publisher?.Dispose();
             Messages?.Dispose();

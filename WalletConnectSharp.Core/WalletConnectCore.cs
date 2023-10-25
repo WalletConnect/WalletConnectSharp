@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
@@ -48,11 +47,6 @@ namespace WalletConnectSharp.Core
                 return $"{Name}{guid}";
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public EventDelegator Events { get; }
         
         /// <summary>
         /// If this module is initialized or not
@@ -165,23 +159,6 @@ namespace WalletConnectSharp.Core
             HeartBeat = new HeartBeat();
             _optName = options.Name;
 
-            try
-            {
-                Events = new EventDelegator(Context);
-            }
-            catch (ArgumentException)
-            {
-                // the context is likely being re-used. Let's randomize the context
-                // and log an error
-                WCLogger.LogError("The WalletConnectCore class is being re-initialized! It's likely a previous " +
-                                  "instance was not disposed of. It's recommended to re-use the same WalletConnectCore " +
-                                  "instance for the same project in the same runtime, event listener leaking can occur.");
-
-                guid = $"-{Guid.NewGuid().ToString()}";
-
-                Events = new EventDelegator(Context);
-            }
-
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
             Verify = new Verifier();
@@ -223,7 +200,6 @@ namespace WalletConnectSharp.Core
 
         public void Dispose()
         {
-            Events?.Dispose();
             HeartBeat?.Dispose();
             Crypto?.Dispose();
             Relayer?.Dispose();

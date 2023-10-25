@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
@@ -10,7 +9,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// of active and pending subscriptions. It will also resubscribe to topics if
     /// the backing Relayer connection disconnects
     /// </summary>
-    public interface ISubscriber : IEvents, IModule
+    public interface ISubscriber : IModule
     { 
         event EventHandler Sync;
         event EventHandler Resubscribed;

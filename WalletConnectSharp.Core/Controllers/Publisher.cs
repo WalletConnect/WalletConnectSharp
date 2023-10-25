@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
@@ -13,11 +12,6 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Publisher : IPublisher
     {
-        /// <summary>
-        /// The EventDelegator this publisher module is using
-        /// </summary>
-        public EventDelegator Events { get; }
-
         public event EventHandler<PublishParams> OnPublishedMessage;
 
         /// <summary>
@@ -57,7 +51,6 @@ namespace WalletConnectSharp.Core.Controllers
         public Publisher(IRelayer relayer)
         {
             Relayer = relayer;
-            Events = new EventDelegator(Context);
             
             RegisterEventListeners();
         }
@@ -192,7 +185,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }

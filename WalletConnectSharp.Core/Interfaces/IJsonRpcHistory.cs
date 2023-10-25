@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.History;
 using WalletConnectSharp.Network;
@@ -11,7 +10,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     /// <typeparam name="T">The JSON RPC Request type</typeparam>
     /// <typeparam name="TR">The JSON RPC Response type</typeparam>
-    public interface IJsonRpcHistory<T, TR> : IModule, IEvents
+    public interface IJsonRpcHistory<T, TR> : IModule
     {
         event EventHandler<JsonRpcRecord<T, TR>> Created;
 

@@ -1,5 +1,4 @@
-﻿using EventEmitter.NET;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
@@ -92,7 +91,7 @@ namespace WalletConnectSharp.Sign.Test
             List<TestPairings> pairings = new List<TestPairings>();
 
             object messageLock = new object();
-            List<List<SessionEvent>> messagesReceived = new List<List<SessionEvent>>();
+            List<List<object>> messagesReceived = new List<List<object>>();
 
             CancellationTokenSource heartbeatToken = new CancellationTokenSource();
 
@@ -128,7 +127,7 @@ namespace WalletConnectSharp.Sign.Test
 
                 lock (messageLock)
                 {
-                    messagesReceived.Insert(clientIndex, new List<SessionEvent>());
+                    messagesReceived.Insert(clientIndex, new List<object>());
                 }
 
                 TaskCompletionSource<bool> task = new TaskCompletionSource<bool>();
@@ -176,17 +175,17 @@ namespace WalletConnectSharp.Sign.Test
                         CheckAllMessagesProcessed();
                     };
 
-                    client.On<EmitEvent<string>>("session_event", (sender, @event) =>
+                    client.HandleEventMessageType<string>(async (s, args) =>
                     {
-                        Assert.Equal(testEventParams.Data, @event.EventData.Params.Event.Data);
-                        Assert.Equal(eventPayload.Topic, @event.EventData.Topic);
+                        Assert.Equal(testEventParams.Data, args.Params.Event.Data);
+                        Assert.Equal(eventPayload.Topic, args.Params.Topic);
                         lock (messageLock)
                         {
-                            messagesReceived[clientIndex].Add(@event.EventData);
+                            messagesReceived[clientIndex].Add(args.Params);
                         }
 
                         CheckAllMessagesProcessed();
-                    });
+                    }, null);
 
                     client.SessionUpdateRequest += (sender, @event) =>
                     {

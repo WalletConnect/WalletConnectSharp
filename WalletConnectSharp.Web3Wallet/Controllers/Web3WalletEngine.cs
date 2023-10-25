@@ -1,6 +1,4 @@
-﻿using EventEmitter.NET;
-using EventEmitter.NET.Model;
-using WalletConnectSharp.Auth;
+﻿using WalletConnectSharp.Auth;
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Model.Errors;
@@ -179,16 +177,6 @@ public class Web3WalletEngine : IWeb3WalletEngine
         return this.AuthClient.FormatMessage(payload, iss);
     }
 
-    private void PropagateEventToClient(string eventName, IEvents source)
-    {
-        EventHandler<GenericEvent<object>> eventHandler = (sender, @event) =>
-        {
-            this.Client.Events.TriggerType(eventName, @event.EventData, @event.EventData.GetType());
-        };
-
-        source.On(eventName, eventHandler);
-    }
-
     private void InitializeEventListeners()
     {
         // Propagate sign events
@@ -201,9 +189,6 @@ public class Web3WalletEngine : IWeb3WalletEngine
         SignClient.SessionConnectionErrored +=
             (sender, exception) => this.SessionConnectionErrored?.Invoke(sender, exception);
         SignClient.SessionUpdateRequest += (sender, @event) => this.SessionUpdated?.Invoke(sender, @event);
-        
-        PropagateEventToClient("session_request", SignClient);
-        PropagateEventToClient("session_event", SignClient);
         
         // Propagate auth events 
         AuthClient.AuthRequested += OnAuthRequest;

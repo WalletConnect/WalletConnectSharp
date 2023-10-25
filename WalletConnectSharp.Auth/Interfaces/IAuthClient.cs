@@ -1,12 +1,11 @@
-﻿using EventEmitter.NET;
-using WalletConnectSharp.Auth.Models;
+﻿using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
 
 namespace WalletConnectSharp.Auth.Interfaces;
 
-public interface IAuthClient : IModule, IEvents, IAuthClientEvents
+public interface IAuthClient : IModule, IAuthClientEvents
 {
     string Protocol { get; }
     int Version { get; }

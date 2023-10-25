@@ -180,7 +180,7 @@ namespace WalletConnectSharp.Sign
                 this.SessionRejected?.Invoke(this, session);
                 
                 // Still used do not remove
-                this.Events.Trigger($"session_approve{id}", payload);
+                this.sessionEventsHandlerMap[$"session_approve{id}"](this, payload);
             }
             else
             {
@@ -189,7 +189,7 @@ namespace WalletConnectSharp.Sign
                     Acknowledged = true
                 });
                 this.SessionApproved?.Invoke(this, session);
-                this.Events.Trigger($"session_approve{id}", payload); 
+                this.sessionEventsHandlerMap[$"session_approve{id}"](this, payload);
             }
         }
 
@@ -229,7 +229,7 @@ namespace WalletConnectSharp.Sign
                 Topic = topic,
             });
             // Still used, do not remove
-            this.Events.Trigger($"session_update{id}", payload);
+            this.sessionEventsHandlerMap[$"session_update{id}"](this, payload);
         }
 
         async Task IEnginePrivate.OnSessionExtendRequest(string topic, JsonRpcRequest<SessionExtend> payload)
@@ -261,7 +261,7 @@ namespace WalletConnectSharp.Sign
                 Id = id
             });
             // Still used, do not remove
-            this.Events.Trigger($"session_extend{id}", payload);
+            this.sessionEventsHandlerMap[$"session_extend{id}"](this, payload);
         }
 
         async Task IEnginePrivate.OnSessionPingRequest(string topic, JsonRpcRequest<SessionPing> payload)
@@ -298,7 +298,7 @@ namespace WalletConnectSharp.Sign
             });
 
             // Still used, do not remove
-            this.Events.Trigger($"session_ping{id}", payload);
+            this.sessionEventsHandlerMap[$"session_ping{id}"](this, payload);
         }
 
         async Task IEnginePrivate.OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload)
@@ -319,47 +319,6 @@ namespace WalletConnectSharp.Sign
             catch (WalletConnectException e)
             {
                 await MessageHandler.SendError<SessionDelete, bool>(id, topic, Error.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionRequest<T, TR>(string topic, JsonRpcRequest<SessionRequest<T>> payload)
-        {
-            var id = payload.Id;
-            var @params = payload.Params;
-            try
-            {
-                await PrivateThis.IsValidRequest(topic, @params.Request, @params.ChainId);
-                this.Client.Events.Trigger("session_request", new SessionRequestEvent<T>()
-                {
-                    Topic = topic,
-                    Id = id,
-                    ChainId = @params.ChainId,
-                    Request = @params.Request
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await MessageHandler.SendError<SessionRequest<T>, TR>(id, topic, Error.FromException(e));
-            }
-        }
-
-        async Task IEnginePrivate.OnSessionEventRequest<T>(string topic, JsonRpcRequest<SessionEvent<T>> payload)
-        {
-            var id = payload.Id;
-            var @params = payload.Params;
-            try
-            {
-                await PrivateThis.IsValidEmit(topic, @params.Event, @params.ChainId);
-                this.Client.Events.Trigger("session_event", new EmitEvent<T>()
-                {
-                    Topic = topic,
-                    Id = id,
-                    Params = @params
-                });
-            }
-            catch (WalletConnectException e)
-            {
-                await MessageHandler.SendError<SessionEvent<T>, object>(id, topic, Error.FromException(e));
             }
         }
     }

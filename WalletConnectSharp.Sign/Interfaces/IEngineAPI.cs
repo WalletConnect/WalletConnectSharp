@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
@@ -13,7 +12,7 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// An interface that represents functions the Sign client Engine can perform. These
     /// functions exist in both the Engine and in the Sign client. 
     /// </summary>
-    public interface IEngineAPI : IEvents
+    public interface IEngineAPI
     {
         event EventHandler<SessionStruct> SessionExpired;
 

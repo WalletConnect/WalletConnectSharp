@@ -1,10 +1,8 @@
-using EventEmitter.NET;
-using EventEmitter.NET.Model;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
+using WalletConnectSharp.Common.Events;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
-using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Network
@@ -15,7 +13,6 @@ namespace WalletConnectSharp.Network
     public class JsonRpcProvider : IJsonRpcProvider, IModule
     {
         private IJsonRpcConnection _connection;
-        private EventDelegator _delegator;
         private bool _hasRegisteredEventListeners;
         private Guid _context;
         private bool _connectingStarted;
@@ -31,6 +28,8 @@ namespace WalletConnectSharp.Network
         public event EventHandler<Exception> ErrorReceived;
 
         public event EventHandler<string> RawMessageReceived;
+
+        private GenericEventHolder jsonResponseEventHolder = new();
 
         /// <summary>
         /// Whether the provider is currently connecting or not
@@ -78,24 +77,12 @@ namespace WalletConnectSharp.Network
         }
 
         /// <summary>
-        /// The EventDelegator this provider is using for events
-        /// </summary>
-        public EventDelegator Events
-        {
-            get
-            {
-                return _delegator;
-            }
-        }
-
-        /// <summary>
         /// Create a new JsonRpcProvider with the given connection
         /// </summary>
         /// <param name="connection">The IJsonRpcConnection to use</param>
         public JsonRpcProvider(IJsonRpcConnection connection)
         {
             _context = Guid.NewGuid();
-            this._delegator = new EventDelegator(Context);
             this._connection = connection;
             if (this._connection.Connected)
             {
@@ -210,39 +197,35 @@ namespace WalletConnectSharp.Network
             var request = new JsonRpcRequest<T>(requestArgs.Method, requestArgs.Params, id);
 
             TaskCompletionSource<TR> requestTask = new TaskCompletionSource<TR>(TaskCreationOptions.None);
-            
-            Events.ListenForAndDeserialize<JsonRpcResponse<TR>>(request.Id.ToString(),
-                delegate(object sender, GenericEvent<JsonRpcResponse<TR>> @event)
+
+            jsonResponseEventHolder.OfType<string>()[request.Id.ToString()] += (sender, responseJson) =>
+            {
+                if (requestTask.Task.IsCompleted)
+                    return;
+
+                var result = JsonConvert.DeserializeObject<JsonRpcResponse<TR>>(responseJson);
+                    
+                if (result.Error != null)
                 {
-                    if (requestTask.Task.IsCompleted)
-                        return;
-                    
-                    var result = @event.EventData;
-                    
-                    //Console.WriteLine($"[{Name}] Got response {JsonConvert.SerializeObject(result)}");
-                    
-                    if (result.Error != null)
-                    {
-                        requestTask.SetException(new IOException(result.Error.Message));
-                    }
-                    else
-                    {
-                        requestTask.SetResult(result.Result);
-                    }
-                });
-            
-            Events.ListenFor(request.Id.ToString(), delegate(object sender, GenericEvent<WalletConnectException> @event)
+                    requestTask.SetException(new IOException(result.Error.Message));
+                }
+                else
+                {
+                    requestTask.SetResult(result.Result);
+                }
+            };
+
+            jsonResponseEventHolder.OfType<WalletConnectException>()[request.Id.ToString()] += (sender, exception) =>
             {
                 if (requestTask.Task.IsCompleted)
                     return;
                 
-                var exception = @event.EventData;
                 //Console.WriteLine($"[{Name}] Got Response Error {exception}");
                 if (exception != null)
                 {
                     requestTask.SetException(exception);
                 }
-            });
+            };
 
             _lastId = request.Id;
             
@@ -260,7 +243,7 @@ namespace WalletConnectSharp.Network
         {
             if (_hasRegisteredEventListeners) return;
             
-            WCLogger.Log($"[JsonRpcProvider] Registering event listeners on connection object with context {_connection.Events.Context}");
+            WCLogger.Log($"[JsonRpcProvider] Registering event listeners on connection object with context {_connection.ToString()}");
             _connection.PayloadReceived += OnPayload;
             _connection.Closed += OnConnectionDisconnected;
             _connection.ErrorReceived += OnConnectionError;
@@ -308,12 +291,13 @@ namespace WalletConnectSharp.Network
                 if (payload.IsError)
                 {
                     var errorPayload = JsonConvert.DeserializeObject<JsonRpcError>(json);
-                    Events.Trigger(payload.Id.ToString(), errorPayload.Error.ToException());
+                    jsonResponseEventHolder.OfType<WalletConnectException>()[payload.Id.ToString()](this,
+                        errorPayload.Error.ToException());
                 }
                 else
                 {
                     WCLogger.Log($"Triggering event for ID {payload.Id.ToString()}");
-                    Events.Trigger(payload.Id.ToString(), json);
+                    jsonResponseEventHolder.OfType<string>()[payload.Id.ToString()](this, json);
                 }
             }
         }
@@ -321,7 +305,6 @@ namespace WalletConnectSharp.Network
         public void Dispose()
         {
             _connection?.Dispose();
-            _delegator?.Dispose();
         }
     }
 }

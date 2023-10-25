@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
@@ -53,12 +52,6 @@ namespace WalletConnectSharp.Sign
         /// The context string for this Sign Client module
         /// </summary>
         public string Context { get; }
-
-        /// <summary>
-        /// The <see cref="EventDelegator"/> this Sign Client module will use
-        /// to trigger events. Listen to Client events using this.
-        /// </summary>
-        public EventDelegator Events { get; }
         
         /// <summary>
         /// The Metadata for this instance of the Sign Client module
@@ -202,8 +195,6 @@ namespace WalletConnectSharp.Sign
                 Core = options.Core;
             else
                 Core = new WalletConnectCore(options);
-
-            Events = new EventDelegator(Context);
 
             PendingRequests = new PendingRequests(Core);
             PairingStore = new PairingStore(Core);
@@ -455,7 +446,6 @@ namespace WalletConnectSharp.Sign
 
         public void Dispose()
         {
-            Events?.Dispose();
             Core?.Dispose();
             PairingStore?.Dispose();
             Session?.Dispose();

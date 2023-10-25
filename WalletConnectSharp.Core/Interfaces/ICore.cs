@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Verify;
@@ -10,7 +9,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// <summary>
     /// Represents the Core module and all fields the Core module will have
     /// </summary>
-    public interface ICore : IModule, IEvents
+    public interface ICore : IModule
     {
         /// <summary>
         /// The Protocol string this Core module will use

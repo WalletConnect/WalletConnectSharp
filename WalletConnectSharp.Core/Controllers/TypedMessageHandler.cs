@@ -1,6 +1,5 @@
-﻿using EventEmitter.NET;
-using EventEmitter.NET.Model;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Events;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
@@ -17,9 +16,9 @@ namespace WalletConnectSharp.Core.Controllers
         private Dictionary<string, DecodeOptions> _decodeOptionsMap = new Dictionary<string, DecodeOptions>();
         private HashSet<string> _typeSafeCache = new HashSet<string>();
 
-        public EventDelegator Events { get; }
-
         public event EventHandler<DecodedMessageEvent> RawMessage;
+        private EventHandlerMap<MessageEvent> messageEventHandlerMap = new();
+        
         public ICore Core { get; }
 
         /// <summary>
@@ -47,7 +46,6 @@ namespace WalletConnectSharp.Core.Controllers
         public TypedMessageHandler(ICore core)
         {
             this.Core = core;
-            this.Events = new EventDelegator(Context);
         }
         
         public Task Init()
@@ -71,7 +69,7 @@ namespace WalletConnectSharp.Core.Controllers
             var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
             if (payload.IsRequest)
             {
-                Events.Trigger($"request_{payload.Method}", e);
+                messageEventHandlerMap[$"request_{payload.Method}"](this, e);
             }
             else if (payload.IsResponse)
             {
@@ -97,12 +95,12 @@ namespace WalletConnectSharp.Core.Controllers
             var method = RpcMethodAttribute.MethodForType<T>();
             var rpcHistory = await this.Core.History.JsonRpcHistoryOfType<T, TR>();
             
-            async void RequestCallback(object sender, GenericEvent<MessageEvent> e)
+            async void RequestCallback(object sender, MessageEvent e)
             {
                 if (requestCallback == null) return;
                 
-                var topic = e.EventData.Topic;
-                var message = e.EventData.Message;
+                var topic = e.Topic;
+                var message = e.Message;
                 
                 var options = DecodeOptionForTopic(topic);
 
@@ -113,12 +111,12 @@ namespace WalletConnectSharp.Core.Controllers
                 await requestCallback(topic, payload);
             }
             
-            async void ResponseCallback(object sender, GenericEvent<MessageEvent> e)
+            async void ResponseCallback(object sender, MessageEvent e)
             {
                 if (responseCallback == null) return;
                 
-                var topic = e.EventData.Topic;
-                var message = e.EventData.Message;
+                var topic = e.Topic;
+                var message = e.Message;
                 
                 var options = DecodeOptionForTopic(topic);
 
@@ -159,7 +157,7 @@ namespace WalletConnectSharp.Core.Controllers
                     var resMethod = record.Request.Method;
                     
                     // Trigger the true response event, which will trigger ResponseCallback
-                    Events.Trigger($"response_{resMethod}", new MessageEvent()
+                    messageEventHandlerMap[$"response_{resMethod}"](this, new MessageEvent()
                     {
                         Topic = topic,
                         Message = message
@@ -173,10 +171,9 @@ namespace WalletConnectSharp.Core.Controllers
                     // ignored if we can't find anything in the history
                 }
             }
-            
-            Events.ListenFor<MessageEvent>($"request_{method}", RequestCallback);
-            
-            Events.ListenFor<MessageEvent>($"response_{method}", ResponseCallback);
+
+            messageEventHandlerMap[$"request_{method}"] += RequestCallback;
+            messageEventHandlerMap[$"response_{method}"] += ResponseCallback;
             
             // Handle response_raw in this context
             // This will allow us to examine response_raw in every typed context registered
@@ -375,7 +372,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
 
         private void EnsureTypeIsSerializerSafe<T>(T testObject)

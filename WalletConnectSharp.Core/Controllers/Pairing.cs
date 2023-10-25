@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using EventEmitter.NET;
+using WalletConnectSharp.Common.Events;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -21,7 +21,7 @@ namespace WalletConnectSharp.Core.Controllers
         private const int KeyLength = 32;
         private bool _initialized;
         private HashSet<string> _registeredMethods = new HashSet<string>();
-
+        
         /// <summary>
         /// The name for this module instance
         /// </summary>
@@ -44,14 +44,11 @@ namespace WalletConnectSharp.Core.Controllers
             }
         }
 
-        /// <summary>
-        /// The EventDelegator this module is using for events
-        /// </summary>
-        public EventDelegator Events { get; }
-
         public event EventHandler<PairingEvent> PairingExpired;
         public event EventHandler<PairingEvent> PairingPinged;
         public event EventHandler<PairingEvent> PairingDeleted;
+
+        private EventHandlerMap<JsonRpcResponse<bool>> PairingPingResponseEvents = new();
 
         /// <summary>
         /// Get the <see cref="IStore{TKey,TValue}"/> module that is handling the storage of
@@ -82,7 +79,6 @@ namespace WalletConnectSharp.Core.Controllers
         public Pairing(ICore core)
         {
             this.Core = core;
-            this.Events = new EventDelegator(Context);
             this.Store = new PairingStore(core);
         }
 
@@ -305,13 +301,15 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 var id = await Core.MessageHandler.SendRequest<PairingPing, bool>(topic, new PairingPing());
                 var done = new TaskCompletionSource<bool>();
-                this.Events.ListenForOnce<JsonRpcResponse<bool>>($"pairing_ping{id}", (sender, e) =>
+
+                PairingPingResponseEvents.ListenOnce($"pairing_ping{id}", (sender, args) =>
                 {
-                    if (e.EventData.IsError)
-                        done.SetException(e.EventData.Error.ToException());
+                    if (args.IsError)
+                        done.SetException(args.Error.ToException());
                     else
-                        done.SetResult(e.EventData.Result);
+                        done.SetResult(args.Result);
                 });
+                
                 await done.Task;
             }
         }
@@ -450,8 +448,8 @@ namespace WalletConnectSharp.Core.Controllers
                 Id = id,
                 Topic = topic
             });
-            
-            this.Events.Trigger($"pairing_ping{id}", payload);
+
+            PairingPingResponseEvents[$"pairing_ping{id}"](this, payload);
         }
         
         private async Task OnPairingDeleteRequest(string topic, JsonRpcRequest<PairingDelete> payload)
@@ -504,7 +502,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
             Store?.Dispose();
         }
     }

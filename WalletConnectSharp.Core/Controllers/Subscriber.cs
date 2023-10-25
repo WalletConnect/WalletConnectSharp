@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
@@ -17,11 +16,6 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Subscriber : ISubscriber
     {
-        /// <summary>
-        /// The EventDelegator this module is using
-        /// </summary>
-        public EventDelegator Events { get; }
-
         #region Events
 
         public event EventHandler Sync;
@@ -170,8 +164,6 @@ namespace WalletConnectSharp.Core.Controllers
         public Subscriber(IRelayer relayer)
         {
             _relayer = relayer;
-            
-            Events = new EventDelegator(Context);
 
             logger = WCLogger.WithContext(Context);
         }
@@ -652,7 +644,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }

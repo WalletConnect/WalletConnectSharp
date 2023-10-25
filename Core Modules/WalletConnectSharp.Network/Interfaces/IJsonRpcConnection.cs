@@ -1,11 +1,11 @@
-using EventEmitter.NET;
+
 
 namespace WalletConnectSharp.Network
 {
     /// <summary>
     /// An interface describing a connection to a JSON RPC node
     /// </summary>
-    public interface IJsonRpcConnection : IEvents, IDisposable
+    public interface IJsonRpcConnection : IDisposable
     {
         event EventHandler<string> PayloadReceived;
 

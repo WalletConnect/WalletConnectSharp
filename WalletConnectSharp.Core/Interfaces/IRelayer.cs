@@ -1,4 +1,3 @@
-using EventEmitter.NET;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Core.Models.Relay;
@@ -10,7 +9,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// The Relayer module handles the interaction with the WalletConnect relayer server.
     /// Each Relayer module uses a Publisher, Subscriber and a JsonRPCProvider.
     /// </summary>
-    public interface IRelayer : IEvents, IModule
+    public interface IRelayer : IModule
     {
         event EventHandler OnConnected;
 

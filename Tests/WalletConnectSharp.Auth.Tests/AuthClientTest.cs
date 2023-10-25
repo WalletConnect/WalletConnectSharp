@@ -66,13 +66,11 @@ namespace WalletConnectSharp.Auth.Tests
             Assert.NotNull(PeerB);
             
             Assert.NotNull(PeerA.Core);
-            Assert.NotNull(PeerA.Events);
             Assert.NotNull(PeerA.Core.Expirer);
             Assert.NotNull(PeerA.Core.History);
             Assert.NotNull(PeerA.Core.Pairing);
             
             Assert.NotNull(PeerB.Core);
-            Assert.NotNull(PeerB.Events);
             Assert.NotNull(PeerB.Core.Expirer);
             Assert.NotNull(PeerB.Core.History);
             Assert.NotNull(PeerB.Core.Pairing);

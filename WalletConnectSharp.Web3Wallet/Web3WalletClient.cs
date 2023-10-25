@@ -1,5 +1,4 @@
-﻿using EventEmitter.NET;
-using WalletConnectSharp.Auth;
+﻿using WalletConnectSharp.Auth;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
@@ -15,7 +14,6 @@ public class Web3WalletClient : IWeb3Wallet
 {
     public string Name { get; }
     public string Context { get; }
-    public EventDelegator Events { get; }
 
     public event EventHandler<SessionStruct> SessionExpired;
     public event EventHandler<SessionProposalEvent> SessionProposed;
@@ -80,7 +78,6 @@ public class Web3WalletClient : IWeb3Wallet
         this.Context = $"{Name}-context";
         this.Core = core;
         
-        this.Events = new EventDelegator(Context);
         this.Engine = new Web3WalletEngine(this);
         
         WrapEngineEvents();
@@ -220,7 +217,6 @@ public class Web3WalletClient : IWeb3Wallet
 
     public void Dispose()
     {
-        Events?.Dispose();
         Core?.Dispose();
     }
 }
