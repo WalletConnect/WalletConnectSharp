@@ -1,11 +1,9 @@
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Network.Tests.Models;
 using WalletConnectSharp.Network.Websocket;
 using WalletConnectSharp.Tests.Common;
-using Websocket.Client;
 using Xunit;
 
 namespace WalletConnectSharp.Network.Tests
@@ -118,7 +116,7 @@ namespace WalletConnectSharp.Network.Tests
             var expectedDisconnectCount = 3;
             var disconnectCount = 0;
 
-            provider.On<DisconnectionInfo>("disconnect", (_, __) => disconnectCount++);
+            provider.Disconnected += (_, _) => disconnectCount++;
 
             await provider.Connect();
             await provider.Disconnect();

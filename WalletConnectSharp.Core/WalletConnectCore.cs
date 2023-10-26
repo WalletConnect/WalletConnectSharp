@@ -1,4 +1,3 @@
-using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models;
@@ -6,7 +5,6 @@ using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Crypto.Interfaces;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
@@ -50,11 +48,6 @@ namespace WalletConnectSharp.Core
                 return $"{Name}{guid}";
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public EventDelegator Events { get; }
 
         /// <summary>
         /// If this module is initialized or not
@@ -165,23 +158,6 @@ namespace WalletConnectSharp.Core
             HeartBeat = new HeartBeat();
             _optName = options.Name;
 
-            try
-            {
-                Events = new EventDelegator(this);
-            }
-            catch (ArgumentException)
-            {
-                // the context is likely being re-used. Let's randomize the context
-                // and log an error
-                WCLogger.LogError("The WalletConnectCore class is being re-initialized! It's likely a previous " +
-                                  "instance was not disposed of. It's recommended to re-use the same WalletConnectCore " +
-                                  "instance for the same project in the same runtime, event listener leaking can occur.");
-
-                guid = $"-{Guid.NewGuid().ToString()}";
-
-                Events = new EventDelegator(this);
-            }
-
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
             Verify = new Verifier();
@@ -224,7 +200,6 @@ namespace WalletConnectSharp.Core
 
         public void Dispose()
         {
-            Events?.Dispose();
             HeartBeat?.Dispose();
             Crypto?.Dispose();
             Relayer?.Dispose();

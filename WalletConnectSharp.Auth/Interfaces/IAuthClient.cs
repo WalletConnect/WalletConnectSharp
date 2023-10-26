@@ -2,11 +2,10 @@
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Auth.Interfaces;
 
-public interface IAuthClient : IModule, IEvents, IAuthClientEvents
+public interface IAuthClient : IModule, IAuthClientEvents
 {
     string Protocol { get; }
     int Version { get; }

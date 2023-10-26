@@ -1,14 +1,22 @@
-using System;
-using System.Threading.Tasks;
-using WalletConnectSharp.Events.Interfaces;
+
 
 namespace WalletConnectSharp.Network
 {
     /// <summary>
     /// An interface describing a connection to a JSON RPC node
     /// </summary>
-    public interface IJsonRpcConnection : IEvents, IDisposable
+    public interface IJsonRpcConnection : IDisposable
     {
+        event EventHandler<string> PayloadReceived;
+
+        event EventHandler Closed;
+
+        event EventHandler<Exception> ErrorReceived;
+
+        event EventHandler<object> Opened;
+
+        event EventHandler<Exception> RegisterErrored;
+        
         /// <summary>
         /// Whether this connection is active and connected
         /// </summary>

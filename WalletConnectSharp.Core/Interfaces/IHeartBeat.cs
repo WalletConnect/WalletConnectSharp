@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using WalletConnectSharp.Common;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
 {
@@ -8,8 +6,10 @@ namespace WalletConnectSharp.Core.Interfaces
     /// The HeartBeat module emits a pulse event at a specific interval simulating
     /// a heartbeat. It can be used as an setInterval replacement or timing actions
     /// </summary>
-    public interface IHeartBeat : IEvents, IModule
+    public interface IHeartBeat : IModule
     {
+        event EventHandler OnPulse;
+        
         /// <summary>
         /// The interval (in milliseconds) the Pulse event gets emitted/triggered
         /// </summary>

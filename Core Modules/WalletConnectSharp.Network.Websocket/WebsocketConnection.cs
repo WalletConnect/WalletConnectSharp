@@ -2,8 +2,6 @@ using System.Net.WebSockets;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using Websocket.Client;
 
@@ -14,7 +12,6 @@ namespace WalletConnectSharp.Network.Websocket
     /// </summary>
     public class WebsocketConnection : IJsonRpcConnection, IModule
     {
-        private EventDelegator _delegator;
         private WebsocketClient _socket;
         private string _url;
         private bool _registering;
@@ -64,17 +61,12 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
-        /// <summary>
-        /// The EventDelegator this Websocket connection module is using
-        /// </summary>
-        public EventDelegator Events
-        {
-            get
-            {
-                return _delegator;
-            }
-        }
-        
+        public event EventHandler<string> PayloadReceived;
+        public event EventHandler Closed;
+        public event EventHandler<Exception> ErrorReceived;
+        public event EventHandler<object> Opened;
+        public event EventHandler<Exception> RegisterErrored;
+
         /// <summary>
         /// Whether this websocket connection is connected
         /// </summary>
@@ -109,7 +101,6 @@ namespace WalletConnectSharp.Network.Websocket
             
             _context = Guid.NewGuid();
             this._url = url;
-            _delegator = new EventDelegator(this);
         }
 
         /// <summary>
@@ -146,18 +137,16 @@ namespace WalletConnectSharp.Network.Websocket
             {
                 TaskCompletionSource<WebsocketClient> registeringTask =
                     new TaskCompletionSource<WebsocketClient>(TaskCreationOptions.None);
-                
-                Events.ListenForOnce("register_error",
-                    delegate(object sender, GenericEvent<Exception> @event)
-                    {
-                        registeringTask.SetException(@event.EventData);
-                    });
-                
-                Events.ListenForOnce("open",
-                    delegate(object sender, GenericEvent<WebsocketClient> @event)
-                    {
-                        registeringTask.SetResult(@event.EventData);
-                    });
+
+                this.ListenOnce<Exception>(nameof(RegisterErrored), (sender, args) =>
+                {
+                    registeringTask.SetException(args);
+                });
+
+                this.ListenOnce<WebsocketClient>(nameof(Opened), (sender, args) =>
+                {
+                    registeringTask.SetResult(args);
+                });
 
                 await registeringTask.Task;
 
@@ -178,7 +167,7 @@ namespace WalletConnectSharp.Network.Websocket
             }
             catch (Exception e)
             {
-                Events.Trigger(WebsocketConnectionEvents.RegisterError, e);
+                this.RegisterErrored?.Invoke(this, e);
                 OnClose(new DisconnectionInfo(DisconnectionType.Error, WebSocketCloseStatus.Empty, e.Message, null, e));
 
                 throw;
@@ -195,13 +184,13 @@ namespace WalletConnectSharp.Network.Websocket
 
             this._socket = socket;
             this._registering = false;
-            Events.Trigger(WebsocketConnectionEvents.Open, _socket);
+            this.Opened?.Invoke(this, _socket);
         }
 
         private void OnDisconnect(DisconnectionInfo obj)
         {
             if (obj.Exception != null)
-                Events.Trigger(WebsocketConnectionEvents.Error, obj.Exception);
+                this.ErrorReceived?.Invoke(this, obj.Exception);
             
             OnClose(obj);
         }
@@ -214,7 +203,7 @@ namespace WalletConnectSharp.Network.Websocket
             //_socket.Dispose();
             this._socket = null;
             this._registering = false;
-            Events.Trigger(WebsocketConnectionEvents.Close, obj);
+            this.Closed?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnPayload(ResponseMessage obj)
@@ -235,7 +224,7 @@ namespace WalletConnectSharp.Network.Websocket
             
             //Console.WriteLine($"[{Name}] Got payload {json}");
 
-            Events.Trigger(WebsocketConnectionEvents.Payload, json);
+            this.PayloadReceived?.Invoke(this, json);
         }
 
         /// <summary>
@@ -342,7 +331,7 @@ namespace WalletConnectSharp.Network.Websocket
             }, default(T));
 
             //Trigger the payload event, converting the new JsonRpcResponse object to JSON string
-            Events.Trigger(WebsocketConnectionEvents.Payload, JsonConvert.SerializeObject(payload));
+            this.PayloadReceived?.Invoke(this, JsonConvert.SerializeObject(payload));
         }
     }
 }

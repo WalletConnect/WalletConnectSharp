@@ -1,6 +1,4 @@
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models.Heartbeat;
-using WalletConnectSharp.Events;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -11,20 +9,12 @@ namespace WalletConnectSharp.Core.Controllers
     public class HeartBeat : IHeartBeat
     {
         /// <summary>
-        /// The event data object used in the Pulse event
-        /// </summary>
-        public static readonly object PULSE_OBJECT = new object();
-        
-        /// <summary>
-        /// The EventDelegator this module is using
-        /// </summary>
-        public EventDelegator Events { get; }
-        
-        /// <summary>
         /// The CancellationToken that stops the Heartbeat module
         /// </summary>
         public CancellationToken HeartBeatCancellationToken { get; private set; }
-        
+
+        public event EventHandler OnPulse;
+
         /// <summary>
         /// The interval (in milliseconds) the Pulse event gets emitted/triggered
         /// </summary>
@@ -60,11 +50,9 @@ namespace WalletConnectSharp.Core.Controllers
         /// <summary>
         /// Create a new Heartbeat module, optionally specifying options
         /// </summary>
-        /// <param name="interval">The interval to emit the <see cref="HeartbeatEvents.Pulse"/> event at</param>
+        /// <param name="interval">The interval to emit the <see cref="IHeartBeat.OnPulse"/> event at</param>
         public HeartBeat(int interval = 5000)
         {
-            Events = new EventDelegator(this);
-
             Interval = interval;
         }
 
@@ -93,12 +81,11 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void Pulse()
         {
-            Events.Trigger(HeartbeatEvents.Pulse, PULSE_OBJECT);
+            this.OnPulse?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }

@@ -2,8 +2,6 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Core.Models.Expirer;
-using WalletConnectSharp.Core.Models.Heartbeat;
-using WalletConnectSharp.Events;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -46,11 +44,6 @@ namespace WalletConnectSharp.Core.Controllers
         }
 
         /// <summary>
-        /// The <see cref="EventDelegator"/> this module uses to emit events
-        /// </summary>
-        public EventDelegator Events { get; }
-
-        /// <summary>
         /// The string key value this module will use when storing data in the <see cref="ICore.Storage"/> module
         /// module 
         /// </summary>
@@ -61,6 +54,11 @@ namespace WalletConnectSharp.Core.Controllers
                 return WalletConnectCore.STORAGE_PREFIX + Version + "//" + Name;
             }
         }
+
+        public event EventHandler<ExpirerEventArgs> Created;
+        public event EventHandler<ExpirerEventArgs> Deleted;
+        public event EventHandler<ExpirerEventArgs> Expired;
+        public event EventHandler Sync;
 
         /// <summary>
         /// The number of expirations this module is tracking
@@ -102,7 +100,6 @@ namespace WalletConnectSharp.Core.Controllers
         public Expirer(ICore core)
         {
             this._core = core;
-            Events = new EventDelegator(this);
         }
 
         /// <summary>
@@ -199,7 +196,7 @@ namespace WalletConnectSharp.Core.Controllers
             
             _expirations.Add(target, expiration);
             CheckExpiry(target, expiration);
-            Events.Trigger(ExpirerEvents.Created, new ExpirerEventArgs()
+            this.Created?.Invoke(this, new ExpirerEventArgs()
             {
                 Expiration = expiration,
                 Target = target
@@ -266,7 +263,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 var expiration = GetExpiration(target);
                 _expirations.Remove(target);
-                Events.Trigger(ExpirerEvents.Deleted, new ExpirerEventArgs()
+                this.Deleted?.Invoke(this, new ExpirerEventArgs()
                 {
                     Target = target,
                     Expiration = expiration
@@ -286,10 +283,10 @@ namespace WalletConnectSharp.Core.Controllers
             return await _core.Storage.GetItem<Expiration[]>(StorageKey);
         }
 
-        private async void Persist()
+        private async void Persist(object sender, ExpirerEventArgs args)
         {
             await SetExpiration(Values);
-            Events.Trigger(ExpirerEvents.Sync, this);
+            this.Sync?.Invoke(this, EventArgs.Empty);
         }
 
         private async Task Restore()
@@ -323,14 +320,14 @@ namespace WalletConnectSharp.Core.Controllers
         private void Expire(string target, Expiration expiration)
         {
             _expirations.Remove(target);
-            Events.Trigger(ExpirerEvents.Expired, new ExpirerEventArgs()
+            this.Expired?.Invoke(this, new ExpirerEventArgs()
             {
                 Target = target,
                 Expiration = expiration
             });
         }
 
-        private void CheckExpirations()
+        private void CheckExpirations(object sender, EventArgs args)
         {
             var clonedArray = _expirations.Keys.ToArray();
             foreach (var target in clonedArray)
@@ -342,11 +339,12 @@ namespace WalletConnectSharp.Core.Controllers
 
         private void RegisterEventListeners()
         {
-            _core.HeartBeat.On(HeartbeatEvents.Pulse, CheckExpirations);
-            
-            this.On(ExpirerEvents.Created, Persist);
-            this.On(ExpirerEvents.Expired, Persist);
-            this.On(ExpirerEvents.Deleted, Persist);
+            _core.HeartBeat.OnPulse += CheckExpirations;
+            //_core.HeartBeat.On(HeartbeatEvents.Pulse, CheckExpirations);
+
+            this.Created += Persist;
+            this.Expired += Persist;
+            this.Deleted += Persist;
         }
 
         private void IsInitialized()
@@ -380,7 +378,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }

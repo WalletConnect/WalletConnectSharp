@@ -1,12 +1,10 @@
-using System.Threading.Tasks;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Network
 {
     /// <summary>
     /// Represents a base interface for JsonRpcProvider
     /// </summary>
-    public interface IBaseJsonRpcProvider : IEvents
+    public interface IBaseJsonRpcProvider
     {
         /// <summary>
         /// Gets the current IJsonRpcConnection this provider is using

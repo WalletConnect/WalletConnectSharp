@@ -41,10 +41,6 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload);
 
-        internal Task OnSessionRequest<T, TR>(string topic, JsonRpcRequest<SessionRequest<T>> payload);
-
-        internal Task OnSessionEventRequest<T>(string topic, JsonRpcRequest<SessionEvent<T>> payload);
-
         internal Task IsValidConnect(ConnectOptions options);
 
         internal Task IsValidPair(string uri);

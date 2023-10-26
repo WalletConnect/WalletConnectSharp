@@ -9,7 +9,6 @@ using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Verify;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign;
 using WalletConnectSharp.Sign.Models;
@@ -187,18 +186,18 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestShouldApproveSessionProposal()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
-                
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
+
                 Assert.Equal(Validation.Unknown, verifyContext.Validation);
                 session = await _wallet.ApproveSession(id, TestNamespaces);
-                
+
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -213,16 +212,16 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             var rejectionError = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
 
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var proposal = @event.EventData.Proposal;
+                var proposal = @event.Proposal;
 
-                var id = @event.EventData.Id;
+                var id = @event.Id;
                 Assert.Equal(TestRequiredNamespaces, proposal.RequiredNamespaces);
 
                 await _wallet.RejectSession(id, rejectionError);
                 task1.TrySetResult(true);
-            });
+            };
 
             async Task CheckSessionReject()
             {
@@ -250,18 +249,18 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestUpdateSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
-                
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
+
                 Assert.Equal(Validation.Unknown, verifyContext.Validation);
                 session = await _wallet.ApproveSession(id, TestNamespaces);
-                
+
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -272,12 +271,12 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             Assert.NotEqual(TestNamespaces, TestUpdatedNamespaces);
 
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
-            _dapp.On<SessionUpdateEvent>(EngineEvents.SessionUpdate, (sender, @event) =>
+            _dapp.SessionUpdateRequest += (sender, @event) =>
             {
-                var param = @event.EventData.Params;
+                var param = @event.Params;
                 Assert.Equal(TestUpdatedNamespaces, param.Namespaces);
                 task2.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task2.Task,
@@ -289,18 +288,18 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestExtendSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
-                
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
+
                 Assert.Equal(Validation.Unknown, verifyContext.Validation);
                 session = await _wallet.ApproveSession(id, TestNamespaces);
-                
+
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -325,11 +324,11 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestRespondToSessionRequest()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
                 
                 session = await _wallet.ApproveSession(id, new Namespaces()
                 {
@@ -345,7 +344,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -403,11 +402,11 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestWalletDisconnectFromSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
                 
                 session = await _wallet.ApproveSession(id, new Namespaces()
                 {
@@ -423,7 +422,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -432,13 +431,13 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             );
 
             var reason = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
-
+            
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
-            _dapp.On<SessionEvent>(EngineEvents.SessionDelete, (sender, @event) =>
+            _dapp.SessionDeleted += (sender, @event) =>
             {
-                Assert.Equal(session.Topic, @event.EventData.Topic);
+                Assert.Equal(session.Topic, @event.Topic);
                 task2.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task2.Task,
@@ -450,11 +449,11 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestDappDisconnectFromSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
                 
                 session = await _wallet.ApproveSession(id, new Namespaces()
                 {
@@ -470,7 +469,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -481,11 +480,11 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             var reason = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
 
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionEvent>(EngineEvents.SessionDelete, (sender, @event) =>
+            _wallet.SessionDeleted += (sender, @event) =>
             {
-                Assert.Equal(session.Topic, @event.EventData.Topic);
+                Assert.Equal(session.Topic, @event.Topic);
                 task2.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task2.Task,
@@ -497,11 +496,11 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestEmitSessionEvent()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
                 
                 session = await _wallet.ApproveSession(id, new Namespaces()
                 {
@@ -517,7 +516,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -555,27 +554,29 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestGetActiveSessions()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
-                
-                session = await _wallet.ApproveSession(id, new Namespaces()
-                {
-                    { 
-                        "eip155", new Namespace()
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
+
+                session = await _wallet.ApproveSession(id,
+                    new Namespaces()
+                    {
                         {
-                            Methods = TestNamespace.Methods,
-                            Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            "eip155",
+                            new Namespace()
+                            {
+                                Methods = TestNamespace.Methods,
+                                Events = TestNamespace.Events,
+                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" }
+                            }
                         }
-                    }
-                });
+                    });
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -593,14 +594,14 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestGetPendingSessionProposals()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += (sender, @event) =>
             {
                 var proposals = _wallet.PendingSessionProposals;
                 Assert.NotNull(proposals);
                 Assert.Single(proposals);
                 Assert.Equal(TestRequiredNamespaces, proposals.Values.ToArray()[0].RequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,
@@ -612,27 +613,29 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         public async void TestGetPendingSessionRequests()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-            _wallet.On<SessionProposalEvent>(EngineEvents.SessionProposal, async (sender, @event) =>
+            _wallet.SessionProposed += async (sender, @event) =>
             {
-                var id = @event.EventData.Id;
-                var proposal = @event.EventData.Proposal;
-                var verifyContext = @event.EventData.VerifiedContext;
-                
-                session = await _wallet.ApproveSession(id, new Namespaces()
-                {
-                    { 
-                        "eip155", new Namespace()
+                var id = @event.Id;
+                var proposal = @event.Proposal;
+                var verifyContext = @event.VerifiedContext;
+
+                session = await _wallet.ApproveSession(id,
+                    new Namespaces()
+                    {
                         {
-                            Methods = TestNamespace.Methods,
-                            Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            "eip155",
+                            new Namespace()
+                            {
+                                Methods = TestNamespace.Methods,
+                                Events = TestNamespace.Events,
+                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" }
+                            }
                         }
-                    }
-                });
+                    });
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
                 task1.TrySetResult(true);
-            });
+            };
 
             await Task.WhenAll(
                 task1.Task,

@@ -1,9 +1,6 @@
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models;
-using WalletConnectSharp.Core.Models.Pairing;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Sign.Models;
 
 namespace WalletConnectSharp.Sign.Interfaces
@@ -12,7 +9,7 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// An interface for the Sign Client. This includes modules the Sign Client will use, the ICore module
     /// this Sign Client is using, as well as public facing Engine functions and properties.
     /// </summary>
-    public interface ISignClient : IModule, IEvents, IEngineAPI
+    public interface ISignClient : IModule, IEngineAPI
     {
         /// <summary>
         /// The Metadata this Sign Client is broadcasting with

@@ -1,7 +1,6 @@
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Core.Models.Relay;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network;
 
 namespace WalletConnectSharp.Core.Interfaces
@@ -10,8 +9,20 @@ namespace WalletConnectSharp.Core.Interfaces
     /// The Relayer module handles the interaction with the WalletConnect relayer server.
     /// Each Relayer module uses a Publisher, Subscriber and a JsonRPCProvider.
     /// </summary>
-    public interface IRelayer : IEvents, IModule
+    public interface IRelayer : IModule
     {
+        event EventHandler OnConnected;
+
+        event EventHandler OnDisconnected;
+
+        event EventHandler<Exception> OnErrored;
+
+        event EventHandler<MessageEvent> OnMessageReceived;
+
+        event EventHandler OnTransportClosed;
+
+        event EventHandler OnConnectionStalled;
+        
         /// <summary>
         /// 
         /// </summary>
@@ -113,5 +124,7 @@ namespace WalletConnectSharp.Core.Interfaces
         public Task TransportOpen(string relayUrl = null);
 
         public Task RestartTransport(string relayUrl = null);
+
+        internal void TriggerConnectionStalled();
     }
 }

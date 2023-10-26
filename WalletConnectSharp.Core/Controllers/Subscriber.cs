@@ -3,11 +3,8 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -19,23 +16,10 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Subscriber : ISubscriber
     {
-        /// <summary>
-        /// Constants that define eventIds for the Subscriber events
-        /// </summary>
-        public static class SubscriberEvents
-        {
-            public static readonly string Created = "subscription_created";
-            public static readonly string Deleted = "subscription_deleted";
-            public static readonly string Expired = "subscription_expired";
-            public static readonly string Disabled = "subscription_disabled";
-            public static readonly string Sync = "subscription_sync";
-            public static readonly string Resubscribed = "subscription_resubscribed";
-        }
-        
-        /// <summary>
-        /// The EventDelegator this module is using
-        /// </summary>
-        public EventDelegator Events { get; }
+        public event EventHandler Sync;
+        public event EventHandler Resubscribed;
+        public event EventHandler<ActiveSubscription> Created;
+        public event EventHandler<DeletedSubscription> Deleted;
 
         /// <summary>
         /// The name of this Subscriber
@@ -176,12 +160,10 @@ namespace WalletConnectSharp.Core.Controllers
         public Subscriber(IRelayer relayer)
         {
             _relayer = relayer;
-            
-            Events = new EventDelegator(this);
 
             _logger = WCLogger.WithContext(Context);
         }
-        
+
         /// <summary>
         /// Initialize this Subscriber, which will restore + resubscribe to all active subscriptions found
         /// in storage
@@ -190,10 +172,11 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (!_initialized)
             {
+                this._clientId = await this._relayer.Core.Crypto.GetClientId();
+
                 await Restart();
                 RegisterEventListeners();
                 OnEnabled();
-                this._clientId = await this._relayer.Core.Crypto.GetClientId();
             }
         }
 
@@ -207,36 +190,35 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterEventListeners()
         {
-            _relayer.Core.HeartBeat.On<object>(HeartbeatEvents.Pulse, (sender, @event) =>
+            _relayer.Core.HeartBeat.OnPulse += (sender, @event) =>
             {
                 CheckPending();
-            });
-            
-            _relayer.On<object>(RelayerEvents.Connect, (sender, @event) =>
+            };
+
+            _relayer.Provider.Connected += (sender, connection) =>
             {
                 OnConnect();
-            });
-            
-            _relayer.On<object>(RelayerEvents.Disconnect, (sender, @event) =>
+            };
+
+            _relayer.Provider.Disconnected += (sender, args) =>
             {
                 OnDisconnect();
-            });
-            
-            this.On<object>(SubscriberEvents.Created, AsyncPersist);
+            };
 
-            this.On<object>(SubscriberEvents.Deleted, AsyncPersist);
+            this.Created += AsyncPersist;
+
+            this.Deleted += AsyncPersist;
         }
 
-        protected virtual async void AsyncPersist(object sender, GenericEvent<object> @event)
+        protected virtual async void AsyncPersist(object sender, object @event)
         {
             await Persist();
         }
-        
-        
+
         protected virtual async Task Persist()
         {
             await SetRelayerSubscriptions(Values);
-            Events.Trigger(SubscriberEvents.Sync, new object());
+            this.Sync?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual async Task<ActiveSubscription[]> GetRelayerSubscriptions()
@@ -285,23 +267,19 @@ namespace WalletConnectSharp.Core.Controllers
                     await this.BatchSubscribe(batch.ToArray());
                 }
             }
-            
-            this.Events.Trigger(SubscriberEvents.Resubscribed, new object());
+
+            this.Resubscribed?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual async Task Resubscribe(ActiveSubscription subscription)
         {
             if (!Ids.Contains(subscription.Id))
             {
-                var @params = new PendingSubscription()
-                {
-                    Relay = subscription.Relay,
-                    Topic = subscription.Topic
-                };
+                var @params = new PendingSubscription() { Relay = subscription.Relay, Topic = subscription.Topic };
 
                 if (pending.ContainsKey(@params.Topic))
                     pending.Remove(@params.Topic);
-                
+
                 pending.Add(@params.Topic, @params);
 
                 var id = await RpcSubscribe(@params.Topic, @params.Relay);
@@ -314,13 +292,9 @@ namespace WalletConnectSharp.Core.Controllers
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
             var request = new RequestArguments<JsonRpcSubscriberParams>()
             {
-                Method = api.Subscribe,
-                Params = new JsonRpcSubscriberParams()
-                {
-                    Topic = topic
-                }
+                Method = api.Subscribe, Params = new JsonRpcSubscriberParams() { Topic = topic }
             };
-            
+
             var subscribe = _relayer.Request<JsonRpcSubscriberParams, string>(request);
             await subscribe.WithTimeout(20000);
 
@@ -332,12 +306,7 @@ namespace WalletConnectSharp.Core.Controllers
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
             var request = new RequestArguments<JsonRpcUnsubscribeParams>()
             {
-                Method = api.Unsubscribe,
-                Params = new JsonRpcUnsubscribeParams()
-                {
-                    Id = id,
-                    Topic = topic
-                }
+                Method = api.Unsubscribe, Params = new JsonRpcUnsubscribeParams() { Id = id, Topic = topic }
             };
 
             return _relayer.Request<JsonRpcUnsubscribeParams, object>(request);
@@ -347,7 +316,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             _cached = Array.Empty<ActiveSubscription>();
             _initialized = true;
-            
+
             if (onSubscriberReady != null)
                 onSubscriberReady(this, EventArgs.Empty);
         }
@@ -368,7 +337,7 @@ namespace WalletConnectSharp.Core.Controllers
         protected virtual async void OnConnect()
         {
             if (RestartInProgress) return;
-            
+
             await Restart();
             OnEnabled();
         }
@@ -384,24 +353,14 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void OnSubscribe(string id, PendingSubscription @params)
         {
-            SetSubscription(id, new ActiveSubscription()
-            {
-                Id = id,
-                Relay = @params.Relay,
-                Topic = @params.Topic
-            });
+            SetSubscription(id, new ActiveSubscription() { Id = id, Relay = @params.Relay, Topic = @params.Topic });
 
             pending.Remove(@params.Topic);
         }
 
         protected virtual void OnResubscribe(string id, PendingSubscription @params)
         {
-            AddSubscription(id, new ActiveSubscription()
-            {
-                Id = id,
-                Relay = @params.Relay,
-                Topic = @params.Topic
-            });
+            AddSubscription(id, new ActiveSubscription() { Id = id, Relay = @params.Relay, Topic = @params.Topic });
 
             pending.Remove(@params.Topic);
         }
@@ -415,14 +374,14 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 DeleteSubscription(id, reason);
             }
-            
+
             await _relayer.Messages.Delete(topic);
         }
 
         protected virtual void SetSubscription(string id, ActiveSubscription subscription)
         {
             if (_subscriptions.ContainsKey(id)) return;
-            
+
             AddSubscription(id, subscription);
         }
 
@@ -430,23 +389,17 @@ namespace WalletConnectSharp.Core.Controllers
         {
             if (_subscriptions.ContainsKey(id))
                 _subscriptions.Remove(id);
-            
+
             _subscriptions.Add(id, subscription);
             _topicMap.Set(subscription.Topic, id);
-            Events.Trigger(SubscriberEvents.Created, subscription);
+            this.Created?.Invoke(this, subscription);
         }
 
         protected virtual Task UnsubscribeByTopic(string topic, UnsubscribeOptions opts = null)
         {
             if (opts == null)
             {
-                opts = new UnsubscribeOptions()
-                {
-                    Relay = new ProtocolOptions()
-                    {
-                        Protocol = RelayProtocols.Default
-                    }
-                };
+                opts = new UnsubscribeOptions() { Relay = new ProtocolOptions() { Protocol = RelayProtocols.Default } };
             }
 
             var ids = TopicMap.Get(topic);
@@ -461,13 +414,11 @@ namespace WalletConnectSharp.Core.Controllers
             var subscription = GetSubscription(id);
             _subscriptions.Remove(id);
             _topicMap.Delete(subscription.Topic, id);
-            Events.Trigger(SubscriberEvents.Deleted, new DeletedSubscription()
-            {
-                Id = id,
-                Reason = reason,
-                Relay = subscription.Relay,
-                Topic = subscription.Topic
-            });
+            this.Deleted?.Invoke(this,
+                new DeletedSubscription()
+                {
+                    Id = id, Reason = reason, Relay = subscription.Relay, Topic = subscription.Topic
+                });
         }
 
         protected virtual async Task UnsubscribeById(string topic, string id, UnsubscribeOptions opts)
@@ -476,11 +427,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 opts = new UnsubscribeOptions()
                 {
-                    Id = id,
-                    Relay = new ProtocolOptions()
-                    {
-                        Protocol = RelayProtocols.Default
-                    }
+                    Id = id, Relay = new ProtocolOptions() { Protocol = RelayProtocols.Default }
                 };
             }
 
@@ -530,26 +477,16 @@ namespace WalletConnectSharp.Core.Controllers
         public async Task<string> Subscribe(string topic, SubscribeOptions opts = null)
         {
             await RestartToComplete();
-            
+
             if (opts == null)
             {
-                opts = new SubscribeOptions()
-                {
-                    Relay = new ProtocolOptions()
-                    {
-                        Protocol = RelayProtocols.Default
-                    }
-                };
+                opts = new SubscribeOptions() { Relay = new ProtocolOptions() { Protocol = RelayProtocols.Default } };
             }
-            
+
             IsInitialized();
 
-            var @params = new PendingSubscription()
-            {
-                Relay = opts.Relay,
-                Topic = topic
-            };
-            
+            var @params = new PendingSubscription() { Relay = opts.Relay, Topic = topic };
+
             pending.Add(topic, @params);
             var id = await RpcSubscribe(topic, @params.Relay);
             OnSubscribe(id, @params);
@@ -564,7 +501,7 @@ namespace WalletConnectSharp.Core.Controllers
         public async Task Unsubscribe(string topic, UnsubscribeOptions opts = null)
         {
             await RestartToComplete();
-            
+
             IsInitialized();
 
             if (opts != null && !string.IsNullOrWhiteSpace(opts.Id))
@@ -615,8 +552,7 @@ namespace WalletConnectSharp.Core.Controllers
             var api = RelayProtocols.GetRelayProtocol(relay.Protocol);
             var request = new RequestArguments<BatchSubscribeParams>()
             {
-                Method = api.BatchSubscribe,
-                Params = new BatchSubscribeParams() { Topics = topics }
+                Method = api.BatchSubscribe, Params = new BatchSubscribeParams() { Topics = topics }
             };
             try
             {
@@ -625,7 +561,7 @@ namespace WalletConnectSharp.Core.Controllers
             }
             catch (Exception e)
             {
-                this._relayer.Events.Trigger(RelayerEvents.ConnectionStalled, new object());
+                this._relayer.TriggerConnectionStalled();
                 throw;
             }
         }
@@ -636,12 +572,9 @@ namespace WalletConnectSharp.Core.Controllers
             var topics = subscriptions.Select(s => s.Topic).ToArray();
             var relay = subscriptions[0].Relay;
             var result = await this.RpcBatchSubscribe(topics, relay);
-            OnBatchSubscribe(result.Select((r, i) => new ActiveSubscription()
-            {
-                Id = r,
-                Relay = relay,
-                Topic = topics[i]
-            }).ToArray());
+            OnBatchSubscribe(result
+                .Select((r, i) => new ActiveSubscription() { Id = r, Relay = relay, Topic = topics[i] })
+                .ToArray());
         }
 
         private void OnBatchSubscribe(ActiveSubscription[] subscriptions)
@@ -656,7 +589,6 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Events?.Dispose();
         }
     }
 }
