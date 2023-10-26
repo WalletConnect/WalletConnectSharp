@@ -1,10 +1,5 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
-using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Network.Tests.Models;
@@ -18,16 +13,21 @@ namespace WalletConnectSharp.Network.Tests
     public class RelayTests
     {
         private static readonly JsonRpcRequest<TopicData> TEST_IRN_REQUEST =
-            new JsonRpcRequest<TopicData>(RelayProtocols.DefaultProtocol.Subscribe, new TopicData()
-            {
-                Topic = "ca838d59a3a3fe3824dab9ca7882ac9a2227c5d0284c88655b261a2fe85db270"
-            });
+            new JsonRpcRequest<TopicData>(RelayProtocols.DefaultProtocol.Subscribe,
+                new TopicData() { Topic = "ca838d59a3a3fe3824dab9ca7882ac9a2227c5d0284c88655b261a2fe85db270" });
+
         private static readonly JsonRpcRequest<TopicData> TEST_BAD_IRN_REQUEST =
             new JsonRpcRequest<TopicData>(RelayProtocols.DefaultProtocol.Subscribe, new TopicData());
 
         private static readonly string DEFAULT_GOOD_WS_URL = "wss://relay.walletconnect.com";
-        private static readonly string ENVIRONMENT_DEFAULT_GOOD_WS_URL = Environment.GetEnvironmentVariable("RELAY_ENDPOINT");
-        private static readonly string GOOD_WS_URL = !string.IsNullOrWhiteSpace(ENVIRONMENT_DEFAULT_GOOD_WS_URL) ? ENVIRONMENT_DEFAULT_GOOD_WS_URL : DEFAULT_GOOD_WS_URL;
+
+        private static readonly string ENVIRONMENT_DEFAULT_GOOD_WS_URL =
+            Environment.GetEnvironmentVariable("RELAY_ENDPOINT");
+
+        private static readonly string GOOD_WS_URL = !string.IsNullOrWhiteSpace(ENVIRONMENT_DEFAULT_GOOD_WS_URL)
+            ? ENVIRONMENT_DEFAULT_GOOD_WS_URL
+            : DEFAULT_GOOD_WS_URL;
+
         private static readonly string TEST_RANDOM_HOST = "random.domain.that.does.not.exist";
         private static readonly string BAD_WS_URL = "ws://" + TEST_RANDOM_HOST;
 
@@ -35,14 +35,14 @@ namespace WalletConnectSharp.Network.Tests
         {
             var crypto = new Crypto.Crypto();
             await crypto.Init();
-            
+
             var auth = await crypto.SignJwt(GOOD_WS_URL);
 
-            return RelayUrl.FormatRelayRpcUrl(
+            var relayUrlBuilder = new RelayUrlBuilder();
+            return relayUrlBuilder.FormatRelayRpcUrl(
                 GOOD_WS_URL,
                 RelayProtocols.Default,
                 RelayConstants.Version.ToString(),
-                SDKConstants.SDK_VERSION,
                 TestValues.TestProjectId,
                 auth
             );
@@ -57,10 +57,10 @@ namespace WalletConnectSharp.Network.Tests
             await provider.Connect();
 
             var result = await provider.Request<TopicData, string>(TEST_IRN_REQUEST);
-            
+
             Assert.True(result.Length > 0);
         }
-        
+
         [Fact, Trait("Category", "integration")]
         public async void RequestWithoutConnect()
         {
@@ -69,7 +69,7 @@ namespace WalletConnectSharp.Network.Tests
             var provider = new JsonRpcProvider(connection);
 
             var result = await provider.Request<TopicData, string>(TEST_IRN_REQUEST);
-            
+
             Assert.True(result.Length > 0);
         }
 
@@ -80,7 +80,8 @@ namespace WalletConnectSharp.Network.Tests
             var connection = new WebsocketConnection(url);
             var provider = new JsonRpcProvider(connection);
 
-            await Assert.ThrowsAsync<WalletConnectException>(() => provider.Request<TopicData, string>(TEST_BAD_IRN_REQUEST));
+            await Assert.ThrowsAsync<WalletConnectException>(() =>
+                provider.Request<TopicData, string>(TEST_BAD_IRN_REQUEST));
         }
 
         [Fact, Trait("Category", "integration")]
@@ -88,7 +89,7 @@ namespace WalletConnectSharp.Network.Tests
         {
             var connection = new WebsocketConnection(BAD_WS_URL);
             var provider = new JsonRpcProvider(connection);
-            
+
             await Assert.ThrowsAsync<TimeoutException>(() => provider.Request<TopicData, string>(TEST_IRN_REQUEST));
         }
 
@@ -101,9 +102,9 @@ namespace WalletConnectSharp.Network.Tests
             Assert.Equal(BAD_WS_URL, provider.Connection.Url);
             await provider.Connect(url);
             Assert.Equal(url, provider.Connection.Url);
-            
+
             var result = await provider.Request<TopicData, string>(TEST_IRN_REQUEST);
-            
+
             Assert.True(result.Length > 0);
         }
 
@@ -113,7 +114,7 @@ namespace WalletConnectSharp.Network.Tests
             var url = await BuildGoodURL();
             var connection = new WebsocketConnection(url);
             var provider = new JsonRpcProvider(connection);
-            
+
             var expectedDisconnectCount = 3;
             var disconnectCount = 0;
 
@@ -125,7 +126,7 @@ namespace WalletConnectSharp.Network.Tests
             await provider.Disconnect();
             await provider.Connect();
             await provider.Disconnect();
-            
+
             Assert.Equal(expectedDisconnectCount, disconnectCount);
         }
     }

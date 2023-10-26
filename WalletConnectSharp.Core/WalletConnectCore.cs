@@ -7,6 +7,7 @@ using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Events;
+using WalletConnectSharp.Network;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
 using WalletConnectSharp.Network.Websocket;
@@ -25,7 +26,7 @@ namespace WalletConnectSharp.Core
         public static readonly string STORAGE_PREFIX = ICore.Protocol + "@" + ICore.Version + ":core:";
 
         private string _optName;
-        
+
         /// <summary>
         /// The name of this module. 
         /// </summary>
@@ -38,6 +39,7 @@ namespace WalletConnectSharp.Core
         }
 
         private string guid = "";
+
         /// <summary>
         /// The current context of this module instance. 
         /// </summary>
@@ -53,37 +55,37 @@ namespace WalletConnectSharp.Core
         /// 
         /// </summary>
         public EventDelegator Events { get; }
-        
+
         /// <summary>
         /// If this module is initialized or not
         /// </summary>
         public bool Initialized { get; private set; }
-        
+
         /// <summary>
         /// The url of the relay server to connect to in the <see cref="IRelayer"/> module
         /// </summary>
         public string RelayUrl { get; }
-        
+
         /// <summary>
         /// The Project ID to use for authentication on the relay server
         /// </summary>
         public string ProjectId { get; }
-        
+
         /// <summary>
         /// The <see cref="IHeartBeat"/> module this Core module is using
         /// </summary>
         public IHeartBeat HeartBeat { get; }
-        
+
         /// <summary>
         /// The <see cref="ICrypto"/> module this Core module is using
         /// </summary>
         public ICrypto Crypto { get; }
-        
+
         /// <summary>
         /// The <see cref="IRelayer"/> module this Core module is using
         /// </summary>
         public IRelayer Relayer { get; }
-        
+
         /// <summary>
         /// The <see cref="IKeyValueStorage"/> module this Core module is using. All
         /// Core Modules should use this for storage.
@@ -114,7 +116,7 @@ namespace WalletConnectSharp.Core
         public IPairing Pairing { get; }
 
         public Verifier Verify { get; }
-        
+
         public CoreOptions Options { get; }
 
         /// <summary>
@@ -128,10 +130,7 @@ namespace WalletConnectSharp.Core
                 var storage = new InMemoryStorage();
                 options = new CoreOptions()
                 {
-                    KeyChain = new KeyChain(storage),
-                    ProjectId = null,
-                    RelayUrl = null,
-                    Storage = storage
+                    KeyChain = new KeyChain(storage), ProjectId = null, RelayUrl = null, Storage = storage
                 };
             }
 
@@ -142,12 +141,13 @@ namespace WalletConnectSharp.Core
 
 
             options.ConnectionBuilder ??= new WebsocketConnectionBuilder();
+            options.RelayUrlBuilder ??= new RelayUrlBuilder();
 
             Options = options;
             ProjectId = options.ProjectId;
             RelayUrl = options.RelayUrl;
             Storage = options.Storage;
-            
+
             if (options.CryptoModule != null)
             {
                 Crypto = options.CryptoModule;
@@ -158,10 +158,10 @@ namespace WalletConnectSharp.Core
                 {
                     options.KeyChain = new KeyChain(options.Storage);
                 }
-                
+
                 Crypto = new Crypto.Crypto(options.KeyChain);
             }
-            
+
             HeartBeat = new HeartBeat();
             _optName = options.Name;
 
@@ -185,13 +185,14 @@ namespace WalletConnectSharp.Core
             Expirer = new Expirer(this);
             Pairing = new Pairing(this);
             Verify = new Verifier();
-            
+
             Relayer = new Relayer(new RelayerOptions()
             {
                 Core = this,
                 ProjectId = ProjectId,
                 RelayUrl = options.RelayUrl,
                 ConnectionTimeout = options.ConnectionTimeout,
+                RelayUrlBuilder = options.RelayUrlBuilder
             });
 
             MessageHandler = new TypedMessageHandler(this);
