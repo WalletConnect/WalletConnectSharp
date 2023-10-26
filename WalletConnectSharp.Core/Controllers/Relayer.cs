@@ -18,7 +18,7 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Relayer : IRelayer
     {
-        private bool transportExplicityClosed = false;
+        private bool _transportExplicitlyClosed = false;
 
         /// <summary>
         /// The default relay server URL used when no relay URL is given
@@ -114,7 +114,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             get
             {
-                return transportExplicityClosed;
+                return _transportExplicitlyClosed;
             }
         }
 
@@ -213,7 +213,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 Events.Trigger(RelayerEvents.Disconnect, new object());
 
-                if (this.transportExplicityClosed)
+                if (this._transportExplicitlyClosed)
                     return;
 
                 // Attempt to reconnect after one second
@@ -350,7 +350,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         public async Task TransportClose()
         {
-            transportExplicityClosed = true;
+            _transportExplicitlyClosed = true;
             if (Connected)
             {
                 await this.Provider.Disconnect();
@@ -360,7 +360,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         public async Task TransportOpen(string relayUrl = null)
         {
-            this.transportExplicityClosed = false;
+            this._transportExplicitlyClosed = false;
             if (reconnecting) return;
             this.relayUrl = relayUrl ?? this.relayUrl;
             this.reconnecting = true;
@@ -425,7 +425,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         public async Task RestartTransport(string relayUrl = null)
         {
-            if (this.transportExplicityClosed || this.reconnecting) return;
+            if (this._transportExplicitlyClosed || this.reconnecting) return;
             this.relayUrl = relayUrl ?? this.relayUrl;
             if (this.Connected)
             {
