@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace WalletConnectSharp.Common
 {
     /// <summary>
@@ -8,7 +10,6 @@ namespace WalletConnectSharp.Common
         /// <summary>
         /// The current version of the SDK
         /// </summary>
-        // TODO Pull this from assembly version
-        public static readonly string SDK_VERSION = "2.0.0-rc.1";
+        public static readonly string SDK_VERSION =  Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "2.0.0-undefined";
     }
 }
