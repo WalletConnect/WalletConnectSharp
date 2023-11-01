@@ -97,6 +97,7 @@ namespace WalletConnectSharp.Sign
         {
             this.Client.Core.Pairing.PairingPinged += (sender, @event) => this.PairingPinged?.Invoke(sender, @event);
             this.Client.Core.Pairing.PairingDeleted += (sender, @event) => this.PairingDeleted?.Invoke(sender, @event);
+            this.Client.Core.Pairing.PairingExpired += (sender, @event) => this.PairingExpired?.Invoke(sender, @event);
         }
 
         private void RegisterExpirerEvents()
@@ -125,7 +126,7 @@ namespace WalletConnectSharp.Sign
         /// This event is invoked when the given pairing has expired
         /// Event Side: Wallet
         /// </summary>
-        public event EventHandler<PairingStruct> PairingExpired;
+        public event EventHandler<PairingEvent> PairingExpired;
         
         /// <summary>
         /// This event is invoked when a new session is proposed. This is usually invoked

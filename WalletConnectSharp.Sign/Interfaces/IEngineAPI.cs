@@ -14,34 +14,96 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// </summary>
     public interface IEngineAPI
     {
+        /// <summary>
+        /// This event is invoked when the given session has expired
+        /// Event Side: dApp & Wallet
+        /// </summary>
         event EventHandler<SessionStruct> SessionExpired;
 
-        event EventHandler<PairingStruct> PairingExpired;
+        /// <summary>
+        /// This event is invoked when the given pairing has expired
+        /// Event Side: Wallet
+        /// </summary>
+        event EventHandler<PairingEvent> PairingExpired;
 
+        /// <summary>
+        /// This event is invoked when a new session is proposed. This is usually invoked
+        /// after a new pairing has been activated from a URI
+        /// Event Side: Wallet
+        /// </summary>
         event EventHandler<SessionProposalEvent> SessionProposed;
 
+        /// <summary>
+        /// This event is invoked when a proposed session has been connected to a wallet. This event is
+        /// triggered after the session has been approved by a wallet
+        /// Event Side: dApp
+        /// </summary>
         event EventHandler<SessionStruct> SessionConnected;
 
+        /// <summary>
+        /// This event is invoked when a proposed session connection failed with an error
+        /// Event Side: dApp
+        /// </summary>
         event EventHandler<Exception> SessionConnectionErrored;
 
+        /// <summary>
+        /// This event is invoked when a given session sent a update request. 
+        /// Event Side: Wallet
+        /// </summary>
         event EventHandler<SessionUpdateEvent> SessionUpdateRequest;
 
+        /// <summary>
+        /// This event is invoked when a given session sent a extend request.
+        /// Event Side: Wallet
+        /// </summary>
         event EventHandler<SessionEvent> SessionExtendRequest;
         
+        /// <summary>
+        /// This event is invoked when a given session update request was successful.
+        /// Event Side: dApp
+        /// </summary>
         event EventHandler<SessionEvent> SessionUpdated;
 
+        /// <summary>
+        /// This event is invoked when a given session extend request was successful.
+        /// Event Side: dApp
+        /// </summary>
         event EventHandler<SessionEvent> SessionExtended;
 
+        /// <summary>
+        /// This event is invoked when a given session has been pinged
+        /// Event Side: dApp & Wallet
+        /// </summary>
         event EventHandler<SessionEvent> SessionPinged;
 
+        /// <summary>
+        /// This event is invoked whenever a session has been deleted
+        /// Event Side: dApp & Wallet
+        /// </summary>
         event EventHandler<SessionEvent> SessionDeleted;
 
+        /// <summary>
+        /// This event is invoked whenever a session has been rejected
+        /// Event Side: Wallet
+        /// </summary>
         event EventHandler<SessionStruct> SessionRejected;
 
+        /// <summary>
+        /// This event is invoked whenever a session has been approved
+        /// Event Side: Wallet
+        /// </summary>
         event EventHandler<SessionStruct> SessionApproved; 
 
+        /// <summary>
+        /// This event is invoked whenever a pairing is pinged
+        /// Event Side: dApp & Wallet
+        /// </summary>
         event EventHandler<PairingEvent> PairingPinged;
 
+        /// <summary>
+        /// This event is invoked whenever a pairing is deleted
+        /// Event Side: dApp & Wallet
+        /// </summary>
         event EventHandler<PairingEvent> PairingDeleted;
         
         /// <summary>
