@@ -114,21 +114,97 @@ namespace WalletConnectSharp.Sign
             MessageHandler.HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null);
             MessageHandler.HandleMessageType<SessionPing, bool>(PrivateThis.OnSessionPingRequest, PrivateThis.OnSessionPingResponse);
         }
-
+        
+        /// <summary>
+        /// This event is invoked when the given session has expired
+        /// Event Side: dApp & Wallet
+        /// </summary>
         public event EventHandler<SessionStruct> SessionExpired;
+        
+        /// <summary>
+        /// This event is invoked when the given pairing has expired
+        /// Event Side: Wallet
+        /// </summary>
         public event EventHandler<PairingStruct> PairingExpired;
+        
+        /// <summary>
+        /// This event is invoked when a new session is proposed. This is usually invoked
+        /// after a new pairing has been activated from a URI
+        /// Event Side: Wallet
+        /// </summary>
         public event EventHandler<SessionProposalEvent> SessionProposed;
+        
+        /// <summary>
+        /// This event is invoked when a proposed session has been connected to a wallet. This event is
+        /// triggered after the session has been approved by a wallet
+        /// Event Side: dApp
+        /// </summary>
         public event EventHandler<SessionStruct> SessionConnected;
+        
+        /// <summary>
+        /// This event is invoked when a proposed session connection failed with an error
+        /// Event Side: dApp
+        /// </summary>
         public event EventHandler<Exception> SessionConnectionErrored;
+        
+        /// <summary>
+        /// This event is invoked when a given session sent a update request. 
+        /// Event Side: Wallet
+        /// </summary>
         public event EventHandler<SessionUpdateEvent> SessionUpdateRequest;
+        
+        /// <summary>
+        /// This event is invoked when a given session sent a extend request.
+        /// Event Side: Wallet
+        /// </summary>
         public event EventHandler<SessionEvent> SessionExtendRequest;
+        
+        /// <summary>
+        /// This event is invoked when a given session update request was successful.
+        /// Event Side: dApp
+        /// </summary>
         public event EventHandler<SessionEvent> SessionUpdated;
+        
+        /// <summary>
+        /// This event is invoked when a given session extend request was successful.
+        /// Event Side: dApp
+        /// </summary>
         public event EventHandler<SessionEvent> SessionExtended;
+        
+        /// <summary>
+        /// This event is invoked when a given session has been pinged
+        /// Event Side: dApp & Wallet
+        /// </summary>
         public event EventHandler<SessionEvent> SessionPinged;
+        
+        /// <summary>
+        /// This event is invoked whenever a session has been deleted
+        /// Event Side: dApp & Wallet
+        /// </summary>
         public event EventHandler<SessionEvent> SessionDeleted;
+        
+        /// <summary>
+        /// This event is invoked whenever a session has been rejected
+        /// Event Side: Wallet
+        /// </summary>
         public event EventHandler<SessionStruct> SessionRejected;
+        
+        /// <summary>
+        /// This event is invoked whenever a session has been approved
+        /// Event Side: Wallet
+        /// </summary>
         public event EventHandler<SessionStruct> SessionApproved;
+        
+        /// <summary>
+        /// This event is invoked whenever a pairing is pinged
+        /// Event Side: dApp & Wallet
+        /// </summary>
         public event EventHandler<PairingEvent> PairingPinged;
+        
+        /// <summary>
+        /// This event is invoked whenever a pairing is deleted
+        /// Event Side: dApp & Wallet
+        /// </summary>
         public event EventHandler<PairingEvent> PairingDeleted;
 
         /// <summary>
@@ -742,13 +818,18 @@ namespace WalletConnectSharp.Sign
             
             if (this.Client.Session.Keys.Contains(topic))
             {
-                await MessageHandler.SendRequest<SessionDelete, bool>(topic, new SessionDelete()
+                var id = await MessageHandler.SendRequest<SessionDelete, bool>(topic, new SessionDelete()
                 {
                     Code = error.Code,
                     Message = error.Message,
                     Data = error.Data
                 });
                 await PrivateThis.DeleteSession(topic);
+                this.SessionDeleted?.Invoke(this, new SessionEvent()
+                {
+                    Topic = topic,
+                    Id = id
+                });
             } 
             else if (this.Client.Core.Pairing.Store.Keys.Contains(topic))
             {
