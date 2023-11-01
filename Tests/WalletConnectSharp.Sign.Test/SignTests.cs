@@ -382,5 +382,180 @@ namespace WalletConnectSharp.Sign.Test
             
             Assert.True(responseReturned2);
         }
+        
+        [Fact, Trait("Category", "integration")]
+        public async void TestTwoUniqueSessionRequestResponseUsingAddressProviderDefaults()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+            
+            var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+            var testMethod = "test_method";
+            var testMethod2 = "test_method_2";
+
+            var dappConnectOptions = new ConnectOptions()
+            {
+                RequiredNamespaces = new RequiredNamespaces()
+                {
+                    {
+                        "eip155", new ProposedNamespace()
+                        {
+                            Methods = new[]
+                            {
+                                testMethod,
+                                testMethod2
+                            },
+                            Chains = new[]
+                            {
+                                "eip155:1"
+                            },
+                            Events = new[]
+                            {
+                                "chainChanged", "accountsChanged"
+                            }
+                        }
+                    }
+                }
+            };
+
+            var dappClient = ClientA;
+            var connectData = await dappClient.Connect(dappConnectOptions);
+
+            var walletClient = ClientB;
+            var proposal = await walletClient.Pair(connectData.Uri);
+
+            var approveData = await walletClient.Approve(proposal, testAddress);
+
+            var sessionData = await connectData.Approval;
+            await approveData.Acknowledged();
+
+            var rnd = new Random();
+            var a = rnd.Next(100);
+            var b = rnd.Next(100);
+            var x = rnd.NextStrings(AllowedChars, (Math.Min(a, b), Math.Max(a, b)), 1).First();
+            var y = x.Length;
+
+            var testData = new TestRequest() { a = a, b = b, };
+            var testData2 = new TestRequest2() { x = x, y = y };
+
+            var pending = new TaskCompletionSource<int>();
+            var pending2 = new TaskCompletionSource<bool>();
+            
+            // Step 1. Setup event listener for request
+            
+            // The wallet client will listen for the request with the "test_method" rpc method
+            walletClient.Engine.SessionRequestEvents<TestRequest, TestResponse>()
+                    .OnRequest += ( requestData) =>
+                {
+                    var request = requestData.Request;
+                    var data = request.Params;
+
+                    requestData.Response = new TestResponse()
+                    {
+                        result = data.a * data.b
+                    };
+                    
+                    return Task.CompletedTask;
+                };
+            
+            // The wallet client will listen for the request with the "test_method" rpc method
+            walletClient.Engine.SessionRequestEvents<TestRequest2, bool>()
+                .OnRequest += ( requestData) =>
+            {
+                var request = requestData.Request;
+                var data = request.Params;
+
+                requestData.Response = data.x.Length == data.y;
+                    
+                return Task.CompletedTask;
+            };
+
+            // The dapp client will listen for the response
+            // Normally, we wouldn't do this and just rely on the return value
+            // from the dappClient.Engine.Request function call (the response Result or throws an Exception)
+            // We do it here for the sake of testing
+            dappClient.Engine.SessionRequestEvents<TestRequest, TestResponse>()
+                .FilterResponses((r) => r.Topic == sessionData.Topic)
+                .OnResponse += (responseData) =>
+            {
+                var response = responseData.Response;
+                
+                var data = response.Result;
+
+                pending.TrySetResult(data.result);
+
+                return Task.CompletedTask;
+            };
+            
+            // 2. Send the request from the dapp client
+            var responseReturned = await dappClient.Engine.Request<TestRequest, TestResponse>(testData);
+            var responseReturned2 = await dappClient.Engine.Request<TestRequest2, bool>(testData2);
+            
+            // 3. Wait for the response from the event listener
+            var eventResult = await pending.Task.WithTimeout(TimeSpan.FromSeconds(5));
+            
+            Assert.Equal(eventResult, a * b);
+            Assert.Equal(eventResult, testData.a * testData.b);
+            Assert.Equal(eventResult, responseReturned.result);
+            
+            Assert.True(responseReturned2);
+        }
+        
+        [Fact, Trait("Category", "integration")]
+        public async void TestAddressProviderDefaults()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+            
+            var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+            var testMethod = "test_method";
+            var testMethod2 = "test_method_2";
+
+            var dappConnectOptions = new ConnectOptions()
+            {
+                RequiredNamespaces = new RequiredNamespaces()
+                {
+                    {
+                        "eip155", new ProposedNamespace()
+                        {
+                            Methods = new[]
+                            {
+                                testMethod,
+                                testMethod2
+                            },
+                            Chains = new[]
+                            {
+                                "eip155:1"
+                            },
+                            Events = new[]
+                            {
+                                "chainChanged", "accountsChanged"
+                            }
+                        }
+                    }
+                }
+            };
+
+            var dappClient = ClientA;
+            var connectData = await dappClient.Connect(dappConnectOptions);
+
+            var walletClient = ClientB;
+            var proposal = await walletClient.Pair(connectData.Uri);
+
+            var approveData = await walletClient.Approve(proposal, testAddress);
+
+            await connectData.Approval;
+            await approveData.Acknowledged();
+
+            var address = dappClient.AddressProvider.CurrentAddress();
+            Assert.Equal(testAddress, address.Address);
+            Assert.Equal("eip155:1", address.ChainId);
+            Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChain);
+            Assert.Equal("eip155", dappClient.AddressProvider.DefaultNamespace);
+            
+            address = walletClient.AddressProvider.CurrentAddress();
+            Assert.Equal(testAddress, address.Address);
+            Assert.Equal("eip155:1", address.ChainId);
+            Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChain);
+            Assert.Equal("eip155", dappClient.AddressProvider.DefaultNamespace);
+        }
     }
 }
