@@ -35,6 +35,10 @@ namespace WalletConnectSharp.Sign
                 var session = this.Client.Session.Get(topic);
                 await PrivateThis.DeleteSession(topic);
                 this.SessionExpired?.Invoke(this, session);
+                this.SessionDeleted?.Invoke(this, new SessionEvent()
+                {
+                    Topic = topic
+                });
             } 
             else if (target.Id != null)
             {

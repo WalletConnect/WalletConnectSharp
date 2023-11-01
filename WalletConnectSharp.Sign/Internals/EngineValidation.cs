@@ -51,7 +51,7 @@ namespace WalletConnectSharp.Sign
             }
         }
 
-        async Task IsValidSessionTopic(string topic)
+        Task IsValidSessionTopic(string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
@@ -64,9 +64,11 @@ namespace WalletConnectSharp.Sign
             var expiry = this.Client.Session.Get(topic).Expiry;
             if (expiry != null && Clock.IsExpired(expiry.Value))
             {
-                await PrivateThis.DeleteSession(topic);
+                //await PrivateThis.DeleteSession(topic);
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"session topic: {topic}");
             }
+
+            return Task.CompletedTask;
         }
 
         async Task IsValidProposalId(long id)
