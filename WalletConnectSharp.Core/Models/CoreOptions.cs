@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Crypto.Interfaces;
 using WalletConnectSharp.Network.Interfaces;
+using WalletConnectSharp.Platform;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
 
@@ -53,11 +54,10 @@ namespace WalletConnectSharp.Core.Models
         public IKeyChain KeyChain;
         
         /// <summary>
-        /// The <see cref="IConnectionBuilder"/> interface to use inside the Relayer to build
-        /// new websocket connections.
+        /// The <see cref="IPlatform"/> interface to use inside in the Platform API
         /// </summary>
-        [JsonProperty("connectionBuilder")]
-        public IConnectionBuilder ConnectionBuilder;
+        [JsonProperty("platform")]
+        public IPlatform Platform;
         
         /// <summary>
         /// The <see cref="ICrypto"/> module to use for crypto operations. This option

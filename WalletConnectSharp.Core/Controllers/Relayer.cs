@@ -10,6 +10,7 @@ using WalletConnectSharp.Events;
 using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
+using WalletConnectSharp.Platform;
 
 namespace WalletConnectSharp.Core.Controllers
 {
@@ -183,7 +184,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual Task<IJsonRpcConnection> BuildConnection(string url)
         {
-            return Core.Options.ConnectionBuilder.CreateConnection(url);
+            return DevicePlatform.ConnectionBuilder.CreateConnection(url);
             //return new WebsocketConnection(url);
         }
 

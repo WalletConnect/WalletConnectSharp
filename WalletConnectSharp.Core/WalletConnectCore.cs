@@ -10,6 +10,7 @@ using WalletConnectSharp.Events;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
 using WalletConnectSharp.Network.Websocket;
+using WalletConnectSharp.Platform;
 
 namespace WalletConnectSharp.Core
 {
@@ -139,9 +140,8 @@ namespace WalletConnectSharp.Core
             {
                 options.Storage = new FileSystemStorage();
             }
-
-
-            options.ConnectionBuilder ??= new WebsocketConnectionBuilder();
+            
+            options.Platform ??= new DefaultPlatform();
 
             Options = options;
             ProjectId = options.ProjectId;
@@ -164,6 +164,8 @@ namespace WalletConnectSharp.Core
             
             HeartBeat = new HeartBeat();
             _optName = options.Name;
+
+            DevicePlatform.Backend = options.Platform;
 
             try
             {
