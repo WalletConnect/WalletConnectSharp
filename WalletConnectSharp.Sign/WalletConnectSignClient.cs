@@ -115,7 +115,7 @@ namespace WalletConnectSharp.Sign
 
 
         public event EventHandler<SessionStruct> SessionExpired;
-        public event EventHandler<PairingStruct> PairingExpired;
+        public event EventHandler<PairingEvent> PairingExpired;
         public event EventHandler<SessionProposalEvent> SessionProposed;
         public event EventHandler<SessionStruct> SessionConnected;
         public event EventHandler<Exception> SessionConnectionErrored;
@@ -226,6 +226,8 @@ namespace WalletConnectSharp.Sign
             Engine.SessionApproved += (sender, @struct) => this.SessionApproved?.Invoke(sender, @struct);
             Engine.SessionExtended += (sender, @event) => this.SessionExtended?.Invoke(sender, @event);
             Engine.SessionUpdated += (sender, @event) => this.SessionUpdated?.Invoke(sender, @event);
+            Engine.PairingDeleted += (sender, @event) => this.PairingDeleted?.Invoke(sender, @event);
+            Engine.PairingPinged += (sender, @event) => this.PairingPinged?.Invoke(sender, @event);
         }
 
         /// <summary>
