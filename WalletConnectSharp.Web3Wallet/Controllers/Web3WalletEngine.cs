@@ -2,9 +2,6 @@
 using WalletConnectSharp.Auth.Interfaces;
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Model.Errors;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Interfaces;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign;
 using WalletConnectSharp.Sign.Interfaces;
@@ -18,6 +15,15 @@ namespace WalletConnectSharp.Web3Wallet.Controllers;
 public class Web3WalletEngine : IWeb3WalletEngine
 {
     private bool _initialized;
+
+    public event EventHandler<SessionStruct> SessionExpired;
+    public event EventHandler<SessionProposalEvent> SessionProposed;
+    public event EventHandler<SessionStruct> SessionConnected;
+    public event EventHandler<Exception> SessionConnectionErrored;
+    public event EventHandler<SessionUpdateEvent> SessionUpdated;
+    public event EventHandler<SessionEvent> SessionExtended;
+    public event EventHandler<SessionEvent> SessionPinged;
+    public event EventHandler<SessionEvent> SessionDeleted;
 
     public IDictionary<string, SessionStruct> ActiveSessions
     {
@@ -171,21 +177,18 @@ public class Web3WalletEngine : IWeb3WalletEngine
         return this.AuthClient.FormatMessage(payload, iss);
     }
 
-    private void PropagateEventToClient(string eventName, IEvents source)
-    {
-        EventHandler<GenericEvent<object>> eventHandler = (sender, @event) =>
-        {
-            this.Client.Events.TriggerType(eventName, @event.EventData, @event.EventData.GetType());
-        };
-
-        source.On(eventName, eventHandler);
-    }
-
     private void InitializeEventListeners()
     {
-        PropagateEventToClient("session_proposal", SignClient);
-        PropagateEventToClient("session_request", SignClient);
-        PropagateEventToClient("session_delete", SignClient);
+        // Propagate sign events
+        SignClient.SessionProposed += (sender, @event) => this.SessionProposed?.Invoke(sender, @event);
+        SignClient.SessionDeleted += (sender, @event) => this.SessionDeleted?.Invoke(sender, @event);
+        SignClient.SessionPinged += (sender, @event) => this.SessionPinged?.Invoke(sender, @event);
+        SignClient.SessionExtendRequest += (sender, @event) => this.SessionExtended?.Invoke(sender, @event);
+        SignClient.SessionExpired += (sender, @struct) => this.SessionExpired?.Invoke(sender, @struct);
+        SignClient.SessionConnected += (sender, @struct) => this.SessionConnected?.Invoke(sender, @struct);
+        SignClient.SessionConnectionErrored +=
+            (sender, exception) => this.SessionConnectionErrored?.Invoke(sender, exception);
+        SignClient.SessionUpdateRequest += (sender, @event) => this.SessionUpdated?.Invoke(sender, @event);
         
         // Propagate auth events 
         AuthClient.AuthRequested += OnAuthRequest;

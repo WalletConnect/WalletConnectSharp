@@ -2,7 +2,6 @@
 using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
@@ -15,7 +14,15 @@ public class Web3WalletClient : IWeb3Wallet
 {
     public string Name { get; }
     public string Context { get; }
-    public EventDelegator Events { get; }
+
+    public event EventHandler<SessionStruct> SessionExpired;
+    public event EventHandler<SessionProposalEvent> SessionProposed;
+    public event EventHandler<SessionStruct> SessionConnected;
+    public event EventHandler<Exception> SessionConnectionErrored;
+    public event EventHandler<SessionUpdateEvent> SessionUpdated;
+    public event EventHandler<SessionEvent> SessionExtended;
+    public event EventHandler<SessionEvent> SessionPinged;
+    public event EventHandler<SessionEvent> SessionDeleted;
 
     public IDictionary<string, SessionStruct> ActiveSessions
     {
@@ -71,8 +78,22 @@ public class Web3WalletClient : IWeb3Wallet
         this.Context = $"{Name}-context";
         this.Core = core;
         
-        this.Events = new EventDelegator(this);
         this.Engine = new Web3WalletEngine(this);
+        
+        WrapEngineEvents();
+    }
+
+    private void WrapEngineEvents()
+    {
+        Engine.SessionExpired += (sender, @struct) => this.SessionExpired?.Invoke(sender, @struct);
+        Engine.SessionProposed += (sender, @event) => this.SessionProposed?.Invoke(sender, @event);
+        Engine.SessionConnected += (sender, @struct) => this.SessionConnected?.Invoke(sender, @struct);
+        Engine.SessionConnectionErrored +=
+            (sender, exception) => this.SessionConnectionErrored?.Invoke(sender, exception);
+        Engine.SessionUpdated += (sender, @event) => this.SessionUpdated?.Invoke(sender, @event);
+        Engine.SessionExtended += (sender, @event) => this.SessionExtended?.Invoke(sender, @event);
+        Engine.SessionPinged += (sender, @event) => this.SessionPinged?.Invoke(sender, @event);
+        Engine.SessionDeleted += (sender, @event) => this.SessionDeleted?.Invoke(sender, @event);
     }
     
     public Task Pair(string uri, bool activatePairing = false)
@@ -196,7 +217,6 @@ public class Web3WalletClient : IWeb3Wallet
 
     public void Dispose()
     {
-        Events?.Dispose();
         Core?.Dispose();
     }
 }

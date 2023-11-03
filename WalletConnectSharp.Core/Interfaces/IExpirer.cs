@@ -1,6 +1,5 @@
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Expirer;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
 {
@@ -8,8 +7,16 @@ namespace WalletConnectSharp.Core.Interfaces
     /// The interface for the Expirer module. The Expirer module keeps track of expiration dates and triggers an event when an expiration date
     /// has passed
     /// </summary>
-    public interface IExpirer : IModule, IEvents
+    public interface IExpirer : IModule
     {
+        event EventHandler<ExpirerEventArgs> Created;
+
+        event EventHandler<ExpirerEventArgs> Deleted;
+
+        event EventHandler<ExpirerEventArgs> Expired;
+
+        event EventHandler Sync;
+        
         /// <summary>
         /// The number of expirations this module is tracking
         /// </summary>

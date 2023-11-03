@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
 {
@@ -12,8 +9,13 @@ namespace WalletConnectSharp.Core.Interfaces
     /// of active and pending subscriptions. It will also resubscribe to topics if
     /// the backing Relayer connection disconnects
     /// </summary>
-    public interface ISubscriber : IEvents, IModule
-    {
+    public interface ISubscriber : IModule
+    { 
+        event EventHandler Sync;
+        event EventHandler Resubscribed;
+        event EventHandler<ActiveSubscription> Created;
+        event EventHandler<DeletedSubscription> Deleted; 
+        
         /// <summary>
         /// A dictionary of active subscriptions where the key is the id of the Subscription
         /// </summary>

@@ -1,7 +1,6 @@
 ﻿using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Interfaces
@@ -10,8 +9,10 @@ namespace WalletConnectSharp.Core.Interfaces
     /// An interface for a module that handles both typed message sending (requests, responses and errors) and handles
     /// typed message listening (requests and responses)
     /// </summary>
-    public interface ITypedMessageHandler : IModule, IEvents
+    public interface ITypedMessageHandler : IModule
     {
+        event EventHandler<DecodedMessageEvent> RawMessage;
+        
         /// <summary>
         /// The <see cref="IRelayer"/> this module is using to send / listen for messages
         /// </summary>

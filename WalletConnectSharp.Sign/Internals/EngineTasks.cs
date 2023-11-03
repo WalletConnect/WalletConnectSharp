@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -89,8 +90,13 @@ namespace WalletConnectSharp.Sign
 
         Task IEnginePrivate.Cleanup()
         {
-            List<string> sessionTopics = (from session in this.Client.Session.Values.Where(e => e.Expiry != null) where Clock.IsExpired(session.Expiry.Value) select session.Topic).ToList();
-            List<long> proposalIds = (from p in this.Client.Proposal.Values.Where(e => e.Expiry != null) where Clock.IsExpired(p.Expiry.Value) select p.Id).ToList();
+            List<string> sessionTopics = (from session in this.Client.Session.Values where session.Expiry != null && Clock.IsExpired(session.Expiry.Value) select session.Topic).ToList();
+            List<long> proposalIds = (from p in this.Client.Proposal.Values where p.Expiry != null && Clock.IsExpired(p.Expiry.Value) select p.Id).ToList();
+
+            if (sessionTopics.Count == 0 && proposalIds.Count == 0)
+                return Task.CompletedTask;
+            
+            WCLogger.Log($"Clearing {sessionTopics.Count} expired sessions and {proposalIds.Count} expired proposals");
 
             return Task.WhenAll(
                 sessionTopics.Select(t => PrivateThis.DeleteSession(t)).Concat(

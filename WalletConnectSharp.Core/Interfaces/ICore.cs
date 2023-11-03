@@ -1,9 +1,7 @@
-using System.Threading.Tasks;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto.Interfaces;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Storage.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
@@ -11,7 +9,7 @@ namespace WalletConnectSharp.Core.Interfaces
     /// <summary>
     /// Represents the Core module and all fields the Core module will have
     /// </summary>
-    public interface ICore : IModule, IEvents
+    public interface ICore : IModule
     {
         /// <summary>
         /// The Protocol string this Core module will use

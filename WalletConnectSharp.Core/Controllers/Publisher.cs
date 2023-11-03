@@ -1,10 +1,8 @@
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
-using WalletConnectSharp.Core.Models.Heartbeat;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Core.Models.Relay;
-using WalletConnectSharp.Events;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Controllers
@@ -14,11 +12,8 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Publisher : IPublisher
     {
-        /// <summary>
-        /// The EventDelegator this publisher module is using
-        /// </summary>
-        public EventDelegator Events { get; }
-        
+        public event EventHandler<PublishParams> OnPublishedMessage;
+
         /// <summary>
         /// The Relayer this publisher module uses to publish messages
         /// </summary>
@@ -56,14 +51,13 @@ namespace WalletConnectSharp.Core.Controllers
         public Publisher(IRelayer relayer)
         {
             Relayer = relayer;
-            Events = new EventDelegator(this);
             
             RegisterEventListeners();
         }
 
         private void RegisterEventListeners()
         {
-            Relayer.Core.HeartBeat.On<object>(HeartbeatEvents.Pulse, (_, __) => CheckQueue());
+            Relayer.Core.HeartBeat.OnPulse += (_, _) => CheckQueue();
         }
 
         private async void CheckQueue()
@@ -98,6 +92,7 @@ namespace WalletConnectSharp.Core.Controllers
                 var hash = HashUtils.HashMessage(@params.Message);
                 await RpcPublish(@params.Topic, @params.Message, @params.Options.TTL, @params.Options.Tag,
                     @params.Options.Relay);
+                this.OnPublishedMessage?.Invoke(this, @params);
                 OnPublish(hash);
             }
         }
@@ -178,20 +173,18 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 await RpcPublish(topic, message, @params.Options.TTL, @params.Options.Tag, @params.Options.Relay)
                     .WithTimeout(TimeSpan.FromSeconds(45));
-                this.Relayer.Events.Trigger(RelayerEvents.Publish, @params);
+                this.OnPublishedMessage?.Invoke(this, @params);
                 OnPublish(hash);
             }
             catch (Exception e)
             {
-                this.Relayer.Events.Trigger<object>(RelayerEvents.ConnectionStalled, new object());
+                this.Relayer.TriggerConnectionStalled();
                 return;
             }
         }
 
         public void Dispose()
         {
-            Events?.Dispose();
-            // Relayer?.Dispose();
         }
     }
 }

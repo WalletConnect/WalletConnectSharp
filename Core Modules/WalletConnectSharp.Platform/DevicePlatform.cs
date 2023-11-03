@@ -17,10 +17,11 @@ public static class DevicePlatform
             _backend = value ?? throw new InvalidOperationException("Backend platform must be non-null");
         }
     }
-    
+
+    public static (string name, string version) GetOsInfo() => Backend.GetOsInfo();
+
+    public static (string name, string version) GetSdkInfo() => Backend.GetSdkInfo();
+    public static IRelayUrlBuilder RelayUrlBuilder => Backend.RelayUrlBuilder;
     public static IConnectionBuilder ConnectionBuilder => Backend.ConnectionBuilder;
-    public static Task OpenUrl(string url)
-    {
-        return Backend.OpenUrl(url);
-    }
+    public static Task OpenUrl(string url) => Backend.OpenUrl(url);
 }

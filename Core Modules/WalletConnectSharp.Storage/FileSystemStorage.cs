@@ -110,8 +110,23 @@ namespace WalletConnectSharp.Storage
             await _semaphoreSlim.WaitAsync();
             var json = await File.ReadAllTextAsync(FilePath, Encoding.UTF8);
             _semaphoreSlim.Release();
-            Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
-                new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+
+            try
+            {
+                Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
+                    new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
+            }
+            catch (JsonSerializationException e)
+            {
+                // Move the file to a .unsupported file
+                // and start fresh
+                WCLogger.LogError(e);
+                WCLogger.LogError("Cannot load JSON file, moving data to .unsupported file to force continue");
+                if (File.Exists(FilePath + ".unsupported"))
+                    File.Move(FilePath + ".unsupported", FilePath + "." + Guid.NewGuid() + ".unsupported");
+                File.Move(FilePath, FilePath + ".unsupported");
+                Entries = new Dictionary<string, object>();
+            }
         }
     }
 }

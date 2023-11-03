@@ -1,10 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.History;
-using WalletConnectSharp.Events.Interfaces;
 using WalletConnectSharp.Network;
-using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Core.Interfaces
 {
@@ -14,8 +10,16 @@ namespace WalletConnectSharp.Core.Interfaces
     /// </summary>
     /// <typeparam name="T">The JSON RPC Request type</typeparam>
     /// <typeparam name="TR">The JSON RPC Response type</typeparam>
-    public interface IJsonRpcHistory<T, TR> : IModule, IEvents
+    public interface IJsonRpcHistory<T, TR> : IModule
     {
+        event EventHandler<JsonRpcRecord<T, TR>> Created;
+
+        event EventHandler<JsonRpcRecord<T, TR>> Updated;
+
+        event EventHandler<JsonRpcRecord<T, TR>> Deleted;
+
+        event EventHandler Sync;
+        
         /// <summary>
         /// A mapping of Json RPC Records to their corresponding Json RPC id
         /// </summary>

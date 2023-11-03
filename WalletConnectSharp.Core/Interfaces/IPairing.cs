@@ -1,14 +1,19 @@
 ﻿using WalletConnectSharp.Common;
 using WalletConnectSharp.Core.Models.Pairing;
-using WalletConnectSharp.Events.Interfaces;
 
 namespace WalletConnectSharp.Core.Interfaces
 {
     /// <summary>
     /// The interface for a module that handles pairing two peers and storing related data
     /// </summary>
-    public interface IPairing : IModule, IEvents
+    public interface IPairing : IModule
     {
+        event EventHandler<PairingEvent> PairingExpired;
+
+        event EventHandler<PairingEvent> PairingPinged;
+
+        event EventHandler<PairingEvent> PairingDeleted;
+        
         /// <summary>
         /// Get the <see cref="IStore{TKey,TValue}"/> module that is handling the storage of
         /// <see cref="PairingStruct"/> 

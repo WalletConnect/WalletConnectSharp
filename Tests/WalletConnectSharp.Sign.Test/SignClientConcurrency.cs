@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
-using WalletConnectSharp.Events;
-using WalletConnectSharp.Events.Model;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
@@ -93,7 +91,7 @@ namespace WalletConnectSharp.Sign.Test
             List<TestPairings> pairings = new List<TestPairings>();
 
             object messageLock = new object();
-            List<List<SessionEvent>> messagesReceived = new List<List<SessionEvent>>();
+            List<List<object>> messagesReceived = new List<List<object>>();
 
             CancellationTokenSource heartbeatToken = new CancellationTokenSource();
 
@@ -129,7 +127,7 @@ namespace WalletConnectSharp.Sign.Test
 
                 lock (messageLock)
                 {
-                    messagesReceived.Insert(clientIndex, new List<SessionEvent>());
+                    messagesReceived.Insert(clientIndex, new List<object>());
                 }
 
                 TaskCompletionSource<bool> task = new TaskCompletionSource<bool>();
@@ -166,38 +164,39 @@ namespace WalletConnectSharp.Sign.Test
 
                 foreach (var client in clientsArr)
                 {
-                    client.On<SessionEvent>(EngineEvents.SessionPing, (sender, @event) =>
+                    client.SessionPinged += (sender, @event) =>
                     {
-                        Assert.Equal(sessionA.Topic, @event.EventData.Topic);
+                        Assert.Equal(sessionA.Topic, @event.Topic);
                         lock (messageLock)
                         {
-                            messagesReceived[clientIndex].Add(@event.EventData);
+                            messagesReceived[clientIndex].Add(@event);
                         }
 
                         CheckAllMessagesProcessed();
-                    });
+                    };
 
-                    client.On<EmitEvent<string>>(EngineEvents.SessionEvent, (sender, @event) =>
+                    client.HandleEventMessageType<string>(async (s, args) =>
                     {
-                        Assert.Equal(testEventParams.Data, @event.EventData.Params.Event.Data);
-                        Assert.Equal(eventPayload.Topic, @event.EventData.Topic);
+                        Assert.Equal(testEventParams.Data, args.Params.Event.Data);
+                        Assert.Equal(eventPayload.Topic, args.Params.Topic);
                         lock (messageLock)
                         {
-                            messagesReceived[clientIndex].Add(@event.EventData);
+                            messagesReceived[clientIndex].Add(args.Params);
                         }
 
                         CheckAllMessagesProcessed();
-                    });
+                    }, null);
 
-                    client.On<SessionUpdateEvent>(EngineEvents.SessionUpdate, (sender, @event) =>
+                    client.SessionUpdateRequest += (sender, @event) =>
                     {
                         Assert.Equal(client.Session.Get(sessionA.Topic).Namespaces, namespacesAfter);
                         lock (messageLock)
                         {
-                            messagesReceived[clientIndex].Add(@event.EventData);
+                            messagesReceived[clientIndex].Add(@event);
                         }
+
                         CheckAllMessagesProcessed();
-                    });
+                    };
                 }
 
                 async void SendMessages()
@@ -291,11 +290,11 @@ namespace WalletConnectSharp.Sign.Test
                 var sessionA = data.sessionA;
 
                 TaskCompletionSource<bool> clientBDisconnected = new TaskCompletionSource<bool>();
-                clients.ClientB.On<SessionEvent>(EngineEvents.SessionDelete, (sender, @event) =>
+                clients.ClientB.SessionDeleted += (sender, @event) =>
                 {
-                    Assert.Equal(sessionA.Topic, @event.EventData.Topic);
+                    Assert.Equal(sessionA.Topic, @event.Topic);
                     clientBDisconnected.TrySetResult(true);
-                });
+                };
 
                 await Task.WhenAll(
                     clientBDisconnected.Task,
