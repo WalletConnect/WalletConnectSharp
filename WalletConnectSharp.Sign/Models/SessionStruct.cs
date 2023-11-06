@@ -92,9 +92,10 @@ namespace WalletConnectSharp.Sign.Models
                 throw new ArgumentException("SessionStruct.CurrentAddress: Session is undefined");
         
             var defaultNamespace = Namespaces[@namespace];
-            
+
             if (defaultNamespace.Accounts.Length == 0)
-                return null; //The namespace {@namespace} has no addresses connected")
+                throw new Exception(
+                    $"SessionStruct.CurrentAddress: Given namespace {@namespace} has no connected addresses");
 
             var fullAddress = defaultNamespace.Accounts[0];
             var addressParts = fullAddress.Split(":");
