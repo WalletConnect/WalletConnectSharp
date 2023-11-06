@@ -260,5 +260,68 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
             Func<string, JsonRpcResponse<bool>, Task> responseCallback);
+        
+        /// <summary>
+        /// Update the default session, adding/removing additional namespaces in the given topic. The default session
+        /// is grabbed from Client.AddressProvider.DefaultSession
+        /// </summary>
+        /// <param name="namespaces">The updated namespaces</param>
+        /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the updates</returns>
+        Task<IAcknowledgement> UpdateSession(Namespaces namespaces);
+
+        /// <summary>
+        /// Extend the default session. 
+        /// </summary>
+        /// <returns>A task that returns an interface that can be used to listen for acknowledgement of the extension</returns>
+        Task<IAcknowledgement> Extend();
+
+        /// <summary>
+        /// Send a request to the default session with the request data T. You may (optionally) specify
+        /// a chainId the request should be performed in. This function will await a response of type TR from the session.
+        ///
+        /// If no response is ever received, then a Timeout exception may be thrown.
+        ///
+        /// The type T MUST define the RpcMethodAttribute to tell the SDK what JSON RPC method to use for the given
+        /// type T.
+        /// Either type T or TR MUST define a RpcRequestOptions and RpcResponseOptions attribute to tell the SDK
+        /// what options to use for the Request / Response.
+        /// </summary>
+        /// <param name="data">The data of the request</param>
+        /// <param name="chainId">An (optional) chainId the request should be performed in</param>
+        /// <param name="expiry">An override to specify how long this request will live for. If null is given, then expiry will be taken from either T or TR attributed options</param>
+        /// <typeparam name="T">The type of the request data. MUST define the RpcMethodAttribute</typeparam>
+        /// <typeparam name="TR">The type of the response data.</typeparam>
+        /// <returns>The response data as type TR</returns>
+        Task<TR> Request<T, TR>(T data, string chainId = null, long? expiry = null);
+
+        /// <summary>
+        /// Send a response to a request to the default session with the response data TR. This function
+        /// can be called directly, however it may be easier to use <see cref="TypedEventHandler{T, TR}.OnResponse"/> event
+        /// to handle sending responses to specific requests. 
+        /// </summary>
+        /// <param name="response">The JSON RPC response to send</param>
+        /// <typeparam name="T">The type of the request data</typeparam>
+        /// <typeparam name="TR">The type of the response data</typeparam>
+        Task Respond<T, TR>(JsonRpcResponse<TR> response);
+
+        /// <summary>
+        /// Emit an event to the default session with the given <see cref="EventData{T}"/>. You may
+        /// optionally specify a chainId to specify where the event occured. 
+        /// </summary>
+        /// <param name="eventData">The event data for the event emitted</param>
+        /// <param name="chainId">An (optional) chainId to specify where the event occured</param>
+        /// <typeparam name="T">The type of the event data</typeparam>
+        Task Emit<T>(EventData<T> eventData, string chainId = null);
+
+        /// <summary>
+        /// Send a ping to the default session
+        /// </summary>
+        Task Ping();
+
+        /// <summary>
+        /// Disconnect the default session with an (optional) error reason
+        /// </summary>
+        /// <param name="reason">An (optional) error reason for the disconnect</param>
+        Task Disconnect(Error reason = null);
     }
 }

@@ -82,5 +82,51 @@ namespace WalletConnectSharp.Sign.Models
                 return Topic;
             }
         }
+        
+        public Caip25Address CurrentAddress(string @namespace)
+        {
+            // double check
+            if (@namespace == null)
+                throw new ArgumentException("SessionStruct.CurrentAddress: @namespace is null");
+            if (string.IsNullOrWhiteSpace(Topic))
+                throw new ArgumentException("SessionStruct.CurrentAddress: Session is undefined");
+        
+            var defaultNamespace = Namespaces[@namespace];
+
+            if (defaultNamespace.Accounts.Length == 0)
+                throw new Exception(
+                    $"SessionStruct.CurrentAddress: Given namespace {@namespace} has no connected addresses");
+
+            var fullAddress = defaultNamespace.Accounts[0];
+            var addressParts = fullAddress.Split(":");
+
+            var address = addressParts[2];
+            var chainId = string.Join(':', addressParts.Take(2));
+
+            return new Caip25Address()
+            {
+                Address = address,
+                ChainId = chainId,
+            };
+        }
+        
+        public Caip25Address[] AllAddresses(string @namespace)
+        {
+            // double check
+            if (@namespace == null)
+                throw new ArgumentException("SessionStruct.AllAddresses: @namespace is null");
+            if (string.IsNullOrWhiteSpace(Topic))
+                throw new ArgumentException("SessionStruct.AllAddresses: Session is undefined");
+        
+            var defaultNamespace = Namespaces[@namespace];
+
+            if (defaultNamespace.Accounts.Length == 0)
+                return null; //The namespace {@namespace} has no addresses connected")
+
+            return defaultNamespace.Accounts.Select(addr => new Caip25Address()
+            {
+                Address = addr.Split(":")[2], ChainId = string.Join(":", addr.Split(":").Take(2))
+            }).ToArray();
+        }
     }
 }

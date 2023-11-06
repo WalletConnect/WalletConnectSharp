@@ -160,7 +160,8 @@ namespace WalletConnectSharp.Sign
                     {
                         PublicKey = controller.PublicKey,
                         Metadata = controller.Metadata
-                    }
+                    },
+                    RequiredNamespaces = Client.Proposal.Values.FirstOrDefault(p => p.PairingTopic == pairingTopic).RequiredNamespaces,
                 };
                 await MessageHandler.SendResult<SessionSettle, bool>(payload.Id, topic, true);
                 this.SessionConnected?.Invoke(this, session);

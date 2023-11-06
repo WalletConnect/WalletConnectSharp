@@ -17,6 +17,12 @@ namespace WalletConnectSharp.Sign.Interfaces
         Metadata Metadata { get; }
         
         /// <summary>
+        /// The module that holds the logic for handling the default session & chain, and for fetching the current address
+        /// for any session or the default session. 
+        /// </summary>
+        IAddressProvider AddressProvider { get; }
+        
+        /// <summary>
         /// The <see cref="ICore"/> module this Sign Client is using
         /// </summary>
         ICore Core { get; }

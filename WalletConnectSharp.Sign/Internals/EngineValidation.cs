@@ -117,7 +117,7 @@ namespace WalletConnectSharp.Sign
             var controller = settle.Controller;
             var namespaces = settle.Namespaces;
             var expiry = settle.Expiry;
-            if (relay.Protocol != null && string.IsNullOrWhiteSpace(relay.Protocol))
+            if (relay != null && string.IsNullOrWhiteSpace(relay.Protocol))
             {
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
                     $"OnSessionSettleRequest() relay protocol should be a string");

@@ -12,6 +12,22 @@ namespace WalletConnectSharp.Sign.Models
     /// </summary>
     public class RequiredNamespaces : Dictionary<string, ProposedNamespace>, IEquatable<RequiredNamespaces>
     {
+        private List<string> _orderedKeys = new();
+
+        public List<string> OrderedKeys => _orderedKeys;
+        
+        public new void Add(string key, ProposedNamespace value)
+        {
+            base.Add(key, value);
+            _orderedKeys.Add(key);
+        }
+
+        public new void Remove(string key)
+        {
+            base.Remove(key);
+            _orderedKeys.Remove(key);
+        }
+        
         public bool Equals(RequiredNamespaces other)
         {
             return new DictionaryComparer<string, ProposedNamespace>(ProposedNamespace.RequiredNamespaceComparer).Equals(this, other);

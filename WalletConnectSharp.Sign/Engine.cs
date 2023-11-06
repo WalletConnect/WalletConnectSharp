@@ -245,6 +245,43 @@ namespace WalletConnectSharp.Sign
             Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
         }
 
+        public Task<IAcknowledgement> UpdateSession(Namespaces namespaces)
+        {
+            return UpdateSession(Client.AddressProvider.DefaultSession.Topic, namespaces);
+        }
+
+        public Task<IAcknowledgement> Extend()
+        {
+            return Extend(Client.AddressProvider.DefaultSession.Topic);
+        }
+
+        public Task<TR> Request<T, TR>(T data, string chainId = null, long? expiry = null)
+        {
+            return Request<T, TR>(Client.AddressProvider.DefaultSession.Topic, data,
+                chainId ?? Client.AddressProvider.DefaultChain, expiry);
+        }
+
+        public Task Respond<T, TR>(JsonRpcResponse<TR> response)
+        {
+            return Respond<T, TR>(Client.AddressProvider.DefaultSession.Topic, response);
+        }
+
+        public Task Emit<T>(EventData<T> eventData, string chainId = null)
+        {
+            return Emit<T>(Client.AddressProvider.DefaultSession.Topic, eventData,
+                chainId ?? Client.AddressProvider.DefaultChain);
+        }
+
+        public Task Ping()
+        {
+            return Ping(Client.AddressProvider.DefaultSession.Topic);
+        }
+
+        public Task Disconnect(Error reason = null)
+        {
+            return Disconnect(Client.AddressProvider.DefaultSession.Topic, reason);
+        }
+
         /// <summary>
         /// Parse a session proposal URI and return all information in the URI in a
         /// new <see cref="UriParameters"/> object
@@ -658,7 +695,7 @@ namespace WalletConnectSharp.Sign
             if (string.IsNullOrWhiteSpace(chainId))
             {
                 var sessionData = Client.Session.Get(topic);
-                var firstRequiredNamespace = sessionData.RequiredNamespaces.Keys.ToArray()[0];
+                var firstRequiredNamespace = sessionData.RequiredNamespaces.OrderedKeys[0];
                 defaultChainId = sessionData.RequiredNamespaces[firstRequiredNamespace].Chains[0];
             }
             else

@@ -57,7 +57,9 @@ namespace WalletConnectSharp.Sign
         /// The Metadata for this instance of the Sign Client module
         /// </summary>
         public Metadata Metadata { get; }
-        
+
+        public IAddressProvider AddressProvider { get; }
+
         /// <summary>
         /// The <see cref="ICore"/> module this Sign Client module is using
         /// </summary>
@@ -201,6 +203,7 @@ namespace WalletConnectSharp.Sign
             Session = new Session(Core);
             Proposal = new Proposal(Core);
             Engine = new Engine(this);
+            AddressProvider = new AddressProvider(this);
             
             SetupEvents();
         }
@@ -434,6 +437,41 @@ namespace WalletConnectSharp.Sign
         public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
             this.Engine.HandleEventMessageType<T>(requestCallback, responseCallback);
+        }
+
+        public Task<IAcknowledgement> UpdateSession(Namespaces namespaces)
+        {
+            return this.Engine.UpdateSession(namespaces);
+        }
+
+        public Task<IAcknowledgement> Extend()
+        {
+            return this.Engine.Extend();
+        }
+
+        public Task<TR> Request<T, TR>(T data, string chainId = null, long? expiry = null)
+        {
+            return this.Engine.Request<T, TR>(data, chainId, expiry);
+        }
+
+        public Task Respond<T, TR>(JsonRpcResponse<TR> response)
+        {
+            return this.Engine.Respond<T, TR>(response);
+        }
+
+        public Task Emit<T>(EventData<T> eventData, string chainId = null)
+        {
+            return this.Engine.Emit<T>(eventData, chainId);
+        }
+
+        public Task Ping()
+        {
+            return this.Engine.Ping();
+        }
+
+        public Task Disconnect(Error reason = null)
+        {
+            return this.Engine.Disconnect(reason);
         }
 
         private async Task Initialize()
