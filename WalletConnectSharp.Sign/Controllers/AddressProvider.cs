@@ -123,28 +123,7 @@ public class AddressProvider : IAddressProvider
         if (string.IsNullOrWhiteSpace(session.Topic)) // default
             session = DefaultSession;
 
-        // double check
-        if (@namespace == null)
-            throw new ArgumentException("CurrentAddress: @namespace is null");
-        if (string.IsNullOrWhiteSpace(session.Topic))
-            throw new ArgumentException("CurrentAddress: Session is undefined");
-        
-        var defaultNamespace = session.Namespaces[@namespace];
-
-        if (defaultNamespace.Accounts.Length == 0)
-            return null; //The namespace {@namespace} has no addresses connected")
-
-        var fullAddress = defaultNamespace.Accounts[0];
-        var addressParts = fullAddress.Split(":");
-
-        var address = addressParts[2];
-        var chainId = string.Join(':', addressParts.Take(2));
-
-        return new Caip25Address()
-        {
-            Address = address,
-            ChainId = chainId,
-        };
+        return session.CurrentAddress(@namespace);
     }
 
     public Caip25Address[] AllAddresses(string @namespace = null, SessionStruct session = default)
@@ -153,21 +132,7 @@ public class AddressProvider : IAddressProvider
         if (string.IsNullOrWhiteSpace(session.Topic)) // default
             session = DefaultSession;
 
-        // double check
-        if (@namespace == null)
-            throw new ArgumentException("CurrentAddress: @namespace is null");
-        if (string.IsNullOrWhiteSpace(session.Topic))
-            throw new ArgumentException("CurrentAddress: Session is undefined");
-        
-        var defaultNamespace = session.Namespaces[@namespace];
-
-        if (defaultNamespace.Accounts.Length == 0)
-            return null; //The namespace {@namespace} has no addresses connected")
-
-        return defaultNamespace.Accounts.Select(addr => new Caip25Address()
-        {
-            Address = addr.Split(":")[2], ChainId = string.Join(":", addr.Split(":").Take(2))
-        }).ToArray();
+        return session.AllAddresses(@namespace);
     }
 
     public void Dispose()
