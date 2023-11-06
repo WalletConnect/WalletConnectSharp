@@ -473,7 +473,7 @@ namespace WalletConnectSharp.Core.Controllers
                 while (Connecting)
                 {
                     WCLogger.Log("[Relayer] Waiting for connection to open");
-                    await Task.Delay(2);
+                    await Task.Delay(TimeSpan.FromSeconds(1));
                 }
 
                 if (!Connected && !Connecting)
