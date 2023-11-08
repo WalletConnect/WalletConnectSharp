@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using WalletConnectSharp.Common.Events;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
@@ -18,10 +19,12 @@ namespace WalletConnectSharp.Core.Controllers
     /// </summary>
     public class Pairing : IPairing
     {
+        protected bool Disposed;
+
         private const int KeyLength = 32;
         private bool _initialized;
         private HashSet<string> _registeredMethods = new HashSet<string>();
-        
+
         /// <summary>
         /// The name for this module instance
         /// </summary>
@@ -55,7 +58,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <see cref="PairingStruct"/> 
         /// </summary>
         public IPairingStore Store { get; }
-        
+
         /// <summary>
         /// Get all active and inactive pairings
         /// </summary>
@@ -136,23 +139,17 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 throw new ArgumentException($"Topic {topic} already has keychain");
             }
-            
+
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
             var pairing = new PairingStruct()
             {
-                Topic = topic,
-                Relay = relay,
-                Expiry = expiry,
-                Active = false,
+                Topic = topic, Relay = relay, Expiry = expiry, Active = false,
             };
-            
+
             await this.Store.Set(topic, pairing);
             await this.Core.Crypto.SetSymKey(symKey, topic);
-            await this.Core.Relayer.Subscribe(topic, new SubscribeOptions()
-            {
-                Relay = relay
-            });
-            
+            await this.Core.Relayer.Subscribe(topic, new SubscribeOptions() { Relay = relay });
+
             this.Core.Expirer.Set(topic, expiry);
 
             if (activatePairing)
@@ -173,7 +170,9 @@ namespace WalletConnectSharp.Core.Controllers
         public UriParameters ParseUri(string uri)
         {
             var pathStart = uri.IndexOf(":", StringComparison.Ordinal);
-            int? pathEnd = uri.IndexOf("?", StringComparison.Ordinal) != -1 ? uri.IndexOf("?", StringComparison.Ordinal) : (int?)null;
+            int? pathEnd = uri.IndexOf("?", StringComparison.Ordinal) != -1
+                ? uri.IndexOf("?", StringComparison.Ordinal)
+                : (int?)null;
             var protocol = uri.Substring(0, pathStart);
 
             string path;
@@ -213,16 +212,10 @@ namespace WalletConnectSharp.Core.Controllers
             var symKey = symKeyRaw.ToHex();
             var topic = await this.Core.Crypto.SetSymKey(symKey);
             var expiry = Clock.CalculateExpiry(Clock.FIVE_MINUTES);
-            var relay = new ProtocolOptions()
-            {
-                Protocol = RelayProtocols.Default
-            };
+            var relay = new ProtocolOptions() { Protocol = RelayProtocols.Default };
             var pairing = new PairingStruct()
             {
-                Topic = topic,
-                Expiry = expiry,
-                Relay = relay,
-                Active = false,
+                Topic = topic, Expiry = expiry, Relay = relay, Active = false,
             };
             var uri = $"{ICore.Protocol}:{topic}@{ICore.Version}?"
                 .AddQueryParam("symKey", symKey)
@@ -235,11 +228,7 @@ namespace WalletConnectSharp.Core.Controllers
             await this.Core.Relayer.Subscribe(topic);
             this.Core.Expirer.Set(topic, expiry);
 
-            return new CreatePairingData()
-            {
-                Topic = topic,
-                Uri = uri
-            };
+            return new CreatePairingData() { Topic = topic, Uri = uri };
         }
 
         /// <summary>
@@ -275,7 +264,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Task UpdateExpiry(string topic, long expiration)
         {
             IsInitialized();
-            return this.Store.Update(topic, new PairingStruct() {Expiry = expiration});
+            return this.Store.Update(topic, new PairingStruct() { Expiry = expiration });
         }
 
         /// <summary>
@@ -286,7 +275,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Task UpdateMetadata(string topic, Metadata metadata)
         {
             IsInitialized();
-            return this.Store.Update(topic, new PairingStruct() {PeerMetadata = metadata});
+            return this.Store.Update(topic, new PairingStruct() { PeerMetadata = metadata });
         }
 
         /// <summary>
@@ -309,7 +298,7 @@ namespace WalletConnectSharp.Core.Controllers
                     else
                         done.SetResult(args.Result);
                 });
-                
+
                 await done.Task;
             }
         }
@@ -327,7 +316,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 var error = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
                 await Core.MessageHandler.SendRequest<PairingDelete, bool>(topic,
-                    new PairingDelete() {Code = error.Code, Message = error.Message});
+                    new PairingDelete() { Code = error.Code, Message = error.Message });
                 await DeletePairing(topic);
             }
         }
@@ -335,24 +324,22 @@ namespace WalletConnectSharp.Core.Controllers
         private async Task ActivatePairing(string topic)
         {
             var expiry = Clock.CalculateExpiry(Clock.THIRTY_DAYS);
-            await this.Store.Update(topic, new PairingStruct()
-            {
-                Active = true,
-                Expiry = expiry
-            });
+            await this.Store.Update(topic, new PairingStruct() { Active = true, Expiry = expiry });
 
             this.Core.Expirer.Set(topic, expiry);
         }
-        
+
         private async Task DeletePairing(string topic)
         {
             bool expirerHasDeleted = !this.Core.Expirer.Has(topic);
             bool pairingHasDeleted = !this.Store.Keys.Contains(topic);
             bool symKeyHasDeleted = !(await this.Core.Crypto.HasKeys(topic));
-            
+
             await this.Core.Relayer.Unsubscribe(topic);
             await Task.WhenAll(
-                pairingHasDeleted ? Task.CompletedTask : this.Store.Delete(topic, Error.FromErrorType(ErrorType.USER_DISCONNECTED)),
+                pairingHasDeleted
+                    ? Task.CompletedTask
+                    : this.Store.Delete(topic, Error.FromErrorType(ErrorType.USER_DISCONNECTED)),
                 symKeyHasDeleted ? Task.CompletedTask : this.Core.Crypto.DeleteSymKey(topic),
                 expirerHasDeleted ? Task.CompletedTask : this.Core.Expirer.Delete(topic)
             );
@@ -360,13 +347,15 @@ namespace WalletConnectSharp.Core.Controllers
 
         private Task Cleanup()
         {
-            List<string> pairingTopics = (from pair in this.Store.Values.Where(e => e.Expiry != null) where Clock.IsExpired(pair.Expiry.Value) select pair.Topic).ToList();
-            
+            List<string> pairingTopics = (from pair in this.Store.Values.Where(e => e.Expiry != null)
+                where Clock.IsExpired(pair.Expiry.Value)
+                select pair.Topic).ToList();
+
             return Task.WhenAll(
                 pairingTopics.Select(DeletePairing)
             );
         }
-        
+
         private async Task IsValidPairingTopic(string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
@@ -384,11 +373,11 @@ namespace WalletConnectSharp.Core.Controllers
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"pairing topic: {topic}");
             }
         }
-        
+
         private bool IsValidUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url)) return false;
-            
+
             try
             {
                 new Uri(url);
@@ -399,14 +388,14 @@ namespace WalletConnectSharp.Core.Controllers
                 return false;
             }
         }
-        
+
         private Task IsValidPair(string uri)
         {
             if (!IsValidUrl(uri))
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"pair() uri: {uri}");
             return Task.CompletedTask;
         }
-        
+
         private void IsInitialized()
         {
             if (!_initialized)
@@ -414,7 +403,7 @@ namespace WalletConnectSharp.Core.Controllers
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, this.Name);
             }
         }
-        
+
         private async Task OnPairingPingRequest(string topic, JsonRpcRequest<PairingPing> payload)
         {
             var id = payload.Id;
@@ -423,11 +412,7 @@ namespace WalletConnectSharp.Core.Controllers
                 await IsValidPairingTopic(topic);
 
                 await Core.MessageHandler.SendResult<PairingPing, bool>(id, topic, true);
-                this.PairingPinged?.Invoke(this, new PairingEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
+                this.PairingPinged?.Invoke(this, new PairingEvent() { Topic = topic, Id = id });
             }
             catch (WalletConnectException e)
             {
@@ -438,20 +423,16 @@ namespace WalletConnectSharp.Core.Controllers
         private async Task OnPairingPingResponse(string topic, JsonRpcResponse<bool> payload)
         {
             var id = payload.Id;
-            
+
             // put at the end of the stack to avoid a race condition
             // where session_ping listener is not yet initialized
             await Task.Delay(500);
 
-            this.PairingPinged?.Invoke(this, new PairingEvent()
-            {
-                Id = id,
-                Topic = topic
-            });
+            this.PairingPinged?.Invoke(this, new PairingEvent() { Id = id, Topic = topic });
 
             PairingPingResponseEvents[$"pairing_ping{id}"](this, payload);
         }
-        
+
         private async Task OnPairingDeleteRequest(string topic, JsonRpcRequest<PairingDelete> payload)
         {
             var id = payload.Id;
@@ -461,18 +442,14 @@ namespace WalletConnectSharp.Core.Controllers
 
                 await Core.MessageHandler.SendResult<PairingDelete, bool>(id, topic, true);
                 await DeletePairing(topic);
-                this.PairingDeleted?.Invoke(this, new PairingEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
+                this.PairingDeleted?.Invoke(this, new PairingEvent() { Topic = topic, Id = id });
             }
             catch (WalletConnectException e)
             {
                 await Core.MessageHandler.SendError<PairingDelete, bool>(id, topic, Error.FromException(e));
             }
         }
-        
+
         private async Task IsValidDisconnect(string topic, Error reason)
         {
             if (string.IsNullOrWhiteSpace(topic))
@@ -482,9 +459,10 @@ namespace WalletConnectSharp.Core.Controllers
 
             await IsValidPairingTopic(topic);
         }
-        
+
         private async void ExpiredCallback(object sender, ExpirerEventArgs e)
         {
+            WCLogger.Log($"Expired topic {e.Target}");
             var target = new ExpirerTarget(e.Target);
 
             if (string.IsNullOrWhiteSpace(target.Topic)) return;
@@ -493,16 +471,26 @@ namespace WalletConnectSharp.Core.Controllers
             if (this.Store.Keys.Contains(topic))
             {
                 await DeletePairing(topic);
-                this.PairingExpired?.Invoke(this, new PairingEvent()
-                {
-                    Topic = topic,
-                });
+                this.PairingExpired?.Invoke(this, new PairingEvent() { Topic = topic, });
             }
         }
 
         public void Dispose()
         {
-            Store?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                Store?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }

@@ -30,7 +30,7 @@ namespace WalletConnectSharp.Crypto
     public class Crypto : ICrypto
     {
         private readonly string CRYPTO_CLIENT_SEED = $"client_ed25519_seed";
-        
+
         private const string MULTICODEC_ED25519_ENCODING = "base58btc";
         private const string MULTICODEC_ED25519_BASE = "z";
         private const string MULTICODEC_ED25519_HEADER = "K36";
@@ -48,7 +48,7 @@ namespace WalletConnectSharp.Crypto
         private const int TYPE_LENGTH = 1;
         private const int IV_LENGTH = 12;
         private const int KEY_LENGTH = 32;
-        
+
         /// <summary>
         /// The name of the crypto module
         /// </summary>
@@ -71,12 +71,12 @@ namespace WalletConnectSharp.Crypto
                 return "walletconnectsharp";
             }
         }
-        
+
         /// <summary>
         /// The current KeyChain this crypto module instance is using
         /// </summary>
         public IKeyChain KeyChain { get; private set; }
-        
+
         /// <summary>
         /// The current storage module this crypto module instance is using
         /// </summary>
@@ -84,6 +84,7 @@ namespace WalletConnectSharp.Crypto
 
         private bool _initialized;
         private bool _newStorage;
+        protected bool Disposed;
 
         /// <summary>
         /// Create a new instance of the crypto module, with a given storage module.
@@ -97,7 +98,7 @@ namespace WalletConnectSharp.Crypto
             this.KeyChain = new KeyChain(storage);
             this.Storage = storage;
         }
-        
+
         /// <summary>
         /// Create a new instance of the crypto module, with a given keychain.
         /// </summary>
@@ -128,7 +129,7 @@ namespace WalletConnectSharp.Crypto
             {
                 if (_newStorage)
                     await this.Storage.Init();
-                
+
                 await this.KeyChain.Init();
                 this._initialized = true;
             }
@@ -159,7 +160,7 @@ namespace WalletConnectSharp.Crypto
             var options = new KeyGenerationParameters(SecureRandom.GetInstance("SHA256PRNG"), 1);
             X25519KeyPairGenerator generator = new X25519KeyPairGenerator();
             generator.Init(options);
-            
+
             var keypair = generator.GenerateKeyPair();
             var publicKeyData = keypair.Public as X25519PublicKeyParameters;
             var privateKeyData = keypair.Private as X25519PrivateKeyParameters;
@@ -281,7 +282,7 @@ namespace WalletConnectSharp.Crypto
 
             var typeRaw = Bases.Base10.Decode($"{@params.Type}");
             var iv = @params.Iv;
-            
+
             byte[] rawIv;
             if (iv == null)
             {
@@ -308,7 +309,7 @@ namespace WalletConnectSharp.Crypto
             {
                 byte[] temp = new byte[encoded.Length * 3];
                 int len = aead.ProcessBytes(encoded, 0, encoded.Length, temp, 0);
-                
+
                 if (len > 0)
                 {
                     encryptedStream.Write(temp, 0, len);
@@ -327,7 +328,7 @@ namespace WalletConnectSharp.Crypto
             {
                 if (senderPublicKey == null)
                     throw new ArgumentException("Missing sender public key for type1 envelope");
-                
+
                 return Task.FromResult(Convert.ToBase64String(
                     typeRaw.Concat(senderPublicKey).Concat(rawIv).Concat(encrypted).ToArray()
                 ));
@@ -380,10 +381,7 @@ namespace WalletConnectSharp.Crypto
             var message = JsonConvert.SerializeObject(payload);
             var results = await Encrypt(new EncryptParams()
             {
-                Message = message,
-                Type = type,
-                SenderPublicKey = senderPublicKey,
-                SymKey = symKey
+                Message = message, Type = type, SenderPublicKey = senderPublicKey, SymKey = symKey
             });
 
             return results;
@@ -398,7 +396,8 @@ namespace WalletConnectSharp.Crypto
         /// <param name="options">(optional) Decoding options</param>
         /// <typeparam name="T">The type of the IJsonRpcPayload to convert the encoded Json to</typeparam>
         /// <returns>The decoded, decrypted and deserialized object of type T from an async task</returns>
-        public async Task<T> Decode<T>(string topic, string encoded, DecodeOptions options = null) where T : IJsonRpcPayload
+        public async Task<T> Decode<T>(string topic, string encoded, DecodeOptions options = null)
+            where T : IJsonRpcPayload
         {
             this.IsInitialized();
             var @params = ValidateDecoding(encoded, options);
@@ -430,7 +429,8 @@ namespace WalletConnectSharp.Crypto
                 var slice3 = slice2 + IV_LENGTH;
                 var senderPublicKey = new ArraySegment<byte>(bytes, slice1, KEY_LENGTH);
                 var iv = new ArraySegment<byte>(bytes, slice2, IV_LENGTH);
-                var @sealed = new ArraySegment<byte>(bytes, slice3, bytes.Length - (TYPE_LENGTH + KEY_LENGTH + IV_LENGTH));
+                var @sealed =
+                    new ArraySegment<byte>(bytes, slice3, bytes.Length - (TYPE_LENGTH + KEY_LENGTH + IV_LENGTH));
 
                 return new EncodingParams()
                 {
@@ -446,12 +446,7 @@ namespace WalletConnectSharp.Crypto
                 var iv = new ArraySegment<byte>(bytes, slice1, IV_LENGTH);
                 var @sealed = new ArraySegment<byte>(bytes, slice2, bytes.Length - (IV_LENGTH + TYPE_LENGTH));
 
-                return new EncodingParams()
-                {
-                    Type = typeRaw,
-                    Sealed = @sealed.ToArray(),
-                    Iv = iv.ToArray()
-                };
+                return new EncodingParams() { Type = typeRaw, Sealed = @sealed.ToArray(), Iv = iv.ToArray() };
             }
         }
 
@@ -493,12 +488,7 @@ namespace WalletConnectSharp.Crypto
             signer.BlockUpdate(data, 0, data.Length);
 
             var signature = signer.GenerateSignature();
-            return EncodeJwt(new IridiumJWTSigned()
-            {
-                Header = header,
-                Payload = payload,
-                Signature = signature
-            });
+            return EncodeJwt(new IridiumJWTSigned() { Header = header, Payload = payload, Signature = signature });
         }
 
         /// <summary>
@@ -516,8 +506,8 @@ namespace WalletConnectSharp.Crypto
 
         private string EncodeJwt(IridiumJWTSigned data)
         {
-            return string.Join(JWT_DELIMITER, 
-                EncodeJson(data.Header), 
+            return string.Join(JWT_DELIMITER,
+                EncodeJson(data.Header),
                 EncodeJson(data.Payload),
                 EncodeSig(data.Signature)
             );
@@ -549,7 +539,7 @@ namespace WalletConnectSharp.Crypto
         private Ed25519PrivateKeyParameters KeypairFromSeed(byte[] seed)
         {
             return new Ed25519PrivateKeyParameters(seed);
-            
+
             /*var options = new KeyCreationParameters()
             {
                 ExportPolicy = KeyExportPolicies.AllowPlaintextExport
@@ -578,10 +568,8 @@ namespace WalletConnectSharp.Crypto
         {
             if (!this._initialized)
             {
-                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, new Dictionary<string, object>()
-                {
-                    { "Name", Name }
-                });
+                throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED,
+                    new Dictionary<string, object>() { { "Name", Name } });
             }
         }
 
@@ -616,7 +604,7 @@ namespace WalletConnectSharp.Crypto
             {
                 var keyB = PublicKey.Import(KeyAgreementAlgorithm.X25519, publicKeyB.HexToByteArray(),
                     KeyBlobFormat.RawPublicKey);
-                
+
                 var options = new SharedSecretCreationParameters
                 {
                     ExportPolicy = KeyExportPolicies.AllowPlaintextArchiving
@@ -632,7 +620,7 @@ namespace WalletConnectSharp.Crypto
             generator.Init(new HkdfParameters(secretKey, Array.Empty<byte>(), Array.Empty<byte>()));
 
             byte[] key = new byte[32];
-            generator.GenerateBytes(key, 0,32);
+            generator.GenerateBytes(key, 0, 32);
 
             return key;
         }
@@ -644,14 +632,14 @@ namespace WalletConnectSharp.Crypto
             var iv = param.Iv;
             var type = int.Parse(Bases.Base10.Encode(param.Type));
             var isType1 = type == TYPE_1;
-            
+
             var aead = new ChaCha20Poly1305();
             aead.Init(false, new ParametersWithIV(new KeyParameter(symKey.HexToByteArray()), iv));
 
             using MemoryStream rawDecrypted = new MemoryStream();
             byte[] temp = new byte[@sealed.Length];
             int len = aead.ProcessBytes(@sealed, 0, @sealed.Length, temp, 0);
-            
+
             if (len > 0)
             {
                 rawDecrypted.Write(temp, 0, len);
@@ -663,7 +651,7 @@ namespace WalletConnectSharp.Crypto
             {
                 rawDecrypted.Write(temp, 0, len);
             }
-                
+
             return Encoding.UTF8.GetString(rawDecrypted.ToArray());
         }
 
@@ -687,7 +675,21 @@ namespace WalletConnectSharp.Crypto
 
         public void Dispose()
         {
-            KeyChain?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed)
+                return;
+
+            if (disposing)
+            {
+                KeyChain?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }

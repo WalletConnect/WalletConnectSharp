@@ -9,7 +9,7 @@ namespace WalletConnectSharp.Core.Interfaces
     public interface IHeartBeat : IModule
     {
         event EventHandler OnPulse;
-        
+
         /// <summary>
         /// The interval (in milliseconds) the Pulse event gets emitted/triggered
         /// </summary>
@@ -21,6 +21,6 @@ namespace WalletConnectSharp.Core.Interfaces
         /// HeartBeatCancellationToken is cancelled, then the interval will be halted.
         /// </summary>
         /// <returns></returns>
-        public Task Init();
+        public Task InitAsync(CancellationToken cancellationToken = default);
     }
 }

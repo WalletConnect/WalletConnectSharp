@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common.Logging;
 
@@ -19,8 +14,9 @@ namespace WalletConnectSharp.Storage
         /// The file path to store the JSON file
         /// </summary>
         public string FilePath { get; private set; }
-        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
-        
+
+        private readonly SemaphoreSlim _semaphoreSlim = new(1);
+
         /// <summary>
         /// A new FileSystemStorage module that reads/writes all storage
         /// values from storage
@@ -30,7 +26,7 @@ namespace WalletConnectSharp.Storage
         {
             if (filePath == null)
             {
-                var home = 
+                var home =
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 filePath = Path.Combine(home, ".wc", "store.json");
             }
@@ -62,7 +58,7 @@ namespace WalletConnectSharp.Storage
             await base.SetItem<T>(key, value);
             await Save();
         }
-        
+
         /// <summary>
         /// The RemoveItem function deletes the value stored based off of the specified key.
         /// Will also update the JSON file
@@ -73,7 +69,7 @@ namespace WalletConnectSharp.Storage
             await base.RemoveItem(key);
             await Save();
         }
-        
+
         /// <summary>
         /// Clear all entries in this storage. WARNING: This will delete all data!
         /// This will also update the JSON file
@@ -91,12 +87,10 @@ namespace WalletConnectSharp.Storage
             {
                 Directory.CreateDirectory(path);
             }
-            
-            var json = JsonConvert.SerializeObject(Entries, new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.All
-            });
-            
+
+            var json = JsonConvert.SerializeObject(Entries,
+                new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+
             await _semaphoreSlim.WaitAsync();
             await File.WriteAllTextAsync(FilePath, json, Encoding.UTF8);
             _semaphoreSlim.Release();
@@ -114,7 +108,7 @@ namespace WalletConnectSharp.Storage
             try
             {
                 Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
-                    new JsonSerializerSettings() {TypeNameHandling = TypeNameHandling.Auto});
+                    new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
             }
             catch (JsonSerializationException e)
             {
@@ -127,6 +121,18 @@ namespace WalletConnectSharp.Storage
                 File.Move(FilePath, FilePath + ".unsupported");
                 Entries = new Dictionary<string, object>();
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                _semaphoreSlim.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }

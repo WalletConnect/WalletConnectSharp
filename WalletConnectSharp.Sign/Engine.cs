@@ -24,12 +24,14 @@ namespace WalletConnectSharp.Sign
     /// </summary>
     public partial class Engine : IEnginePrivate, IEngine, IModule
     {
+        protected bool Disposed;
+
         private const long ProposalExpiry = Clock.THIRTY_DAYS;
         private const long SessionExpiry = Clock.SEVEN_DAYS;
         private const int KeyLength = 32;
 
         private bool _initialized = false;
-        
+
         /// <summary>
         /// The <see cref="ISignClient"/> using this Engine
         /// </summary>
@@ -80,7 +82,7 @@ namespace WalletConnectSharp.Sign
             if (!this._initialized)
             {
                 SetupEvents();
-                
+
                 await PrivateThis.Cleanup();
                 this.RegisterRelayerEvents();
                 this.RegisterExpirerEvents();
@@ -108,100 +110,105 @@ namespace WalletConnectSharp.Sign
         private void RegisterRelayerEvents()
         {
             // Register all Request Types
-            MessageHandler.HandleMessageType<SessionPropose, SessionProposeResponse>(PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse);
-            MessageHandler.HandleMessageType<SessionSettle, bool>(PrivateThis.OnSessionSettleRequest, PrivateThis.OnSessionSettleResponse);
-            MessageHandler.HandleMessageType<SessionUpdate, bool>(PrivateThis.OnSessionUpdateRequest, PrivateThis.OnSessionUpdateResponse);
-            MessageHandler.HandleMessageType<SessionExtend, bool>(PrivateThis.OnSessionExtendRequest, PrivateThis.OnSessionExtendResponse);
+            MessageHandler.HandleMessageType<SessionPropose, SessionProposeResponse>(
+                PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse);
+            MessageHandler.HandleMessageType<SessionSettle, bool>(PrivateThis.OnSessionSettleRequest,
+                PrivateThis.OnSessionSettleResponse);
+            MessageHandler.HandleMessageType<SessionUpdate, bool>(PrivateThis.OnSessionUpdateRequest,
+                PrivateThis.OnSessionUpdateResponse);
+            MessageHandler.HandleMessageType<SessionExtend, bool>(PrivateThis.OnSessionExtendRequest,
+                PrivateThis.OnSessionExtendResponse);
             MessageHandler.HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null);
-            MessageHandler.HandleMessageType<SessionPing, bool>(PrivateThis.OnSessionPingRequest, PrivateThis.OnSessionPingResponse);
+            MessageHandler.HandleMessageType<SessionPing, bool>(PrivateThis.OnSessionPingRequest,
+                PrivateThis.OnSessionPingResponse);
         }
-        
+
         /// <summary>
         /// This event is invoked when the given session has expired
         /// Event Side: dApp & Wallet
         /// </summary>
         public event EventHandler<SessionStruct> SessionExpired;
-        
+
         /// <summary>
         /// This event is invoked when the given pairing has expired
         /// Event Side: Wallet
         /// </summary>
         public event EventHandler<PairingEvent> PairingExpired;
-        
+
         /// <summary>
         /// This event is invoked when a new session is proposed. This is usually invoked
         /// after a new pairing has been activated from a URI
         /// Event Side: Wallet
         /// </summary>
         public event EventHandler<SessionProposalEvent> SessionProposed;
-        
+
         /// <summary>
         /// This event is invoked when a proposed session has been connected to a wallet. This event is
         /// triggered after the session has been approved by a wallet
         /// Event Side: dApp
         /// </summary>
         public event EventHandler<SessionStruct> SessionConnected;
-        
+
         /// <summary>
         /// This event is invoked when a proposed session connection failed with an error
         /// Event Side: dApp
         /// </summary>
         public event EventHandler<Exception> SessionConnectionErrored;
-        
+
         /// <summary>
         /// This event is invoked when a given session sent a update request. 
         /// Event Side: Wallet
         /// </summary>
         public event EventHandler<SessionUpdateEvent> SessionUpdateRequest;
-        
+
         /// <summary>
         /// This event is invoked when a given session sent a extend request.
         /// Event Side: Wallet
         /// </summary>
         public event EventHandler<SessionEvent> SessionExtendRequest;
-        
+
         /// <summary>
         /// This event is invoked when a given session update request was successful.
         /// Event Side: dApp
         /// </summary>
         public event EventHandler<SessionEvent> SessionUpdated;
-        
+
         /// <summary>
         /// This event is invoked when a given session extend request was successful.
         /// Event Side: dApp
         /// </summary>
         public event EventHandler<SessionEvent> SessionExtended;
-        
+
         /// <summary>
         /// This event is invoked when a given session has been pinged
         /// Event Side: dApp & Wallet
         /// </summary>
         public event EventHandler<SessionEvent> SessionPinged;
-        
+
         /// <summary>
         /// This event is invoked whenever a session has been deleted
         /// Event Side: dApp & Wallet
         /// </summary>
         public event EventHandler<SessionEvent> SessionDeleted;
-        
+
         /// <summary>
         /// This event is invoked whenever a session has been rejected
         /// Event Side: Wallet
         /// </summary>
         public event EventHandler<SessionStruct> SessionRejected;
-        
+
         /// <summary>
         /// This event is invoked whenever a session has been approved
         /// Event Side: Wallet
         /// </summary>
         public event EventHandler<SessionStruct> SessionApproved;
-        
+
         /// <summary>
         /// This event is invoked whenever a pairing is pinged
         /// Event Side: dApp & Wallet
         /// </summary>
         public event EventHandler<PairingEvent> PairingPinged;
-        
+
         /// <summary>
         /// This event is invoked whenever a pairing is deleted
         /// Event Side: dApp & Wallet
@@ -228,11 +235,13 @@ namespace WalletConnectSharp.Sign
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for. Will be wrapped in <see cref="SessionRequest{T}"/></typeparam>
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
-        public void HandleSessionRequestMessageType<T, TR>(Func<string, JsonRpcRequest<SessionRequest<T>>, Task> requestCallback, Func<string, JsonRpcResponse<TR>, Task> responseCallback)
+        public void HandleSessionRequestMessageType<T, TR>(
+            Func<string, JsonRpcRequest<SessionRequest<T>>, Task> requestCallback,
+            Func<string, JsonRpcResponse<TR>, Task> responseCallback)
         {
             Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
         }
-        
+
         /// <summary>
         /// An alias for <see cref="HandleMessageType{T,TR}"/> where T is <see cref="SessionEvent{T}"/> and
         /// TR is unchanged
@@ -240,7 +249,8 @@ namespace WalletConnectSharp.Sign
         /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for. Will be wrapped in <see cref="SessionEvent{T}"/></typeparam>
-        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
+        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
+            Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
             Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
         }
@@ -292,7 +302,9 @@ namespace WalletConnectSharp.Sign
         public UriParameters ParseUri(string uri)
         {
             var pathStart = uri.IndexOf(":", StringComparison.Ordinal);
-            int? pathEnd = uri.IndexOf("?", StringComparison.Ordinal) != -1 ? uri.IndexOf("?", StringComparison.Ordinal) : (int?)null;
+            int? pathEnd = uri.IndexOf("?", StringComparison.Ordinal) != -1
+                ? uri.IndexOf("?", StringComparison.Ordinal)
+                : (int?)null;
             var protocol = uri.Substring(0, pathStart);
 
             string path;
@@ -344,7 +356,7 @@ namespace WalletConnectSharp.Sign
             await PrivateThis.IsValidConnect(options);
             var requiredNamespaces = options.RequiredNamespaces;
             var optionalNamespaces = options.OptionalNamespaces;
-            var sessionProperties = options.SessionProperties; 
+            var sessionProperties = options.SessionProperties;
             var relays = options.Relays;
             var topic = options.PairingTopic;
             string uri = "";
@@ -355,7 +367,7 @@ namespace WalletConnectSharp.Sign
                 var pairing = this.Client.Core.Pairing.Store.Get(topic);
                 if (pairing.Active != null)
                     active = pairing.Active.Value;
-                
+
                 WCLogger.Log($"Loaded pairing for {topic}");
             }
 
@@ -364,7 +376,7 @@ namespace WalletConnectSharp.Sign
                 var CreatePairing = await this.Client.Core.Pairing.Create();
                 topic = CreatePairing.Topic;
                 uri = CreatePairing.Uri;
-                
+
                 WCLogger.Log($"Created pairing for new topic: {topic}");
             }
 
@@ -374,22 +386,12 @@ namespace WalletConnectSharp.Sign
                 RequiredNamespaces = requiredNamespaces,
                 Relays = relays != null
                     ? new[] { relays }
-                    : new[]
-                    {
-                        new ProtocolOptions()
-                        {
-                            Protocol = RelayProtocols.Default
-                        }
-                    },
-                Proposer = new Participant()
-                {
-                    PublicKey = publicKey,
-                    Metadata = this.Client.Metadata
-                },
+                    : new[] { new ProtocolOptions() { Protocol = RelayProtocols.Default } },
+                Proposer = new Participant() { PublicKey = publicKey, Metadata = this.Client.Metadata },
                 OptionalNamespaces = optionalNamespaces,
                 SessionProperties = sessionProperties,
             };
-            
+
             WCLogger.Log($"Created public key pair");
 
             TaskCompletionSource<SessionStruct> approvalTask = new TaskCompletionSource<SessionStruct>();
@@ -406,11 +408,12 @@ namespace WalletConnectSharp.Sign
                 var completeSession = session with { RequiredNamespaces = requiredNamespaces };
                 await PrivateThis.SetExpiry(session.Topic, session.Expiry.Value);
                 await Client.Session.Set(session.Topic, completeSession);
-                
+
                 if (!string.IsNullOrWhiteSpace(topic))
                 {
                     await this.Client.Core.Pairing.UpdateMetadata(topic, session.Peer.Metadata);
                 }
+
                 approvalTask.SetResult(completeSession);
             };
 
@@ -438,9 +441,9 @@ namespace WalletConnectSharp.Sign
             }
 
             logger.Log($"Sending request JSON {JsonConvert.SerializeObject(proposal)} to topic {topic}");
-            
+
             var id = await MessageHandler.SendRequest<SessionPropose, SessionProposeResponse>(topic, proposal);
-            
+
             logger.Log($"Got back {id} as request pending id");
 
             var expiry = Clock.CalculateExpiry(options.Expiry);
@@ -456,11 +459,7 @@ namespace WalletConnectSharp.Sign
                 SessionProperties = proposal.SessionProperties,
             });
 
-            return new ConnectedData()
-            {
-                Uri = uri,
-                Approval = approvalTask.Task
-            };
+            return new ConnectedData() { Uri = uri, Approval = approvalTask.Task };
         }
 
         /// <summary>
@@ -524,16 +523,9 @@ namespace WalletConnectSharp.Sign
 
             var sessionSettle = new SessionSettle()
             {
-                Relay = new ProtocolOptions()
-                {
-                    Protocol = relayProtocol != null ? relayProtocol : "irn"
-                },
+                Relay = new ProtocolOptions() { Protocol = relayProtocol != null ? relayProtocol : "irn" },
                 Namespaces = namespaces,
-                Controller = new Participant()
-                {
-                    PublicKey = selfPublicKey,
-                    Metadata = this.Client.Metadata
-                },
+                Controller = new Participant() { PublicKey = selfPublicKey, Metadata = this.Client.Metadata },
                 Expiry = Clock.CalculateExpiry(SessionExpiry)
             };
 
@@ -573,16 +565,13 @@ namespace WalletConnectSharp.Sign
                 await MessageHandler.SendResult<SessionPropose, SessionProposeResponse>(id, pairingTopic,
                     new SessionProposeResponse()
                     {
-                        Relay = new ProtocolOptions()
-                        {
-                            Protocol = relayProtocol != null ? relayProtocol : "irn"
-                        },
+                        Relay = new ProtocolOptions() { Protocol = relayProtocol != null ? relayProtocol : "irn" },
                         ResponderPublicKey = selfPublicKey
                     });
                 await this.Client.Proposal.Delete(id, Error.FromErrorType(ErrorType.USER_DISCONNECTED));
                 await this.Client.Core.Pairing.Activate(pairingTopic);
             }
-            
+
             return IApprovedData.FromTask(sessionTopic, acknowledgedTask.Task);
         }
 
@@ -620,10 +609,8 @@ namespace WalletConnectSharp.Sign
         {
             IsInitialized();
             await PrivateThis.IsValidUpdate(topic, namespaces);
-            var id = await MessageHandler.SendRequest<SessionUpdate, bool>(topic, new SessionUpdate()
-            {
-                Namespaces = namespaces
-            });
+            var id = await MessageHandler.SendRequest<SessionUpdate, bool>(topic,
+                new SessionUpdate() { Namespaces = namespaces });
 
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
             this.sessionEventsHandlerMap.ListenOnce($"session_update{id}", (sender, args) =>
@@ -634,11 +621,8 @@ namespace WalletConnectSharp.Sign
                     acknowledgedTask.SetResult(args.Result);
             });
 
-            await this.Client.Session.Update(topic, new SessionStruct()
-            {
-                Namespaces = namespaces
-            });
-            
+            await this.Client.Session.Update(topic, new SessionStruct() { Namespaces = namespaces });
+
             return IAcknowledgement.FromTask(acknowledgedTask.Task);
         }
 
@@ -652,7 +636,7 @@ namespace WalletConnectSharp.Sign
             IsInitialized();
             await PrivateThis.IsValidExtend(topic);
             var id = await MessageHandler.SendRequest<SessionExtend, bool>(topic, new SessionExtend());
-            
+
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
 
             this.sessionEventsHandlerMap.ListenOnce($"session_extend{id}", (sender, args) =>
@@ -664,7 +648,7 @@ namespace WalletConnectSharp.Sign
             });
 
             await PrivateThis.SetExpiry(topic, Clock.CalculateExpiry(SessionExpiry));
-            
+
             return IAcknowledgement.FromTask(acknowledgedTask.Task);
         }
 
@@ -704,13 +688,13 @@ namespace WalletConnectSharp.Sign
             }
 
             var request = new JsonRpcRequest<T>(method, data);
-            
+
             IsInitialized();
             await PrivateThis.IsValidRequest(topic, request, defaultChainId);
             long[] id = new long[1];
-            
+
             var taskSource = new TaskCompletionSource<TR>();
-            
+
             SessionRequestEvents<T, TR>()
                 .FilterResponses((e) => e.Topic == topic && e.Response.Id == id[0])
                 .OnResponse += args =>
@@ -723,12 +707,9 @@ namespace WalletConnectSharp.Sign
                 return Task.CompletedTask;
             };
 
-            id[0] = await MessageHandler.SendRequest<SessionRequest<T>, TR>(topic, new SessionRequest<T>()
-            {
-                ChainId = defaultChainId,
-                Request = request
-            });
-            
+            id[0] = await MessageHandler.SendRequest<SessionRequest<T>, TR>(topic,
+                new SessionRequest<T>() { ChainId = defaultChainId, Request = request });
+
 
             return await taskSource.Task;
         }
@@ -770,12 +751,8 @@ namespace WalletConnectSharp.Sign
         public async Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
         {
             IsInitialized();
-            await MessageHandler.SendRequest<SessionEvent<T>, object>(topic, new SessionEvent<T>()
-            {
-                ChainId = chainId,
-                Event = @event,
-                Topic = topic,
-            });
+            await MessageHandler.SendRequest<SessionEvent<T>, object>(topic,
+                new SessionEvent<T>() { ChainId = chainId, Event = @event, Topic = topic, });
         }
 
         /// <summary>
@@ -786,7 +763,7 @@ namespace WalletConnectSharp.Sign
         {
             IsInitialized();
             await PrivateThis.IsValidPing(topic);
-            
+
             if (this.Client.Session.Keys.Contains(topic))
             {
                 var id = await MessageHandler.SendRequest<SessionPing, bool>(topic, new SessionPing());
@@ -799,7 +776,7 @@ namespace WalletConnectSharp.Sign
                         done.SetResult(args.Result);
                 });
                 await done.Task;
-            } 
+            }
             else if (this.Client.Core.Pairing.Store.Keys.Contains(topic))
             {
                 await this.Client.Core.Pairing.Ping(topic);
@@ -816,22 +793,14 @@ namespace WalletConnectSharp.Sign
             IsInitialized();
             var error = reason ?? Error.FromErrorType(ErrorType.USER_DISCONNECTED);
             await PrivateThis.IsValidDisconnect(topic, error);
-            
+
             if (this.Client.Session.Keys.Contains(topic))
             {
-                var id = await MessageHandler.SendRequest<SessionDelete, bool>(topic, new SessionDelete()
-                {
-                    Code = error.Code,
-                    Message = error.Message,
-                    Data = error.Data
-                });
+                var id = await MessageHandler.SendRequest<SessionDelete, bool>(topic,
+                    new SessionDelete() { Code = error.Code, Message = error.Message, Data = error.Data });
                 await PrivateThis.DeleteSession(topic);
-                this.SessionDeleted?.Invoke(this, new SessionEvent()
-                {
-                    Topic = topic,
-                    Id = id
-                });
-            } 
+                this.SessionDeleted?.Invoke(this, new SessionEvent() { Topic = topic, Id = id });
+            }
             else if (this.Client.Core.Pairing.Store.Keys.Contains(topic))
             {
                 await this.Client.Core.Pairing.Disconnect(topic);
@@ -885,7 +854,20 @@ namespace WalletConnectSharp.Sign
 
         public void Dispose()
         {
-            Client?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                Client?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }

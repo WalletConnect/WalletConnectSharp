@@ -17,15 +17,17 @@ namespace WalletConnectSharp.Core.Controllers
     /// <typeparam name="TValue">The type of the values stored, the value must contain the key</typeparam>
     public class Store<TKey, TValue> : IStore<TKey, TValue> where TValue : IKeyHolder<TKey>
     {
+        protected bool Disposed;
+
         private bool initialized;
         private Dictionary<TKey, TValue> map = new Dictionary<TKey, TValue>();
         private TValue[] cached = Array.Empty<TValue>();
-        
+
         /// <summary>
         /// The ICore module using this Store module
         /// </summary>
         public ICore Core { get; }
-        
+
         /// <summary>
         /// The StoragePrefix this Store module will prepend to the storage key
         /// </summary>
@@ -41,12 +43,12 @@ namespace WalletConnectSharp.Core.Controllers
                 return "0.3";
             }
         }
-        
+
         /// <summary>
         /// The Name of this Store module
         /// </summary>
         public string Name { get; }
-        
+
         /// <summary>
         /// The context string of this Store module
         /// </summary>
@@ -109,7 +111,7 @@ namespace WalletConnectSharp.Core.Controllers
             name = $"{core.Name}-{name}";
             Name = name;
             Context = name;
-            
+
             if (storagePrefix == null)
                 StoragePrefix = WalletConnectCore.STORAGE_PREFIX;
             else
@@ -152,6 +154,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 return Update(key, value);
             }
+
             map.Add(key, value);
             return Persist();
         }
@@ -179,7 +182,7 @@ namespace WalletConnectSharp.Core.Controllers
         public Task Update(TKey key, TValue update)
         {
             IsInitialized();
-            
+
             // Partial updates aren't built into C#
             // However, we can use reflection to sort of
             // get the same thing
@@ -205,7 +208,7 @@ namespace WalletConnectSharp.Core.Controllers
                         previousValue = (TValue)test;
                     }
                 }
-                
+
                 var fields = t.GetFields();
 
                 // Loop through all of them
@@ -221,7 +224,7 @@ namespace WalletConnectSharp.Core.Controllers
                         previousValue = (TValue)test;
                     }
                 }
-                
+
                 // Now, set the update variable to be the new modified 
                 // previousValue object
                 update = previousValue;
@@ -312,7 +315,22 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Core?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                map.Clear();
+                map = null;
+                cached = null;
+            }
+
+            Disposed = true;
         }
     }
 }

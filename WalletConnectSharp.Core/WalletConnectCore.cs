@@ -112,6 +112,8 @@ namespace WalletConnectSharp.Core
 
         public CoreOptions Options { get; }
 
+        protected bool Disposed;
+
         /// <summary>
         /// Create a new Core with the given options.
         /// </summary>
@@ -192,7 +194,7 @@ namespace WalletConnectSharp.Core
             await Storage.Init();
             await Crypto.Init();
             await Relayer.Init();
-            await HeartBeat.Init();
+            await HeartBeat.InitAsync();
             await Expirer.Init();
             await MessageHandler.Init();
             await Pairing.Init();
@@ -200,13 +202,26 @@ namespace WalletConnectSharp.Core
 
         public void Dispose()
         {
-            HeartBeat?.Dispose();
-            Crypto?.Dispose();
-            Relayer?.Dispose();
-            Storage?.Dispose();
-            MessageHandler?.Dispose();
-            Expirer?.Dispose();
-            Pairing?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                HeartBeat?.Dispose();
+                Crypto?.Dispose();
+                Relayer?.Dispose();
+                Storage?.Dispose();
+                MessageHandler?.Dispose();
+                Expirer?.Dispose();
+                Pairing?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }
