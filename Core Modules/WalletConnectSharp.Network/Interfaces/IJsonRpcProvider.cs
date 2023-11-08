@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using WalletConnectSharp.Common;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Network
@@ -7,7 +8,7 @@ namespace WalletConnectSharp.Network
     /// <summary>
     /// The interface that represents a JSON RPC provider
     /// </summary>
-    public interface IJsonRpcProvider : IBaseJsonRpcProvider
+    public interface IJsonRpcProvider : IBaseJsonRpcProvider, IModule
     {
         event EventHandler<JsonRpcPayload> PayloadReceived;
 
@@ -18,7 +19,7 @@ namespace WalletConnectSharp.Network
         event EventHandler<Exception> ErrorReceived;
 
         event EventHandler<string> RawMessageReceived;
-        
+
         /// <summary>
         /// Connect this provider to the given URL
         /// </summary>

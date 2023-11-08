@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Storage.Interfaces;
 
@@ -11,6 +7,7 @@ namespace WalletConnectSharp.Storage
     {
         protected Dictionary<string, object> Entries = new Dictionary<string, object>();
         private bool _initialized = false;
+        protected bool Disposed;
 
         public virtual Task Init()
         {
@@ -41,13 +38,14 @@ namespace WalletConnectSharp.Storage
             IsInitialized();
             return Task.FromResult(Entries[key] is T ? (T)Entries[key] : default);
         }
-        
+
         public virtual Task SetItem<T>(string key, T value)
         {
             IsInitialized();
             Entries[key] = value;
             return Task.CompletedTask;
         }
+
         public virtual Task RemoveItem(string key)
         {
             IsInitialized();
@@ -78,7 +76,13 @@ namespace WalletConnectSharp.Storage
 
         public void Dispose()
         {
-            Entries?.Clear();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            Disposed = true;
         }
     }
 }

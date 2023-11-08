@@ -15,7 +15,9 @@ namespace WalletConnectSharp.Core.Controllers
         /// The version of this module
         /// </summary>
         public static readonly string Version = "0.3";
-        
+
+        protected bool Disposed;
+
         private Dictionary<string, Expiration> _expirations = new Dictionary<string, Expiration>();
         private bool initialized = false;
         private Expiration[] _cached = Array.Empty<Expiration>();
@@ -185,22 +187,14 @@ namespace WalletConnectSharp.Core.Controllers
         private void SetWithTarget(string targetType, object key, long expiry)
         {
             var target = FormatTarget(targetType, key);
-            var expiration = new Expiration()
-            {
-                Target = target,
-                Expiry = expiry
-            };
+            var expiration = new Expiration() { Target = target, Expiry = expiry };
 
             if (_expirations.ContainsKey(target))
                 _expirations.Remove(target); // We cannot override, so remove first
-            
+
             _expirations.Add(target, expiration);
             CheckExpiry(target, expiration);
-            this.Created?.Invoke(this, new ExpirerEventArgs()
-            {
-                Expiration = expiration,
-                Target = target
-            });
+            this.Created?.Invoke(this, new ExpirerEventArgs() { Expiration = expiration, Target = target });
         }
 
         /// <summary>
@@ -242,7 +236,7 @@ namespace WalletConnectSharp.Core.Controllers
 
             return Task.CompletedTask;
         }
-        
+
         /// <summary>
         /// Delete a expiration with the given long key (usually a id).
         /// </summary>
@@ -263,11 +257,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 var expiration = GetExpiration(target);
                 _expirations.Remove(target);
-                this.Deleted?.Invoke(this, new ExpirerEventArgs()
-                {
-                    Target = target,
-                    Expiration = expiration
-                });
+                this.Deleted?.Invoke(this, new ExpirerEventArgs() { Target = target, Expiration = expiration });
             }
         }
 
@@ -320,11 +310,7 @@ namespace WalletConnectSharp.Core.Controllers
         private void Expire(string target, Expiration expiration)
         {
             _expirations.Remove(target);
-            this.Expired?.Invoke(this, new ExpirerEventArgs()
-            {
-                Target = target,
-                Expiration = expiration
-            });
+            this.Expired?.Invoke(this, new ExpirerEventArgs() { Target = target, Expiration = expiration });
         }
 
         private void CheckExpirations(object sender, EventArgs args)
@@ -372,12 +358,30 @@ namespace WalletConnectSharp.Core.Controllers
                 default:
                     throw new ArgumentException($"Unknown expirer target type: ${targetType}");
             }
-            
+
             return $"{targetType}:{key}";
         }
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                _core.HeartBeat.OnPulse -= CheckExpirations;
+
+                this.Created -= Persist;
+                this.Expired -= Persist;
+                this.Deleted -= Persist;
+            }
+
+            Disposed = true;
         }
     }
 }

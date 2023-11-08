@@ -16,6 +16,7 @@ namespace WalletConnectSharp.Network.Websocket
         private string _url;
         private bool _registering;
         private Guid _context;
+        protected bool Disposed;
 
         /// <summary>
         /// The Open timeout
@@ -98,7 +99,7 @@ namespace WalletConnectSharp.Network.Websocket
         {
             if (!Validation.IsWsUrl(url))
                 throw new ArgumentException("Provided URL is not compatible with WebSocket connection: " + url);
-            
+
             _context = Guid.NewGuid();
             this._url = url;
         }
@@ -178,7 +179,7 @@ namespace WalletConnectSharp.Network.Websocket
         {
             if (socket == null)
                 return;
-            
+
             socket.MessageReceived.Subscribe(OnPayload);
             socket.DisconnectionHappened.Subscribe(OnDisconnect);
 
@@ -191,15 +192,15 @@ namespace WalletConnectSharp.Network.Websocket
         {
             if (obj.Exception != null)
                 this.ErrorReceived?.Invoke(this, obj.Exception);
-            
+
             OnClose(obj);
         }
-        
+
         private void OnClose(DisconnectionInfo obj)
         {
             if (this._socket == null)
                 return;
-            
+
             //_socket.Dispose();
             this._socket = null;
             this._registering = false;
@@ -221,7 +222,7 @@ namespace WalletConnectSharp.Network.Websocket
             }
 
             if (string.IsNullOrWhiteSpace(json)) return;
-            
+
             //Console.WriteLine($"[{Name}] Got payload {json}");
 
             this.PayloadReceived?.Invoke(this, json);
@@ -237,8 +238,9 @@ namespace WalletConnectSharp.Network.Websocket
                 throw new IOException("Connection already closed");
 
             await _socket.Stop(WebSocketCloseStatus.NormalClosure, "Close Invoked");
-            
-            OnClose(new DisconnectionInfo(DisconnectionType.Exit, WebSocketCloseStatus.Empty, "Close Invoked", null, null));
+
+            OnClose(new DisconnectionInfo(DisconnectionType.Exit, WebSocketCloseStatus.Empty, "Close Invoked", null,
+                null));
         }
 
         /// <summary>
@@ -303,32 +305,37 @@ namespace WalletConnectSharp.Network.Websocket
             }
         }
 
-        /// <summary>
-        /// Dispose this websocket connection. Will automatically Close this
-        /// websocket if still connected.
-        /// </summary>
         public async void Dispose()
         {
-            if (Connected)
-            {
-                await Close();
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        private string addressNotFoundError = "getaddrinfo ENOTFOUND";
-        private string connectionRefusedError = "connect ECONNREFUSED";
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed)
+                return;
+
+            if (disposing)
+            {
+                _socket.Dispose();
+            }
+
+            Disposed = true;
+        }
+
+        private const string AddressNotFoundError = "getaddrinfo ENOTFOUND";
+        private const string ConnectionRefusedError = "connect ECONNREFUSED";
+
         private void OnError<T>(IJsonRpcPayload ogPayload, Exception e)
         {
-            var exception = e.Message.Contains(addressNotFoundError) || e.Message.Contains(connectionRefusedError)
-                ? new IOException("Unavailable WS RPC url at " + _url) : e;
+            var exception = e.Message.Contains(AddressNotFoundError) || e.Message.Contains(ConnectionRefusedError)
+                ? new IOException("Unavailable WS RPC url at " + _url)
+                : e;
 
             var message = exception.Message;
-            var payload = new JsonRpcResponse<T>(ogPayload.Id, new Error()
-            {
-                Code = exception.HResult,
-                Data = null,
-                Message = message
-            }, default(T));
+            var payload = new JsonRpcResponse<T>(ogPayload.Id,
+                new Error() { Code = exception.HResult, Data = null, Message = message }, default(T));
 
             //Trigger the payload event, converting the new JsonRpcResponse object to JSON string
             this.PayloadReceived?.Invoke(this, JsonConvert.SerializeObject(payload));

@@ -17,7 +17,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// The storage version of this module
         /// </summary>
         public static readonly string Version = "0.3";
-        
+
         /// <summary>
         /// The name of this module instance
         /// </summary>
@@ -50,6 +50,8 @@ namespace WalletConnectSharp.Core.Controllers
                 return WalletConnectCore.STORAGE_PREFIX + Version + "//" + Name;
             }
         }
+
+        protected bool Disposed;
 
         private JsonRpcRecord<T, TR>[] _cached = Array.Empty<JsonRpcRecord<T, TR>>();
         private Dictionary<long, JsonRpcRecord<T, TR>> _records = new Dictionary<long, JsonRpcRecord<T, TR>>();
@@ -155,12 +157,7 @@ namespace WalletConnectSharp.Core.Controllers
             IsInitialized();
             if (_records.ContainsKey(request.Id)) return;
 
-            var record = new JsonRpcRecord<T, TR>(request)
-            {
-                Id = request.Id,
-                Topic = topic,
-                ChainId = chainId,
-            };
+            var record = new JsonRpcRecord<T, TR>(request) { Id = request.Id, Topic = topic, ChainId = chainId, };
             _records.Add(record.Id, record);
             this.Created?.Invoke(this, record);
         }
@@ -176,13 +173,13 @@ namespace WalletConnectSharp.Core.Controllers
             IsInitialized();
 
             var record = GetRecord(id);
-            
+
             // TODO Log
             /*if (topic != record.Topic)
             {
                 throw WalletConnectException.FromType(ErrorType.MISMATCHED_TOPIC, $"{Name}: {id}");
             }*/
-            
+
             return Task.FromResult<JsonRpcRecord<T, TR>>(record);
         }
 
@@ -269,10 +266,8 @@ namespace WalletConnectSharp.Core.Controllers
 
             if (!_records.ContainsKey(id))
             {
-                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY, new Dictionary<string, object>()
-                {
-                    {"Tag", $"{Name}: {id}"}
-                });
+                throw WalletConnectException.FromType(ErrorType.NO_MATCHING_KEY,
+                    new Dictionary<string, object>() { { "Tag", $"{Name}: {id}" } });
             }
 
             return _records[id];
@@ -321,7 +316,22 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            _core?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                this.Created -= SaveRecordCallback;
+                this.Updated -= SaveRecordCallback;
+                this.Deleted -= SaveRecordCallback;
+            }
+
+            Disposed = true;
         }
     }
 }

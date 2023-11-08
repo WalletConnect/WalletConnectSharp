@@ -18,7 +18,9 @@ namespace WalletConnectSharp.Core.Controllers
 
         public event EventHandler<DecodedMessageEvent> RawMessage;
         private EventHandlerMap<MessageEvent> messageEventHandlerMap = new();
-        
+
+        protected bool Disposed;
+
         public ICore Core { get; }
 
         /// <summary>
@@ -47,7 +49,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             this.Core = core;
         }
-        
+
         public Task Init()
         {
             if (!_initialized)
@@ -58,7 +60,7 @@ namespace WalletConnectSharp.Core.Controllers
             _initialized = true;
             return Task.CompletedTask;
         }
-        
+
         async void RelayerMessageCallback(object sender, MessageEvent e)
         {
             var topic = e.Topic;
@@ -73,12 +75,8 @@ namespace WalletConnectSharp.Core.Controllers
             }
             else if (payload.IsResponse)
             {
-                this.RawMessage?.Invoke(this, new DecodedMessageEvent()
-                {
-                    Topic = topic,
-                    Message = message,
-                    Payload = payload
-                });
+                this.RawMessage?.Invoke(this,
+                    new DecodedMessageEvent() { Topic = topic, Message = message, Payload = payload });
             }
         }
 
@@ -90,34 +88,35 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
-        public async void HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback, Func<string, JsonRpcResponse<TR>, Task> responseCallback)
+        public async void HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback,
+            Func<string, JsonRpcResponse<TR>, Task> responseCallback)
         {
             var method = RpcMethodAttribute.MethodForType<T>();
             var rpcHistory = await this.Core.History.JsonRpcHistoryOfType<T, TR>();
-            
+
             async void RequestCallback(object sender, MessageEvent e)
             {
                 if (requestCallback == null) return;
-                
+
                 var topic = e.Topic;
                 var message = e.Message;
-                
+
                 var options = DecodeOptionForTopic(topic);
 
                 var payload = await this.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message, options);
-                
+
                 (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
 
                 await requestCallback(topic, payload);
             }
-            
+
             async void ResponseCallback(object sender, MessageEvent e)
             {
                 if (responseCallback == null) return;
-                
+
                 var topic = e.Topic;
                 var message = e.Message;
-                
+
                 var options = DecodeOptionForTopic(topic);
 
                 var rawResultPayload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
@@ -128,7 +127,7 @@ namespace WalletConnectSharp.Core.Controllers
                 try
                 {
                     var payload = await this.Core.Crypto.Decode<JsonRpcResponse<TR>>(topic, message, options);
-                    
+
                     await history.Resolve(payload);
 
                     await responseCallback(topic, payload);
@@ -155,26 +154,23 @@ namespace WalletConnectSharp.Core.Controllers
                     // ignored if we can't find anything in the history
                     if (record == null) return;
                     var resMethod = record.Request.Method;
-                    
+
                     // Trigger the true response event, which will trigger ResponseCallback
-                    messageEventHandlerMap[$"response_{resMethod}"](this, new MessageEvent()
-                    {
-                        Topic = topic,
-                        Message = message
-                    });
+                    messageEventHandlerMap[$"response_{resMethod}"](this,
+                        new MessageEvent() { Topic = topic, Message = message });
                 }
-                catch(WalletConnectException err)
+                catch (WalletConnectException err)
                 {
                     if (err.CodeType != ErrorType.NO_MATCHING_KEY)
                         throw;
-                    
+
                     // ignored if we can't find anything in the history
                 }
             }
 
             messageEventHandlerMap[$"request_{method}"] += RequestCallback;
             messageEventHandlerMap[$"response_{method}"] += ResponseCallback;
-            
+
             // Handle response_raw in this context
             // This will allow us to examine response_raw in every typed context registered
             this.RawMessage += InspectResponseRaw;
@@ -197,7 +193,8 @@ namespace WalletConnectSharp.Core.Controllers
                 opts = RpcRequestOptionsForType<T2>();
                 if (opts == null)
                 {
-                    throw new Exception($"No RpcRequestOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
+                    throw new Exception(
+                        $"No RpcRequestOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
                 }
             }
 
@@ -222,11 +219,7 @@ namespace WalletConnectSharp.Core.Controllers
 
             var opts = attributes.Cast<RpcRequestOptionsAttribute>().First();
 
-            return new PublishOptions()
-            {
-                Tag = opts.Tag,
-                TTL = opts.TTL
-            };
+            return new PublishOptions() { Tag = opts.Tag, TTL = opts.TTL };
         }
 
         /// <summary>
@@ -249,12 +242,13 @@ namespace WalletConnectSharp.Core.Controllers
             opts = RpcResponseOptionsForType<T2>();
             if (opts == null)
             {
-                throw new Exception($"No RpcResponseOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
+                throw new Exception(
+                    $"No RpcResponseOptions attribute found in either {typeof(T1).FullName} or {typeof(T2).FullName}!");
             }
 
             return opts;
         }
-        
+
         /// <summary>
         /// Build <see cref="PublishOptions"/> from an <see cref="RpcResponseOptionsAttribute"/> from
         /// the given type T
@@ -273,11 +267,7 @@ namespace WalletConnectSharp.Core.Controllers
 
             var opts = attributes.Cast<RpcResponseOptionsAttribute>().First();
 
-            return new PublishOptions()
-            {
-                Tag = opts.Tag,
-                TTL = opts.TTL
-            };
+            return new PublishOptions() { Tag = opts.Tag, TTL = opts.TTL };
         }
 
         public void SetDecodeOptionsForTopic(DecodeOptions options, string topic)
@@ -287,9 +277,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         public DecodeOptions DecodeOptionForTopic(string topic)
         {
-            if (_decodeOptionsMap.ContainsKey(topic))
-                return _decodeOptionsMap[topic];
-            return null;
+            return _decodeOptionsMap.TryGetValue(topic, out var option) ? option : null;
         }
 
         /// <summary>
@@ -301,14 +289,15 @@ namespace WalletConnectSharp.Core.Controllers
         /// <typeparam name="T">The request type</typeparam>
         /// <typeparam name="TR">The response type</typeparam>
         /// <returns>The id of the request sent</returns>
-        public async Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null, EncodeOptions options = null)
+        public async Task<long> SendRequest<T, TR>(string topic, T parameters, long? expiry = null,
+            EncodeOptions options = null)
         {
             EnsureTypeIsSerializerSafe(parameters);
-            
+
             var method = RpcMethodAttribute.MethodForType<T>();
 
             var payload = new JsonRpcRequest<T>(method, parameters);
-            
+
             WCLogger.Log(JsonConvert.SerializeObject(payload));
 
             var message = await this.Core.Crypto.Encode(topic, payload, options);
@@ -319,7 +308,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 opts.TTL = (long)expiry;
             }
-            
+
             (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Set(topic, payload, null);
 
             // await is intentionally omitted here because of a possible race condition
@@ -342,7 +331,7 @@ namespace WalletConnectSharp.Core.Controllers
         public async Task SendResult<T, TR>(long id, string topic, TR result, EncodeOptions options = null)
         {
             EnsureTypeIsSerializerSafe(result);
-            
+
             var payload = new JsonRpcResponse<TR>(id, null, result);
             var message = await this.Core.Crypto.Encode(topic, payload, options);
             var opts = RpcResponseOptionsFromTypes<T, TR>();
@@ -362,7 +351,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             // Type Error is always serializer safe
             // EnsureTypeIsSerializerSafe(error);
-            
+
             var payload = new JsonRpcResponse<TR>(id, error, default);
             var message = await this.Core.Crypto.Encode(topic, payload, options);
             var opts = RpcResponseOptionsFromTypes<T, TR>();
@@ -370,21 +359,36 @@ namespace WalletConnectSharp.Core.Controllers
             await (await this.Core.History.JsonRpcHistoryOfType<T, TR>()).Resolve(payload);
         }
 
-        public void Dispose()
-        {
-        }
-
         private void EnsureTypeIsSerializerSafe<T>(T testObject)
         {
             var typeString = typeof(T).FullName;
             if (_typeSafeCache.Contains(typeString))
                 return;
-            
+
             // Throw any serialization exceptions now
             // before it's too late
             TypeSafety.EnsureTypeSerializerSafe(testObject);
 
             _typeSafeCache.Add(typeString);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed)
+                return;
+
+            if (disposing)
+            {
+                this.Core.Relayer.OnMessageReceived -= RelayerMessageCallback;
+            }
+
+            Disposed = true;
         }
     }
 }

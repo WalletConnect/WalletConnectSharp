@@ -9,9 +9,9 @@ namespace WalletConnectSharp.Core.Controllers
     public class HeartBeat : IHeartBeat
     {
         /// <summary>
-        /// The CancellationToken that stops the Heartbeat module
+        /// The CancellationTokenSource that can be used to stop the Heartbeat module
         /// </summary>
-        public CancellationToken HeartBeatCancellationToken { get; private set; }
+        public CancellationTokenSource CancellationTokenSource { get; private set; } = new();
 
         public event EventHandler OnPulse;
 
@@ -19,11 +19,11 @@ namespace WalletConnectSharp.Core.Controllers
         /// The interval (in milliseconds) the Pulse event gets emitted/triggered
         /// </summary>
         public int Interval { get; }
-        
+
         /// <summary>
-        /// The context UUID that this heartboeat module uses
+        /// The context UUID that this heartbeat module uses
         /// </summary>
-        public readonly Guid contextGuid = Guid.NewGuid();
+        public readonly Guid ContextGuid = Guid.NewGuid();
 
         /// <summary>
         /// The name of this Heartbeat module
@@ -32,7 +32,7 @@ namespace WalletConnectSharp.Core.Controllers
         {
             get
             {
-                return $"heartbeat-{contextGuid}";
+                return $"heartbeat-{ContextGuid}";
             }
         }
 
@@ -46,6 +46,8 @@ namespace WalletConnectSharp.Core.Controllers
                 return Name;
             }
         }
+
+        protected bool Disposed;
 
         /// <summary>
         /// Create a new Heartbeat module, optionally specifying options
@@ -62,19 +64,22 @@ namespace WalletConnectSharp.Core.Controllers
         /// HeartBeatCancellationToken is cancelled, then the interval will be halted.
         /// </summary>
         /// <returns></returns>
-        public Task Init()
+        public Task InitAsync(CancellationToken cancellationToken = default)
         {
-            HeartBeatCancellationToken = new CancellationToken();
+            if (cancellationToken != default)
+            {
+                CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            }
 
             Task.Run(async () =>
             {
-                while (!HeartBeatCancellationToken.IsCancellationRequested)
+                while (!CancellationTokenSource.Token.IsCancellationRequested)
                 {
                     Pulse();
 
-                    await Task.Delay(Interval, HeartBeatCancellationToken);
+                    await Task.Delay(Interval, CancellationTokenSource.Token);
                 }
-            }, HeartBeatCancellationToken);
+            }, CancellationTokenSource.Token);
 
             return Task.CompletedTask;
         }
@@ -86,6 +91,20 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                CancellationTokenSource?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }

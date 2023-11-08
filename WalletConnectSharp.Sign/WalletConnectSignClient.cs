@@ -27,12 +27,12 @@ namespace WalletConnectSharp.Sign
         /// The protocol ALL Sign Client will use as a protocol string
         /// </summary>
         public static readonly string PROTOCOL = "wc";
-        
+
         /// <summary>
         /// The protocol version ALL Sign Client use
         /// </summary>
         public static readonly int VERSION = 2;
-        
+
         /// <summary>
         /// The base context string ALL Sign Client use
         /// </summary>
@@ -52,7 +52,7 @@ namespace WalletConnectSharp.Sign
         /// The context string for this Sign Client module
         /// </summary>
         public string Context { get; }
-        
+
         /// <summary>
         /// The Metadata for this instance of the Sign Client module
         /// </summary>
@@ -64,23 +64,23 @@ namespace WalletConnectSharp.Sign
         /// The <see cref="ICore"/> module this Sign Client module is using
         /// </summary>
         public ICore Core { get; }
-        
+
         /// <summary>
         /// The <see cref="IEngine"/> module this Sign Client module is using. Used to do all
         /// protocol activities behind the scenes, should not be used directly.
         /// </summary>
         public IEngine Engine { get; }
-        
+
         /// <summary>
         /// The <see cref="IPairingStore"/> module this Sign Client module is using. Used for storing pairing data
         /// </summary>
         public IPairingStore PairingStore { get; }
-        
+
         /// <summary>
         /// The <see cref="ISession"/> module this Sign Client module is using. Used for storing session data
         /// </summary>
         public ISession Session { get; }
-        
+
         /// <summary>
         /// The <see cref="IProposal"/> module this Sign Client module is using. Used for storing proposal data
         /// </summary>
@@ -115,6 +115,7 @@ namespace WalletConnectSharp.Sign
             }
         }
 
+        protected bool Disposed;
 
         public event EventHandler<SessionStruct> SessionExpired;
         public event EventHandler<PairingEvent> PairingExpired;
@@ -165,7 +166,7 @@ namespace WalletConnectSharp.Sign
                 throw new ArgumentException("The Metadata field must be set in the SignClientOptions object");
             else
                 Metadata = options.Metadata;
-            
+
             Options = options;
 
             if (string.IsNullOrWhiteSpace(options.Name))
@@ -175,7 +176,7 @@ namespace WalletConnectSharp.Sign
                 else
                     throw new ArgumentException("The Name field in Metadata must be set");
             }
-            
+
             Name = options.Name;
 
             if (string.IsNullOrWhiteSpace(options.BaseContext))
@@ -204,7 +205,7 @@ namespace WalletConnectSharp.Sign
             Proposal = new Proposal(Core);
             Engine = new Engine(this);
             AddressProvider = new AddressProvider(this);
-            
+
             SetupEvents();
         }
 
@@ -293,7 +294,7 @@ namespace WalletConnectSharp.Sign
         {
             return Engine.Reject(@params);
         }
-        
+
         /// <summary>
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
@@ -308,13 +309,9 @@ namespace WalletConnectSharp.Sign
             if (message == null)
                 message = "Proposal denied by remote host";
 
-            return Reject(proposalStruct, new Error()
-            {
-                Message = message,
-                Code = (long) ErrorType.USER_DISCONNECTED,
-            });
+            return Reject(proposalStruct, new Error() { Message = message, Code = (long)ErrorType.USER_DISCONNECTED, });
         }
-        
+
         /// <summary>
         /// Reject a proposal that was recently paired. If the given proposal was not from a recent pairing,
         /// or the proposal has expired, then an Exception will be thrown.
@@ -326,12 +323,8 @@ namespace WalletConnectSharp.Sign
             if (proposalStruct.Id == null)
                 throw new ArgumentException("No proposal Id given");
 
-            var rejectParams = new RejectParams()
-            {
-                Id = (long) proposalStruct.Id,
-                Reason = error
-            };
-            
+            var rejectParams = new RejectParams() { Id = (long)proposalStruct.Id, Reason = error };
+
             return Reject(rejectParams);
         }
 
@@ -434,7 +427,8 @@ namespace WalletConnectSharp.Sign
             return Engine.Find(requiredNamespaces);
         }
 
-        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
+        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
+            Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
             this.Engine.HandleEventMessageType<T>(requestCallback, responseCallback);
         }
@@ -486,11 +480,24 @@ namespace WalletConnectSharp.Sign
 
         public void Dispose()
         {
-            Core?.Dispose();
-            PairingStore?.Dispose();
-            Session?.Dispose();
-            Proposal?.Dispose();
-            PendingRequests?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                Core?.Dispose();
+                PairingStore?.Dispose();
+                Session?.Dispose();
+                Proposal?.Dispose();
+                PendingRequests?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }

@@ -122,6 +122,7 @@ namespace WalletConnectSharp.Core.Controllers
         private string projectId;
         private bool initialized;
         private bool reconnecting = false;
+        protected bool Disposed;
 
         /// <summary>
         /// Create a new Relayer with the given RelayerOptions.
@@ -488,9 +489,23 @@ namespace WalletConnectSharp.Core.Controllers
 
         public void Dispose()
         {
-            Subscriber?.Dispose();
-            Publisher?.Dispose();
-            Messages?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                Subscriber?.Dispose();
+                Publisher?.Dispose();
+                Messages?.Dispose();
+                Provider?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }
