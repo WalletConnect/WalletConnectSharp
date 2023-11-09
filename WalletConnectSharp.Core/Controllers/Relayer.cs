@@ -230,13 +230,15 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterEventListeners()
         {
-            this.OnConnectionStalled += async (sender, args) =>
-            {
-                if (this.Provider.Connection.IsPaused)
-                    return;
+            this.OnConnectionStalled += OnConnectionStalledHandler;
+        }
 
-                await this.RestartTransport();
-            };
+        private async void OnConnectionStalledHandler(object sender, EventArgs e)
+        {
+            if (this.Provider.Connection.IsPaused)
+                return;
+
+            await this.RestartTransport();
         }
 
         protected virtual async void OnProviderPayload(string payloadJson)
@@ -499,6 +501,9 @@ namespace WalletConnectSharp.Core.Controllers
 
             if (disposing)
             {
+                _transportExplicitlyClosed = true;
+                this.OnConnectionStalled -= OnConnectionStalledHandler;
+
                 Subscriber?.Dispose();
                 Publisher?.Dispose();
                 Messages?.Dispose();
