@@ -28,7 +28,7 @@ public class DefaultPlatform : IPlatform
         return ("csharp", SDKConstants.SDK_VERSION);
     }
     
-    public Task OpenUrl(string url)
+    public virtual Task OpenUrl(string url)
     {
         throw new NotImplementedException("Not supported when using DefaultPlatform");
     }

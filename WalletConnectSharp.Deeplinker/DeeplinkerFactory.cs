@@ -1,4 +1,6 @@
 using System.Reflection;
+using WalletConnectSharp.Common.Logging;
+using WalletConnectSharp.Platform;
 
 namespace Deeplinker;
 
@@ -39,8 +41,53 @@ public class DeeplinkerFactory
         return (IDeeplinkable)(genericMethod.Invoke(this, new object[] { }) ?? throw new InvalidOperationException($"Cannot build deeplinkable for type {t.FullName}"));
     }
 
-    public IDeeplinkable BuildLinkable<T>() where T : IDeeplinkable, new()
+    public IDeeplinkable AddDeepLinkable<T>() where T : IDeeplinkable, new()
     {
-        return new T();
+        var linker = new T();
+        AddDeepLinkable(linker);
+        return linker;
+    }
+
+    public void AddDeepLinkable(IDeeplinkable deeplinkable)
+    {
+        _deeplinkables.Add(deeplinkable);
+    }
+
+    public void RemoveLinkable<T>() where T : IDeeplinkable
+    {
+        _deeplinkables.RemoveAll(dl => dl.GetType() == typeof(T));
+    }
+
+    public string BuildLink(string wcUri, string targetChainId)
+    {
+        return BuildLink(wcUri, new[] { targetChainId }).FirstOrDefault() ?? throw new Exception("No linker could build the link");
+    }
+
+    public IEnumerable<string> BuildLink(string wcUri, string[] targetChains)
+    {
+        return from linker in _deeplinkables
+            orderby linker.Priority descending
+            where targetChains.Any(linker.SupportsChain) 
+            select linker.TransformUri(wcUri)
+            into url 
+            where !string.IsNullOrWhiteSpace(url) 
+            select url;
+    }
+
+    public async Task TryOpen(string wcUri, string[] targetChains)
+    {
+        var links = BuildLink(wcUri, targetChains);
+        foreach (var link in links)
+        {
+            try
+            {
+                await DevicePlatform.OpenUrl(link);
+                break;
+            }
+            catch (Exception e)
+            {
+                WCLogger.LogError(e);
+            }
+        }
     }
 }

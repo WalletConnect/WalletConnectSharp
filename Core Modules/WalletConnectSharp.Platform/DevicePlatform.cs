@@ -21,7 +21,29 @@ public static class DevicePlatform
     public static (string name, string version) GetOsInfo() => Backend.GetOsInfo();
 
     public static (string name, string version) GetSdkInfo() => Backend.GetSdkInfo();
-    public static IRelayUrlBuilder RelayUrlBuilder => Backend.RelayUrlBuilder;
-    public static IConnectionBuilder ConnectionBuilder => Backend.ConnectionBuilder;
+
+    public static IRelayUrlBuilder RelayUrlBuilder
+    {
+        get
+        {
+            return Backend.RelayUrlBuilder;
+        }
+        set
+        {
+            Backend.RelayUrlBuilder = value;
+        }
+    }
+
+    public static IConnectionBuilder ConnectionBuilder
+    {
+        get
+        {
+            return Backend.ConnectionBuilder;
+        }
+        set
+        {
+            Backend.ConnectionBuilder = value;
+        }
+    }
     public static Task OpenUrl(string url) => Backend.OpenUrl(url);
 }
