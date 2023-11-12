@@ -199,33 +199,46 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterProviderEventListeners()
         {
-            Provider.RawMessageReceived += (sender, s) =>
-            {
-                OnProviderPayload(s);
-            };
+            Provider.RawMessageReceived += ProviderOnRawMessageReceived;
+            Provider.Connected += ProviderOnConnected;
+            Provider.Disconnected += ProviderOnDisconnected;
+            Provider.ErrorReceived += ProviderOnErrorReceived;
+        }
 
-            Provider.Connected += (sender, connection) =>
-            {
-                this.OnConnected?.Invoke(this, EventArgs.Empty);
-            };
+        private void ProviderOnErrorReceived(object sender, Exception e)
+        {
+            if (Disposed) return;
 
-            Provider.Disconnected += async (sender, args) =>
-            {
-                this.OnDisconnected?.Invoke(this, EventArgs.Empty);
+            this.OnErrored?.Invoke(this, e);
+        }
 
-                if (this._transportExplicitlyClosed)
-                    return;
+        private async void ProviderOnDisconnected(object sender, EventArgs e)
+        {
+            if (Disposed) return;
 
-                // Attempt to reconnect after one second
-                await Task.Delay(1000);
+            this.OnDisconnected?.Invoke(this, EventArgs.Empty);
 
-                await RestartTransport();
-            };
+            if (this._transportExplicitlyClosed)
+                return;
 
-            Provider.ErrorReceived += (sender, args) =>
-            {
-                this.OnErrored?.Invoke(this, args);
-            };
+            // Attempt to reconnect after one second
+            await Task.Delay(1000);
+
+            await RestartTransport();
+        }
+
+        private void ProviderOnConnected(object sender, IJsonRpcConnection e)
+        {
+            if (Disposed) return;
+            
+            this.OnConnected?.Invoke(sender, EventArgs.Empty);
+        }
+
+        private void ProviderOnRawMessageReceived(object sender, string e)
+        {
+            if (Disposed) return;
+
+            OnProviderPayload(e);
         }
 
         protected virtual void RegisterEventListeners()
@@ -507,6 +520,13 @@ namespace WalletConnectSharp.Core.Controllers
                 Subscriber?.Dispose();
                 Publisher?.Dispose();
                 Messages?.Dispose();
+                
+                // Un-listen to events
+                Provider.Connected -= ProviderOnConnected;
+                Provider.Disconnected -= ProviderOnDisconnected;
+                Provider.RawMessageReceived -= ProviderOnRawMessageReceived;
+                Provider.ErrorReceived -= ProviderOnErrorReceived;
+                
                 Provider?.Dispose();
             }
 

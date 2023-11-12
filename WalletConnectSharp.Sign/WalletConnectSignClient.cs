@@ -476,6 +476,7 @@ namespace WalletConnectSharp.Sign
             await Session.Init();
             await Proposal.Init();
             await Engine.Init();
+            await AddressProvider.Init();
         }
 
         public void Dispose()
@@ -495,6 +496,7 @@ namespace WalletConnectSharp.Sign
                 Session?.Dispose();
                 Proposal?.Dispose();
                 PendingRequests?.Dispose();
+                Engine?.Dispose();
             }
 
             Disposed = true;

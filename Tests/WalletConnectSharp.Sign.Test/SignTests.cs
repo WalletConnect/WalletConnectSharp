@@ -6,12 +6,14 @@ using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WalletConnectSharp.Sign.Test
 {
     public class SignTests : IClassFixture<SignClientFixture>
     {
         private SignClientFixture _cryptoFixture;
+        private readonly ITestOutputHelper _testOutputHelper;
         private const string AllowedChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         [RpcMethod("test_method"), RpcRequestOptions(Clock.ONE_MINUTE, 99998)]
@@ -52,9 +54,10 @@ namespace WalletConnectSharp.Sign.Test
             }
         }
 
-        public SignTests(SignClientFixture cryptoFixture)
+        public SignTests(SignClientFixture cryptoFixture, ITestOutputHelper testOutputHelper)
         {
             this._cryptoFixture = cryptoFixture;
+            _testOutputHelper = testOutputHelper;
         }
 
         public static async Task<SessionStruct> TestConnectMethod(ISignClient clientA, ISignClient clientB)
@@ -384,50 +387,50 @@ namespace WalletConnectSharp.Sign.Test
         }
         
         [Fact, Trait("Category", "integration")]
-        public async void TestTwoUniqueSessionRequestResponseUsingAddressProviderDefaults()
+        public async Task TestTwoUniqueSessionRequestResponseUsingAddressProviderDefaults()
         {
             await _cryptoFixture.WaitForClientsReady();
             
-            var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-            var testMethod = "test_method";
-            var testMethod2 = "test_method_2";
-
-            var dappConnectOptions = new ConnectOptions()
+            var dappClient = ClientA;
+            var walletClient = ClientB;
+            if (!dappClient.AddressProvider.HasDefaultSession && !walletClient.AddressProvider.HasDefaultSession)
             {
-                RequiredNamespaces = new RequiredNamespaces()
+                var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+                var testMethod = "test_method";
+                var testMethod2 = "test_method_2";
+
+                var dappConnectOptions = new ConnectOptions()
                 {
+                    RequiredNamespaces = new RequiredNamespaces()
                     {
-                        "eip155", new ProposedNamespace()
                         {
-                            Methods = new[]
+                            "eip155",
+                            new ProposedNamespace()
                             {
-                                testMethod,
-                                testMethod2
-                            },
-                            Chains = new[]
-                            {
-                                "eip155:1"
-                            },
-                            Events = new[]
-                            {
-                                "chainChanged", "accountsChanged"
+                                Methods = new[] { testMethod, testMethod2 },
+                                Chains = new[] { "eip155:1" },
+                                Events = new[] { "chainChanged", "accountsChanged" }
                             }
                         }
                     }
-                }
-            };
+                };
 
-            var dappClient = ClientA;
-            var connectData = await dappClient.Connect(dappConnectOptions);
+                var connectData = await dappClient.Connect(dappConnectOptions);
 
-            var walletClient = ClientB;
-            var proposal = await walletClient.Pair(connectData.Uri);
+                var proposal = await walletClient.Pair(connectData.Uri);
 
-            var approveData = await walletClient.Approve(proposal, testAddress);
+                var approveData = await walletClient.Approve(proposal, testAddress);
 
-            var sessionData = await connectData.Approval;
-            await approveData.Acknowledged();
+                await connectData.Approval;
+                await approveData.Acknowledged();
+            }
+            else
+            {
+                Assert.True(dappClient.AddressProvider.HasDefaultSession);
+                Assert.True(walletClient.AddressProvider.HasDefaultSession);
+            }
 
+            var defaultSessionTopic = dappClient.AddressProvider.DefaultSession.Topic;
             var rnd = new Random();
             var a = rnd.Next(100);
             var b = rnd.Next(100);
@@ -474,9 +477,11 @@ namespace WalletConnectSharp.Sign.Test
             // from the dappClient.Engine.Request function call (the response Result or throws an Exception)
             // We do it here for the sake of testing
             dappClient.Engine.SessionRequestEvents<TestRequest, TestResponse>()
-                .FilterResponses((r) => r.Topic == sessionData.Topic)
+                .FilterResponses((r) => r.Topic == defaultSessionTopic)
                 .OnResponse += (responseData) =>
             {
+                Assert.True(responseData.Topic == defaultSessionTopic);
+                
                 var response = responseData.Response;
                 
                 var data = response.Result;
@@ -556,6 +561,31 @@ namespace WalletConnectSharp.Sign.Test
             Assert.Equal("eip155:1", address.ChainId);
             Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChain);
             Assert.Equal("eip155", dappClient.AddressProvider.DefaultNamespace);
+        }
+
+        [Fact, Trait("Category", "integration")]
+        public async void TestAddressProviderDefaultsSaving()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+
+            await TestTwoUniqueSessionRequestResponseUsingAddressProviderDefaults();
+
+            var defaultSessionTopic = _cryptoFixture.ClientA.AddressProvider.DefaultSession.Topic;
+
+            _cryptoFixture.StorageOverrideA = _cryptoFixture.ClientA.Core.Storage;
+            _cryptoFixture.StorageOverrideB = _cryptoFixture.ClientB.Core.Storage;
+
+            await Task.Delay(100);
+            
+            await _cryptoFixture.DisposeAndReset();
+            
+            await Task.Delay(100);
+
+            var reloadedDefaultSessionTopic = _cryptoFixture.ClientA.AddressProvider.DefaultSession.Topic;
+            
+            Assert.Equal(defaultSessionTopic, reloadedDefaultSessionTopic);
+            
+            await TestTwoUniqueSessionRequestResponseUsingAddressProviderDefaults();
         }
     }
 }

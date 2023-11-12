@@ -88,12 +88,42 @@ namespace WalletConnectSharp.Storage
                 Directory.CreateDirectory(path);
             }
 
-            var json = JsonConvert.SerializeObject(Entries,
-                new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+            string json;
+            lock (entriesLock)
+            {
+                json = JsonConvert.SerializeObject(Entries,
+                    new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+            }
 
-            await _semaphoreSlim.WaitAsync();
-            await File.WriteAllTextAsync(FilePath, json, Encoding.UTF8);
-            _semaphoreSlim.Release();
+            try
+            {
+                if (!Disposed)
+                    await _semaphoreSlim.WaitAsync();
+                int count = 5;
+                IOException lastException;
+                do
+                {
+                    try
+                    {
+                        await File.WriteAllTextAsync(FilePath, json, Encoding.UTF8);
+                        return;
+                    }
+                    catch (IOException e)
+                    {
+                        WCLogger.LogError($"Got error saving storage file: retries left {count}");
+                        await Task.Delay(100);
+                        count--;
+                        lastException = e;
+                    }
+                } while (count > 0);
+
+                throw lastException;
+            }
+            finally
+            {
+                if (!Disposed)
+                    _semaphoreSlim.Release();
+            }
         }
 
         private async Task Load()
@@ -101,25 +131,22 @@ namespace WalletConnectSharp.Storage
             if (!File.Exists(FilePath))
                 return;
 
-            await _semaphoreSlim.WaitAsync();
-            var json = await File.ReadAllTextAsync(FilePath, Encoding.UTF8);
-            _semaphoreSlim.Release();
-
+            string json;
             try
+            {
+                await _semaphoreSlim.WaitAsync();
+                json = await File.ReadAllTextAsync(FilePath, Encoding.UTF8);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+            
+            // Hard fail here if the storage file is bad
+            lock (entriesLock)
             {
                 Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
                     new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-            }
-            catch (JsonSerializationException e)
-            {
-                // Move the file to a .unsupported file
-                // and start fresh
-                WCLogger.LogError(e);
-                WCLogger.LogError("Cannot load JSON file, moving data to .unsupported file to force continue");
-                if (File.Exists(FilePath + ".unsupported"))
-                    File.Move(FilePath + ".unsupported", FilePath + "." + Guid.NewGuid() + ".unsupported");
-                File.Move(FilePath, FilePath + ".unsupported");
-                Entries = new Dictionary<string, object>();
             }
         }
 

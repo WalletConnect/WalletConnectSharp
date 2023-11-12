@@ -15,7 +15,7 @@ namespace WalletConnectSharp.Sign.Models
     /// </summary>
     /// <typeparam name="T">The request type to filter for</typeparam>
     /// <typeparam name="TR">The response typ to filter for</typeparam>
-    public class TypedEventHandler<T, TR>
+    public class TypedEventHandler<T, TR> : IDisposable
     {
         protected static Dictionary<string, TypedEventHandler<T, TR>> _instances = new Dictionary<string,TypedEventHandler<T,TR>>();
 
@@ -257,6 +257,12 @@ namespace WalletConnectSharp.Sign.Models
             }
 
             return context;
+        }
+
+        public virtual void Dispose()
+        {
+            var context = _ref.Context;
+            _instances.Remove(context);
         }
     }
 }

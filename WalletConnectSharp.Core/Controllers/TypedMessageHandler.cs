@@ -66,6 +66,12 @@ namespace WalletConnectSharp.Core.Controllers
             var topic = e.Topic;
             var message = e.Message;
 
+            if (!await this.Core.Crypto.KeyChain.Has(topic))
+            {
+                WCLogger.LogError($"Received message for topic we don't have: {topic}");
+                return;
+            }
+
             var options = DecodeOptionForTopic(topic);
 
             var payload = await this.Core.Crypto.Decode<JsonRpcPayload>(topic, message, options);
@@ -101,6 +107,8 @@ namespace WalletConnectSharp.Core.Controllers
                 var topic = e.Topic;
                 var message = e.Message;
 
+                if (!await this.Core.Crypto.HasKeys(topic)) return;
+
                 var options = DecodeOptionForTopic(topic);
 
                 var payload = await this.Core.Crypto.Decode<JsonRpcRequest<T>>(topic, message, options);
@@ -116,6 +124,8 @@ namespace WalletConnectSharp.Core.Controllers
 
                 var topic = e.Topic;
                 var message = e.Message;
+                
+                if (!await this.Core.Crypto.HasKeys(topic)) return;
 
                 var options = DecodeOptionForTopic(topic);
 

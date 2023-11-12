@@ -15,7 +15,7 @@ namespace WalletConnectSharp.Sign.Interfaces
     /// is an sub-type of <see cref="IEngineAPI"/> and represents the actual Engine. This is
     /// different than the Sign client.
     /// </summary>
-    public interface IEngine : IEngineAPI
+    public interface IEngine : IEngineAPI, IDisposable
     {
         /// <summary>
         /// The <see cref="ISignClient"/> this Engine is using

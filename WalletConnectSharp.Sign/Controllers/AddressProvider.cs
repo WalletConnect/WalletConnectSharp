@@ -1,4 +1,6 @@
-﻿using WalletConnectSharp.Sign.Interfaces;
+﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Logging;
+using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 
@@ -6,6 +8,15 @@ namespace WalletConnectSharp.Sign.Controllers;
 
 public class AddressProvider : IAddressProvider
 {
+    public struct DefaultData
+    {
+        public SessionStruct Session;
+        public string Namespace;
+        public string ChainId;
+    }
+
+    public event EventHandler<DefaultsLoadingEventArgs> DefaultsLoading;
+
     public bool HasDefaultSession
     {
         get
@@ -30,9 +41,43 @@ public class AddressProvider : IAddressProvider
         }
     }
 
-    public SessionStruct DefaultSession { get; set; }
-    public string DefaultNamespace { get; set; }
-    public string DefaultChain { get; set; }
+    private DefaultData _state;
+
+    public SessionStruct DefaultSession
+    {
+        get
+        {
+            return _state.Session;
+        }
+        set
+        {
+            _state.Session = value;
+        }
+    }
+
+    public string DefaultNamespace
+    {
+        get
+        {
+            return _state.Namespace;
+        }
+        set
+        {
+            _state.Namespace = value;
+        }
+    }
+
+    public string DefaultChain
+    {
+        get
+        {
+            return _state.ChainId;
+        }
+        set
+        {
+            _state.ChainId = value;
+        }
+    }
     public ISession Sessions { get; private set; }
 
     private ISignClient _client;
@@ -46,7 +91,27 @@ public class AddressProvider : IAddressProvider
         client.SessionConnected += ClientOnSessionConnected;
         client.SessionDeleted += ClientOnSessionDeleted;
         client.SessionUpdated += ClientOnSessionUpdated;
-        client.SessionApproved += ClientOnSessionConnected; 
+        client.SessionApproved += ClientOnSessionConnected;
+    }
+
+    public virtual async Task SaveDefaults()
+    {
+        await _client.Core.Storage.SetItem($"{Context}-default-session", _state);
+    }
+
+    public virtual async Task LoadDefaults()
+    {
+        var key = $"{Context}-default-session";
+        if (await _client.Core.Storage.HasItem(key))
+        {
+            _state = await _client.Core.Storage.GetItem<DefaultData>($"{Context}-default-session");
+        }
+        else
+        {
+            _state = new DefaultData();
+        }
+        
+        DefaultsLoading?.Invoke(this, new DefaultsLoadingEventArgs(ref _state));
     }
     
     private void ClientOnSessionUpdated(object sender, SessionEvent e)
@@ -75,45 +140,52 @@ public class AddressProvider : IAddressProvider
         }
     }
 
-    private void UpdateDefaultChainAndNamespace()
+    private async void UpdateDefaultChainAndNamespace()
     {
-        if (HasDefaultSession)
+        try
         {
-            var currentDefault = DefaultNamespace;
-            if (currentDefault != null && DefaultSession.RequiredNamespaces.ContainsKey(currentDefault))
+            if (HasDefaultSession)
             {
-                // DefaultNamespace is still valid
-                var currentChain = DefaultChain;
-                if (currentChain == null ||
-                    DefaultSession.RequiredNamespaces[DefaultNamespace].Chains.Contains(currentChain))
+                var currentDefault = DefaultNamespace;
+                if (currentDefault != null && DefaultSession.RequiredNamespaces.ContainsKey(currentDefault))
                 {
-                    // DefaultChain is still valid
+                    // DefaultNamespace is still valid
+                    var currentChain = DefaultChain;
+                    if (currentChain == null ||
+                        DefaultSession.RequiredNamespaces[DefaultNamespace].Chains.Contains(currentChain))
+                    {
+                        // DefaultChain is still valid
+                        return;
+                    }
+
+                    DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
                     return;
                 }
 
-                DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
-                return;
-            }
-
-            // DefaultNamespace is null or not found in RequiredNamespaces, update it
-            DefaultNamespace = DefaultSession.RequiredNamespaces.OrderedKeys.FirstOrDefault();
-            if (DefaultNamespace != null)
-            {
-                DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
-            }
-            else
-            {
-                // TODO The Keys property is unordered! Maybe this needs to be updated
-                DefaultNamespace = DefaultSession.RequiredNamespaces.Keys.FirstOrDefault();
+                // DefaultNamespace is null or not found in RequiredNamespaces, update it
+                DefaultNamespace = DefaultSession.RequiredNamespaces.OrderedKeys.FirstOrDefault();
                 if (DefaultNamespace != null)
                 {
                     DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
                 }
+                else
+                {
+                    // TODO The Keys property is unordered! Maybe this needs to be updated
+                    DefaultNamespace = DefaultSession.RequiredNamespaces.Keys.FirstOrDefault();
+                    if (DefaultNamespace != null)
+                    {
+                        DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                    }
+                }
+            }
+            else
+            {
+                DefaultNamespace = null;
             }
         }
-        else
+        finally
         {
-            DefaultNamespace = null;
+            await SaveDefaults();
         }
     }
 
@@ -124,6 +196,11 @@ public class AddressProvider : IAddressProvider
             session = DefaultSession;
 
         return session.CurrentAddress(@namespace);
+    }
+
+    public async Task Init()
+    {
+        await this.LoadDefaults();
     }
 
     public Caip25Address[] AllAddresses(string @namespace = null, SessionStruct session = default)

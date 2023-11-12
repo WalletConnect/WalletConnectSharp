@@ -14,6 +14,7 @@ namespace WalletConnectSharp.Sign.Models
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
     {
         private IEnginePrivate _enginePrivate;
+        private List<Action> _disposeActions = new List<Action>();
         
         /// <summary>
         /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
@@ -44,20 +45,32 @@ namespace WalletConnectSharp.Sign.Models
 
         protected override TypedEventHandler<T, TR> BuildNew(ICore _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
-            return new SessionRequestEventHandler<T, TR>(_ref, _enginePrivate)
+            var instance = new SessionRequestEventHandler<T, TR>(_ref, _enginePrivate)
             {
                 requestPredicate = requestPredicate,
                 responsePredicate = responsePredicate
             };
+            
+            _disposeActions.Add(() =>
+            {
+                instance.Dispose();
+            });
+
+            return instance;
         }
 
         protected override void Setup()
         {
             var wrappedRef = TypedEventHandler<SessionRequest<T>, TR>.GetInstance(_ref);
-            
+
             wrappedRef.OnRequest += WrappedRefOnOnRequest;
             wrappedRef.OnResponse += WrappedRefOnOnResponse;
-        }
+
+            _disposeActions.Add(() =>
+            {
+                wrappedRef.Dispose();
+            });
+    }
 
         private Task WrappedRefOnOnResponse(ResponseEventArgs<TR> e)
         {
@@ -93,6 +106,16 @@ namespace WalletConnectSharp.Sign.Models
             });
 
             await base.RequestCallback(e.Topic, sessionRequest);
+        }
+
+        public override void Dispose()
+        {
+            foreach (var action in _disposeActions)
+            {
+                action();
+            }
+            
+            base.Dispose();
         }
     }
 }

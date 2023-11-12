@@ -5,6 +5,7 @@ namespace WalletConnectSharp.Storage
 {
     public class InMemoryStorage : IKeyValueStorage
     {
+        protected readonly object entriesLock = new object();
         protected Dictionary<string, object> Entries = new Dictionary<string, object>();
         private bool _initialized = false;
         protected bool Disposed;
@@ -18,51 +19,76 @@ namespace WalletConnectSharp.Storage
         public virtual Task<string[]> GetKeys()
         {
             IsInitialized();
-            return Task.FromResult(Entries.Keys.ToArray());
+            lock (entriesLock)
+            {
+                return Task.FromResult(Entries.Keys.ToArray());
+            }
         }
 
         public virtual async Task<T[]> GetEntriesOfType<T>()
         {
             IsInitialized();
+            // GetEntries is thread-safe
             return (await GetEntries()).OfType<T>().ToArray();
         }
 
         public virtual Task<object[]> GetEntries()
         {
             IsInitialized();
-            return Task.FromResult(Entries.Values.ToArray());
+            lock (entriesLock)
+            {
+                return Task.FromResult(Entries.Values.ToArray());
+            }
         }
 
         public virtual Task<T> GetItem<T>(string key)
         {
             IsInitialized();
-            return Task.FromResult(Entries[key] is T ? (T)Entries[key] : default);
+            lock (entriesLock)
+            {
+                return Task.FromResult(Entries[key] is T ? (T)Entries[key] : default);
+            }
         }
 
         public virtual Task SetItem<T>(string key, T value)
         {
             IsInitialized();
-            Entries[key] = value;
+            lock (entriesLock)
+            {
+                Entries[key] = value;
+            }
+
             return Task.CompletedTask;
         }
 
         public virtual Task RemoveItem(string key)
         {
             IsInitialized();
-            Entries.Remove(key);
+            lock (entriesLock)
+            {
+                Entries.Remove(key);
+            }
+
             return Task.CompletedTask;
         }
 
         public virtual Task<bool> HasItem(string key)
         {
             IsInitialized();
-            return Task.FromResult(Entries.ContainsKey(key));
+            lock (entriesLock)
+            {
+                return Task.FromResult(Entries.ContainsKey(key));
+            }
         }
 
         public virtual Task Clear()
         {
             IsInitialized();
-            Entries.Clear();
+            lock (entriesLock)
+            {
+                Entries.Clear();
+            }
+
             return Task.CompletedTask;
         }
 

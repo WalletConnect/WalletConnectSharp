@@ -31,6 +31,7 @@ namespace WalletConnectSharp.Sign
         private const int KeyLength = 32;
 
         private bool _initialized = false;
+        private Dictionary<string, Action> _disposeActions = new Dictionary<string, Action>();
 
         /// <summary>
         /// The <see cref="ISignClient"/> using this Engine
@@ -224,7 +225,11 @@ namespace WalletConnectSharp.Sign
         /// <returns>The <see cref="TypedEventHandler{T,TR}"/> managing events for the given types T, TR</returns>
         public TypedEventHandler<T, TR> SessionRequestEvents<T, TR>()
         {
-            return SessionRequestEventHandler<T, TR>.GetInstance(Client.Core, PrivateThis);
+            var uniqueKey = typeof(T).FullName + "--" + typeof(TR).FullName;
+            var instance = SessionRequestEventHandler<T, TR>.GetInstance(Client.Core, PrivateThis);
+            if (!_disposeActions.ContainsKey(uniqueKey))
+                _disposeActions.Add(uniqueKey, () => instance.Dispose());
+            return instance;
         }
 
         /// <summary>
@@ -864,7 +869,11 @@ namespace WalletConnectSharp.Sign
 
             if (disposing)
             {
-                Client?.Dispose();
+                foreach (var action in _disposeActions.Values)
+                {
+                    action();
+                }
+                _disposeActions.Clear();
             }
 
             Disposed = true;

@@ -177,7 +177,9 @@ namespace WalletConnectSharp.Core.Controllers
 
         private async Task SetRelayerMessages(Dictionary<string, MessageRecord> messages)
         {
-            await _core.Storage.SetItem(StorageKey, messages);
+            // Clone dictionary for Storage, otherwise we'll be saving
+            // the reference
+            await _core.Storage.SetItem(StorageKey, new Dictionary<string, MessageRecord>(messages));
         }
 
         private async Task<Dictionary<string, MessageRecord>> GetRelayerMessages()
