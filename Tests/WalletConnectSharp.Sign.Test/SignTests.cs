@@ -1,9 +1,11 @@
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
+using WalletConnectSharp.Crypto;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
+using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
 using Xunit.Abstractions;
@@ -579,6 +581,8 @@ namespace WalletConnectSharp.Sign.Test
             
             await _cryptoFixture.DisposeAndReset();
             
+            _testOutputHelper.WriteLine(string.Join(",", _cryptoFixture.ClientB.Core.Crypto.KeyChain.Keychain.Values));
+
             await Task.Delay(100);
 
             var reloadedDefaultSessionTopic = _cryptoFixture.ClientA.AddressProvider.DefaultSession.Topic;
