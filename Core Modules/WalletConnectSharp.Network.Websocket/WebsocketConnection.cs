@@ -139,14 +139,14 @@ namespace WalletConnectSharp.Network.Websocket
                 TaskCompletionSource<WebsocketClient> registeringTask =
                     new TaskCompletionSource<WebsocketClient>(TaskCreationOptions.None);
 
-                this.ListenOnce<Exception>(nameof(RegisterErrored), (sender, args) =>
+                RegisterErrored.ListenOnce((sender, args) =>
                 {
                     registeringTask.SetException(args);
                 });
 
-                this.ListenOnce<WebsocketClient>(nameof(Opened), (sender, args) =>
+                Opened.ListenOnce((sender, args) =>
                 {
-                    registeringTask.SetResult(args);
+                    registeringTask.SetResult((WebsocketClient)args);
                 });
 
                 await registeringTask.Task;

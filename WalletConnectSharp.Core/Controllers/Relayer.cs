@@ -316,11 +316,16 @@ namespace WalletConnectSharp.Core.Controllers
             }
 
             TaskCompletionSource<string> task1 = new TaskCompletionSource<string>();
-            this.Subscriber.ListenOnce<ActiveSubscription>(nameof(this.Subscriber.Created), (sender, subscription) =>
-            {
-                if (subscription.Topic == topic)
-                    task1.TrySetResult("");
-            });
+
+            EventUtils.ListenOnce<ActiveSubscription>(
+                (sender, subscription) =>
+                {
+                    if (subscription.Topic == topic)
+                        task1.TrySetResult("");
+                },
+                h => this.Subscriber.Created += h,
+                h => this.Subscriber.Created -= h
+            );
 
             return (await Task.WhenAll(
                 task1.Task,
@@ -376,10 +381,9 @@ namespace WalletConnectSharp.Core.Controllers
                 }
                 else
                 {
-                    this.Subscriber.ListenOnce(nameof(this.Subscriber.Resubscribed), (sender, args) =>
-                    {
-                        task1.TrySetResult(true);
-                    });
+                    EventUtils.ListenOnce((_, _) => task1.TrySetResult(true),
+                        h => this.Subscriber.Resubscribed += h,
+                        h => this.Subscriber.Resubscribed -= h);
                 }
 
                 TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
@@ -391,7 +395,7 @@ namespace WalletConnectSharp.Core.Controllers
 
                 async void Task2()
                 {
-                    var cleanupEvent = this.ListenOnce(nameof(OnTransportClosed), RejectTransportOpen);
+                    var cleanupEvent = OnTransportClosed.ListenOnce(RejectTransportOpen);
                     try
                     {
                         var connectionTask = this.Provider.Connect();
@@ -432,10 +436,10 @@ namespace WalletConnectSharp.Core.Controllers
             if (this.Connected)
             {
                 TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
-                this.Provider.ListenOnce(nameof(this.Provider.Disconnected), (sender, args) =>
-                {
-                    task1.TrySetResult(true);
-                });
+
+                EventUtils.ListenOnce((_, _) => task1.TrySetResult(true),
+                    h => this.Provider.Disconnected += h,
+                    h => this.Provider.Disconnected -= h);
 
                 await Task.WhenAll(task1.Task, this.TransportClose());
             }
