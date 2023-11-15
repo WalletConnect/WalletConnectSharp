@@ -36,13 +36,14 @@ namespace WalletConnectSharp.Sign.Models
         {
             var context = engine.Context;
 
-            if (Instances.ContainsKey(context)) return Instances[context];
+            if (Instances.TryGetValue(context, out var instance))
+                return instance;
 
-            var _instance = new TypedEventHandler<T, TR>(engine);
+            var newInstance = new TypedEventHandler<T, TR>(engine);
 
-            Instances.Add(context, _instance);
+            Instances.Add(context, newInstance);
 
-            return _instance;
+            return newInstance;
         }
 
         /// <summary>
