@@ -477,18 +477,22 @@ namespace WalletConnectSharp.Sign
 
             TaskCompletionSource<ProposalStruct> sessionProposeTask = new TaskCompletionSource<ProposalStruct>();
 
-            Client.ListenOnce<SessionProposalEvent>(nameof(Client.SessionProposed), (sender, args) =>
-            {
-                var proposal = args.Proposal;
-                if (topic != proposal.PairingTopic)
-                    return;
+            EventUtils.ListenOnce<SessionProposalEvent>(
+                (sender, args) =>
+                {
+                    var proposal = args.Proposal;
+                    if (topic != proposal.PairingTopic)
+                        return;
 
-                if (args.VerifiedContext.Validation == Validation.Invalid)
-                    sessionProposeTask.SetException(new Exception(
-                        $"Could not validate, invalid validation status {args.VerifiedContext.Validation} for origin {args.VerifiedContext.Origin}"));
-                else
-                    sessionProposeTask.SetResult(proposal);
-            });
+                    if (args.VerifiedContext.Validation == Validation.Invalid)
+                        sessionProposeTask.SetException(new Exception(
+                            $"Could not validate, invalid validation status {args.VerifiedContext.Validation} for origin {args.VerifiedContext.Origin}"));
+                    else
+                        sessionProposeTask.SetResult(proposal);
+                },
+                h => Client.SessionProposed += h,
+                h => Client.SessionProposed -= h
+            );
 
             return await sessionProposeTask.Task;
         }

@@ -24,7 +24,7 @@ namespace WalletConnectSharp.Auth.Tests
             ChainId = "eip155:1",
             Nonce = CryptoUtils.GenerateNonce()
         };
-        
+
         private readonly CryptoWalletFixture _cryptoWalletFixture;
 
         private IAuthClient PeerA;
@@ -64,12 +64,12 @@ namespace WalletConnectSharp.Auth.Tests
         {
             Assert.NotNull(PeerA);
             Assert.NotNull(PeerB);
-            
+
             Assert.NotNull(PeerA.Core);
             Assert.NotNull(PeerA.Core.Expirer);
             Assert.NotNull(PeerA.Core.History);
             Assert.NotNull(PeerA.Core.Pairing);
-            
+
             Assert.NotNull(PeerB.Core);
             Assert.NotNull(PeerB.Core.Expirer);
             Assert.NotNull(PeerB.Core.History);
@@ -93,17 +93,18 @@ namespace WalletConnectSharp.Auth.Tests
             await PeerB.Core.Pairing.Pair(uri);
 
             await authRequested.Task;
-            
-            Assert.Equal(PeerA.Core.Pairing.Pairings.Select(p => p.Key), PeerB.Core.Pairing.Pairings.Select(p => p.Key));
+
+            Assert.Equal(PeerA.Core.Pairing.Pairings.Select(p => p.Key),
+                PeerB.Core.Pairing.Pairings.Select(p => p.Key));
             Assert.Equal(ogPairSize + 1, PeerA.Core.Pairing.Pairings.Length);
 
             var peerAHistory = await PeerA.Core.History.JsonRpcHistoryOfType<WcAuthRequest, Cacao>();
             var peerBHistory = await PeerB.Core.History.JsonRpcHistoryOfType<WcAuthRequest, Cacao>();
-            
+
             Assert.Equal(peerAHistory.Size, peerBHistory.Size);
-            
+
             Assert.True(PeerB.Core.Pairing.Pairings[0].Active);
-            
+
             // Cleanup event listeners
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
         }
@@ -114,20 +115,25 @@ namespace WalletConnectSharp.Auth.Tests
             var ogSizeA = PeerA.Core.Pairing.Pairings.Length;
             var history = await PeerA.AuthHistory();
             var ogHistorySizeA = history.Keys.Length;
-            
+
             var ogSizeB = PeerB.Core.Pairing.Pairings.Length;
             var historyB = await PeerB.AuthHistory();
             var ogHistorySizeB = historyB.Keys.Length;
-            
+
             List<TopicMessage> responses = new List<TopicMessage>();
             TaskCompletionSource<TopicMessage> responseTask = new TaskCompletionSource<TopicMessage>();
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
                 var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
-                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign
+                    .SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new Cacao() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
+                await PeerB.Respond(
+                    new Cacao()
+                    {
+                        Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature)
+                    }, this.Iss);
 
                 Assert.Equal(Validation.Unknown, request.VerifyContext?.Validation);
             }
@@ -162,7 +168,7 @@ namespace WalletConnectSharp.Auth.Tests
             await PeerB.Core.Pairing.Pair(requestData.Uri);
 
             await responseTask.Task;
-            
+
             // Reset
             responseTask = new TaskCompletionSource<TopicMessage>();
 
@@ -172,15 +178,15 @@ namespace WalletConnectSharp.Auth.Tests
             var requestData2 = await PeerA.Request(DefaultRequestParams, knownPairing.Topic);
 
             await responseTask.Task;
-            
+
             Assert.Null(requestData2.Uri);
-            
+
             Assert.Equal(ogSizeA + 1, PeerA.Core.Pairing.Pairings.Length);
             Assert.Equal(ogHistorySizeA + 2, history.Keys.Length);
             Assert.Equal(ogSizeB + 1, PeerB.Core.Pairing.Pairings.Length);
             Assert.Equal(ogHistorySizeB + 2, historyB.Keys.Length);
             Assert.Equal(responses[0].Topic, responses[1].Topic);
-            
+
             // Cleanup event listeners
 
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
@@ -192,7 +198,7 @@ namespace WalletConnectSharp.Auth.Tests
         public async void HandlesAuthRequests()
         {
             var ogSize = PeerB.Requests.Length;
-            
+
             TaskCompletionSource<bool> receivedAuthRequest = new TaskCompletionSource<bool>();
 
             void OnPeerBOnAuthRequested(object o, AuthRequest authRequest) => receivedAuthRequest.SetResult(true);
@@ -206,11 +212,11 @@ namespace WalletConnectSharp.Auth.Tests
             await receivedAuthRequest.Task;
 
             Assert.Equal(ogSize + 1, PeerB.Requests.Length);
-            
+
             // Cleanup event listeners
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
         }
-        
+
         [Fact, Trait("Category", "unit")]
         public async void TestErrorResponses()
         {
@@ -220,8 +226,14 @@ namespace WalletConnectSharp.Auth.Tests
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
-                await PeerB.Respond(new ErrorResponse() { Error = new Network.Models.Error() { Code = 14001, Message = "Can not login" }, Id = request.Id }, this.Iss);
+                await PeerB.Respond(
+                    new ErrorResponse()
+                    {
+                        Error = new Network.Models.Error() { Code = 14001, Message = "Can not login" },
+                        Id = request.Id
+                    }, this.Iss);
             }
+
             void OnPeerAOnAuthResponded(object sender, AuthResponse response)
             {
                 errorResponse.SetResult(false);
@@ -241,7 +253,7 @@ namespace WalletConnectSharp.Auth.Tests
             await PeerB.Core.Pairing.Pair(requestData.Uri);
 
             await errorResponse.Task;
-            
+
             Assert.False(PeerA.Core.Pairing.Pairings[^1].Active);
             Assert.True(errorResponse.Task.Result);
 
@@ -254,22 +266,28 @@ namespace WalletConnectSharp.Auth.Tests
         public async void HandlesSuccessfulResponse()
         {
             var ogPSize = PeerA.Core.Pairing.Pairings.Length;
-            
+
             TaskCompletionSource<bool> successfulResponse = new TaskCompletionSource<bool>();
 
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
                 var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
-                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign
+                    .SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
+                await PeerB.Respond(
+                    new ResultResponse()
+                    {
+                        Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature)
+                    }, this.Iss);
 
                 Assert.Equal(Validation.Unknown, request.VerifyContext?.Validation);
             }
 
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
-            void OnPeerAOnAuthResponded(object sender, AuthResponse response) => successfulResponse.SetResult(response.Response.Result?.Signature != null);
+            void OnPeerAOnAuthResponded(object sender, AuthResponse response) =>
+                successfulResponse.SetResult(response.Response.Result?.Signature != null);
 
             PeerA.AuthResponded += OnPeerAOnAuthResponded;
 
@@ -278,17 +296,17 @@ namespace WalletConnectSharp.Auth.Tests
             PeerA.AuthError += OnPeerAOnAuthError;
 
             var requestData = await PeerA.Request(DefaultRequestParams);
-            
+
             Assert.Equal(ogPSize + 1, PeerA.Core.Pairing.Pairings.Length);
             Assert.False(PeerA.Core.Pairing.Pairings[^1].Active);
 
             await PeerB.Core.Pairing.Pair(requestData.Uri);
 
             await successfulResponse.Task;
-            
+
             Assert.True(PeerA.Core.Pairing.Pairings[^1].Active);
             Assert.True(successfulResponse.Task.Result);
-            
+
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
             PeerA.AuthResponded -= OnPeerAOnAuthResponded;
             PeerA.AuthError -= OnPeerAOnAuthError;
@@ -302,12 +320,16 @@ namespace WalletConnectSharp.Auth.Tests
 
             TaskCompletionSource<bool> resolve1 = new TaskCompletionSource<bool>();
 
-            PeerA.Core.Relayer.Publisher.ListenOnce<PublishParams>(nameof(PeerA.Core.Relayer.Publisher.OnPublishedMessage), (sender, args) =>
-            {
-                Assert.Equal(expiry, args.Options.TTL);
-                resolve1.SetResult(true);
-            });
-           
+            EventUtils.ListenOnce<PublishParams>(
+                (sender, args) =>
+                {
+                    Assert.Equal(expiry, args.Options.TTL);
+                    resolve1.SetResult(true);
+                },
+                h => PeerA.Core.Relayer.Publisher.OnPublishedMessage += h,
+                h => PeerA.Core.Relayer.Publisher.OnPublishedMessage -= h
+            );
+
             await Task.WhenAll(resolve1.Task, Task.Run(async () =>
             {
                 var response = await PeerA.Request(new RequestParams(DefaultRequestParams) { Expiry = expiry });
@@ -319,9 +341,14 @@ namespace WalletConnectSharp.Auth.Tests
             async void OnPeerBOnAuthRequested(object sender, AuthRequest request)
             {
                 var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
-                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign
+                    .SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
+                await PeerB.Respond(
+                    new ResultResponse()
+                    {
+                        Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature)
+                    }, this.Iss);
                 resolve3.SetResult(true);
             }
 
@@ -351,7 +378,7 @@ namespace WalletConnectSharp.Auth.Tests
             await receivedAuthRequest.Task;
 
             var requests = PeerB.PendingRequests;
-            
+
             Assert.Equal(ogCount + 1, requests.Count);
             Assert.Contains(requests, r => r.Value.CacaoPayload.Aud == aud);
 
@@ -363,7 +390,7 @@ namespace WalletConnectSharp.Auth.Tests
         {
             var peerAOgSize = PeerA.Core.Pairing.Pairings.Length;
             var peerBOgSize = PeerB.Core.Pairing.Pairings.Length;
-            
+
             TaskCompletionSource<bool> receivedAuthRequest = new TaskCompletionSource<bool>();
 
             void OnPeerBOnAuthRequested(object sender, AuthRequest request) => receivedAuthRequest.SetResult(true);
@@ -378,14 +405,14 @@ namespace WalletConnectSharp.Auth.Tests
 
             var clientPairings = PeerA.Core.Pairing.Pairings;
             var peerPairings = PeerB.Core.Pairing.Pairings;
-            
+
             Assert.Equal(peerAOgSize + 1, clientPairings.Length);
             Assert.Equal(peerBOgSize + 1, peerPairings.Length);
             Assert.Equal(clientPairings[^1].Topic, peerPairings[^1].Topic);
 
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
         }
-        
+
         [Fact, Trait("Category", "unit")]
         public async void TestPing()
         {
@@ -397,15 +424,15 @@ namespace WalletConnectSharp.Auth.Tests
 
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
-            PeerB.Core.Pairing.ListenOnce<PairingEvent>(nameof(PeerB.Core.Pairing.PairingPinged), (sender, @event) =>
+            EventUtils.ListenOnce<PairingEvent>((sender, @event) =>
             {
                 receivedPeerPing.SetResult(true);
-            });
-            
-            PeerA.Core.Pairing.ListenOnce<PairingEvent>(nameof(PeerA.Core.Pairing.PairingPinged), (sender, args) =>
+            }, h => PeerB.Core.Pairing.PairingPinged += h, h => PeerB.Core.Pairing.PairingPinged -= h);
+
+            EventUtils.ListenOnce<PairingEvent>((sender, @event) =>
             {
                 receivedClientPing.SetResult(true);
-            });
+            }, h => PeerA.Core.Pairing.PairingPinged += h, h => PeerA.Core.Pairing.PairingPinged -= h);
 
             var requestData = await PeerA.Request(DefaultRequestParams);
 
@@ -418,7 +445,7 @@ namespace WalletConnectSharp.Auth.Tests
             await PeerB.Core.Pairing.Ping(pairing.Topic);
 
             await Task.WhenAll(receivedClientPing.Task, receivedPeerPing.Task);
-            
+
             Assert.True(receivedClientPing.Task.Result);
             Assert.True(receivedPeerPing.Task.Result);
 
@@ -438,10 +465,10 @@ namespace WalletConnectSharp.Auth.Tests
 
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
-            PeerB.Core.Pairing.ListenOnce<PairingEvent>(nameof(PeerB.Core.Pairing.PairingDeleted), (sender, args) =>
+            EventUtils.ListenOnce<PairingEvent>((sender, args) =>
             {
                 peerDeletedPairing.SetResult(true);
-            });
+            }, h => PeerB.Core.Pairing.PairingDeleted += h, h => PeerB.Core.Pairing.PairingDeleted -= h);
 
             var requestData = await PeerA.Request(DefaultRequestParams);
 
@@ -451,7 +478,7 @@ namespace WalletConnectSharp.Auth.Tests
 
             var clientPairings = PeerA.Core.Pairing.Pairings;
             var peerPairings = PeerB.Core.Pairing.Pairings;
-            
+
             Assert.Equal(peerAOgSize + 1, PeerA.Core.Pairing.Pairings.Length);
             Assert.Equal(peerBOgSize + 1, PeerB.Core.Pairing.Pairings.Length);
             Assert.Equal(clientPairings[^1].Topic, peerPairings[^1].Topic);
@@ -464,7 +491,7 @@ namespace WalletConnectSharp.Auth.Tests
 
             PeerB.AuthRequested -= OnPeerBOnAuthRequested;
         }
-        
+
         [Fact, Trait("Category", "unit")]
         public async void TestReceivesMetadata()
         {
@@ -477,9 +504,14 @@ namespace WalletConnectSharp.Auth.Tests
             {
                 receivedMetadataName = request.Parameters.Requester?.Metadata?.Name;
                 var message = PeerB.FormatMessage(request.Parameters.CacaoPayload, this.Iss);
-                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign.SendRequestAsync(Encoding.UTF8.GetBytes(message));
+                var signature = await CryptoWallet.GetAccount(WalletAddress).AccountSigningService.PersonalSign
+                    .SendRequestAsync(Encoding.UTF8.GetBytes(message));
 
-                await PeerB.Respond(new ResultResponse() { Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature) }, this.Iss);
+                await PeerB.Respond(
+                    new ResultResponse()
+                    {
+                        Id = request.Id, Signature = new Cacao.CacaoSignature.EIP191CacaoSignature(signature)
+                    }, this.Iss);
 
                 hasResponded.SetResult(true);
                 Assert.Equal(Validation.Unknown, request.VerifyContext.Validation);
@@ -488,14 +520,14 @@ namespace WalletConnectSharp.Auth.Tests
             PeerB.AuthRequested += OnPeerBOnAuthRequested;
 
             var requestData = await PeerA.Request(DefaultRequestParams);
-            
+
             Assert.Equal(ogPairingSize + 1, PeerA.Core.Pairing.Pairings.Length);
             Assert.False(PeerA.Core.Pairing.Pairings[^1].Active);
 
             await PeerB.Core.Pairing.Pair(requestData.Uri);
 
             await hasResponded.Task;
-            
+
             Assert.True(PeerA.Core.Pairing.Pairings[^1].Active);
             Assert.True(hasResponded.Task.Result);
             Assert.Equal(PeerA.Metadata.Name, receivedMetadataName);

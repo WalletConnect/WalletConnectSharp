@@ -13,7 +13,7 @@ namespace WalletConnectSharp.Common.Utils
         /// <param name="o">The object to check</param>
         /// <returns>Returns true if the object has a numeric type</returns>
         public static bool IsNumericType(this object o)
-        {   
+        {
             switch (Type.GetTypeCode(o.GetType()))
             {
                 case TypeCode.Byte:
@@ -29,7 +29,7 @@ namespace WalletConnectSharp.Common.Utils
                     return false;
             }
         }
-        
+
         /// <summary>
         /// Add a query parameter to the given source string
         /// </summary>
@@ -58,7 +58,8 @@ namespace WalletConnectSharp.Common.Utils
                    + "=" + HttpUtility.UrlEncode(value);
         }
 
-        public static async Task<T> WithTimeout<T>(this Task<T> task, int timeout = 1000, string message = "Timeout of %t exceeded")
+        public static async Task<T> WithTimeout<T>(this Task<T> task, int timeout = 1000,
+            string message = "Timeout of %t exceeded")
         {
             var resultT = await Task.WhenAny(task, Task.Delay(timeout));
             if (resultT != task)
@@ -66,10 +67,11 @@ namespace WalletConnectSharp.Common.Utils
                 throw new TimeoutException(message.Replace("%t", timeout.ToString()));
             }
 
-            return ((Task<T>) resultT).Result;
+            return ((Task<T>)resultT).Result;
         }
-        
-        public static async Task WithTimeout(this Task task, int timeout = 1000, string message = "Timeout of %t exceeded")
+
+        public static async Task WithTimeout(this Task task, int timeout = 1000,
+            string message = "Timeout of %t exceeded")
         {
             var resultT = await Task.WhenAny(task, Task.Delay(timeout));
             if (resultT != task)
@@ -77,8 +79,9 @@ namespace WalletConnectSharp.Common.Utils
                 throw new TimeoutException(message.Replace("%t", timeout.ToString()));
             }
         }
-        
-        public static async Task<T> WithTimeout<T>(this Task<T> task, TimeSpan timeout, string message = "Timeout of %t exceeded")
+
+        public static async Task<T> WithTimeout<T>(this Task<T> task, TimeSpan timeout,
+            string message = "Timeout of %t exceeded")
         {
             var resultT = await Task.WhenAny(task, Task.Delay(timeout));
             if (resultT != task)
@@ -86,10 +89,11 @@ namespace WalletConnectSharp.Common.Utils
                 throw new TimeoutException(message.Replace("%t", timeout.ToString()));
             }
 
-            return ((Task<T>) resultT).Result;
+            return ((Task<T>)resultT).Result;
         }
-        
-        public static async Task WithTimeout(this Task task, TimeSpan timeout, string message = "Timeout of %t exceeded")
+
+        public static async Task WithTimeout(this Task task, TimeSpan timeout,
+            string message = "Timeout of %t exceeded")
         {
             var resultT = await Task.WhenAny(task, Task.Delay(timeout));
             if (resultT != task)
@@ -97,38 +101,62 @@ namespace WalletConnectSharp.Common.Utils
                 throw new TimeoutException(message.Replace("%t", timeout.ToString()));
             }
         }
-        
+
         public static bool SetEquals<T>(this IEnumerable<T> first, IEnumerable<T> second,
             IEqualityComparer<T> comparer)
         {
             return new HashSet<T>(second, comparer ?? EqualityComparer<T>.Default)
                 .SetEquals(first);
         }
-        
-        public static Action ListenOnce(this object eventSource, string eventName, EventHandler handler) {
-            var eventInfo = eventSource.GetType().GetEvent(eventName);
-            EventHandler internalHandler = null;
-            internalHandler = (src, args) => {
-                eventInfo.RemoveEventHandler(eventSource, internalHandler);
-                handler(src, args);
-            };
-            void RemoveListener()
-            {
-                eventInfo.RemoveEventHandler(eventSource, internalHandler);
-            }
-            eventInfo.AddEventHandler(eventSource, internalHandler);
 
-            return RemoveListener;
+        public static Action ListenOnce(this EventHandler eventHandler, EventHandler handler)
+        {
+            EventHandler internalHandler = null;
+            internalHandler = (sender, args) =>
+            {
+                eventHandler -= internalHandler;
+                handler(sender, args);
+            };
+
+            eventHandler += internalHandler;
+
+            return () =>
+            {
+                try
+                {
+                    eventHandler -= internalHandler;
+                }
+                catch (Exception e)
+                {
+                    // ignored
+                }
+            };
         }
 
-        public static void ListenOnce<TEventArgs>(this object eventSource, string eventName, EventHandler<TEventArgs> handler) {
-            var eventInfo = eventSource.GetType().GetEvent(eventName);
+        public static Action ListenOnce<TEventArgs>(
+            this EventHandler<TEventArgs> eventHandler,
+            EventHandler<TEventArgs> handler)
+        {
             EventHandler<TEventArgs> internalHandler = null;
-            internalHandler = (src, args) => {
-                eventInfo.RemoveEventHandler(eventSource, internalHandler);
-                handler(src, args);
+            internalHandler = (sender, args) =>
+            {
+                eventHandler -= internalHandler;
+                handler(sender, args);
             };
-            eventInfo.AddEventHandler(eventSource, internalHandler);
+
+            eventHandler += internalHandler;
+
+            return () =>
+            {
+                try
+                {
+                    eventHandler -= internalHandler;
+                }
+                catch (Exception e)
+                {
+                    // ignored
+                }
+            };
         }
     }
 }
