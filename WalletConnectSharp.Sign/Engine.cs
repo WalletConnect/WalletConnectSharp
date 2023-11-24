@@ -683,7 +683,7 @@ namespace WalletConnectSharp.Sign
             if (string.IsNullOrWhiteSpace(chainId))
             {
                 var sessionData = Client.Session.Get(topic);
-                var firstRequiredNamespace = sessionData.RequiredNamespaces.OrderedKeys[0];
+                var firstRequiredNamespace = sessionData.RequiredNamespaces.Keys.First();
                 defaultChainId = sessionData.RequiredNamespaces[firstRequiredNamespace].Chains[0];
             }
             else
