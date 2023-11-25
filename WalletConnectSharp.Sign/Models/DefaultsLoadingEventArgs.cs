@@ -4,7 +4,7 @@ namespace WalletConnectSharp.Sign.Models;
 
 public class DefaultsLoadingEventArgs : EventArgs
 {
-    public DefaultsLoadingEventArgs(ref AddressProvider.DefaultData defaults)
+    public DefaultsLoadingEventArgs(in AddressProvider.DefaultData defaults)
     {
         Defaults = defaults;
     }

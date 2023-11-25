@@ -51,10 +51,7 @@ namespace WalletConnectSharp.Sign.Models
                 responsePredicate = responsePredicate
             };
             
-            _disposeActions.Add(() =>
-            {
-                instance.Dispose();
-            });
+            _disposeActions.Add(instance.Dispose);
 
             return instance;
         }
@@ -66,10 +63,7 @@ namespace WalletConnectSharp.Sign.Models
             wrappedRef.OnRequest += WrappedRefOnOnRequest;
             wrappedRef.OnResponse += WrappedRefOnOnResponse;
 
-            _disposeActions.Add(() =>
-            {
-                wrappedRef.Dispose();
-            });
+            _disposeActions.Add(wrappedRef.Dispose);
     }
 
         private Task WrappedRefOnOnResponse(ResponseEventArgs<TR> e)
@@ -108,13 +102,16 @@ namespace WalletConnectSharp.Sign.Models
             await base.RequestCallback(e.Topic, sessionRequest);
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            foreach (var action in _disposeActions)
+            if (disposing)
             {
-                action();
+                foreach (var action in _disposeActions)
+                {
+                    action();
+                }
             }
-            
+
             base.Dispose();
         }
     }

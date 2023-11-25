@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common.Logging;
@@ -89,11 +90,8 @@ namespace WalletConnectSharp.Storage
             }
 
             string json;
-            lock (entriesLock)
-            {
-                json = JsonConvert.SerializeObject(Entries,
-                    new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-            }
+            json = JsonConvert.SerializeObject(Entries,
+                new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
 
             try
             {
@@ -143,11 +141,8 @@ namespace WalletConnectSharp.Storage
             }
             
             // Hard fail here if the storage file is bad
-            lock (entriesLock)
-            {
-                Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
-                    new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
-            }
+            Entries = JsonConvert.DeserializeObject<ConcurrentDictionary<string, object>>(json,
+                new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
         }
 
         protected override void Dispose(bool disposing)

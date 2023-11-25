@@ -63,7 +63,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestInit()
+        public async Task TestInit()
         {
             Assert.NotNull(PeerA);
             Assert.NotNull(PeerB);
@@ -80,7 +80,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestPairs()
+        public async Task TestPairs()
         {
             var ogPairSize = PeerA.Core.Pairing.Pairings.Length;
 
@@ -112,7 +112,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestKnownPairings()
+        public async Task TestKnownPairings()
         {
             var ogSizeA = PeerA.Core.Pairing.Pairings.Length;
             var history = await PeerA.AuthHistory();
@@ -192,7 +192,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void HandlesAuthRequests()
+        public async Task HandlesAuthRequests()
         {
             var ogSize = PeerB.Requests.Length;
             
@@ -215,7 +215,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestErrorResponses()
+        public async Task TestErrorResponses()
         {
             var ogPSize = PeerA.Core.Pairing.Pairings.Length;
 
@@ -254,7 +254,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void HandlesSuccessfulResponse()
+        public async Task HandlesSuccessfulResponse()
         {
             var ogPSize = PeerA.Core.Pairing.Pairings.Length;
             
@@ -298,7 +298,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestCustomRequestExpiry()
+        public async Task TestCustomRequestExpiry()
         {
             var uri = "";
             var expiry = 1000;
@@ -336,7 +336,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPendingPairings()
+        public async Task TestGetPendingPairings()
         {
             var ogCount = PeerB.PendingRequests.Count;
 
@@ -362,7 +362,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPairings()
+        public async Task TestGetPairings()
         {
             var peerAOgSize = PeerA.Core.Pairing.Pairings.Length;
             var peerBOgSize = PeerB.Core.Pairing.Pairings.Length;
@@ -390,7 +390,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestPing()
+        public async Task TestPing()
         {
             TaskCompletionSource<bool> receivedAuthRequest = new TaskCompletionSource<bool>();
             TaskCompletionSource<bool> receivedClientPing = new TaskCompletionSource<bool>();
@@ -429,7 +429,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestDisconnectedPairing()
+        public async Task TestDisconnectedPairing()
         {
             var peerAOgSize = PeerA.Core.Pairing.Pairings.Length;
             var peerBOgSize = PeerB.Core.Pairing.Pairings.Length;
@@ -469,7 +469,7 @@ namespace WalletConnectSharp.Auth.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestReceivesMetadata()
+        public async Task TestReceivesMetadata()
         {
             var receivedMetadataName = "";
             var ogPairingSize = PeerA.Core.Pairing.Pairings.Length;

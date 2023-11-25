@@ -93,7 +93,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestRespondToAuthRequest()
+        public async Task TestRespondToAuthRequest()
         {
             var request = await _dapp.Request(DefaultRequestParams);
             uriString = request.Uri;
@@ -134,7 +134,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestShouldRejectAuthRequest()
+        public async Task TestShouldRejectAuthRequest()
         {
             var request = await _dapp.Request(DefaultRequestParams);
             uriString = request.Uri;
@@ -181,7 +181,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPendingAuthRequest()
+        public async Task TestGetPendingAuthRequest()
         {
             var request = await _dapp.Request(DefaultRequestParams);
             uriString = request.Uri;

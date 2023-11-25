@@ -47,7 +47,7 @@ namespace WalletConnectSharp.Network.Tests
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void ConnectAndRequest()
+        public async Task ConnectAndRequest()
         {
             var url = await BuildGoodURL();
             var connection = new WebsocketConnection(url);
@@ -60,7 +60,7 @@ namespace WalletConnectSharp.Network.Tests
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void RequestWithoutConnect()
+        public async Task RequestWithoutConnect()
         {
             var url = await BuildGoodURL();
             var connection = new WebsocketConnection(url);
@@ -72,7 +72,7 @@ namespace WalletConnectSharp.Network.Tests
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void ThrowOnJsonRpcError()
+        public async Task ThrowOnJsonRpcError()
         {
             var url = await BuildGoodURL();
             var connection = new WebsocketConnection(url);
@@ -83,7 +83,7 @@ namespace WalletConnectSharp.Network.Tests
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void ThrowsOnUnavailableHost()
+        public async Task ThrowsOnUnavailableHost()
         {
             var connection = new WebsocketConnection(BAD_WS_URL);
             var provider = new JsonRpcProvider(connection);
@@ -92,7 +92,7 @@ namespace WalletConnectSharp.Network.Tests
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void ReconnectsWithNewProvidedHost()
+        public async Task ReconnectsWithNewProvidedHost()
         {
             var url = await BuildGoodURL();
             var connection = new WebsocketConnection(BAD_WS_URL);
@@ -107,7 +107,7 @@ namespace WalletConnectSharp.Network.Tests
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void DoesNotDoubleRegisterListeners()
+        public async Task DoesNotDoubleRegisterListeners()
         {
             var url = await BuildGoodURL();
             var connection = new WebsocketConnection(url);

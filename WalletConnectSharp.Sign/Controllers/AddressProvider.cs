@@ -15,7 +15,7 @@ public class AddressProvider : IAddressProvider
         public string ChainId;
     }
 
-    public event EventHandler<DefaultsLoadingEventArgs> DefaultsLoading;
+    public event EventHandler<DefaultsLoadingEventArgs> DefaultsLoaded;
 
     public bool HasDefaultSession
     {
@@ -104,14 +104,14 @@ public class AddressProvider : IAddressProvider
         var key = $"{Context}-default-session";
         if (await _client.Core.Storage.HasItem(key))
         {
-            _state = await _client.Core.Storage.GetItem<DefaultData>($"{Context}-default-session");
+            _state = await _client.Core.Storage.GetItem<DefaultData>(key);
         }
         else
         {
             _state = new DefaultData();
         }
         
-        DefaultsLoading?.Invoke(this, new DefaultsLoadingEventArgs(ref _state));
+        DefaultsLoaded?.Invoke(this, new DefaultsLoadingEventArgs(_state));
     }
     
     private void ClientOnSessionUpdated(object sender, SessionEvent e)
@@ -155,10 +155,12 @@ public class AddressProvider : IAddressProvider
                         DefaultSession.RequiredNamespaces[DefaultNamespace].Chains.Contains(currentChain))
                     {
                         // DefaultChain is still valid
+                        await SaveDefaults();
                         return;
                     }
 
                     DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                    await SaveDefaults();
                     return;
                 }
 
@@ -177,15 +179,19 @@ public class AddressProvider : IAddressProvider
                         DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
                     }
                 }
+
             }
             else
             {
                 DefaultNamespace = null;
             }
-        }
-        finally
-        {
+
             await SaveDefaults();
+        }
+        catch (Exception e)
+        {
+            WCLogger.LogError(e);
+            throw;
         }
     }
 

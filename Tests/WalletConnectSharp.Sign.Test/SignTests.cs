@@ -119,7 +119,7 @@ namespace WalletConnectSharp.Sign.Test
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void TestApproveSession()
+        public async Task TestApproveSession()
         {
             await _cryptoFixture.WaitForClientsReady();
 
@@ -127,7 +127,7 @@ namespace WalletConnectSharp.Sign.Test
         }
         
         [Fact, Trait("Category", "integration")]
-        public async void TestRejectSession()
+        public async Task TestRejectSession()
         {
             await _cryptoFixture.WaitForClientsReady();
             
@@ -172,7 +172,7 @@ namespace WalletConnectSharp.Sign.Test
         }
         
         [Fact, Trait("Category", "integration")]
-        public async void TestSessionRequestResponse()
+        public async Task TestSessionRequestResponse()
         {
             await _cryptoFixture.WaitForClientsReady();
             
@@ -272,7 +272,7 @@ namespace WalletConnectSharp.Sign.Test
         }
         
         [Fact, Trait("Category", "integration")]
-        public async void TestTwoUniqueSessionRequestResponse()
+        public async Task TestTwoUniqueSessionRequestResponse()
         {
             await _cryptoFixture.WaitForClientsReady();
             
@@ -508,7 +508,7 @@ namespace WalletConnectSharp.Sign.Test
         }
         
         [Fact, Trait("Category", "integration")]
-        public async void TestAddressProviderDefaults()
+        public async Task TestAddressProviderDefaults()
         {
             await _cryptoFixture.WaitForClientsReady();
             
@@ -566,7 +566,7 @@ namespace WalletConnectSharp.Sign.Test
         }
 
         [Fact, Trait("Category", "integration")]
-        public async void TestAddressProviderDefaultsSaving()
+        public async Task TestAddressProviderDefaultsSaving()
         {
             await _cryptoFixture.WaitForClientsReady();
 

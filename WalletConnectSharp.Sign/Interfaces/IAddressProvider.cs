@@ -5,7 +5,7 @@ namespace WalletConnectSharp.Sign.Interfaces;
 
 public interface IAddressProvider : IModule
 {
-    event EventHandler<DefaultsLoadingEventArgs> DefaultsLoading; 
+    event EventHandler<DefaultsLoadingEventArgs> DefaultsLoaded; 
 
     bool HasDefaultSession { get; }
     

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Storage.Interfaces;
 
@@ -5,8 +6,7 @@ namespace WalletConnectSharp.Storage
 {
     public class InMemoryStorage : IKeyValueStorage
     {
-        protected readonly object entriesLock = new object();
-        protected Dictionary<string, object> Entries = new Dictionary<string, object>();
+        protected ConcurrentDictionary<string, object> Entries = new ConcurrentDictionary<string, object>();
         private bool _initialized = false;
         protected bool Disposed;
 
@@ -19,10 +19,7 @@ namespace WalletConnectSharp.Storage
         public virtual Task<string[]> GetKeys()
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                return Task.FromResult(Entries.Keys.ToArray());
-            }
+            return Task.FromResult(Entries.Keys.ToArray());
         }
 
         public virtual async Task<T[]> GetEntriesOfType<T>()
@@ -35,28 +32,19 @@ namespace WalletConnectSharp.Storage
         public virtual Task<object[]> GetEntries()
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                return Task.FromResult(Entries.Values.ToArray());
-            }
+            return Task.FromResult(Entries.Values.ToArray());
         }
 
         public virtual Task<T> GetItem<T>(string key)
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                return Task.FromResult(Entries[key] is T ? (T)Entries[key] : default);
-            }
+            return Task.FromResult(Entries[key] is T ? (T)Entries[key] : default);
         }
 
         public virtual Task SetItem<T>(string key, T value)
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                Entries[key] = value;
-            }
+            Entries[key] = value;
 
             return Task.CompletedTask;
         }
@@ -64,10 +52,7 @@ namespace WalletConnectSharp.Storage
         public virtual Task RemoveItem(string key)
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                Entries.Remove(key);
-            }
+            Entries.Remove(key, out _);
 
             return Task.CompletedTask;
         }
@@ -75,19 +60,13 @@ namespace WalletConnectSharp.Storage
         public virtual Task<bool> HasItem(string key)
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                return Task.FromResult(Entries.ContainsKey(key));
-            }
+            return Task.FromResult(Entries.ContainsKey(key));
         }
 
         public virtual Task Clear()
         {
             IsInitialized();
-            lock (entriesLock)
-            {
-                Entries.Clear();
-            }
+            Entries.Clear();
 
             return Task.CompletedTask;
         }

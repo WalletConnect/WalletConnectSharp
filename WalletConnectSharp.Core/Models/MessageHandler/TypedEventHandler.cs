@@ -141,6 +141,8 @@ namespace WalletConnectSharp.Sign.Models
             }
         }
 
+        public bool Disposed { get; protected set; }
+
         protected TypedEventHandler(ICore engine)
         {
             _ref = engine;
@@ -259,10 +261,23 @@ namespace WalletConnectSharp.Sign.Models
             return context;
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
-            var context = _ref.Context;
-            _instances.Remove(context);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+            
+            if (disposing)
+            {
+                var context = _ref.Context;
+                _instances.Remove(context);
+            }
+
+            Disposed = true;
         }
     }
 }

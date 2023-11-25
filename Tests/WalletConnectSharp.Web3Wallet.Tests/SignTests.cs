@@ -183,7 +183,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestShouldApproveSessionProposal()
+        public async Task TestShouldApproveSessionProposal()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -207,7 +207,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestShouldRejectSessionProposal()
+        public async Task TestShouldRejectSessionProposal()
         {
             var rejectionError = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
 
@@ -246,7 +246,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestUpdateSession()
+        public async Task TestUpdateSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -285,7 +285,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestExtendSession()
+        public async Task TestExtendSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -321,7 +321,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestRespondToSessionRequest()
+        public async Task TestRespondToSessionRequest()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -399,7 +399,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestWalletDisconnectFromSession()
+        public async Task TestWalletDisconnectFromSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -446,7 +446,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestDappDisconnectFromSession()
+        public async Task TestDappDisconnectFromSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -493,7 +493,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestEmitSessionEvent()
+        public async Task TestEmitSessionEvent()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -551,7 +551,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetActiveSessions()
+        public async Task TestGetActiveSessions()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -591,7 +591,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPendingSessionProposals()
+        public async Task TestGetPendingSessionProposals()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += (sender, @event) =>
@@ -610,7 +610,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPendingSessionRequests()
+        public async Task TestGetPendingSessionRequests()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>

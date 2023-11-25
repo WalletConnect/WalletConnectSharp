@@ -46,7 +46,7 @@ namespace WalletConnectSharp.Sign.Test
         }
 
         [Fact, Trait("Category", "concurrency")]
-        public async void TestConcurrentClients() => await _TestConcurrentClients().WithTimeout(TimeSpan.FromMinutes(20));
+        public async Task TestConcurrentClients() => await _TestConcurrentClients().WithTimeout(TimeSpan.FromMinutes(20));
 
         private int[][] BatchArray(int[] array, int size)
         {
