@@ -277,8 +277,8 @@ namespace WalletConnectSharp.Sign.Models
             
             if (disposing)
             {
-                var context = _ref.Context;
-                _instances.Remove(context);
+                var context = Ref.Context;
+                Instances.Remove(context);
             }
 
             Disposed = true;
