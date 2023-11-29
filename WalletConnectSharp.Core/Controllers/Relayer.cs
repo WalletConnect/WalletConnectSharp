@@ -199,20 +199,20 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterProviderEventListeners()
         {
-            Provider.RawMessageReceived += ProviderOnRawMessageReceived;
-            Provider.Connected += ProviderOnConnected;
-            Provider.Disconnected += ProviderOnDisconnected;
-            Provider.ErrorReceived += ProviderOnErrorReceived;
+            Provider.RawMessageReceived += OnProviderRawMessageReceived;
+            Provider.Connected += OnProviderConnected;
+            Provider.Disconnected += OnProviderDisconnected;
+            Provider.ErrorReceived += OnProviderErrorReceived;
         }
 
-        private void ProviderOnErrorReceived(object sender, Exception e)
+        private void OnProviderErrorReceived(object sender, Exception e)
         {
             if (Disposed) return;
 
             this.OnErrored?.Invoke(this, e);
         }
 
-        private async void ProviderOnDisconnected(object sender, EventArgs e)
+        private async void OnProviderDisconnected(object sender, EventArgs e)
         {
             if (Disposed) return;
 
@@ -227,14 +227,14 @@ namespace WalletConnectSharp.Core.Controllers
             await RestartTransport();
         }
 
-        private void ProviderOnConnected(object sender, IJsonRpcConnection e)
+        private void OnProviderConnected(object sender, IJsonRpcConnection e)
         {
             if (Disposed) return;
             
             this.OnConnected?.Invoke(sender, EventArgs.Empty);
         }
 
-        private void ProviderOnRawMessageReceived(object sender, string e)
+        private void OnProviderRawMessageReceived(object sender, string e)
         {
             if (Disposed) return;
 
@@ -526,10 +526,10 @@ namespace WalletConnectSharp.Core.Controllers
                 Messages?.Dispose();
                 
                 // Un-listen to events
-                Provider.Connected -= ProviderOnConnected;
-                Provider.Disconnected -= ProviderOnDisconnected;
-                Provider.RawMessageReceived -= ProviderOnRawMessageReceived;
-                Provider.ErrorReceived -= ProviderOnErrorReceived;
+                Provider.Connected -= OnProviderConnected;
+                Provider.Disconnected -= OnProviderDisconnected;
+                Provider.RawMessageReceived -= OnProviderRawMessageReceived;
+                Provider.ErrorReceived -= OnProviderErrorReceived;
                 
                 Provider?.Dispose();
             }
