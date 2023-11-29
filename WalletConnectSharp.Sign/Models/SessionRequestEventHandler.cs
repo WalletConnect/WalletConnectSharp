@@ -13,7 +13,7 @@ namespace WalletConnectSharp.Sign.Models
     /// <typeparam name="TR">The type of the response for the session request</typeparam>
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
     {
-        private IEnginePrivate _enginePrivate;
+        private readonly IEnginePrivate _enginePrivate;
         private List<Action> _disposeActions = new List<Action>();
         
         /// <summary>
@@ -25,30 +25,31 @@ namespace WalletConnectSharp.Sign.Models
         /// <param name="engine">The engine this singleton instance is for, and where the context string will
         /// be read from</param>
         /// <returns>The singleton instance to use for request/response event handlers</returns>
-        public static new TypedEventHandler<T, TR> GetInstance(ICore engine, IEnginePrivate _enginePrivate)
+        public static TypedEventHandler<T, TR> GetInstance(ICore engine, IEnginePrivate enginePrivate)
         {
             var context = engine.Context;
-            
-            if (_instances.ContainsKey(context)) return _instances[context];
 
-            var _instance = new SessionRequestEventHandler<T, TR>(engine, _enginePrivate);
-            
-            _instances.Add(context, _instance);
+            if (Instances.TryGetValue(context, out var instance))
+                return instance;
 
-            return _instance;
+            var newInstance = new SessionRequestEventHandler<T, TR>(engine, enginePrivate);
+
+            Instances.Add(context, newInstance);
+
+            return newInstance;
         }
-        
+
         protected SessionRequestEventHandler(ICore engine, IEnginePrivate enginePrivate) : base(engine)
         {
             this._enginePrivate = enginePrivate;
         }
 
-        protected override TypedEventHandler<T, TR> BuildNew(ICore _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
+        protected override TypedEventHandler<T, TR> BuildNew(ICore @ref,
+            Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
-            var instance = new SessionRequestEventHandler<T, TR>(_ref, _enginePrivate)
+            var instance =  new SessionRequestEventHandler<T, TR>(@ref, _enginePrivate)
             {
-                requestPredicate = requestPredicate,
-                responsePredicate = responsePredicate
+                RequestPredicate = requestPredicate, ResponsePredicate = responsePredicate
             };
             
             _disposeActions.Add(instance.Dispose);
@@ -58,7 +59,7 @@ namespace WalletConnectSharp.Sign.Models
 
         protected override void Setup()
         {
-            var wrappedRef = TypedEventHandler<SessionRequest<T>, TR>.GetInstance(_ref);
+            var wrappedRef = TypedEventHandler<SessionRequest<T>, TR>.GetInstance(Ref);
 
             wrappedRef.OnRequest += WrappedRefOnOnRequest;
             wrappedRef.OnResponse += WrappedRefOnOnResponse;
@@ -77,17 +78,18 @@ namespace WalletConnectSharp.Sign.Models
             var method = RpcMethodAttribute.MethodForType<T>();
 
             var sessionRequest = e.Request.Params.Request;
-            
+
             if (sessionRequest.Method != method) return;
 
             //Set inner request id to match outer request id
             sessionRequest.Id = e.Request.Id;
-            
+
             //Add to pending requests
             //We can't do a simple cast, so we need to copy all the data
             await _enginePrivate.SetPendingSessionRequest(new PendingRequestStruct()
             {
-                Id = e.Request.Id, Parameters = new SessionRequest<object>()
+                Id = e.Request.Id,
+                Parameters = new SessionRequest<object>()
                 {
                     ChainId = e.Request.Params.ChainId,
                     Request = new JsonRpcRequest<object>()
@@ -96,7 +98,8 @@ namespace WalletConnectSharp.Sign.Models
                         Method = sessionRequest.Method,
                         Params = sessionRequest.Params
                     }
-                }, Topic = e.Topic
+                },
+                Topic = e.Topic
             });
 
             await base.RequestCallback(e.Topic, sessionRequest);

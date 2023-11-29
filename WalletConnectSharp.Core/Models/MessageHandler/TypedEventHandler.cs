@@ -17,11 +17,11 @@ namespace WalletConnectSharp.Sign.Models
     /// <typeparam name="TR">The response typ to filter for</typeparam>
     public class TypedEventHandler<T, TR> : IDisposable
     {
-        protected static Dictionary<string, TypedEventHandler<T, TR>> _instances = new Dictionary<string,TypedEventHandler<T,TR>>();
+        protected static readonly Dictionary<string, TypedEventHandler<T, TR>> Instances = new();
+        protected readonly ICore Ref;
 
-        protected Func<RequestEventArgs<T, TR>, bool> requestPredicate;
-        protected Func<ResponseEventArgs<TR>, bool> responsePredicate;
-        protected ICore _ref;
+        protected Func<RequestEventArgs<T, TR>, bool> RequestPredicate;
+        protected Func<ResponseEventArgs<TR>, bool> ResponsePredicate;
 
         /// <summary>
         /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
@@ -35,24 +35,26 @@ namespace WalletConnectSharp.Sign.Models
         public static TypedEventHandler<T, TR> GetInstance(ICore engine)
         {
             var context = engine.Context;
-            
-            if (_instances.ContainsKey(context)) return _instances[context];
 
-            var _instance = new TypedEventHandler<T, TR>(engine);
-            
-            _instances.Add(context, _instance);
+            if (Instances.TryGetValue(context, out var instance))
+                return instance;
 
-            return _instance;
+            var newInstance = new TypedEventHandler<T, TR>(engine);
+
+            Instances.Add(context, newInstance);
+
+            return newInstance;
         }
-            
+
         /// <summary>
         /// The callback function delegate that handles requests of the type TRequestArgs, TResponseArgs. These
         /// functions are async and return a Task.
         /// </summary>
         /// <typeparam name="TRequestArgs">The type of the request this function is for</typeparam>
         /// <typeparam name="TResponseArgs">The type of the response this function is for</typeparam>
-        public delegate Task RequestMethod<TRequestArgs, TResponseArgs>(RequestEventArgs<TRequestArgs, TResponseArgs> e);
-        
+        public delegate Task
+            RequestMethod<TRequestArgs, TResponseArgs>(RequestEventArgs<TRequestArgs, TResponseArgs> e);
+
         /// <summary>
         /// The callback function delegate that handles responses of the type TResponseArgs. These
         /// functions are async and return a Task.
@@ -64,7 +66,7 @@ namespace WalletConnectSharp.Sign.Models
         private event ResponseMethod<TR> _onResponse;
         private object _eventLock = new object();
         private int _activeCount;
-        
+
         /// <summary>
         /// The event handler that triggers when a new request of type
         /// T, TR is received. This event handler is only triggered
@@ -145,9 +147,9 @@ namespace WalletConnectSharp.Sign.Models
 
         protected TypedEventHandler(ICore engine)
         {
-            _ref = engine;
+            Ref = engine;
         }
-        
+
         /// <summary>
         /// Filter request events based on the given predicate. This will return a new instance of this
         /// <see cref="TypedEventHandler{T,TR}"/> that will only fire the <see cref="OnRequest"/> event handler
@@ -159,10 +161,10 @@ namespace WalletConnectSharp.Sign.Models
         public virtual TypedEventHandler<T, TR> FilterRequests(Func<RequestEventArgs<T, TR>, bool> predicate)
         {
             var finalPredicate = predicate;
-            if (this.requestPredicate != null)
-                finalPredicate = (rea) => this.requestPredicate(rea) && predicate(rea);
+            if (this.RequestPredicate != null)
+                finalPredicate = (rea) => this.RequestPredicate(rea) && predicate(rea);
 
-            return BuildNew(_ref, finalPredicate, responsePredicate);
+            return BuildNew(Ref, finalPredicate, ResponsePredicate);
         }
 
         /// <summary>
@@ -176,25 +178,25 @@ namespace WalletConnectSharp.Sign.Models
         public virtual TypedEventHandler<T, TR> FilterResponses(Func<ResponseEventArgs<TR>, bool> predicate)
         {
             var finalPredicate = predicate;
-            if (this.responsePredicate != null)
-                finalPredicate = (rea) => this.responsePredicate(rea) && predicate(rea);
+            if (this.ResponsePredicate != null)
+                finalPredicate = (rea) => this.ResponsePredicate(rea) && predicate(rea);
 
-            return BuildNew(_ref, requestPredicate, finalPredicate);
+            return BuildNew(Ref, RequestPredicate, finalPredicate);
         }
 
-        protected virtual TypedEventHandler<T, TR> BuildNew(ICore _ref, Func<RequestEventArgs<T, TR>, bool> requestPredicate,
+        protected virtual TypedEventHandler<T, TR> BuildNew(ICore _ref,
+            Func<RequestEventArgs<T, TR>, bool> requestPredicate,
             Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
             return new TypedEventHandler<T, TR>(_ref)
             {
-                requestPredicate = requestPredicate,
-                responsePredicate = responsePredicate
+                RequestPredicate = requestPredicate, ResponsePredicate = responsePredicate
             };
         }
 
         protected virtual void Setup()
         {
-            _ref.MessageHandler.HandleMessageType<T, TR>(RequestCallback, ResponseCallback);
+            Ref.MessageHandler.HandleMessageType<T, TR>(RequestCallback, ResponseCallback);
         }
 
         protected virtual void Teardown()
@@ -205,18 +207,18 @@ namespace WalletConnectSharp.Sign.Models
         protected virtual Task ResponseCallback(string arg1, JsonRpcResponse<TR> arg2)
         {
             var rea = new ResponseEventArgs<TR>(arg2, arg1);
-            return responsePredicate != null && !responsePredicate(rea) ? Task.CompletedTask :
+            return ResponsePredicate != null && !ResponsePredicate(rea) ? Task.CompletedTask :
                 _onResponse != null ? _onResponse(rea) : Task.CompletedTask;
         }
 
         protected virtual async Task RequestCallback(string arg1, JsonRpcRequest<T> arg2)
         {
             VerifiedContext verifyContext = new VerifiedContext() { Validation = Validation.Unknown };
-            
+
             // Find pairing to get metadata
-            if (_ref.Pairing.Store.Keys.Contains(arg1))
+            if (Ref.Pairing.Store.Keys.Contains(arg1))
             {
-                var pairing = _ref.Pairing.Store.Get(arg1);
+                var pairing = Ref.Pairing.Store.Get(arg1);
 
                 var hash = HashUtils.HashMessage(JsonConvert.SerializeObject(arg2));
                 verifyContext = await VerifyContext(hash, pairing.PeerMetadata);
@@ -224,29 +226,31 @@ namespace WalletConnectSharp.Sign.Models
 
             var rea = new RequestEventArgs<T, TR>(arg1, arg2, verifyContext);
 
-            if (requestPredicate != null && !requestPredicate(rea)) return;
+            if (RequestPredicate != null && !RequestPredicate(rea)) return;
             if (_onRequest == null) return;
 
             await _onRequest(rea);
 
-            if (rea.Response != null || rea.Error != null)
+            if (rea.Error != null)
             {
-                await _ref.MessageHandler.SendResult<T, TR>(arg2.Id, arg1, rea.Response);
+                await Ref.MessageHandler.SendError<T, TR>(arg2.Id, arg1, rea.Error);
+            }
+            else if (rea.Response != null)
+            {
+                await Ref.MessageHandler.SendResult<T, TR>(arg2.Id, arg1, rea.Response);
             }
         }
-        
+
         async Task<VerifiedContext> VerifyContext(string hash, Metadata metadata)
         {
             var context = new VerifiedContext()
             {
-                VerifyUrl = metadata.VerifyUrl ?? "",
-                Validation = Validation.Unknown,
-                Origin = metadata.Url ?? ""
+                VerifyUrl = metadata.VerifyUrl ?? "", Validation = Validation.Unknown, Origin = metadata.Url ?? ""
             };
 
             try
             {
-                var origin = await _ref.Verify.Resolve(hash);
+                var origin = await Ref.Verify.Resolve(hash);
                 if (!string.IsNullOrWhiteSpace(origin))
                 {
                     context.Origin = origin;
