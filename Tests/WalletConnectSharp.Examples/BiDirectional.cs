@@ -6,7 +6,6 @@ using WalletConnectSharp.Storage;
 
 namespace WalletConnectSharp.Examples
 {
-
     public class BiDirectional : IExample
     {
         public string Name
@@ -16,15 +15,15 @@ namespace WalletConnectSharp.Examples
 
         public async Task Execute(string[] args)
         {
-            var home = 
+            var home =
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            
+
             var testAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
-            
+
             var dappFilePath = Path.Combine(home, ".wc", "store_dapp_example.json");
             var dappOptions = new SignClientOptions()
             {
-                ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
+                ProjectId = "ef21cf313a63dbf63f2e9e04f3614029",
                 Metadata = new Metadata()
                 {
                     Description = "An example dapp to showcase WalletConnectSharpv2",
@@ -34,31 +33,22 @@ namespace WalletConnectSharp.Examples
                 },
                 Storage = new FileSystemStorage(dappFilePath)
             };
-            
+
             var dappConnectOptions = new ConnectOptions()
             {
                 RequiredNamespaces = new RequiredNamespaces()
                 {
                     {
-                        "eip155", new ProposedNamespace()
+                        "eip155",
+                        new ProposedNamespace()
                         {
                             Methods = new[]
                             {
-                                "eth_sendTransaction",
-                                "eth_signTransaction",
-                                "eth_sign",
-                                "personal_sign",
+                                "eth_sendTransaction", "eth_signTransaction", "eth_sign", "personal_sign",
                                 "eth_signTypedData",
                             },
-                            Chains = new[]
-                            {
-                                "eip155:1"
-                            },
-                            Events = new[]
-                            {
-                                "chainChanged", 
-                                "accountsChanged",
-                            }
+                            Chains = new[] { "eip155:1" },
+                            Events = new[] { "chainChanged", "accountsChanged", }
                         }
                     }
                 }
@@ -70,7 +60,7 @@ namespace WalletConnectSharp.Examples
             var walletFilePath = Path.Combine(home, ".wc", "store_wallet_example.json");
             var walletOptions = new SignClientOptions()
             {
-                ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
+                ProjectId = "ef21cf313a63dbf63f2e9e04f3614029",
                 Metadata = new Metadata()
                 {
                     Description = "An example wallet to showcase WalletConnectSharpv2",
