@@ -115,7 +115,7 @@ namespace WalletConnectSharp.Sign.Models
                 }
             }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
