@@ -11,18 +11,20 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: |
-          3.1.x
           6.0.x
+   
     - name: Build
       run: dotnet build -c Release
     - uses: ./.github/actions/ci
       with:
         type: 'unit-tests'
         project-id: ${{ secrets.PROJECT_ID }}
+    
     - name: Pack nugets
       run: dotnet pack -c Release --no-build --output .
     - name: Push to NuGet
