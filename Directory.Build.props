@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <DefaultVersion>2.1.6</DefaultVersion>
-    <DefaultTargetFrameworks>net6.0;netstandard2.1;</DefaultTargetFrameworks>
+    <DefaultTargetFrameworks>net6.0;net7.0;net8.0;netstandard2.1;</DefaultTargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Label="C#">
     <LangVersion>latest</LangVersion>
