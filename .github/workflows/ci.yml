@@ -4,35 +4,28 @@ on:
   push:
     branches: [ main, '2.0' ]
   pull_request:
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        test-type: [unit-tests, integration-tests]
-      
+
     steps:
     - uses: actions/checkout@v2
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: |
           6.0.x
-    
+
     - name: Restore dependencies
       run: dotnet restore
       working-directory: ./
-    
+
     - name: Build
       run: dotnet build --no-restore
       working-directory: ./
-    
-    - name: Run tests
-      uses: ./.github/actions/ci
-      with:
-        type: ${{ matrix.test-type }}
-        project-id: ${{ secrets.PROJECT_ID }}
-        
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -41,3 +34,25 @@ jobs:
           **/bin/**/*.dll
           !**/Core Modules/**/bin/**/*.dll
           !**/Tests/**/bin/**/*.dll
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-type: [unit-tests, integration-tests]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          6.0.x
+
+    - name: Run tests
+      uses: ./.github/actions/ci
+      with:
+        type: ${{ matrix.test-type }}
+        project-id: ${{ secrets.PROJECT_ID }}
