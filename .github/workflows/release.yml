@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,22 +38,22 @@ jobs:
   pack:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-#      - name: Setup .NET
-#        uses: actions/setup-dotnet@v3
-#        with:
-#          dotnet-version: |
-#            8.0.x
-#
-#      - name: Pack nugets
-#        run: dotnet pack -c Release --no-build --output .
-#
-#      - name: Push to NuGet
-#        run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            8.0.x
+
+      - name: Pack nugets
+        run: dotnet pack -c Release --no-build --output .
+
+      - name: Push to NuGet
+        run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
 
   dispatch:
     needs: pack
