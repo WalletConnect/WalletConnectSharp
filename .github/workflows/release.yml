@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  workflow_dispatch:
   release:
     types: [published]
 
@@ -66,3 +65,4 @@ jobs:
           token: ${{ secrets.REPOSITORY_DISPATCH_PAT }}
           repository: walletconnect/walletconnectunity
           event-type: new-release
+          client-payload: '{"tag_name": "${{ github.event.release.tag_name }}", "sha": "${{ github.sha }}"}'
