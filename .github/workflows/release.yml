@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -23,20 +23,9 @@ jobs:
         with:
           type: 'unit-tests'
           project-id: ${{ secrets.PROJECT_ID }}
-          
-      - name: Build Release
-        run: dotnet build -c Release
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: |
-            **/bin/**/*.dll
-            !**/Tests/**/bin/**/*.dll
 
   pack:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -48,12 +37,23 @@ jobs:
         with:
           dotnet-version: |
             8.0.x
+      
+      - name: Build Release
+        run: dotnet build -c Release
 
       - name: Pack nugets
         run: dotnet pack -c Release --no-build --output .
 
       - name: Push to NuGet
         run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            **/bin/**/*.dll
+            !**/Tests/**/bin/**/*.dll
 
   dispatch:
     needs: pack
