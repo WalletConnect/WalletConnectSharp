@@ -10,7 +10,7 @@ namespace WalletConnectSharp.Sign.Models
     /// namespace:   [-a-z0-9]{3,8}
     /// reference:   [-_a-zA-Z0-9]{1,32}
     /// </summary>
-    public class Namespaces : Dictionary<string, Namespace>, IEquatable<Namespaces>
+    public class Namespaces : SortedDictionary<string, Namespace>
     {
         public Namespaces() : base() { }
 
@@ -29,35 +29,7 @@ namespace WalletConnectSharp.Sign.Models
             WithProposedNamespaces(proposedNamespaces);
         }
 
-        public bool Equals(Namespaces other)
-        {
-            return new DictionaryComparer<string, Namespace>(Namespace.NamespaceComparer).Equals(this, other);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            if (obj.GetType() != this.GetType())
-            {
-                return false;
-            }
-
-            return Equals((Namespaces)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            throw new NotImplementedException();
-        }
+        public override IEqualityComparer<Namespace> Comparer => Namespace.NamespaceComparer;
 
         public Namespaces WithNamespace(string chainNamespace, Namespace nm)
         {

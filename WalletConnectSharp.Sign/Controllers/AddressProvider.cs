@@ -21,7 +21,7 @@ public class AddressProvider : IAddressProvider
     {
         get
         {
-            return !string.IsNullOrWhiteSpace(DefaultSession.Topic) && DefaultSession.RequiredNamespaces != null;
+            return !string.IsNullOrWhiteSpace(DefaultSession.Topic) && DefaultSession.Namespaces != null;
         }
     }
 
@@ -147,36 +147,36 @@ public class AddressProvider : IAddressProvider
             if (HasDefaultSession)
             {
                 var currentDefault = DefaultNamespace;
-                if (currentDefault != null && DefaultSession.RequiredNamespaces.ContainsKey(currentDefault))
+                if (currentDefault != null && DefaultSession.Namespaces.ContainsKey(currentDefault))
                 {
                     // DefaultNamespace is still valid
                     var currentChain = DefaultChain;
                     if (currentChain == null ||
-                        DefaultSession.RequiredNamespaces[DefaultNamespace].Chains.Contains(currentChain))
+                        DefaultSession.Namespaces[DefaultNamespace].Chains.Contains(currentChain))
                     {
                         // DefaultChain is still valid
                         await SaveDefaults();
                         return;
                     }
 
-                    DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                    DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                     await SaveDefaults();
                     return;
                 }
 
-                // DefaultNamespace is null or not found in RequiredNamespaces, update it
-                DefaultNamespace = DefaultSession.RequiredNamespaces.OrderedKeys.FirstOrDefault();
+                // DefaultNamespace is null or not found in current available spaces, update it
+                DefaultNamespace = DefaultSession.Namespaces.OrderedKeys.FirstOrDefault();
                 if (DefaultNamespace != null)
                 {
-                    DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                    DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                 }
                 else
                 {
                     // TODO The Keys property is unordered! Maybe this needs to be updated
-                    DefaultNamespace = DefaultSession.RequiredNamespaces.Keys.FirstOrDefault();
+                    DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
                     if (DefaultNamespace != null)
                     {
-                        DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                        DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                     }
                 }
 

@@ -688,8 +688,8 @@ namespace WalletConnectSharp.Sign
             if (string.IsNullOrWhiteSpace(chainId))
             {
                 var sessionData = Client.Session.Get(topic);
-                var defaultNamespace = Client.AddressProvider.DefaultNamespace ?? sessionData.RequiredNamespaces.OrderedKeys[0];
-                defaultChainId = Client.AddressProvider.DefaultChain ?? sessionData.RequiredNamespaces[defaultNamespace].Chains[0];
+                var defaultNamespace = Client.AddressProvider.DefaultNamespace ?? sessionData.Namespaces.OrderedKeys[0];
+                defaultChainId = Client.AddressProvider.DefaultChain ?? sessionData.Namespaces[defaultNamespace].Chains[0];
             }
             else
             {
