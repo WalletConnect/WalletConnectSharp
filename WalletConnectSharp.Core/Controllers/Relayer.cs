@@ -239,16 +239,9 @@ namespace WalletConnectSharp.Core.Controllers
 
                 if (response?.Messages == null)
                     break;
-                    
-                foreach (var message in response.Messages)
-                {
-                    var messageEvent = new MessageEvent
-                    {
-                        Message = message.Message, Topic = message.Topic
-                    };
 
-                    await OnMessageEvent(messageEvent);
-                }
+                await Task.WhenAll(response.Messages.Select(message => new MessageEvent() { Message = message.Message, Topic = message.Topic })
+                    .Select(OnMessageEvent));
 
                 hasMore = response.HasMore;
             } while (hasMore);
