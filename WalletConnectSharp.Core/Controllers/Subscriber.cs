@@ -582,8 +582,7 @@ namespace WalletConnectSharp.Core.Controllers
             if (subscriptions.Length == 0) return;
             foreach (var sub in subscriptions)
             {
-                SetSubscription(sub.Id, sub);
-                this.pending.Remove(sub.Topic);
+                OnSubscribe(sub.Id, sub);
             }
         }
 

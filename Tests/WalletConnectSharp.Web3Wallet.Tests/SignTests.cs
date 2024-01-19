@@ -82,7 +82,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                             "eth_signTypedData"
                         },
                         Accounts = TestAccounts,
-                        Events = TestEvents
+                        Events = TestEvents,
+                        Chains = new[] { TestEthereumChain },
                     }
             }
         };
@@ -91,7 +92,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         {
             Methods = new[] { "eth_signTransaction", },
             Accounts = new[] { TestAccounts[0] },
-            Events = new[] { TestEvents[0] }
+            Events = new[] { TestEvents[0] },
+            Chains = new[] { TestEthereumChain },
         };
         
         private static readonly Namespaces TestNamespaces = new Namespaces()
@@ -183,7 +185,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestShouldApproveSessionProposal()
+        public async Task TestShouldApproveSessionProposal()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -207,7 +209,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestShouldRejectSessionProposal()
+        public async Task TestShouldRejectSessionProposal()
         {
             var rejectionError = Error.FromErrorType(ErrorType.USER_DISCONNECTED);
 
@@ -246,7 +248,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestUpdateSession()
+        public async Task TestUpdateSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -285,7 +287,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestExtendSession()
+        public async Task TestExtendSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -321,7 +323,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestRespondToSessionRequest()
+        public async Task TestRespondToSessionRequest()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -337,7 +339,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new[] { TestEthereumChain },
                         }
                     }
                 });
@@ -399,7 +402,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestWalletDisconnectFromSession()
+        public async Task TestWalletDisconnectFromSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -415,7 +418,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new [] { TestEthereumChain }
                         }
                     }
                 });
@@ -446,7 +450,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
         
         [Fact, Trait("Category", "unit")]
-        public async void TestDappDisconnectFromSession()
+        public async Task TestDappDisconnectFromSession()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -462,7 +466,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new [] { TestEthereumChain }
                         }
                     }
                 });
@@ -493,7 +498,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestEmitSessionEvent()
+        public async Task TestEmitSessionEvent()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -509,7 +514,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new [] { TestEthereumChain }
                         }
                     }
                 });
@@ -534,7 +540,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             };
 
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
-            _dapp.HandleEventMessageType<ChainChangedEvent>(async (s, request) =>
+            var handler = await _dapp.HandleEventMessageType<ChainChangedEvent>(async (s, request) =>
             {
                 var eventData = request.Params.Event;
                 var topic = request.Params.Topic;
@@ -548,10 +554,12 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                 task2.Task,
                 _wallet.EmitSessionEvent(session.Topic, sentData, TestRequiredNamespaces["eip155"].Chains[0])
             );
+            
+            handler.Dispose();
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetActiveSessions()
+        public async Task TestGetActiveSessions()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -569,7 +577,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                             {
                                 Methods = TestNamespace.Methods,
                                 Events = TestNamespace.Events,
-                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" }
+                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" },
+                                Chains = new [] { TestEthereumChain }
                             }
                         }
                     });
@@ -591,7 +600,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPendingSessionProposals()
+        public async Task TestGetPendingSessionProposals()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += (sender, @event) =>
@@ -610,7 +619,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void TestGetPendingSessionRequests()
+        public async Task TestGetPendingSessionRequests()
         {
             TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
@@ -628,7 +637,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                             {
                                 Methods = TestNamespace.Methods,
                                 Events = TestNamespace.Events,
-                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" }
+                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" },
+                                Chains = new [] { TestEthereumChain }
                             }
                         }
                     });

@@ -9,7 +9,7 @@ namespace WalletConnectSharp.Storage.Test
     public class FileSystemStorageTest
     {
         [Fact, Trait("Category", "unit")]
-        public async void GetSetRemoveTest()
+        public async Task GetSetRemoveTest()
         {
             using (var tempFolder = new TempFolder())
             {
@@ -23,7 +23,7 @@ namespace WalletConnectSharp.Storage.Test
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void GetKeysTest()
+        public async Task GetKeysTest()
         {
             using (var tempFolder = new TempFolder())
             {
@@ -36,7 +36,7 @@ namespace WalletConnectSharp.Storage.Test
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void GetEntriesTests()
+        public async Task GetEntriesTests()
         {
             using (var tempFolder = new TempFolder())
             {
@@ -51,7 +51,7 @@ namespace WalletConnectSharp.Storage.Test
         }
 
         [Fact, Trait("Category", "unit")]
-        public async void HasItemTest()
+        public async Task HasItemTest()
         {
             using (var tempFolder = new TempFolder())
             {

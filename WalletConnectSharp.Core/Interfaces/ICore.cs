@@ -59,7 +59,7 @@ namespace WalletConnectSharp.Core.Interfaces
         /// SDK executions
         /// </summary>
         public IKeyValueStorage Storage { get; }
-        
+
         /// <summary>
         /// The <see cref="ITypedMessageHandler"/> module this Core module is using. Use this for handling
         /// custom message types (request or response) and for sending messages (request, responses or errors)

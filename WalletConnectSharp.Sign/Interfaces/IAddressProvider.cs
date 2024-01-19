@@ -5,6 +5,8 @@ namespace WalletConnectSharp.Sign.Interfaces;
 
 public interface IAddressProvider : IModule
 {
+    event EventHandler<DefaultsLoadingEventArgs> DefaultsLoaded; 
+
     bool HasDefaultSession { get; }
     
     SessionStruct DefaultSession { get; set; }
@@ -16,6 +18,8 @@ public interface IAddressProvider : IModule
     ISession Sessions { get; }
     
     Caip25Address CurrentAddress( string chain = null, SessionStruct session = default);
+
+    Task Init();
 
     Caip25Address[] AllAddresses(string chain = null, SessionStruct session = default);
 }

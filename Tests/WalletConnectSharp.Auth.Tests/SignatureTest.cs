@@ -22,7 +22,7 @@ Issued At: 2022-10-10T23:03:35.700Z
 Expiration Time: 2022-10-11T23:03:35.700Z".Replace("\r", "");
     
     [Fact, Trait("Category", "unit")]
-    public async void TestValidEip1271Signature()
+    public async Task TestValidEip1271Signature()
     {
         var signature = new Cacao.CacaoSignature.EIP1271CacaoSignature(
             "0xc1505719b2504095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c");
@@ -34,7 +34,7 @@ Expiration Time: 2022-10-11T23:03:35.700Z".Replace("\r", "");
     }
 
     [Fact, Trait("Category", "unit")]
-    public async void TestBadEip1271Signature()
+    public async Task TestBadEip1271Signature()
     {
         var signature = new Cacao.CacaoSignature.EIP1271CacaoSignature(
             "0xdead5719b2504095116db01baaf276361efd3a73c28cf8cc28dabefa945b8d536011289ac0a3b048600c1e692ff173ca944246cf7ceb319ac2262d27b395c82b1c");

@@ -1,4 +1,6 @@
-﻿using WalletConnectSharp.Core.Interfaces;
+﻿using WalletConnectSharp.Common.Logging;
+using WalletConnectSharp.Common.Model.Errors;
+using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
@@ -14,7 +16,7 @@ namespace WalletConnectSharp.Sign.Models
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
     {
         private readonly IEnginePrivate _enginePrivate;
-
+        
         /// <summary>
         /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
         /// string of the given <see cref="IEngine"/> will be used to determine the singleton instance to
@@ -46,10 +48,14 @@ namespace WalletConnectSharp.Sign.Models
         protected override TypedEventHandler<T, TR> BuildNew(ICore @ref,
             Func<RequestEventArgs<T, TR>, bool> requestPredicate, Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
-            return new SessionRequestEventHandler<T, TR>(@ref, _enginePrivate)
+            var instance =  new SessionRequestEventHandler<T, TR>(@ref, _enginePrivate)
             {
                 RequestPredicate = requestPredicate, ResponsePredicate = responsePredicate
             };
+            
+            _disposeActions.Add(instance.Dispose);
+
+            return instance;
         }
 
         protected override void Setup()
@@ -58,10 +64,18 @@ namespace WalletConnectSharp.Sign.Models
 
             wrappedRef.OnRequest += WrappedRefOnOnRequest;
             wrappedRef.OnResponse += WrappedRefOnOnResponse;
+
+            _disposeActions.Add(() =>
+            {
+                wrappedRef.OnRequest -= WrappedRefOnOnRequest;
+                wrappedRef.OnResponse -= WrappedRefOnOnResponse;
+                wrappedRef.Dispose();
+            });
         }
 
         private Task WrappedRefOnOnResponse(ResponseEventArgs<TR> e)
         {
+            WCLogger.Log($"Got response for type {typeof(TR)}");
             return base.ResponseCallback(e.Topic, e.Response);
         }
 
@@ -96,6 +110,8 @@ namespace WalletConnectSharp.Sign.Models
             });
 
             await base.RequestCallback(e.Topic, sessionRequest);
+
+            await _enginePrivate.DeletePendingSessionRequest(e.Request.Id, Error.FromErrorType(ErrorType.GENERIC));
         }
     }
 }

@@ -3,6 +3,7 @@ using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
 using WalletConnectSharp.Network;
@@ -123,6 +124,8 @@ namespace WalletConnectSharp.Core.Controllers
         private bool initialized;
         private bool reconnecting = false;
         protected bool Disposed;
+        private DateTime lastSyncTime;
+        private bool isSyncing;
 
         /// <summary>
         /// Create a new Relayer with the given RelayerOptions.
@@ -146,7 +149,10 @@ namespace WalletConnectSharp.Core.Controllers
 
             ConnectionTimeout = opts.ConnectionTimeout;
             RelayUrlBuilder = opts.RelayUrlBuilder;
+            MessageFetchInterval = opts.MessageFetchInterval;
         }
+
+        public TimeSpan? MessageFetchInterval { get; set; }
 
         /// <summary>
         /// Initialize this Relayer module. This will initialize all sub-modules
@@ -199,33 +205,85 @@ namespace WalletConnectSharp.Core.Controllers
 
         protected virtual void RegisterProviderEventListeners()
         {
-            Provider.RawMessageReceived += (sender, s) =>
+            Provider.RawMessageReceived += OnProviderRawMessageReceived;
+            Provider.Connected += OnProviderConnected;
+            Provider.Disconnected += OnProviderDisconnected;
+            Provider.ErrorReceived += OnProviderErrorReceived;
+            
+            Core.HeartBeat.OnPulse += HeartBeatOnOnPulse;
+        }
+
+        private async void HeartBeatOnOnPulse(object sender, EventArgs e)
+        {
+            var interval = this.MessageFetchInterval;
+            if (interval == null) return;
+            
+            var topics = Subscriber.Topics;
+            if (topics.Length <= 0 || isSyncing || !(DateTime.Now - lastSyncTime >= interval)) return;
+
+            isSyncing = true;
+            bool hasMore;
+            do
             {
-                OnProviderPayload(s);
-            };
+                var request = new BatchFetchMessageRequest()
+                {
+                    Topics = topics
+                };
 
-            Provider.Connected += (sender, connection) =>
-            {
-                this.OnConnected?.Invoke(this, EventArgs.Empty);
-            };
+                var response =
+                    await Request<BatchFetchMessageRequest, BatchFetchMessagesResponse>(new RequestArguments<BatchFetchMessageRequest>()
+                    {
+                        Method = "irn_batchFetchMessages",
+                        Params = request
+                    });
 
-            Provider.Disconnected += async (sender, args) =>
-            {
-                this.OnDisconnected?.Invoke(this, EventArgs.Empty);
+                if (response?.Messages == null)
+                    break;
 
-                if (this._transportExplicitlyClosed)
-                    return;
+                await Task.WhenAll(response.Messages.Select(message => new MessageEvent() { Message = message.Message, Topic = message.Topic })
+                    .Select(OnMessageEvent));
 
-                // Attempt to reconnect after one second
-                await Task.Delay(1000);
+                hasMore = response.HasMore;
+            } while (hasMore);
 
-                await RestartTransport();
-            };
+            isSyncing = false;
+            lastSyncTime = DateTime.Now;
+        }
 
-            Provider.ErrorReceived += (sender, args) =>
-            {
-                this.OnErrored?.Invoke(this, args);
-            };
+        private void OnProviderErrorReceived(object sender, Exception e)
+        {
+            if (Disposed) return;
+
+            this.OnErrored?.Invoke(this, e);
+        }
+
+        private async void OnProviderDisconnected(object sender, EventArgs e)
+        {
+            if (Disposed) return;
+
+            this.OnDisconnected?.Invoke(this, EventArgs.Empty);
+
+            if (this._transportExplicitlyClosed)
+                return;
+
+            // Attempt to reconnect after one second
+            await Task.Delay(1000);
+
+            await RestartTransport();
+        }
+
+        private void OnProviderConnected(object sender, IJsonRpcConnection e)
+        {
+            if (Disposed) return;
+            
+            this.OnConnected?.Invoke(sender, EventArgs.Empty);
+        }
+
+        private void OnProviderRawMessageReceived(object sender, string e)
+        {
+            if (Disposed) return;
+
+            OnProviderPayload(e);
         }
 
         protected virtual void RegisterEventListeners()
@@ -511,6 +569,15 @@ namespace WalletConnectSharp.Core.Controllers
                 Subscriber?.Dispose();
                 Publisher?.Dispose();
                 Messages?.Dispose();
+                
+                // Un-listen to events
+                Provider.Connected -= OnProviderConnected;
+                Provider.Disconnected -= OnProviderDisconnected;
+                Provider.RawMessageReceived -= OnProviderRawMessageReceived;
+                Provider.ErrorReceived -= OnProviderErrorReceived;
+
+                Core.HeartBeat.OnPulse -= HeartBeatOnOnPulse;
+                
                 Provider?.Dispose();
             }
 

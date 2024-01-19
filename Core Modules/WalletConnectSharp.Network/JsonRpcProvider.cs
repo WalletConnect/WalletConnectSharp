@@ -253,6 +253,19 @@ namespace WalletConnectSharp.Network
             _hasRegisteredEventListeners = true;
         }
 
+        protected void UnregisterEventListeners()
+        {
+            if (!_hasRegisteredEventListeners) return;
+
+            WCLogger.Log(
+                $"[JsonRpcProvider] Unregistering event listeners on connection object with context {_connection.ToString()} inside {Context}");
+            _connection.PayloadReceived -= OnPayload;
+            _connection.Closed -= OnConnectionDisconnected;
+            _connection.ErrorReceived -= OnConnectionError;
+
+            _hasRegisteredEventListeners = false;
+        }
+
         private void OnConnectionError(object sender, Exception e)
         {
             this.ErrorReceived?.Invoke(this, e);
@@ -313,6 +326,7 @@ namespace WalletConnectSharp.Network
 
             if (disposing)
             {
+                UnregisterEventListeners();
                 _connection?.Dispose();
             }
 

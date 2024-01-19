@@ -75,9 +75,14 @@ namespace WalletConnectSharp.Sign.Models
             return new Namespace(this).WithAccount(account);
         }
 
+        protected bool ArrayEquals(string[] a, string[] b)
+        {
+            return a.Length == b.Length && a.All(b.Contains) && b.All(a.Contains);
+        }
+
         protected bool Equals(ProposedNamespace other)
         {
-            return Equals(Chains, other.Chains) && Equals(Methods, other.Methods) && Equals(Events, other.Events);
+            return ArrayEquals(Chains, other.Chains) && ArrayEquals(Methods, other.Methods) && ArrayEquals(Events, other.Events);
         }
 
         public override bool Equals(object obj)

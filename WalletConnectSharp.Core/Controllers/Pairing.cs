@@ -6,6 +6,7 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Model.Relay;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Expirer;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Pairing.Methods;
@@ -52,6 +53,8 @@ namespace WalletConnectSharp.Core.Controllers
         public event EventHandler<PairingEvent> PairingDeleted;
 
         private EventHandlerMap<JsonRpcResponse<bool>> PairingPingResponseEvents = new();
+        private DisposeHandlerToken pairingDeleteMessageHandler;
+        private DisposeHandlerToken pairingPingMessageHandler;
 
         /// <summary>
         /// Get the <see cref="IStore{TKey,TValue}"/> module that is handling the storage of
@@ -95,7 +98,7 @@ namespace WalletConnectSharp.Core.Controllers
             {
                 await this.Store.Init();
                 await Cleanup();
-                RegisterTypedMessages();
+                await RegisterTypedMessages();
                 RegisterExpirerEvents();
                 this._initialized = true;
             }
@@ -106,10 +109,10 @@ namespace WalletConnectSharp.Core.Controllers
             this.Core.Expirer.Expired += ExpiredCallback;
         }
 
-        private void RegisterTypedMessages()
+        private async Task RegisterTypedMessages()
         {
-            Core.MessageHandler.HandleMessageType<PairingDelete, bool>(OnPairingDeleteRequest, null);
-            Core.MessageHandler.HandleMessageType<PairingPing, bool>(OnPairingPingRequest, OnPairingPingResponse);
+            this.pairingDeleteMessageHandler = await Core.MessageHandler.HandleMessageType<PairingDelete, bool>(OnPairingDeleteRequest, null);
+            this.pairingPingMessageHandler = await Core.MessageHandler.HandleMessageType<PairingPing, bool>(OnPairingPingRequest, OnPairingPingResponse);
         }
 
         /// <summary>
@@ -488,6 +491,8 @@ namespace WalletConnectSharp.Core.Controllers
             if (disposing)
             {
                 Store?.Dispose();
+                this.pairingDeleteMessageHandler.Dispose();
+                this.pairingPingMessageHandler.Dispose();
             }
 
             Disposed = true;

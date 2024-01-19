@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Storage.Interfaces;
 
@@ -5,13 +6,16 @@ namespace WalletConnectSharp.Storage
 {
     public class InMemoryStorage : IKeyValueStorage
     {
-        protected Dictionary<string, object> Entries = new Dictionary<string, object>();
-        private bool _initialized = false;
+        protected ConcurrentDictionary<string, object> Entries = new ConcurrentDictionary<string, object>();
+        protected bool Initialized = false;
         protected bool Disposed;
 
         public virtual Task Init()
         {
-            _initialized = true;
+            if (Initialized)
+                return Task.CompletedTask;
+
+            Initialized = true;
             return Task.CompletedTask;
         }
 
@@ -24,6 +28,7 @@ namespace WalletConnectSharp.Storage
         public virtual async Task<T[]> GetEntriesOfType<T>()
         {
             IsInitialized();
+            // GetEntries is thread-safe
             return (await GetEntries()).OfType<T>().ToArray();
         }
 
@@ -43,13 +48,15 @@ namespace WalletConnectSharp.Storage
         {
             IsInitialized();
             Entries[key] = value;
+
             return Task.CompletedTask;
         }
 
         public virtual Task RemoveItem(string key)
         {
             IsInitialized();
-            Entries.Remove(key);
+            Entries.Remove(key, out _);
+
             return Task.CompletedTask;
         }
 
@@ -63,12 +70,13 @@ namespace WalletConnectSharp.Storage
         {
             IsInitialized();
             Entries.Clear();
+
             return Task.CompletedTask;
         }
 
         protected void IsInitialized()
         {
-            if (!_initialized)
+            if (!Initialized)
             {
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, "Storage");
             }

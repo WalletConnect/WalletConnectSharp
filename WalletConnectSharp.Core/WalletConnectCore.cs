@@ -112,7 +112,7 @@ namespace WalletConnectSharp.Core
 
         public CoreOptions Options { get; }
 
-        protected bool Disposed;
+        public bool Disposed { get; protected set; }
 
         /// <summary>
         /// Create a new Core with the given options.

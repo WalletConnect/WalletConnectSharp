@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using Newtonsoft.Json;
 using WalletConnectSharp.Common.Logging;
@@ -41,7 +42,11 @@ namespace WalletConnectSharp.Storage
         /// <returns></returns>
         public override async Task Init()
         {
+            if (Initialized)
+                return;
+
             _semaphoreSlim = new SemaphoreSlim(1, 1);
+
             await Task.WhenAll(
                 Load(), base.Init()
             );
@@ -89,12 +94,39 @@ namespace WalletConnectSharp.Storage
                 Directory.CreateDirectory(path);
             }
 
-            var json = JsonConvert.SerializeObject(Entries,
+            string json;
+            json = JsonConvert.SerializeObject(Entries,
                 new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
 
-            await _semaphoreSlim.WaitAsync();
-            await File.WriteAllTextAsync(FilePath, json, Encoding.UTF8);
-            _semaphoreSlim.Release();
+            try
+            {
+                if (!Disposed)
+                    await _semaphoreSlim.WaitAsync();
+                int count = 5;
+                IOException lastException;
+                do
+                {
+                    try
+                    {
+                        await File.WriteAllTextAsync(FilePath, json, Encoding.UTF8);
+                        return;
+                    }
+                    catch (IOException e)
+                    {
+                        WCLogger.LogError($"Got error saving storage file: retries left {count}");
+                        await Task.Delay(100);
+                        count--;
+                        lastException = e;
+                    }
+                } while (count > 0);
+
+                throw lastException;
+            }
+            finally
+            {
+                if (!Disposed)
+                    _semaphoreSlim.Release();
+            }
         }
 
         private async Task Load()
@@ -102,25 +134,28 @@ namespace WalletConnectSharp.Storage
             if (!File.Exists(FilePath))
                 return;
 
-            await _semaphoreSlim.WaitAsync();
-            var json = await File.ReadAllTextAsync(FilePath, Encoding.UTF8);
-            _semaphoreSlim.Release();
-
+            string json;
             try
             {
-                Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(json,
-                    new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+                await _semaphoreSlim.WaitAsync();
+                json = await File.ReadAllTextAsync(FilePath, Encoding.UTF8);
             }
-            catch (JsonSerializationException e)
+            finally
             {
-                // Move the file to a .unsupported file
-                // and start fresh
-                WCLogger.LogError(e);
-                WCLogger.LogError("Cannot load JSON file, moving data to .unsupported file to force continue");
-                if (File.Exists(FilePath + ".unsupported"))
-                    File.Move(FilePath + ".unsupported", FilePath + "." + Guid.NewGuid() + ".unsupported");
-                File.Move(FilePath, FilePath + ".unsupported");
-                Entries = new Dictionary<string, object>();
+                _semaphoreSlim.Release();
+            }
+
+            // Hard fail here if the storage file is bad, unless it's serialized as a Dictionary (for backwards compatibility)
+            var jsonSerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
+            try
+            {
+                Entries = JsonConvert.DeserializeObject<ConcurrentDictionary<string, object>>(json,
+                    jsonSerializerSettings);
+            }
+            catch (JsonSerializationException)
+            {
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(json, jsonSerializerSettings);
+                Entries = new ConcurrentDictionary<string, object>(dict);
             }
         }
 

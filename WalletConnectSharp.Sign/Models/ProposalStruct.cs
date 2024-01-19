@@ -121,7 +121,8 @@ namespace WalletConnectSharp.Sign.Models
                 {
                     Accounts = allAccounts,
                     Events = rn.Events,
-                    Methods = rn.Methods
+                    Methods = rn.Methods,
+                    Chains = rn.Chains,
                 });
             }
             if (OptionalNamespaces != null)
@@ -135,7 +136,8 @@ namespace WalletConnectSharp.Sign.Models
                     {
                         Accounts = allAccounts,
                         Events = rn.Events,
-                        Methods = rn.Methods
+                        Methods = rn.Methods,
+                        Chains = rn.Chains,
                     });
                 }
                 

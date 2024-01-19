@@ -193,7 +193,9 @@ namespace WalletConnectSharp.Crypto
 
         private async Task SaveKeyChain()
         {
-            await Storage.SetItem(StorageKey, this._keyChain);
+            // We need to copy the contents, otherwise Dispose()
+            // may clear the reference stored inside InMemoryStorage
+            await Storage.SetItem(StorageKey, new Dictionary<string, string>(this._keyChain));
         }
 
         public void Dispose()
