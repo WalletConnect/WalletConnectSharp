@@ -4,6 +4,7 @@ using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Network.Models;
@@ -88,7 +89,7 @@ namespace WalletConnectSharp.Core.Controllers
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
-        public async void HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback,
+        public async Task<DisposeHandlerToken> HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback,
             Func<string, JsonRpcResponse<TR>, Task> responseCallback)
         {
             var method = RpcMethodAttribute.MethodForType<T>();
@@ -178,6 +179,14 @@ namespace WalletConnectSharp.Core.Controllers
             // Handle response_raw in this context
             // This will allow us to examine response_raw in every typed context registered
             this.RawMessage += InspectResponseRaw;
+            
+            return new DisposeHandlerToken(() =>
+            {
+                this.RawMessage -= InspectResponseRaw;
+                
+                messageEventHandlerMap[$"request_{method}"] -= RequestCallback;
+                messageEventHandlerMap[$"response_{method}"] -= ResponseCallback;
+            });
         }
 
         /// <summary>
@@ -301,8 +310,6 @@ namespace WalletConnectSharp.Core.Controllers
             var method = RpcMethodAttribute.MethodForType<T>();
 
             var payload = new JsonRpcRequest<T>(method, parameters);
-
-            WCLogger.Log(JsonConvert.SerializeObject(payload));
 
             var message = await this.Core.Crypto.Encode(topic, payload, options);
 

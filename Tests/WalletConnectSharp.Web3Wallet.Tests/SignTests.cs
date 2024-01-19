@@ -534,7 +534,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             };
 
             TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
-            _dapp.HandleEventMessageType<ChainChangedEvent>(async (s, request) =>
+            var handler = await _dapp.HandleEventMessageType<ChainChangedEvent>(async (s, request) =>
             {
                 var eventData = request.Params.Event;
                 var topic = request.Params.Topic;
@@ -548,6 +548,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                 task2.Task,
                 _wallet.EmitSessionEvent(session.Topic, sentData, TestRequiredNamespaces["eip155"].Chains[0])
             );
+            
+            handler.Dispose();
         }
 
         [Fact, Trait("Category", "unit")]

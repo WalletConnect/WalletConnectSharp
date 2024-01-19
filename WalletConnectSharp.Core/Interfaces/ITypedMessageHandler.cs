@@ -1,4 +1,5 @@
 ﻿using WalletConnectSharp.Common;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Network.Models;
@@ -31,7 +32,7 @@ namespace WalletConnectSharp.Core.Interfaces
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for</typeparam>
         /// <typeparam name="TR">The response type to trigger the responseCallback for</typeparam>
-        void HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback,
+        Task<DisposeHandlerToken> HandleMessageType<T, TR>(Func<string, JsonRpcRequest<T>, Task> requestCallback,
             Func<string, JsonRpcResponse<TR>, Task> responseCallback);
 
         /// <summary>

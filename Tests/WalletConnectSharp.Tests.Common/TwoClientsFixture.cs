@@ -20,7 +20,7 @@ public abstract class TwoClientsFixture<TClient> where TClient : IDisposable
             await Task.Delay(10);
     }
 
-    public async Task DisposeAndReset()
+    public virtual async Task DisposeAndReset()
     {
         if (ClientA != null)
         {

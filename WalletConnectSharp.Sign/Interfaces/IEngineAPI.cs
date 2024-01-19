@@ -1,3 +1,4 @@
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Network.Models;
@@ -258,7 +259,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// <returns>All sessions that have a namespace that match the given <see cref="RequiredNamespaces"/></returns>
         SessionStruct[] Find(RequiredNamespaces requiredNamespaces);
 
-        void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
+        Task<DisposeHandlerToken> HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
             Func<string, JsonRpcResponse<bool>, Task> responseCallback);
         
         /// <summary>

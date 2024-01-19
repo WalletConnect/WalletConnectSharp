@@ -3,6 +3,7 @@ using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Core.Models.Subscriber;
 using WalletConnectSharp.Network;
@@ -123,6 +124,8 @@ namespace WalletConnectSharp.Core.Controllers
         private bool initialized;
         private bool reconnecting = false;
         protected bool Disposed;
+        private DateTime lastSyncTime;
+        private bool isSyncing;
 
         /// <summary>
         /// Create a new Relayer with the given RelayerOptions.
@@ -203,6 +206,56 @@ namespace WalletConnectSharp.Core.Controllers
             Provider.Connected += OnProviderConnected;
             Provider.Disconnected += OnProviderDisconnected;
             Provider.ErrorReceived += OnProviderErrorReceived;
+            
+            Core.HeartBeat.OnPulse += HeartBeatOnOnPulse;
+        }
+
+        private async void HeartBeatOnOnPulse(object sender, EventArgs e)
+        {
+            var topics = Subscriber.Topics;
+            if (topics.Length > 0 && !isSyncing && DateTime.Now - lastSyncTime >= TimeSpan.FromSeconds(15))
+            {
+                isSyncing = true;
+                bool hasMore = false;
+                do
+                {
+                    WCLogger.Log($"Asking Relay server for messages inside {Context}");
+                    var request = new BatchFetchMessageRequest()
+                    {
+                        Topics = topics
+                    };
+
+                    var response =
+                        await Request<BatchFetchMessageRequest, BatchFetchMessagesResponse>(new RequestArguments<BatchFetchMessageRequest>()
+                        {
+                            Method = "irn_batchFetchMessages",
+                            Params = request
+                        });
+
+                    if (response?.Messages == null)
+                    {
+                        WCLogger.Log("Got no messages from Relayer");
+                        break;
+                    }
+                    
+                    WCLogger.Log($"Got {response.Messages.Length} messages from Relay server");
+                    foreach (var message in response.Messages)
+                    {
+                        var messageEvent = new MessageEvent()
+                        {
+                            Message = message.Message, Topic = message.Topic
+                        };
+
+                        await OnMessageEvent(messageEvent);
+                    }
+
+                    hasMore = response.HasMore;
+                    WCLogger.Log($"Are there more messages? {hasMore}");
+                } while (hasMore);
+
+                isSyncing = false;
+                lastSyncTime = DateTime.Now;
+            }
         }
 
         private void OnProviderErrorReceived(object sender, Exception e)
@@ -530,6 +583,8 @@ namespace WalletConnectSharp.Core.Controllers
                 Provider.Disconnected -= OnProviderDisconnected;
                 Provider.RawMessageReceived -= OnProviderRawMessageReceived;
                 Provider.ErrorReceived -= OnProviderErrorReceived;
+
+                Core.HeartBeat.OnPulse -= HeartBeatOnOnPulse;
                 
                 Provider?.Dispose();
             }

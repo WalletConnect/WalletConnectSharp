@@ -2,6 +2,7 @@ using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
 using WalletConnectSharp.Crypto;
@@ -427,10 +428,10 @@ namespace WalletConnectSharp.Sign
             return Engine.Find(requiredNamespaces);
         }
 
-        public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
+        public Task<DisposeHandlerToken> HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
             Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
-            this.Engine.HandleEventMessageType<T>(requestCallback, responseCallback);
+            return this.Engine.HandleEventMessageType<T>(requestCallback, responseCallback);
         }
 
         public Task<IAcknowledgement> UpdateSession(Namespaces namespaces)

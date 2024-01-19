@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Interfaces;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Network.Models;
 
@@ -19,6 +21,7 @@ namespace WalletConnectSharp.Sign.Models
     {
         protected static readonly Dictionary<string, TypedEventHandler<T, TR>> Instances = new();
         protected readonly ICore Ref;
+        protected List<Action> _disposeActions = new List<Action>();
 
         protected Func<RequestEventArgs<T, TR>, bool> RequestPredicate;
         protected Func<ResponseEventArgs<TR>, bool> ResponsePredicate;
@@ -66,6 +69,7 @@ namespace WalletConnectSharp.Sign.Models
         private event ResponseMethod<TR> _onResponse;
         private object _eventLock = new object();
         private int _activeCount;
+        protected DisposeHandlerToken messageHandler;
 
         /// <summary>
         /// The event handler that triggers when a new request of type
@@ -188,24 +192,33 @@ namespace WalletConnectSharp.Sign.Models
             Func<RequestEventArgs<T, TR>, bool> requestPredicate,
             Func<ResponseEventArgs<TR>, bool> responsePredicate)
         {
-            return new TypedEventHandler<T, TR>(_ref)
+            var wrappedRef = new TypedEventHandler<T, TR>(_ref)
             {
                 RequestPredicate = requestPredicate, ResponsePredicate = responsePredicate
             };
+            
+            _disposeActions.Add(wrappedRef.Dispose);
+
+            return wrappedRef;
         }
 
-        protected virtual void Setup()
+        protected virtual async void Setup()
         {
-            Ref.MessageHandler.HandleMessageType<T, TR>(RequestCallback, ResponseCallback);
+            this.messageHandler = await Ref.MessageHandler.HandleMessageType<T, TR>(RequestCallback, ResponseCallback);
         }
 
-        protected virtual void Teardown()
+        protected virtual async void Teardown()
         {
-            // TODO Unsubscribe from HandleMessageType<T, TR> from above
+            if (this.messageHandler != null)
+            {
+                this.messageHandler.Dispose();
+                this.messageHandler = null;
+            }
         }
 
         protected virtual Task ResponseCallback(string arg1, JsonRpcResponse<TR> arg2)
         {
+            WCLogger.Log($"Got generic response for type {typeof(TR)}");
             var rea = new ResponseEventArgs<TR>(arg2, arg1);
             return ResponsePredicate != null && !ResponsePredicate(rea) ? Task.CompletedTask :
                 _onResponse != null ? _onResponse(rea) : Task.CompletedTask;
@@ -229,7 +242,23 @@ namespace WalletConnectSharp.Sign.Models
             if (RequestPredicate != null && !RequestPredicate(rea)) return;
             if (_onRequest == null) return;
 
+            var isDisposed = ((WalletConnectCore)Ref).Disposed;
+            
+            if (isDisposed)
+            {
+                WCLogger.Log($"Too late to process request {typeof(T)} in topic {arg1}, the WalletConnect instance {Ref.Context} was disposed before we could");
+                return;
+            }
+            
             await _onRequest(rea);
+            
+            var nextIsDisposed = ((WalletConnectCore)Ref).Disposed;
+
+            if (nextIsDisposed)
+            {
+                WCLogger.Log($"Too late to send a result for request {typeof(T)} in topic {arg1}, the WalletConnect instance {Ref.Context} was disposed before we could");
+                return;
+            }
 
             if (rea.Error != null)
             {
@@ -278,7 +307,17 @@ namespace WalletConnectSharp.Sign.Models
             if (disposing)
             {
                 var context = Ref.Context;
-                Instances.Remove(context);
+                foreach (var action in _disposeActions)
+                {
+                    action();
+                }
+                
+                _disposeActions.Clear();
+                
+                if (Instances.ContainsKey(context))
+                    Instances.Remove(context);
+                
+                Teardown();
             }
 
             Disposed = true;

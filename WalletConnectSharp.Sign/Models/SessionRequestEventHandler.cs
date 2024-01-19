@@ -1,4 +1,6 @@
-﻿using WalletConnectSharp.Core.Interfaces;
+﻿using WalletConnectSharp.Common.Logging;
+using WalletConnectSharp.Common.Model.Errors;
+using WalletConnectSharp.Core.Interfaces;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
@@ -14,7 +16,6 @@ namespace WalletConnectSharp.Sign.Models
     public class SessionRequestEventHandler<T, TR> : TypedEventHandler<T, TR>
     {
         private readonly IEnginePrivate _enginePrivate;
-        private List<Action> _disposeActions = new List<Action>();
         
         /// <summary>
         /// Get a singleton instance of this class for the given <see cref="IEngine"/> context. The context
@@ -64,11 +65,17 @@ namespace WalletConnectSharp.Sign.Models
             wrappedRef.OnRequest += WrappedRefOnOnRequest;
             wrappedRef.OnResponse += WrappedRefOnOnResponse;
 
-            _disposeActions.Add(wrappedRef.Dispose);
-    }
+            _disposeActions.Add(() =>
+            {
+                wrappedRef.OnRequest -= WrappedRefOnOnRequest;
+                wrappedRef.OnResponse -= WrappedRefOnOnResponse;
+                wrappedRef.Dispose();
+            });
+        }
 
         private Task WrappedRefOnOnResponse(ResponseEventArgs<TR> e)
         {
+            WCLogger.Log($"Got response for type {typeof(TR)}");
             return base.ResponseCallback(e.Topic, e.Response);
         }
 
@@ -103,19 +110,8 @@ namespace WalletConnectSharp.Sign.Models
             });
 
             await base.RequestCallback(e.Topic, sessionRequest);
-        }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                foreach (var action in _disposeActions)
-                {
-                    action();
-                }
-            }
-
-            base.Dispose(disposing);
+            await _enginePrivate.DeletePendingSessionRequest(e.Request.Id, Error.FromErrorType(ErrorType.GENERIC));
         }
     }
 }

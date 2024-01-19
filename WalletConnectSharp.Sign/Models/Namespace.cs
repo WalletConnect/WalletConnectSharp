@@ -63,10 +63,15 @@ namespace WalletConnectSharp.Sign.Models
             Accounts = Accounts.Append(account).ToArray();
             return this;
         }
+        
+        protected bool ArrayEquals(string[] a, string[] b)
+        {
+            return a.Length == b.Length && a.All(b.Contains) && b.All(a.Contains);
+        }
 
         protected bool Equals(Namespace other)
         {
-            return Equals(Accounts, other.Accounts) && Equals(Methods, other.Methods) && Equals(Events, other.Events);
+            return ArrayEquals(Accounts, other.Accounts) && ArrayEquals(Methods, other.Methods) && ArrayEquals(Events, other.Events);
         }
 
         public override bool Equals(object obj)

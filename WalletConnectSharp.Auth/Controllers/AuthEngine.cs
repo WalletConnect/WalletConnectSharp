@@ -5,6 +5,7 @@ using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Verify;
 using WalletConnectSharp.Crypto.Models;
 using WalletConnectSharp.Network.Models;
@@ -25,6 +26,9 @@ public partial class AuthEngine : IAuthEngine
         $"{AUTH_CLIENT_PROTOCOL}@{AUTH_CLIENT_VERSION}:{AUTH_CLIENT_CONTEXT}";
 
     public static readonly string AUTH_CLIENT_PUBLIC_KEY_NAME = $"{AUTH_CLIENT_STORAGE_PREFIX}:PUB_KEY";
+    
+    private DisposeHandlerToken messageHandler;
+    protected bool Disposed;
 
     public string Name
     {
@@ -57,11 +61,11 @@ public partial class AuthEngine : IAuthEngine
         Client = client;
     }
 
-    public void Init()
+    public async Task Init()
     {
         if (!initialized)
         {
-            RegisterRelayerEvents();
+            await RegisterRelayerEvents();
             this.initialized = true;
         }
     }
@@ -234,10 +238,10 @@ public partial class AuthEngine : IAuthEngine
         this.Client.Core.Expirer.Set(topic, expiry);
     }
 
-    private void RegisterRelayerEvents()
+    private async Task RegisterRelayerEvents()
     {
         // MessageHandler will handle all topic tracking
-        this.Client.Core.MessageHandler.HandleMessageType<WcAuthRequest, Cacao>(OnAuthRequest, OnAuthResponse);
+        this.messageHandler = await this.Client.Core.MessageHandler.HandleMessageType<WcAuthRequest, Cacao>(OnAuthRequest, OnAuthResponse);
     }
 
     private async Task OnAuthResponse(string topic, JsonRpcResponse<Cacao> response)
@@ -392,5 +396,19 @@ public partial class AuthEngine : IAuthEngine
 
     public void Dispose()
     {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (Disposed) return;
+            
+        if (disposing)
+        {
+            this.messageHandler.Dispose();
+        }
+
+        Disposed = true;
     }
 }

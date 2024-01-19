@@ -1,4 +1,5 @@
-﻿using WalletConnectSharp.Core;
+﻿using WalletConnectSharp.Common.Logging;
+using WalletConnectSharp.Core;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Storage.Interfaces;
@@ -55,6 +56,21 @@ public class SignClientFixture : TwoClientsFixture<WalletConnectSignClient>
         ClientA = await WalletConnectSignClient.Init(OptionsA);
         ClientB = await WalletConnectSignClient.Init(OptionsB);
     }
+
+    public override async Task DisposeAndReset()
+    {
+        await WaitForNoPendingRequests(ClientA);
+        await WaitForNoPendingRequests(ClientB);
+        
+        await base.DisposeAndReset();
+    }
     
-    
+    protected async Task WaitForNoPendingRequests(WalletConnectSignClient client)
+    {
+        while (client.PendingSessionRequests.Length > 0)
+        {
+            WCLogger.Log($"Waiting for {client.PendingSessionRequests.Length} requests to finish sending");
+            await Task.Delay(100);
+        }
+    }
 }

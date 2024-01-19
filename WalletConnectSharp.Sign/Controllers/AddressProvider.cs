@@ -168,15 +168,36 @@ public class AddressProvider : IAddressProvider
                 DefaultNamespace = DefaultSession.Namespaces.OrderedKeys.FirstOrDefault();
                 if (DefaultNamespace != null)
                 {
-                    DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
+                    if (DefaultSession.Namespaces.ContainsKey(DefaultNamespace) && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
+                    {
+                        DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
+                    }
+                    else if (DefaultSession.RequiredNamespaces.ContainsKey(DefaultNamespace) && DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
+                    {
+                        // We don't know what chain to use? Let's use the required one as a fallback
+                        DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                    }
                 }
                 else
                 {
-                    // TODO The Keys property is unordered! Maybe this needs to be updated
-                    DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
-                    if (DefaultNamespace != null)
+                    DefaultNamespace = DefaultSession.Namespaces.OrderedKeys.FirstOrDefault();
+                    if (DefaultNamespace != null && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
                     {
                         DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
+                    }
+                    else
+                    {
+                        // We don't know what chain to use? Let's use the required one as a fallback
+                        DefaultNamespace = DefaultSession.RequiredNamespaces.OrderedKeys.FirstOrDefault();
+                        if (DefaultNamespace != null &&
+                            DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
+                        {
+                            DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
+                        }
+                        else
+                        {
+                            WCLogger.LogError("Could not figure out default chain to use");
+                        }
                     }
                 }
 

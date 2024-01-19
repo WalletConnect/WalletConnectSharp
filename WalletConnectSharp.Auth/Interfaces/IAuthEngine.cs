@@ -9,7 +9,7 @@ public interface IAuthEngine : IModule
     
     IDictionary<long, PendingRequest> PendingRequests { get; }
 
-    void Init();
+    Task Init();
 
     Task<RequestUri> Request(RequestParams @params, string topic = null);
 

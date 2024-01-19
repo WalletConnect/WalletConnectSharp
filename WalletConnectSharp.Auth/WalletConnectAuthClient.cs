@@ -85,7 +85,7 @@ public class WalletConnectAuthClient : IAuthClient
         await this.AuthKeys.Init();
         await this.Requests.Init();
         await this.PairingTopics.Init();
-        this.Engine.Init();
+        await this.Engine.Init();
     }
 
     private WalletConnectAuthClient(AuthOptions options)
