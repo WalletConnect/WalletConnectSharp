@@ -195,12 +195,12 @@ namespace WalletConnectSharp.Core.Controllers
                 CheckPending();
             };
 
-            _relayer.Provider.Connected += (sender, connection) =>
+            _relayer.OnConnected += (sender, connection) =>
             {
                 OnConnect();
             };
 
-            _relayer.Provider.Disconnected += (sender, args) =>
+            _relayer.OnDisconnected += (sender, args) =>
             {
                 OnDisconnect();
             };

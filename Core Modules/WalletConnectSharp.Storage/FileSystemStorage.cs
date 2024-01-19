@@ -16,7 +16,7 @@ namespace WalletConnectSharp.Storage
         /// </summary>
         public string FilePath { get; private set; }
 
-        private readonly SemaphoreSlim _semaphoreSlim = new(1);
+        private SemaphoreSlim _semaphoreSlim;
 
         /// <summary>
         /// A new FileSystemStorage module that reads/writes all storage
@@ -40,12 +40,14 @@ namespace WalletConnectSharp.Storage
         /// as well as loads in the JSON file
         /// </summary>
         /// <returns></returns>
-        public override Task Init()
+        public override async Task Init()
         {
             if (Initialized)
-                return Task.CompletedTask;
+                return;
 
-            return Task.WhenAll(
+            _semaphoreSlim = new SemaphoreSlim(1, 1);
+
+            await Task.WhenAll(
                 Load(), base.Init()
             );
         }

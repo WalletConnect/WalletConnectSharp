@@ -16,7 +16,7 @@ namespace WalletConnectSharp.Examples
         {
             var options = new SignClientOptions()
             {
-                ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
+                ProjectId = "ef21cf313a63dbf63f2e9e04f3614029",
                 Metadata = new Metadata()
                 {
                     Description = "An example project to showcase WalletConnectSharpv2",
