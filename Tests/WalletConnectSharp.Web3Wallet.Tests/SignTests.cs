@@ -82,7 +82,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                             "eth_signTypedData"
                         },
                         Accounts = TestAccounts,
-                        Events = TestEvents
+                        Events = TestEvents,
+                        Chains = new[] { TestEthereumChain },
                     }
             }
         };
@@ -91,7 +92,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         {
             Methods = new[] { "eth_signTransaction", },
             Accounts = new[] { TestAccounts[0] },
-            Events = new[] { TestEvents[0] }
+            Events = new[] { TestEvents[0] },
+            Chains = new[] { TestEthereumChain },
         };
         
         private static readonly Namespaces TestNamespaces = new Namespaces()
@@ -337,7 +339,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new[] { TestEthereumChain },
                         }
                     }
                 });
@@ -415,7 +418,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new [] { TestEthereumChain }
                         }
                     }
                 });
@@ -462,7 +466,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new [] { TestEthereumChain }
                         }
                     }
                 });
@@ -509,7 +514,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" }
+                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
+                            Chains = new [] { TestEthereumChain }
                         }
                     }
                 });
@@ -571,7 +577,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                             {
                                 Methods = TestNamespace.Methods,
                                 Events = TestNamespace.Events,
-                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" }
+                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" },
+                                Chains = new [] { TestEthereumChain }
                             }
                         }
                     });
@@ -630,7 +637,8 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                             {
                                 Methods = TestNamespace.Methods,
                                 Events = TestNamespace.Events,
-                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" }
+                                Accounts = new[] { $"{TestEthereumChain}:{WalletAddress}" },
+                                Chains = new [] { TestEthereumChain }
                             }
                         }
                     });
