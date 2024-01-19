@@ -113,27 +113,27 @@ namespace WalletConnectSharp.Sign
         private async Task RegisterRelayerEvents()
         {
             this.messageDisposeHandlers = new List<DisposeHandlerToken>();
-            
+
             // Register all Request Types
             this.messageDisposeHandlers.Add(
                 await MessageHandler.HandleMessageType<SessionPropose, SessionProposeResponse>(
                     PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse));
-            
+
             this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionSettle, bool>(
                 PrivateThis.OnSessionSettleRequest,
                 PrivateThis.OnSessionSettleResponse));
-            
+
             this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionUpdate, bool>(
                 PrivateThis.OnSessionUpdateRequest,
                 PrivateThis.OnSessionUpdateResponse));
-            
+
             this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionExtend, bool>(
                 PrivateThis.OnSessionExtendRequest,
                 PrivateThis.OnSessionExtendResponse));
-            
+
             this.messageDisposeHandlers.Add(
                 await MessageHandler.HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null));
-            
+
             this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionPing, bool>(
                 PrivateThis.OnSessionPingRequest,
                 PrivateThis.OnSessionPingResponse));
@@ -269,7 +269,8 @@ namespace WalletConnectSharp.Sign
         /// <param name="requestCallback">The callback function to invoke when a request is received with the given request type</param>
         /// <param name="responseCallback">The callback function to invoke when a response is received with the given response type</param>
         /// <typeparam name="T">The request type to trigger the requestCallback for. Will be wrapped in <see cref="SessionEvent{T}"/></typeparam>
-        public Task<DisposeHandlerToken> HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
+        public Task<DisposeHandlerToken> HandleEventMessageType<T>(
+            Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback,
             Func<string, JsonRpcResponse<bool>, Task> responseCallback)
         {
             return Client.Core.MessageHandler.HandleMessageType(requestCallback, responseCallback);
@@ -697,8 +698,10 @@ namespace WalletConnectSharp.Sign
             if (string.IsNullOrWhiteSpace(chainId))
             {
                 var sessionData = Client.Session.Get(topic);
-                var defaultNamespace = Client.AddressProvider.DefaultNamespace ?? sessionData.Namespaces.OrderedKeys[0];
-                defaultChainId = Client.AddressProvider.DefaultChain ?? sessionData.Namespaces[defaultNamespace].Chains[0];
+                var defaultNamespace = Client.AddressProvider.DefaultNamespace ??
+                                       sessionData.Namespaces.Keys.FirstOrDefault();
+                defaultChainId = Client.AddressProvider.DefaultChain ??
+                                 sessionData.Namespaces[defaultNamespace].Chains[0];
             }
             else
             {
@@ -886,6 +889,7 @@ namespace WalletConnectSharp.Sign
                 {
                     action();
                 }
+
                 _disposeActions.Clear();
             }
 

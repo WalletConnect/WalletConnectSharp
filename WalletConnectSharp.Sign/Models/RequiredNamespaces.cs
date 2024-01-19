@@ -17,7 +17,5 @@ namespace WalletConnectSharp.Sign.Models
             Add(chainNamespace, proposedNamespace);
             return this;
         }
-
-        public override IEqualityComparer<ProposedNamespace> Comparer => ProposedNamespace.RequiredNamespaceComparer;
     }
 }

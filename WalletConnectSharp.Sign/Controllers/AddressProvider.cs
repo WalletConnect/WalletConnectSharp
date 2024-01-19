@@ -78,6 +78,7 @@ public class AddressProvider : IAddressProvider
             _state.ChainId = value;
         }
     }
+
     public ISession Sessions { get; private set; }
 
     private ISignClient _client;
@@ -86,7 +87,7 @@ public class AddressProvider : IAddressProvider
     {
         this._client = client;
         this.Sessions = client.Session;
-        
+
         // set the first connected session to the default one
         client.SessionConnected += ClientOnSessionConnected;
         client.SessionDeleted += ClientOnSessionDeleted;
@@ -110,10 +111,10 @@ public class AddressProvider : IAddressProvider
         {
             _state = new DefaultData();
         }
-        
+
         DefaultsLoaded?.Invoke(this, new DefaultsLoadingEventArgs(_state));
     }
-    
+
     private void ClientOnSessionUpdated(object sender, SessionEvent e)
     {
         if (DefaultSession.Topic == e.Topic)
@@ -165,14 +166,16 @@ public class AddressProvider : IAddressProvider
                 }
 
                 // DefaultNamespace is null or not found in current available spaces, update it
-                DefaultNamespace = DefaultSession.Namespaces.OrderedKeys.FirstOrDefault();
+                DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
                 if (DefaultNamespace != null)
                 {
-                    if (DefaultSession.Namespaces.ContainsKey(DefaultNamespace) && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
+                    if (DefaultSession.Namespaces.ContainsKey(DefaultNamespace) &&
+                        DefaultSession.Namespaces[DefaultNamespace].Chains != null)
                     {
                         DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                     }
-                    else if (DefaultSession.RequiredNamespaces.ContainsKey(DefaultNamespace) && DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
+                    else if (DefaultSession.RequiredNamespaces.ContainsKey(DefaultNamespace) &&
+                             DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
                     {
                         // We don't know what chain to use? Let's use the required one as a fallback
                         DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
@@ -180,7 +183,7 @@ public class AddressProvider : IAddressProvider
                 }
                 else
                 {
-                    DefaultNamespace = DefaultSession.Namespaces.OrderedKeys.FirstOrDefault();
+                    DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
                     if (DefaultNamespace != null && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
                     {
                         DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
@@ -188,7 +191,7 @@ public class AddressProvider : IAddressProvider
                     else
                     {
                         // We don't know what chain to use? Let's use the required one as a fallback
-                        DefaultNamespace = DefaultSession.RequiredNamespaces.OrderedKeys.FirstOrDefault();
+                        DefaultNamespace = DefaultSession.RequiredNamespaces.Keys.FirstOrDefault();
                         if (DefaultNamespace != null &&
                             DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
                         {
@@ -200,7 +203,6 @@ public class AddressProvider : IAddressProvider
                         }
                     }
                 }
-
             }
             else
             {
@@ -244,7 +246,7 @@ public class AddressProvider : IAddressProvider
         _client.SessionConnected -= ClientOnSessionConnected;
         _client.SessionDeleted -= ClientOnSessionDeleted;
         _client.SessionUpdated -= ClientOnSessionUpdated;
-        _client.SessionApproved -= ClientOnSessionConnected; 
+        _client.SessionApproved -= ClientOnSessionConnected;
 
         _client = null;
         Sessions = null;

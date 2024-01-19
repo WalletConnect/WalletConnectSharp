@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using WalletConnectSharp.Common.Utils;
-
 namespace WalletConnectSharp.Sign.Models
 {
     /// <summary>
@@ -16,20 +13,17 @@ namespace WalletConnectSharp.Sign.Models
 
         public Namespaces(Namespaces namespaces) : base(namespaces)
         {
-            
         }
 
         public Namespaces(RequiredNamespaces requiredNamespaces)
         {
             WithProposedNamespaces(requiredNamespaces);
         }
-        
+
         public Namespaces(Dictionary<string, ProposedNamespace> proposedNamespaces)
         {
             WithProposedNamespaces(proposedNamespaces);
         }
-
-        public override IEqualityComparer<Namespace> Comparer => Namespace.NamespaceComparer;
 
         public Namespaces WithNamespace(string chainNamespace, Namespace nm)
         {
@@ -41,14 +35,11 @@ namespace WalletConnectSharp.Sign.Models
         {
             return this[chainNamespace];
         }
-        
-        public Namespaces WithProposedNamespaces(Dictionary<string, ProposedNamespace> proposedNamespaces)
+
+        public Namespaces WithProposedNamespaces(IDictionary<string, ProposedNamespace> proposedNamespaces)
         {
-            foreach (var pair in proposedNamespaces)
+            foreach (var (chainNamespace, requiredNamespace) in proposedNamespaces)
             {
-                var chainNamespace = pair.Key;
-                var requiredNamespace = pair.Value;
-                
                 Add(chainNamespace, new Namespace(requiredNamespace));
             }
 
