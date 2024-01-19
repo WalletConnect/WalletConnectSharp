@@ -7,12 +7,15 @@ namespace WalletConnectSharp.Storage
     public class InMemoryStorage : IKeyValueStorage
     {
         protected ConcurrentDictionary<string, object> Entries = new ConcurrentDictionary<string, object>();
-        private bool _initialized = false;
+        protected bool Initialized = false;
         protected bool Disposed;
 
         public virtual Task Init()
         {
-            _initialized = true;
+            if (Initialized)
+                return Task.CompletedTask;
+
+            Initialized = true;
             return Task.CompletedTask;
         }
 
@@ -73,7 +76,7 @@ namespace WalletConnectSharp.Storage
 
         protected void IsInitialized()
         {
-            if (!_initialized)
+            if (!Initialized)
             {
                 throw WalletConnectException.FromType(ErrorType.NOT_INITIALIZED, "Storage");
             }

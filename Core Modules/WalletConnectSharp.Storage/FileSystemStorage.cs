@@ -42,6 +42,9 @@ namespace WalletConnectSharp.Storage
         /// <returns></returns>
         public override Task Init()
         {
+            if (Initialized)
+                return Task.CompletedTask;
+
             return Task.WhenAll(
                 Load(), base.Init()
             );
@@ -139,10 +142,19 @@ namespace WalletConnectSharp.Storage
             {
                 _semaphoreSlim.Release();
             }
-            
-            // Hard fail here if the storage file is bad
-            Entries = JsonConvert.DeserializeObject<ConcurrentDictionary<string, object>>(json,
-                new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto });
+
+            // Hard fail here if the storage file is bad, unless it's serialized as a Dictionary (for backwards compatibility)
+            var jsonSerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
+            try
+            {
+                Entries = JsonConvert.DeserializeObject<ConcurrentDictionary<string, object>>(json,
+                    jsonSerializerSettings);
+            }
+            catch (JsonSerializationException)
+            {
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(json, jsonSerializerSettings);
+                Entries = new ConcurrentDictionary<string, object>(dict);
+            }
         }
 
         protected override void Dispose(bool disposing)
