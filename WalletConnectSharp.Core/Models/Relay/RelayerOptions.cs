@@ -34,6 +34,13 @@ namespace WalletConnectSharp.Core.Models.Relay
         public TimeSpan? ConnectionTimeout = TimeSpan.FromSeconds(30);
 
         /// <summary>
+        /// The interval at which the Relayer should request new (unsent) messages from the Relay server. If
+        /// this field is null, then the Relayer will never ask for new messages, so all new messages will only
+        /// come directly from Relay server 
+        /// </summary>
+        public TimeSpan? MessageFetchInterval = TimeSpan.FromSeconds(15);
+
+        /// <summary>
         /// The <see cref="IRelayUrlBuilder"/> module to use for building the Relay RPC URL.
         /// </summary>
         public IRelayUrlBuilder RelayUrlBuilder;

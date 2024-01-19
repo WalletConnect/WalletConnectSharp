@@ -149,7 +149,10 @@ namespace WalletConnectSharp.Core.Controllers
 
             ConnectionTimeout = opts.ConnectionTimeout;
             RelayUrlBuilder = opts.RelayUrlBuilder;
+            MessageFetchInterval = opts.MessageFetchInterval;
         }
+
+        public TimeSpan? MessageFetchInterval { get; set; }
 
         /// <summary>
         /// Initialize this Relayer module. This will initialize all sub-modules
@@ -212,50 +215,46 @@ namespace WalletConnectSharp.Core.Controllers
 
         private async void HeartBeatOnOnPulse(object sender, EventArgs e)
         {
+            var interval = this.MessageFetchInterval;
+            if (interval == null) return;
+            
             var topics = Subscriber.Topics;
-            if (topics.Length > 0 && !isSyncing && DateTime.Now - lastSyncTime >= TimeSpan.FromSeconds(15))
+            if (topics.Length <= 0 || isSyncing || !(DateTime.Now - lastSyncTime >= interval)) return;
+
+            isSyncing = true;
+            bool hasMore;
+            do
             {
-                isSyncing = true;
-                bool hasMore = false;
-                do
+                var request = new BatchFetchMessageRequest()
                 {
-                    WCLogger.Log($"Asking Relay server for messages inside {Context}");
-                    var request = new BatchFetchMessageRequest()
+                    Topics = topics
+                };
+
+                var response =
+                    await Request<BatchFetchMessageRequest, BatchFetchMessagesResponse>(new RequestArguments<BatchFetchMessageRequest>()
                     {
-                        Topics = topics
+                        Method = "irn_batchFetchMessages",
+                        Params = request
+                    });
+
+                if (response?.Messages == null)
+                    break;
+                    
+                foreach (var message in response.Messages)
+                {
+                    var messageEvent = new MessageEvent
+                    {
+                        Message = message.Message, Topic = message.Topic
                     };
 
-                    var response =
-                        await Request<BatchFetchMessageRequest, BatchFetchMessagesResponse>(new RequestArguments<BatchFetchMessageRequest>()
-                        {
-                            Method = "irn_batchFetchMessages",
-                            Params = request
-                        });
+                    await OnMessageEvent(messageEvent);
+                }
 
-                    if (response?.Messages == null)
-                    {
-                        WCLogger.Log("Got no messages from Relayer");
-                        break;
-                    }
-                    
-                    WCLogger.Log($"Got {response.Messages.Length} messages from Relay server");
-                    foreach (var message in response.Messages)
-                    {
-                        var messageEvent = new MessageEvent()
-                        {
-                            Message = message.Message, Topic = message.Topic
-                        };
+                hasMore = response.HasMore;
+            } while (hasMore);
 
-                        await OnMessageEvent(messageEvent);
-                    }
-
-                    hasMore = response.HasMore;
-                    WCLogger.Log($"Are there more messages? {hasMore}");
-                } while (hasMore);
-
-                isSyncing = false;
-                lastSyncTime = DateTime.Now;
-            }
+            isSyncing = false;
+            lastSyncTime = DateTime.Now;
         }
 
         private void OnProviderErrorReceived(object sender, Exception e)
