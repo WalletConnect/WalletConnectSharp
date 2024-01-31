@@ -7,20 +7,20 @@ namespace WalletConnectSharp.Sign.Models
     /// <summary>
     /// A required namespace that holds chains, methods and events enabled.
     /// </summary>
-    public class ProposedNamespace
+    public sealed class ProposedNamespace
     {
         /// <summary>
         /// A list of all chains that are required to be enabled in this namespace
         /// </summary>
         [JsonProperty("chains")]
         public string[] Chains;
-        
+
         /// <summary>
         /// A list of all methods that are required to be enabled in this namespace
         /// </summary>
         [JsonProperty("methods")]
         public string[] Methods;
-        
+
         /// <summary>
         /// A list of all events that are required to be enabled in this namespace
         /// </summary>
@@ -58,7 +58,7 @@ namespace WalletConnectSharp.Sign.Models
             Methods = Methods.Append(method).ToArray();
             return this;
         }
-        
+
         /// <summary>
         /// Add an event as required in this namespace
         /// </summary>
@@ -82,7 +82,8 @@ namespace WalletConnectSharp.Sign.Models
 
         protected bool Equals(ProposedNamespace other)
         {
-            return ArrayEquals(Chains, other.Chains) && ArrayEquals(Methods, other.Methods) && ArrayEquals(Events, other.Events);
+            return ArrayEquals(Chains, other.Chains) && ArrayEquals(Methods, other.Methods) &&
+                   ArrayEquals(Events, other.Events);
         }
 
         public override bool Equals(object obj)
@@ -134,7 +135,8 @@ namespace WalletConnectSharp.Sign.Models
                     return false;
                 }
 
-                return x.Chains.SequenceEqual(y.Chains) && x.Methods.SequenceEqual(y.Methods) && x.Events.SequenceEqual(y.Events);
+                return x.Chains.SequenceEqual(y.Chains) && x.Methods.SequenceEqual(y.Methods) &&
+                       x.Events.SequenceEqual(y.Events);
             }
 
             public int GetHashCode(ProposedNamespace obj)
@@ -143,6 +145,7 @@ namespace WalletConnectSharp.Sign.Models
             }
         }
 
-        public static IEqualityComparer<ProposedNamespace> RequiredNamespaceComparer { get; } = new RequiredNamespaceEqualityComparer();
+        public static IEqualityComparer<ProposedNamespace> RequiredNamespaceComparer { get; } =
+            new RequiredNamespaceEqualityComparer();
     }
 }
