@@ -6,7 +6,7 @@ namespace WalletConnectSharp.Sign.Models
     /// A namespace that holds accounts, methods and events enabled. Also includes
     /// extension namespaces that are enabled
     /// </summary>
-    public class Namespace
+    public sealed class Namespace
     {
         public Namespace(ProposedNamespace proposedNamespace)
         {
@@ -22,13 +22,13 @@ namespace WalletConnectSharp.Sign.Models
         /// </summary>
         [JsonProperty("accounts")]
         public string[] Accounts;
-        
+
         /// <summary>
         /// An array of all methods enabled in this namespace
         /// </summary>
         [JsonProperty("methods")]
         public string[] Methods;
-        
+
         /// <summary>
         /// An array of all events enabled in this namespace
         /// </summary>
@@ -42,36 +42,45 @@ namespace WalletConnectSharp.Sign.Models
 
         public Namespace WithMethod(string method)
         {
-            Methods = Methods.Append(method).ToArray();
+            Methods = Methods == null
+                ? [method]
+                : Methods.Append(method).ToArray();
             return this;
         }
 
         public Namespace WithChain(string chain)
         {
-            Chains = Chains.Append(chain).ToArray();
+            Chains = Chains == null
+                ? [chain]
+                : Chains.Append(chain).ToArray();
             return this;
         }
-        
+
         public Namespace WithEvent(string @event)
         {
-            Events = Events.Append(@event).ToArray();
+            Events = Events == null
+                ? [@event]
+                : Events.Append(@event).ToArray();
             return this;
         }
 
         public Namespace WithAccount(string account)
         {
-            Accounts = Accounts.Append(account).ToArray();
+            Accounts = Accounts == null
+                ? [account]
+                : Accounts.Append(account).ToArray();
             return this;
         }
-        
-        protected bool ArrayEquals(string[] a, string[] b)
+
+        protected static bool ArrayEquals(string[] a, string[] b)
         {
             return a.Length == b.Length && a.All(b.Contains) && b.All(a.Contains);
         }
 
         protected bool Equals(Namespace other)
         {
-            return ArrayEquals(Accounts, other.Accounts) && ArrayEquals(Methods, other.Methods) && ArrayEquals(Events, other.Events);
+            return ArrayEquals(Accounts, other.Accounts) && ArrayEquals(Methods, other.Methods) &&
+                   ArrayEquals(Events, other.Events);
         }
 
         public override bool Equals(object obj)
@@ -123,7 +132,8 @@ namespace WalletConnectSharp.Sign.Models
                     return false;
                 }
 
-                return x.Accounts.SequenceEqual(y.Accounts) && x.Methods.SequenceEqual(y.Methods) && x.Events.SequenceEqual(y.Events);
+                return x.Accounts.SequenceEqual(y.Accounts) && x.Methods.SequenceEqual(y.Methods) &&
+                       x.Events.SequenceEqual(y.Events);
             }
 
             public int GetHashCode(Namespace obj)
