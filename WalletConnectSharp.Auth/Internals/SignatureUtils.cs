@@ -1,14 +1,13 @@
 ﻿using System.Text;
 using Nethereum.Signer;
 using Newtonsoft.Json;
-using WalletConnectSharp.Auth.Models;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core.Models.Eth;
 using WalletConnectSharp.Network.Models;
 
 namespace WalletConnectSharp.Auth.Internals;
 
-public class SignatureUtils
+public static class SignatureUtils
 {
     public const string DefaultRpcUrl = "https://rpc.walletconnect.com/v1";
     
@@ -27,7 +26,8 @@ public class SignatureUtils
         }
     }
 
-    private static async Task<bool> IsValidEip1271Signature(string address, string reconstructedMessage, string cacaoSignatureS, string chainId, string projectId)
+    private static async Task<bool> IsValidEip1271Signature(string address, string reconstructedMessage, string cacaoSignatureS, string chainId,
+        string projectId)
     {
         var eip1271MagicValue = "0x1626ba7e";
         var dynamicTypeOffset = "0000000000000000000000000000000000000000000000000000000000000040";
@@ -46,30 +46,34 @@ public class SignatureUtils
         string result = null;
         using (var client = new HttpClient())
         {
-            var url = $"{DefaultRpcUrl}/?chainId={chainId}&projectId={projectId}";
+            var builder = new UriBuilder(DefaultRpcUrl) { Query = $"chainId={chainId}&projectId={projectId}" };
 
-            var rpcRequest = new JsonRpcRequest<object[]>("eth_call",
-                new object[] { new EthCall() { To = address, Data = data }, "latest" });
-            
-            var httpResponse = await client.PostAsync(url, new StringContent(JsonConvert.SerializeObject(rpcRequest)));
+            var rpcRequest = new JsonRpcRequest<object[]>("eth_call", [new EthCall { To = address, Data = data }, "latest"]);
+
+            var httpResponse = await client.PostAsync(builder.Uri, new StringContent(JsonConvert.SerializeObject(rpcRequest)));
+
+            if (httpResponse is not { IsSuccessStatusCode: true })
+            {
+                throw new HttpRequestException($"Failed to call RPC endpoint {builder.Uri} with status code {httpResponse?.StatusCode}");
+            }
 
             var jsonResponse = await httpResponse.Content.ReadAsStringAsync();
 
             var response = JsonConvert.DeserializeObject<JsonRpcResponse<string>>(jsonResponse);
 
-            if (response != null)
-                result = response.Result;
-            else
-                throw new Exception($"Could not deserialize JsonRpcResponse from JSON {jsonResponse}");
-        }
-            
-        if (string.IsNullOrWhiteSpace(result) || result == "0x")
-        {
-            return false;
+            if (response == null)
+            {
+                throw new JsonSerializationException($"Could not deserialize JsonRpcResponse from JSON {jsonResponse}");
+            }
+
+            result = response.Result;
         }
 
-        var recoveredValue = result.Substring(0, eip1271MagicValue.Length);
-        return recoveredValue.ToLower() == eip1271MagicValue.ToLower();
+        if (string.IsNullOrWhiteSpace(result) || result == "0x")
+            return false;
+
+        var recoveredValue = result[..eip1271MagicValue.Length];
+        return string.Equals(recoveredValue, eip1271MagicValue, StringComparison.CurrentCultureIgnoreCase);
     }
 
     private static bool IsValidEip191Signature(string address, string reconstructedMessage, string cacaoSignatureS)
