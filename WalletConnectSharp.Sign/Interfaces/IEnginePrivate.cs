@@ -63,7 +63,7 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         internal Task IsValidPing(string topic);
 
-        internal Task IsValidEmit<T>(string topic, EventData<T> request, string chainId);
+        internal Task IsValidEmit<T>(string topic, EventData<T> eventData, string chainId);
 
         internal Task IsValidDisconnect(string topic, Error reason);
 

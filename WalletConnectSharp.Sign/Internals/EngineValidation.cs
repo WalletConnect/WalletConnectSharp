@@ -64,7 +64,6 @@ namespace WalletConnectSharp.Sign
             var expiry = this.Client.Session.Get(topic).Expiry;
             if (expiry != null && Clock.IsExpired(expiry.Value))
             {
-                //await PrivateThis.DeleteSession(topic);
                 throw WalletConnectException.FromType(ErrorType.EXPIRED, $"session topic: {topic}");
             }
 
@@ -161,19 +160,16 @@ namespace WalletConnectSharp.Sign
             if (conformingNamespacesError != null)
                 throw conformingNamespacesError.ToException();
 
-            if (relayProtocol != null)
+            if (relayProtocol != null && string.IsNullOrWhiteSpace(relayProtocol))
             {
-                if (string.IsNullOrWhiteSpace(relayProtocol))
-                    throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
-                        $"approve() relayProtocol: {relayProtocol}");
+                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"approve() relayProtocol: {relayProtocol}");
             }
 
-            if (@params.SessionProperties != null)
+            if (@params.SessionProperties != null && @params.SessionProperties.Values.Any(string.IsNullOrWhiteSpace))
             {
-                if (@params.SessionProperties.Values.Any(string.IsNullOrWhiteSpace))
-                    throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
-                        $"sessionProperties must be in Dictionary<string, string> format with no null or " +
-                        $"empty/whitespace values. Received: {JsonConvert.SerializeObject(@params.SessionProperties)}");
+                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
+                    $"sessionProperties must be in Dictionary<string, string> format with no null or " +
+                    $"empty/whitespace values. Received: {JsonConvert.SerializeObject(@params.SessionProperties)}");
             }
         }
 
@@ -268,7 +264,7 @@ namespace WalletConnectSharp.Sign
             return events;
         }
 
-        async Task IEnginePrivate.IsValidEmit<T>(string topic, EventData<T> @event, string chainId)
+        async Task IEnginePrivate.IsValidEmit<T>(string topic, EventData<T> eventData, string chainId)
         {
             await IsValidSessionTopic(topic);
             var session = this.Client.Session.Get(topic);
@@ -279,13 +275,15 @@ namespace WalletConnectSharp.Sign
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"emit() chainId: {chainId}");
             }
 
-            if (@event == null || string.IsNullOrWhiteSpace(@event.Name))
-                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"emit() event: {JsonConvert.SerializeObject(@event)}");
+            if (eventData == null || string.IsNullOrWhiteSpace(eventData.Name))
+            {
+                throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID, $"emit() event: {JsonConvert.SerializeObject(eventData)}");
+            }
 
-            if (!GetNamespacesEventsForChainId(namespaces, chainId).Contains(@event.Name))
+            if (!GetNamespacesEventsForChainId(namespaces, chainId).Contains(eventData.Name))
             {
                 throw WalletConnectException.FromType(ErrorType.MISSING_OR_INVALID,
-                    $"emit() event: {JsonConvert.SerializeObject(@event)}");
+                    $"emit() event: {JsonConvert.SerializeObject(eventData)}");
             }
         }
 

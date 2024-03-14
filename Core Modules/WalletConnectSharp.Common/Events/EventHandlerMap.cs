@@ -99,10 +99,7 @@ public class EventHandlerMap<TEventArgs> : IDisposable
     {
         lock (_mappingLock)
         {
-            if (_mapping.ContainsKey(eventId))
-            {
-                _mapping.Remove(eventId);
-            }
+            _mapping.Remove(eventId);
         }
     }
     

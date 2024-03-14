@@ -567,7 +567,6 @@ namespace WalletConnectSharp.Sign
             var pairingTopic = proposal.PairingTopic;
             var proposer = proposal.Proposer;
             var requiredNamespaces = proposal.RequiredNamespaces;
-            var optionalNamespaces = proposal.OptionalNamespaces;
 
             var selfPublicKey = await this.Client.Core.Crypto.GenerateKeyPair();
             var peerPublicKey = proposer.PublicKey;
@@ -578,7 +577,7 @@ namespace WalletConnectSharp.Sign
 
             var sessionSettle = new SessionSettle()
             {
-                Relay = new ProtocolOptions() { Protocol = relayProtocol != null ? relayProtocol : "irn" },
+                Relay = new ProtocolOptions() { Protocol = relayProtocol ?? "irn" },
                 Namespaces = namespaces,
                 Controller = new Participant() { PublicKey = selfPublicKey, Metadata = this.Client.Metadata },
                 Expiry = Clock.CalculateExpiry(SessionExpiry)
