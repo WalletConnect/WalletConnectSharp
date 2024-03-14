@@ -26,8 +26,11 @@ public class EventHandlerMap<TEventArgs> : IDisposable
         _beforeEventExecuted = callbackBeforeExecuted;
     }
 
-    private void CallbackBeforeExecuted(object sender, TEventArgs e)
+    private static void CallbackBeforeExecuted(object sender, TEventArgs e)
     {
+        // Default event handler used when no specific callback is provided. 
+        // Currently, it doesn't perform any action when an event is triggered.
+        // This is necessary to avoid null reference exceptions when no event handler is provided.
     }
 
     /// <summary>
@@ -102,8 +105,14 @@ public class EventHandlerMap<TEventArgs> : IDisposable
             }
         }
     }
-
+    
     public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
     {
         lock (_mappingLock)
         {

@@ -113,7 +113,7 @@ namespace WalletConnectSharp.Sign
                 {
                     try
                     {
-                        var subscriptionId = await this.Client.Core.Relayer.Subscribe(sessionTopic);
+                        _ = await Client.Core.Relayer.Subscribe(sessionTopic);
                         return;
                     }
                     catch (Exception e)
@@ -162,7 +162,7 @@ namespace WalletConnectSharp.Sign
                         PublicKey = controller.PublicKey,
                         Metadata = controller.Metadata
                     },
-                    RequiredNamespaces = Client.Proposal.Values.FirstOrDefault(p => p.PairingTopic == pairingTopic).RequiredNamespaces,
+                    RequiredNamespaces = Client.Proposal.Values.First(p => p.PairingTopic == pairingTopic).RequiredNamespaces
                 };
                 await MessageHandler.SendResult<SessionSettle, bool>(payload.Id, topic, true);
                 this.SessionConnected?.Invoke(this, session);

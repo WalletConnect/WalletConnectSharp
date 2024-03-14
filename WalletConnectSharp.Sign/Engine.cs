@@ -805,11 +805,11 @@ namespace WalletConnectSharp.Sign
         /// <param name="eventData">The event data for the event emitted</param>
         /// <param name="chainId">An (optional) chainId to specify where the event occured</param>
         /// <typeparam name="T">The type of the event data</typeparam>
-        public async Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
+        public async Task Emit<T>(string topic, EventData<T> eventData, string chainId = null)
         {
             IsInitialized();
             await MessageHandler.SendRequest<SessionEvent<T>, object>(topic,
-                new SessionEvent<T>() { ChainId = chainId, Event = @event, Topic = topic, });
+                new SessionEvent<T> { ChainId = chainId, Event = eventData, Topic = topic });
         }
 
         /// <summary>
@@ -926,7 +926,13 @@ namespace WalletConnectSharp.Sign
                     action();
                 }
 
+                foreach (var disposeHandlerToken in _messageDisposeHandlers)
+                {
+                    disposeHandlerToken.Dispose();
+                }
+
                 _disposeActions.Clear();
+                _messageDisposeHandlers.Clear();
             }
 
             Disposed = true;
