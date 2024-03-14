@@ -1,18 +1,27 @@
-﻿namespace WalletConnectSharp.Common.Events;
+﻿using System.Collections.Concurrent;
+
+namespace WalletConnectSharp.Common.Events;
 
 public class GenericEventHolder
 {
-    private Dictionary<Type, object> dynamicTypeMapping = new();
+    private readonly ConcurrentDictionary<Type, object> _dynamicTypeMapping = new();
 
     public EventHandlerMap<T> OfType<T>()
     {
         Type t = typeof(T);
 
-        if (dynamicTypeMapping.TryGetValue(t, out var value))
-            return (EventHandlerMap<T>)value;
+        if (_dynamicTypeMapping.TryGetValue(t, out var value))
+        {
+            if (value is EventHandlerMap<T> eventHandlerMap)
+            {
+                return eventHandlerMap;
+            }
+
+            throw new InvalidCastException($"Stored value cannot be cast to EventHandlerMap<{typeof(T).Name}>");
+        }
 
         var mapping = new EventHandlerMap<T>();
-        dynamicTypeMapping.Add(t, mapping);
+        _dynamicTypeMapping.TryAdd(t, mapping);
 
         return mapping;
     }

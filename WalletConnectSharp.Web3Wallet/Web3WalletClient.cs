@@ -143,7 +143,7 @@ public class Web3WalletClient : IWeb3Wallet
 
     public Task EmitSessionEvent<T>(string topic, EventData<T> eventData, string chainId)
     {
-        return this.Engine.EmitSessionEvent(topic, eventData, topic);
+        return this.Engine.EmitSessionEvent(topic, eventData, chainId);
     }
 
     public Task DisconnectSession(string topic, Error reason)

@@ -183,7 +183,7 @@ namespace WalletConnectSharp.Core.Controllers
             return new DisposeHandlerToken(() =>
             {
                 this.RawMessage -= InspectResponseRaw;
-                
+
                 messageEventHandlerMap[$"request_{method}"] -= RequestCallback;
                 messageEventHandlerMap[$"response_{method}"] -= ResponseCallback;
             });
@@ -290,7 +290,7 @@ namespace WalletConnectSharp.Core.Controllers
 
         public DecodeOptions DecodeOptionForTopic(string topic)
         {
-            return _decodeOptionsMap.TryGetValue(topic, out var option) ? option : null;
+            return _decodeOptionsMap.GetValueOrDefault(topic);
         }
 
         /// <summary>

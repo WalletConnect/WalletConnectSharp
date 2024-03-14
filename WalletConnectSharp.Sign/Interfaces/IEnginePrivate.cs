@@ -1,4 +1,4 @@
-using WalletConnectSharp.Core.Models.Pairing.Methods;
+using Newtonsoft.Json.Linq;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -40,6 +40,8 @@ namespace WalletConnectSharp.Sign.Interfaces
         internal Task OnSessionPingResponse(string topic, JsonRpcResponse<bool> payload);
 
         internal Task OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload);
+
+        internal Task OnSessionEventRequest(string topic, JsonRpcRequest<SessionEvent<JToken>> payload);
 
         internal Task IsValidConnect(ConnectOptions options);
 

@@ -2,8 +2,10 @@ using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3.Accounts;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WalletConnectSharp.Auth.Internals;
 using WalletConnectSharp.Auth.Models;
+using WalletConnectSharp.Common.Events;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
 using WalletConnectSharp.Core;
@@ -14,9 +16,11 @@ using WalletConnectSharp.Sign;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models.Engine.Events;
+using WalletConnectSharp.Sign.Models.Engine.Methods;
 using WalletConnectSharp.Storage;
 using WalletConnectSharp.Tests.Common;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WalletConnectSharp.Web3Wallet.Tests
 {
@@ -30,10 +34,10 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         {
         }
 
-        public class ChainChangedEvent
+        public class TestDataObject
         {
-            [JsonProperty("test")]
-            public string Test;
+            [JsonProperty("hello")]
+            public string Hello;
         }
         
         private static readonly string TestEthereumAddress = "0x3c582121909DE92Dc89A36898633C1aE4790382b";
@@ -47,7 +51,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             $"{TestAvalancheChain}:{TestEthereumAddress}"
         };
 
-        private static readonly string[] TestEvents = new[] { "chainChanged", "accountsChanged" };
+        private static readonly string[] TestEvents = new[] { "chainChanged", "accountsChanged", "valueTypeEvent", "referenceTypeEvent" };
         
         private static readonly RequestParams DefaultRequestParams = new RequestParams()
         {
@@ -64,7 +68,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                     {
                         Chains = new []{ "eip155:1" },
                         Methods = new[] { "eth_signTransaction" },
-                        Events = new[] { "chainChanged" }
+                        Events = TestEvents
                     }
             }
         };
@@ -88,15 +92,12 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             }
         };
 
-        private static readonly Namespace TestNamespace = new Namespace()
+        private static readonly Namespace TestNamespace = new()
         {
-            Methods = new[] { "eth_signTransaction", },
-            Accounts = new[] { TestAccounts[0] },
-            Events = new[] { TestEvents[0] },
-            Chains = new[] { TestEthereumChain },
+            Methods = ["eth_signTransaction"], Accounts = [TestAccounts[0]], Events = TestEvents, Chains = [TestEthereumChain]
         };
-        
-        private static readonly Namespaces TestNamespaces = new Namespaces()
+
+        private static readonly Namespaces TestNamespaces = new()
         {
             {
                 "eip155", TestNamespace
@@ -107,6 +108,7 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             .UseRequireNamespaces(TestRequiredNamespaces);
         
         private readonly CryptoWalletFixture _cryptoWalletFixture;
+        private readonly ITestOutputHelper _testOutputHelper;
         private WalletConnectCore _core;
         private WalletConnectSignClient _dapp;
         private Web3WalletClient _wallet;
@@ -131,9 +133,12 @@ namespace WalletConnectSharp.Web3Wallet.Tests
             }
         }
 
-        public SignClientTests(CryptoWalletFixture cryptoWalletFixture)
+        private static readonly string[] second = new[] { "chainChanged2" };
+
+        public SignClientTests(CryptoWalletFixture cryptoWalletFixture, ITestOutputHelper testOutputHelper)
         {
             this._cryptoWalletFixture = cryptoWalletFixture;
+            _testOutputHelper = testOutputHelper;
         }
 
         public async Task InitializeAsync()
@@ -500,12 +505,11 @@ namespace WalletConnectSharp.Web3Wallet.Tests
         [Fact, Trait("Category", "unit")]
         public async Task TestEmitSessionEvent()
         {
-            TaskCompletionSource<bool> task1 = new TaskCompletionSource<bool>();
+            var pairingTask = new TaskCompletionSource<bool>();
             _wallet.SessionProposed += async (sender, @event) =>
             {
                 var id = @event.Id;
                 var proposal = @event.Proposal;
-                var verifyContext = @event.VerifiedContext;
                 
                 session = await _wallet.ApproveSession(id, new Namespaces()
                 {
@@ -514,48 +518,68 @@ namespace WalletConnectSharp.Web3Wallet.Tests
                         {
                             Methods = TestNamespace.Methods,
                             Events = TestNamespace.Events,
-                            Accounts = new []{ $"{TestEthereumChain}:{WalletAddress}" },
-                            Chains = new [] { TestEthereumChain }
+                            Accounts = [$"{TestEthereumChain}:{WalletAddress}"],
+                            Chains = [TestEthereumChain]
                         }
                     }
                 });
 
                 Assert.Equal(proposal.RequiredNamespaces, TestRequiredNamespaces);
-                task1.TrySetResult(true);
+                pairingTask.TrySetResult(true);
             };
 
             await Task.WhenAll(
-                task1.Task,
+                pairingTask.Task,
                 sessionApproval,
                 _wallet.Pair(uriString)
             );
 
-            var sentData = new EventData<ChainChangedEvent>()
+            var referenceHandlingTask = new TaskCompletionSource<bool>();
+            var valueHandlingTask = new TaskCompletionSource<bool>();
+
+            var referenceTypeEventData = new EventData<TestDataObject>
             {
-                Name = "chainChanged",
-                Data = new ChainChangedEvent()
+                Name = "referenceTypeEvent",
+                Data = new TestDataObject
                 {
-                    Test = "123"
+                    Hello = "World"
                 }
             };
 
-            TaskCompletionSource<bool> task2 = new TaskCompletionSource<bool>();
-            var handler = await _dapp.HandleEventMessageType<ChainChangedEvent>(async (s, request) =>
+            var valueTypeEventData = new EventData<long> { Name = "valueTypeEvent", Data = 10 };
+
+            void ReferenceTypeEventHandler(object _, SessionEvent<JToken> data)
             {
-                var eventData = request.Params.Event;
-                var topic = request.Params.Topic;
-                Assert.Equal(session.Topic, topic);
-                Assert.Equal(sentData.Name, eventData.Name);
-                Assert.Equal(sentData.Data.Test, eventData.Data.Test);
-                task2.TrySetResult(true);
-            }, null);
+                var eventData = data.Event.Data.ToObject<TestDataObject>();
+
+                Assert.Equal(referenceTypeEventData.Name, data.Event.Name);
+                Assert.Equal(referenceTypeEventData.Data.Hello, eventData.Hello);
+
+                referenceHandlingTask.TrySetResult(true);
+            }
+
+            void ValueTypeEventHandler(object _, SessionEvent<JToken> eventData)
+            {
+                var data = eventData.Event.Data.Value<long>();
+
+                Assert.Equal(valueTypeEventData.Name, eventData.Event.Name);
+                Assert.Equal(valueTypeEventData.Data, data);
+
+                valueHandlingTask.TrySetResult(true);
+            }
+
+            _dapp.SubscribeToSessionEvent(referenceTypeEventData.Name, ReferenceTypeEventHandler);
+            _dapp.SubscribeToSessionEvent(valueTypeEventData.Name, ValueTypeEventHandler);
 
             await Task.WhenAll(
-                task2.Task,
-                _wallet.EmitSessionEvent(session.Topic, sentData, TestRequiredNamespaces["eip155"].Chains[0])
+                referenceHandlingTask.Task,
+                valueHandlingTask.Task,
+                _wallet.EmitSessionEvent(session.Topic, referenceTypeEventData, TestRequiredNamespaces["eip155"].Chains[0]),
+                _wallet.EmitSessionEvent(session.Topic, valueTypeEventData, TestRequiredNamespaces["eip155"].Chains[0])
             );
-            
-            handler.Dispose();
+
+            Assert.True(_dapp.TryUnsubscribeFromSessionEvent(referenceTypeEventData.Name, ReferenceTypeEventHandler));
+            Assert.True(_dapp.TryUnsubscribeFromSessionEvent(valueTypeEventData.Name, ValueTypeEventHandler));
         }
 
         [Fact, Trait("Category", "unit")]
