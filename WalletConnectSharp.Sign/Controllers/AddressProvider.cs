@@ -67,7 +67,7 @@ public class AddressProvider : IAddressProvider
         }
     }
 
-    public string DefaultChain
+    public string DefaultChainId
     {
         get
         {
@@ -115,106 +115,70 @@ public class AddressProvider : IAddressProvider
         DefaultsLoaded?.Invoke(this, new DefaultsLoadingEventArgs(_state));
     }
 
-    private void ClientOnSessionUpdated(object sender, SessionEvent e)
+    private async void ClientOnSessionUpdated(object sender, SessionEvent e)
     {
         if (DefaultSession.Topic == e.Topic)
         {
-            UpdateDefaultChainAndNamespace();
+            await UpdateDefaultChainIdAndNamespaceAsync();
         }
     }
 
-    private void ClientOnSessionDeleted(object sender, SessionEvent e)
+    private async void ClientOnSessionDeleted(object sender, SessionEvent e)
     {
         if (DefaultSession.Topic == e.Topic)
         {
             DefaultSession = default;
-            UpdateDefaultChainAndNamespace();
+            await UpdateDefaultChainIdAndNamespaceAsync();
         }
     }
 
-    private void ClientOnSessionConnected(object sender, SessionStruct e)
+    private async void ClientOnSessionConnected(object sender, SessionStruct e)
     {
         if (!HasDefaultSession)
         {
             DefaultSession = e;
-            UpdateDefaultChainAndNamespace();
+            await UpdateDefaultChainIdAndNamespaceAsync();
         }
     }
 
-    private async void UpdateDefaultChainAndNamespace()
+    private async Task UpdateDefaultChainIdAndNamespaceAsync()
     {
-        try
+        if (HasDefaultSession)
         {
-            if (HasDefaultSession)
+            // Check if current default namespace is still valid with the current session
+            var currentDefault = DefaultNamespace;
+            if (currentDefault != null && DefaultSession.Namespaces.ContainsKey(currentDefault))
             {
-                var currentDefault = DefaultNamespace;
-                if (currentDefault != null && DefaultSession.Namespaces.ContainsKey(currentDefault))
+                // Check if current default chain is still valid with the current session
+                var currentChain = DefaultChainId;
+                if (currentChain == null || !DefaultSession.Namespaces[DefaultNamespace].Chains.Contains(currentChain))
                 {
-                    // DefaultNamespace is still valid
-                    var currentChain = DefaultChain;
-                    if (currentChain == null ||
-                        DefaultSession.Namespaces[DefaultNamespace].Chains.Contains(currentChain))
-                    {
-                        // DefaultChain is still valid
-                        await SaveDefaults();
-                        return;
-                    }
-
-                    DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
-                    await SaveDefaults();
-                    return;
-                }
-
-                // DefaultNamespace is null or not found in current available spaces, update it
-                DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
-                if (DefaultNamespace != null)
-                {
-                    if (DefaultSession.Namespaces.ContainsKey(DefaultNamespace) &&
-                        DefaultSession.Namespaces[DefaultNamespace].Chains != null)
-                    {
-                        DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
-                    }
-                    else if (DefaultSession.RequiredNamespaces.ContainsKey(DefaultNamespace) &&
-                             DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
-                    {
-                        // We don't know what chain to use? Let's use the required one as a fallback
-                        DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
-                    }
-                }
-                else
-                {
-                    DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
-                    if (DefaultNamespace != null && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
-                    {
-                        DefaultChain = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
-                    }
-                    else
-                    {
-                        // We don't know what chain to use? Let's use the required one as a fallback
-                        DefaultNamespace = DefaultSession.RequiredNamespaces.Keys.FirstOrDefault();
-                        if (DefaultNamespace != null &&
-                            DefaultSession.RequiredNamespaces[DefaultNamespace].Chains != null)
-                        {
-                            DefaultChain = DefaultSession.RequiredNamespaces[DefaultNamespace].Chains[0];
-                        }
-                        else
-                        {
-                            WCLogger.LogError("Could not figure out default chain to use");
-                        }
-                    }
+                    // If the current default chain is not valid, let's use the first one
+                    // TODO: or the last from the storage?
+                    DefaultChainId = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                 }
             }
             else
             {
-                DefaultNamespace = null;
+                // If DefaultNamespace is null or not found in current available spaces, update it
+                DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
+                if (DefaultNamespace != null && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
+                {
+                    // TODO: or the last from the storage?
+                    DefaultChainId = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not figure out default chain and namespace");
+                }
             }
 
             await SaveDefaults();
         }
-        catch (Exception e)
+        else
         {
-            WCLogger.LogError(e);
-            throw;
+            DefaultNamespace = null;
+            DefaultChainId = null;
         }
     }
 
@@ -227,9 +191,25 @@ public class AddressProvider : IAddressProvider
         return session.CurrentAddress(@namespace);
     }
 
-    public async Task Init()
+    public async Task InitAsync()
     {
         await this.LoadDefaults();
+    }
+
+    public async Task SetDefaultChainIdAsync(string chainId)
+    {
+        if (string.IsNullOrWhiteSpace(chainId))
+        {
+            throw new ArgumentNullException(nameof(chainId));
+        }
+
+        if (!DefaultSession.Namespaces[DefaultNamespace].Chains.Contains(chainId))
+        {
+            throw new InvalidOperationException($"Chain {chainId} is not available in the current session");
+        }
+
+        DefaultChainId = chainId;
+        await SaveDefaults();
     }
 
     public Caip25Address[] AllAddresses(string @namespace = null, SessionStruct session = default)

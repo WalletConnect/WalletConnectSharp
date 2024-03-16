@@ -325,7 +325,7 @@ namespace WalletConnectSharp.Sign
         public Task<TR> Request<T, TR>(T data, string chainId = null, long? expiry = null)
         {
             return Request<T, TR>(Client.AddressProvider.DefaultSession.Topic, data,
-                chainId ?? Client.AddressProvider.DefaultChain, expiry);
+                chainId ?? Client.AddressProvider.DefaultChainId, expiry);
         }
 
         public Task Respond<T, TR>(JsonRpcResponse<TR> response)
@@ -336,7 +336,7 @@ namespace WalletConnectSharp.Sign
         public Task Emit<T>(EventData<T> eventData, string chainId = null)
         {
             return Emit<T>(Client.AddressProvider.DefaultSession.Topic, eventData,
-                chainId ?? Client.AddressProvider.DefaultChain);
+                chainId ?? Client.AddressProvider.DefaultChainId);
         }
 
         public Task Ping()
@@ -735,7 +735,7 @@ namespace WalletConnectSharp.Sign
                 var sessionData = Client.Session.Get(topic);
                 var defaultNamespace = Client.AddressProvider.DefaultNamespace ??
                                        sessionData.Namespaces.Keys.FirstOrDefault();
-                defaultChainId = Client.AddressProvider.DefaultChain ??
+                defaultChainId = Client.AddressProvider.DefaultChainId ??
                                  sessionData.Namespaces[defaultNamespace].Chains[0];
             }
             else

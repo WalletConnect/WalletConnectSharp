@@ -488,7 +488,7 @@ namespace WalletConnectSharp.Sign
             await Session.Init();
             await Proposal.Init();
             await Engine.Init();
-            await AddressProvider.Init();
+            await AddressProvider.InitAsync();
         }
 
         public void Dispose()

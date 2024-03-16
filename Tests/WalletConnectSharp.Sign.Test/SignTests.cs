@@ -84,7 +84,7 @@ namespace WalletConnectSharp.Sign.Test
                             },
                             Chains = new[]
                             {
-                                "eip155:1"
+                                "eip155:1", "eip155:10"
                             },
                             Events = new[]
                             {
@@ -149,7 +149,7 @@ namespace WalletConnectSharp.Sign.Test
                             },
                             Chains = new[]
                             {
-                                "eip155:1"
+                                "eip155:1", "eip155:10"
                             },
                             Events = new[]
                             {
@@ -192,7 +192,7 @@ namespace WalletConnectSharp.Sign.Test
                             },
                             Chains = new[]
                             {
-                                "eip155:1"
+                                "eip155:1", "eip155:10"
                             },
                             Events = new[]
                             {
@@ -294,7 +294,7 @@ namespace WalletConnectSharp.Sign.Test
                             },
                             Chains = new[]
                             {
-                                "eip155:1"
+                                "eip155:1", "eip155:10"
                             },
                             Events = new[]
                             {
@@ -555,13 +555,13 @@ namespace WalletConnectSharp.Sign.Test
             var address = dappClient.AddressProvider.CurrentAddress();
             Assert.Equal(testAddress, address.Address);
             Assert.Equal("eip155:1", address.ChainId);
-            Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChain);
+            Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChainId);
             Assert.Equal("eip155", dappClient.AddressProvider.DefaultNamespace);
             
             address = walletClient.AddressProvider.CurrentAddress();
             Assert.Equal(testAddress, address.Address);
             Assert.Equal("eip155:1", address.ChainId);
-            Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChain);
+            Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChainId);
             Assert.Equal("eip155", dappClient.AddressProvider.DefaultNamespace);
         }
 
@@ -590,6 +590,36 @@ namespace WalletConnectSharp.Sign.Test
             Assert.Equal(defaultSessionTopic, reloadedDefaultSessionTopic);
             
             await TestTwoUniqueSessionRequestResponseUsingAddressProviderDefaults();
+        }
+
+        [Fact] [Trait("Category", "integration")]
+        public async Task TestAddressProviderChainIdChange()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+
+            _ = await TestConnectMethod(ClientA, ClientB);
+
+            const string badChainId = "invalid:invalid";
+            await Assert.ThrowsAsync<InvalidOperationException>(() => ClientA.AddressProvider.SetDefaultChainIdAsync(badChainId));
+
+            // Change the default chain id
+            const string newChainId = "eip155:10";
+            await ClientA.AddressProvider.SetDefaultChainIdAsync(newChainId);
+            Assert.Equal(newChainId, ClientA.AddressProvider.DefaultChainId);
+        }
+
+        [Fact] [Trait("Category", "integration")]
+        public async Task TestAddressProviderDisconnect()
+        {
+            await _cryptoFixture.WaitForClientsReady();
+
+            _ = await TestConnectMethod(ClientA, ClientB);
+
+            Assert.True(ClientA.AddressProvider.HasDefaultSession);
+
+            await ClientA.Disconnect();
+
+            Assert.False(ClientA.AddressProvider.HasDefaultSession);
         }
     }
 }
