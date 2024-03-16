@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WalletConnectSharp.Sign.Models.Engine.Events
 {
@@ -12,11 +13,12 @@ namespace WalletConnectSharp.Sign.Models.Engine.Events
         /// The name of the event
         /// </summary>
         [JsonProperty("name")]
-        public string Name;
+        public virtual string Name { get; set; }
 
         /// <summary>
         /// The event data associated with this event
         /// </summary>
-        [JsonProperty("data")] public T Data;
+        [JsonProperty("data")]
+        public virtual T Data { get; set; }
     }
 }

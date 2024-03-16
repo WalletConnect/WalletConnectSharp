@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
@@ -133,6 +134,16 @@ namespace WalletConnectSharp.Sign
         public event EventHandler<SessionStruct> SessionApproved;
         public event EventHandler<PairingEvent> PairingPinged;
         public event EventHandler<PairingEvent> PairingDeleted;
+
+        public void SubscribeToSessionEvent(string eventName, EventHandler<SessionEvent<JToken>> handler)
+        {
+            Engine.SubscribeToSessionEvent(eventName, handler);
+        }
+
+        public bool TryUnsubscribeFromSessionEvent(string eventName, EventHandler<SessionEvent<JToken>> handler)
+        {
+            return Engine.TryUnsubscribeFromSessionEvent(eventName, handler);
+        }
 
         public TypedEventHandler<T, TR> SessionRequestEvents<T, TR>()
         {

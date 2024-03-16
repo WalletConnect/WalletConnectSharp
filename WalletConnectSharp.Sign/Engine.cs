@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Events;
 using WalletConnectSharp.Common.Logging;
@@ -32,7 +33,7 @@ namespace WalletConnectSharp.Sign
         private const int KeyLength = 32;
 
         private bool _initialized = false;
-        private Dictionary<string, Action> _disposeActions = new Dictionary<string, Action>();
+        private readonly Dictionary<string, Action> _disposeActions = new();
 
         /// <summary>
         /// The <see cref="ISignClient"/> using this Engine
@@ -43,8 +44,9 @@ namespace WalletConnectSharp.Sign
 
         private ITypedMessageHandler MessageHandler => Client.Core.MessageHandler;
 
-        private EventHandlerMap<JsonRpcResponse<bool>> sessionEventsHandlerMap = new();
-        private List<DisposeHandlerToken> messageDisposeHandlers;
+        private readonly EventHandlerMap<SessionEvent<JToken>> _customSessionEventsHandlerMap = new();
+        private readonly EventHandlerMap<JsonRpcResponse<bool>> _sessionEventsHandlerMap = new();
+        private List<DisposeHandlerToken> _messageDisposeHandlers = [];
 
         /// <summary>
         /// The name of this Engine module
@@ -112,31 +114,36 @@ namespace WalletConnectSharp.Sign
 
         private async Task RegisterRelayerEvents()
         {
-            this.messageDisposeHandlers = new List<DisposeHandlerToken>();
-
-            // Register all Request Types
-            this.messageDisposeHandlers.Add(
+            _messageDisposeHandlers =
+            [
                 await MessageHandler.HandleMessageType<SessionPropose, SessionProposeResponse>(
-                    PrivateThis.OnSessionProposeRequest, PrivateThis.OnSessionProposeResponse));
+                    PrivateThis.OnSessionProposeRequest,
+                    PrivateThis.OnSessionProposeResponse),
 
-            this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionSettle, bool>(
-                PrivateThis.OnSessionSettleRequest,
-                PrivateThis.OnSessionSettleResponse));
+                await MessageHandler.HandleMessageType<SessionSettle, bool>(
+                    PrivateThis.OnSessionSettleRequest,
+                    PrivateThis.OnSessionSettleResponse),
 
-            this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionUpdate, bool>(
-                PrivateThis.OnSessionUpdateRequest,
-                PrivateThis.OnSessionUpdateResponse));
+                await MessageHandler.HandleMessageType<SessionUpdate, bool>(
+                    PrivateThis.OnSessionUpdateRequest,
+                    PrivateThis.OnSessionUpdateResponse),
 
-            this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionExtend, bool>(
-                PrivateThis.OnSessionExtendRequest,
-                PrivateThis.OnSessionExtendResponse));
+                await MessageHandler.HandleMessageType<SessionExtend, bool>(
+                    PrivateThis.OnSessionExtendRequest,
+                    PrivateThis.OnSessionExtendResponse),
 
-            this.messageDisposeHandlers.Add(
-                await MessageHandler.HandleMessageType<SessionDelete, bool>(PrivateThis.OnSessionDeleteRequest, null));
+                await MessageHandler.HandleMessageType<SessionDelete, bool>(
+                    PrivateThis.OnSessionDeleteRequest,
+                    null),
 
-            this.messageDisposeHandlers.Add(await MessageHandler.HandleMessageType<SessionPing, bool>(
-                PrivateThis.OnSessionPingRequest,
-                PrivateThis.OnSessionPingResponse));
+                await MessageHandler.HandleMessageType<SessionPing, bool>(
+                    PrivateThis.OnSessionPingRequest,
+                    PrivateThis.OnSessionPingResponse),
+
+                await MessageHandler.HandleMessageType<SessionEvent<JToken>, bool>(
+                    PrivateThis.OnSessionEventRequest,
+                    null)
+            ];
         }
 
         /// <summary>
@@ -230,6 +237,35 @@ namespace WalletConnectSharp.Sign
         /// Event Side: dApp & Wallet
         /// </summary>
         public event EventHandler<PairingEvent> PairingDeleted;
+
+        /// <summary>
+        /// Subscribes to a specific session event (wc_sessionEvent). The event is identified by its name and handled by the provided event handler.
+        /// </summary>
+        /// <param name="eventName">The name of the session event to subscribe to.</param>
+        /// <param name="handler">The event handler that will handle the event when it's triggered.</param>
+        public void SubscribeToSessionEvent(string eventName, EventHandler<SessionEvent<JToken>> handler)
+        {
+            _customSessionEventsHandlerMap[eventName] += handler;
+        }
+
+        /// <summary>
+        /// Unsubscribes from a specific session event (wc_sessionEvent). The event is identified by its name and the provided event handler.
+        /// </summary>
+        /// <param name="eventName">The name of the session event to unsubscribe from.</param>
+        /// <param name="handler">The event handler that was handling the event.</param>
+        /// <returns>True if the event handler was successfully removed, false otherwise.</returns>
+        public bool TryUnsubscribeFromSessionEvent(string eventName, EventHandler<SessionEvent<JToken>> handler)
+        {
+            // ReSharper disable once NotAccessedVariable
+            if (_customSessionEventsHandlerMap.TryGetValue(eventName, out var eventHandler))
+            {
+                // ReSharper disable once RedundantAssignment
+                eventHandler -= handler;
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Get static event handlers for requests / responses for the given type T, TR. This is similar to
@@ -531,7 +567,6 @@ namespace WalletConnectSharp.Sign
             var pairingTopic = proposal.PairingTopic;
             var proposer = proposal.Proposer;
             var requiredNamespaces = proposal.RequiredNamespaces;
-            var optionalNamespaces = proposal.OptionalNamespaces;
 
             var selfPublicKey = await this.Client.Core.Crypto.GenerateKeyPair();
             var peerPublicKey = proposer.PublicKey;
@@ -542,7 +577,7 @@ namespace WalletConnectSharp.Sign
 
             var sessionSettle = new SessionSettle()
             {
-                Relay = new ProtocolOptions() { Protocol = relayProtocol != null ? relayProtocol : "irn" },
+                Relay = new ProtocolOptions() { Protocol = relayProtocol ?? "irn" },
                 Namespaces = namespaces,
                 Controller = new Participant() { PublicKey = selfPublicKey, Metadata = this.Client.Metadata },
                 Expiry = Clock.CalculateExpiry(SessionExpiry)
@@ -553,7 +588,7 @@ namespace WalletConnectSharp.Sign
 
             var acknowledgedTask = new TaskCompletionSource<SessionStruct>();
 
-            this.sessionEventsHandlerMap.ListenOnce($"session_approve{requestId}", (sender, args) =>
+            _sessionEventsHandlerMap.ListenOnce($"session_approve{requestId}", (sender, args) =>
             {
                 if (args.IsError)
                     acknowledgedTask.SetException(args.Error.ToException());
@@ -632,7 +667,7 @@ namespace WalletConnectSharp.Sign
                 new SessionUpdate() { Namespaces = namespaces });
 
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
-            this.sessionEventsHandlerMap.ListenOnce($"session_update{id}", (sender, args) =>
+            _sessionEventsHandlerMap.ListenOnce($"session_update{id}", (sender, args) =>
             {
                 if (args.IsError)
                     acknowledgedTask.SetException(args.Error.ToException());
@@ -658,7 +693,7 @@ namespace WalletConnectSharp.Sign
 
             TaskCompletionSource<bool> acknowledgedTask = new TaskCompletionSource<bool>();
 
-            this.sessionEventsHandlerMap.ListenOnce($"session_extend{id}", (sender, args) =>
+            _sessionEventsHandlerMap.ListenOnce($"session_extend{id}", (sender, args) =>
             {
                 if (args.IsError)
                     acknowledgedTask.SetException(args.Error.ToException());
@@ -769,11 +804,11 @@ namespace WalletConnectSharp.Sign
         /// <param name="eventData">The event data for the event emitted</param>
         /// <param name="chainId">An (optional) chainId to specify where the event occured</param>
         /// <typeparam name="T">The type of the event data</typeparam>
-        public async Task Emit<T>(string topic, EventData<T> @event, string chainId = null)
+        public async Task Emit<T>(string topic, EventData<T> eventData, string chainId = null)
         {
             IsInitialized();
             await MessageHandler.SendRequest<SessionEvent<T>, object>(topic,
-                new SessionEvent<T>() { ChainId = chainId, Event = @event, Topic = topic, });
+                new SessionEvent<T> { ChainId = chainId, Event = eventData, Topic = topic });
         }
 
         /// <summary>
@@ -789,7 +824,7 @@ namespace WalletConnectSharp.Sign
             {
                 var id = await MessageHandler.SendRequest<SessionPing, bool>(topic, new SessionPing());
                 var done = new TaskCompletionSource<bool>();
-                this.sessionEventsHandlerMap.ListenOnce($"session_ping{id}", (sender, args) =>
+                _sessionEventsHandlerMap.ListenOnce($"session_ping{id}", (sender, args) =>
                 {
                     if (args.IsError)
                         done.SetException(args.Error.ToException());
@@ -890,7 +925,13 @@ namespace WalletConnectSharp.Sign
                     action();
                 }
 
+                foreach (var disposeHandlerToken in _messageDisposeHandlers)
+                {
+                    disposeHandlerToken.Dispose();
+                }
+
                 _disposeActions.Clear();
+                _messageDisposeHandlers.Clear();
             }
 
             Disposed = true;

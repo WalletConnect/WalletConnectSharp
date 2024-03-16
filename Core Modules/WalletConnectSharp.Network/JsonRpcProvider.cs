@@ -29,7 +29,7 @@ namespace WalletConnectSharp.Network
 
         public event EventHandler<string> RawMessageReceived;
 
-        private GenericEventHolder jsonResponseEventHolder = new();
+        private readonly GenericEventHolder _jsonResponseEventHolder = new();
         protected bool Disposed;
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace WalletConnectSharp.Network
 
             TaskCompletionSource<TR> requestTask = new TaskCompletionSource<TR>(TaskCreationOptions.None);
 
-            jsonResponseEventHolder.OfType<string>()[request.Id.ToString()] += (sender, responseJson) =>
+            _jsonResponseEventHolder.OfType<string>()[request.Id.ToString()] += (sender, responseJson) =>
             {
                 if (requestTask.Task.IsCompleted)
                     return;
@@ -217,7 +217,7 @@ namespace WalletConnectSharp.Network
                 }
             };
 
-            jsonResponseEventHolder.OfType<WalletConnectException>()[request.Id.ToString()] += (sender, exception) =>
+            _jsonResponseEventHolder.OfType<WalletConnectException>()[request.Id.ToString()] += (sender, exception) =>
             {
                 if (requestTask.Task.IsCompleted)
                     return;
@@ -303,13 +303,13 @@ namespace WalletConnectSharp.Network
                 if (payload.IsError)
                 {
                     var errorPayload = JsonConvert.DeserializeObject<JsonRpcError>(json);
-                    jsonResponseEventHolder.OfType<WalletConnectException>()[payload.Id.ToString()](this,
+                    _jsonResponseEventHolder.OfType<WalletConnectException>()[payload.Id.ToString()](this,
                         errorPayload.Error.ToException());
                 }
                 else
                 {
                     WCLogger.Log($"Triggering event for ID {payload.Id.ToString()}");
-                    jsonResponseEventHolder.OfType<string>()[payload.Id.ToString()](this, json);
+                    _jsonResponseEventHolder.OfType<string>()[payload.Id.ToString()](this, json);
                 }
             }
         }

@@ -6,11 +6,11 @@
 /// <typeparam name="TEventArgs">The type of EventHandler's argument to store</typeparam>
 public class EventHandlerMap<TEventArgs> : IDisposable
 {
-    private Dictionary<string, EventHandler<TEventArgs>> mapping = new();
+    private readonly Dictionary<string, EventHandler<TEventArgs>> _mapping = new();
 
     private readonly object _mappingLock = new();
 
-    private EventHandler<TEventArgs> BeforeEventExecuted;
+    private readonly EventHandler<TEventArgs> _beforeEventExecuted;
 
     /// <summary>
     /// Create a new EventHandlerMap with an initial EventHandler to append onto
@@ -23,11 +23,14 @@ public class EventHandlerMap<TEventArgs> : IDisposable
             callbackBeforeExecuted = CallbackBeforeExecuted;
         }
 
-        this.BeforeEventExecuted = callbackBeforeExecuted;
+        _beforeEventExecuted = callbackBeforeExecuted;
     }
 
-    private void CallbackBeforeExecuted(object sender, TEventArgs e)
+    private static void CallbackBeforeExecuted(object sender, TEventArgs e)
     {
+        // Default event handler used when no specific callback is provided. 
+        // Currently, it doesn't perform any action when an event is triggered.
+        // This is necessary to avoid null reference exceptions when no event handler is provided.
     }
 
     /// <summary>
@@ -41,21 +44,17 @@ public class EventHandlerMap<TEventArgs> : IDisposable
         {
             lock (_mappingLock)
             {
-                mapping.TryAdd(eventId, BeforeEventExecuted);
+                _mapping.TryAdd(eventId, _beforeEventExecuted);
 
-                return mapping[eventId];
+                return _mapping[eventId];
             }
         }
         set
         {
             lock (_mappingLock)
             {
-                if (mapping.ContainsKey(eventId))
-                {
-                    mapping.Remove(eventId);
-                }
-
-                mapping.Add(eventId, value);
+                _mapping.Remove(eventId);
+                _mapping.Add(eventId, value);
             }
         }
     }
@@ -69,7 +68,15 @@ public class EventHandlerMap<TEventArgs> : IDisposable
             eventHandler(src, args);
         };
         this[eventId] += internalHandler;
-    } 
+    }
+
+    public bool TryGetValue(string eventName, out EventHandler<TEventArgs> handler)
+    {
+        lock (_mappingLock)
+        {
+            return _mapping.TryGetValue(eventName, out handler);
+        }
+    }
 
     /// <summary>
     /// Check if a given eventId has any EventHandlers registered yet.
@@ -80,7 +87,7 @@ public class EventHandlerMap<TEventArgs> : IDisposable
     {
         lock (_mappingLock)
         {
-            return mapping.ContainsKey(eventId);
+            return _mapping.ContainsKey(eventId);
         }
     }
 
@@ -92,18 +99,21 @@ public class EventHandlerMap<TEventArgs> : IDisposable
     {
         lock (_mappingLock)
         {
-            if (mapping.ContainsKey(eventId))
-            {
-                mapping.Remove(eventId);
-            }
+            _mapping.Remove(eventId);
         }
     }
-
+    
     public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
     {
         lock (_mappingLock)
         {
-            mapping.Clear();
+            _mapping.Clear();
         }
     }
 }

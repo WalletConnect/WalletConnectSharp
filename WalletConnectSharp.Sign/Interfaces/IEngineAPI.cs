@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Core.Models.Relay;
@@ -106,6 +107,21 @@ namespace WalletConnectSharp.Sign.Interfaces
         /// Event Side: dApp & Wallet
         /// </summary>
         event EventHandler<PairingEvent> PairingDeleted;
+
+        /// <summary>
+        /// Subscribes to a specific session event (wc_sessionEvent). The event is identified by its name and handled by the provided event handler.
+        /// </summary>
+        /// <param name="eventName">The name of the session event to subscribe to.</param>
+        /// <param name="handler">The event handler that will handle the event when it's triggered.</param>
+        public void SubscribeToSessionEvent(string eventName, EventHandler<SessionEvent<JToken>> handler);
+
+        /// <summary>
+        /// Unsubscribes from a specific session event (wc_sessionEvent). The event is identified by its name and the provided event handler.
+        /// </summary>
+        /// <param name="eventName">The name of the session event to unsubscribe from.</param>
+        /// <param name="handler">The event handler that was handling the event.</param>
+        /// <returns>True if the event handler was successfully removed, false otherwise.</returns>
+        public bool TryUnsubscribeFromSessionEvent(string eventName, EventHandler<SessionEvent<JToken>> handler);   
         
         /// <summary>
         /// Get static event handlers for requests / responses for the given type T, TR. This is similar to

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Common.Utils;
@@ -112,7 +113,7 @@ namespace WalletConnectSharp.Sign
                 {
                     try
                     {
-                        var subscriptionId = await this.Client.Core.Relayer.Subscribe(sessionTopic);
+                        _ = await Client.Core.Relayer.Subscribe(sessionTopic);
                         return;
                     }
                     catch (Exception e)
@@ -161,7 +162,9 @@ namespace WalletConnectSharp.Sign
                         PublicKey = controller.PublicKey,
                         Metadata = controller.Metadata
                     },
-                    RequiredNamespaces = Client.Proposal.Values.FirstOrDefault(p => p.PairingTopic == pairingTopic).RequiredNamespaces,
+#pragma warning disable S6602
+                    RequiredNamespaces = Client.Proposal.Values.FirstOrDefault(p => p.PairingTopic == pairingTopic).RequiredNamespaces
+#pragma warning restore S6602
                 };
                 await MessageHandler.SendResult<SessionSettle, bool>(payload.Id, topic, true);
                 this.SessionConnected?.Invoke(this, session);
@@ -185,7 +188,7 @@ namespace WalletConnectSharp.Sign
                 this.SessionRejected?.Invoke(this, session);
                 
                 // Still used do not remove
-                this.sessionEventsHandlerMap[$"session_approve{id}"](this, payload);
+                _sessionEventsHandlerMap[$"session_approve{id}"](this, payload);
             }
             else
             {
@@ -194,7 +197,7 @@ namespace WalletConnectSharp.Sign
                     Acknowledged = true
                 });
                 this.SessionApproved?.Invoke(this, session);
-                this.sessionEventsHandlerMap[$"session_approve{id}"](this, payload);
+                _sessionEventsHandlerMap[$"session_approve{id}"](this, payload);
             }
         }
 
@@ -234,7 +237,7 @@ namespace WalletConnectSharp.Sign
                 Topic = topic,
             });
             // Still used, do not remove
-            this.sessionEventsHandlerMap[$"session_update{id}"](this, payload);
+            _sessionEventsHandlerMap[$"session_update{id}"](this, payload);
         }
 
         async Task IEnginePrivate.OnSessionExtendRequest(string topic, JsonRpcRequest<SessionExtend> payload)
@@ -266,7 +269,7 @@ namespace WalletConnectSharp.Sign
                 Id = id
             });
             // Still used, do not remove
-            this.sessionEventsHandlerMap[$"session_extend{id}"](this, payload);
+            _sessionEventsHandlerMap[$"session_extend{id}"](this, payload);
         }
 
         async Task IEnginePrivate.OnSessionPingRequest(string topic, JsonRpcRequest<SessionPing> payload)
@@ -303,7 +306,7 @@ namespace WalletConnectSharp.Sign
             });
 
             // Still used, do not remove
-            this.sessionEventsHandlerMap[$"session_ping{id}"](this, payload);
+            _sessionEventsHandlerMap[$"session_ping{id}"](this, payload);
         }
 
         async Task IEnginePrivate.OnSessionDeleteRequest(string topic, JsonRpcRequest<SessionDelete> payload)
@@ -324,6 +327,27 @@ namespace WalletConnectSharp.Sign
             catch (WalletConnectException e)
             {
                 await MessageHandler.SendError<SessionDelete, bool>(id, topic, Error.FromException(e));
+            }
+        }
+
+        async Task IEnginePrivate.OnSessionEventRequest(string topic, JsonRpcRequest<SessionEvent<JToken>> payload)
+        {
+            var @params = payload.Params;
+            var id = payload.Id;
+            try
+            {
+                var eventData = @params.Event;
+                var eventName = eventData.Name;
+
+                await PrivateThis.IsValidEmit(topic, eventData, @params.ChainId);
+
+                _customSessionEventsHandlerMap[eventName]?.Invoke(this, @params);
+
+                await MessageHandler.SendResult<SessionEvent<EventData<JToken>>, bool>(id, topic, true);
+            }
+            catch (WalletConnectException e)
+            {
+                await MessageHandler.SendError<SessionEvent<JToken>, bool>(id, topic, Error.FromException(e));
             }
         }
     }
