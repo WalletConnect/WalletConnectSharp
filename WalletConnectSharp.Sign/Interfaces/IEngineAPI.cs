@@ -50,7 +50,7 @@ namespace WalletConnectSharp.Sign.Interfaces
 
         /// <summary>
         /// This event is invoked when a given session sent a update request. 
-        /// Event Side: Wallet
+        /// Event Side: dApp
         /// </summary>
         event EventHandler<SessionUpdateEvent> SessionUpdateRequest;
 
@@ -62,7 +62,7 @@ namespace WalletConnectSharp.Sign.Interfaces
         
         /// <summary>
         /// This event is invoked when a given session update request was successful.
-        /// Event Side: dApp
+        /// Event Side: Wallet
         /// </summary>
         event EventHandler<SessionEvent> SessionUpdated;
 

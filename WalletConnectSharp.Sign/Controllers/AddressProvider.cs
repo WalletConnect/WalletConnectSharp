@@ -154,7 +154,6 @@ public class AddressProvider : IAddressProvider
                 if (currentChain == null || !DefaultSession.Namespaces[DefaultNamespace].Chains.Contains(currentChain))
                 {
                     // If the current default chain is not valid, let's use the first one
-                    // TODO: or the last from the storage?
                     DefaultChainId = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                 }
             }
@@ -164,7 +163,6 @@ public class AddressProvider : IAddressProvider
                 DefaultNamespace = DefaultSession.Namespaces.Keys.FirstOrDefault();
                 if (DefaultNamespace != null && DefaultSession.Namespaces[DefaultNamespace].Chains != null)
                 {
-                    // TODO: or the last from the storage?
                     DefaultChainId = DefaultSession.Namespaces[DefaultNamespace].Chains[0];
                 }
                 else
