@@ -10,16 +10,21 @@ public interface IAddressProvider : IModule
     bool HasDefaultSession { get; }
     
     SessionStruct DefaultSession { get; set; }
-    
-    string DefaultNamespace { get; set; }
-    
-    string DefaultChain { get; set; }
+
+    string DefaultNamespace { get; }
+
+    string DefaultChainId { get; }
     
     ISession Sessions { get; }
-    
-    Caip25Address CurrentAddress( string chain = null, SessionStruct session = default);
 
-    Task Init();
 
-    Caip25Address[] AllAddresses(string chain = null, SessionStruct session = default);
+    Task InitAsync();
+
+    Task SetDefaultNamespaceAsync(string @namespace);
+
+    Task SetDefaultChainIdAsync(string chainId);
+
+    Caip25Address CurrentAddress(string chainId = null, SessionStruct session = default);
+
+    IEnumerable<Caip25Address> AllAddresses(string @namespace = null, SessionStruct session = default);
 }
