@@ -503,12 +503,13 @@ namespace WalletConnectSharp.Sign
 
             if (disposing)
             {
+                AddressProvider?.Dispose();
                 Core?.Dispose();
+                Engine?.Dispose();
                 PairingStore?.Dispose();
                 Session?.Dispose();
                 Proposal?.Dispose();
                 PendingRequests?.Dispose();
-                Engine?.Dispose();
             }
 
             Disposed = true;
