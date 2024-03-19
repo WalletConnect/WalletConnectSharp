@@ -82,51 +82,77 @@ namespace WalletConnectSharp.Sign.Models
                 return Topic;
             }
         }
-        
-        public Caip25Address CurrentAddress(string @namespace)
+
+        public Caip25Address CurrentAddress(string chainId)
         {
-            // double check
-            if (@namespace == null)
-                throw new ArgumentException("SessionStruct.CurrentAddress: @namespace is null");
-            if (string.IsNullOrWhiteSpace(Topic))
-                throw new ArgumentException("SessionStruct.CurrentAddress: Session is undefined");
+            ValidateChainIdAndTopic(chainId);
+
+            var namespaceStr = chainId.Split(':')[0];
+
+            if (!Namespaces.TryGetValue(namespaceStr, out var defaultNamespace))
+            {
+                throw new InvalidOperationException(
+                    $"SessionStruct.CurrentAddress: Given namespace {namespaceStr} is not available in the current session");
+            }
+            
+            if (defaultNamespace.Accounts.Length == 0)
+                throw new InvalidOperationException(
+                    $"SessionStruct.CurrentAddress: Given namespace {namespaceStr} has no connected addresses");
+
+            var fullAddress = Array.Find(defaultNamespace.Accounts, addr => addr.StartsWith(chainId));
+            if (fullAddress == default)
+            {
+                throw new InvalidOperationException(
+                    $"SessionStruct.CurrentAddress: No address found for chain {chainId}");
+            }
+
+            var address = fullAddress.Split(":")[2];
+            return new Caip25Address { Address = address, ChainId = chainId };
+        }
+
+        public IEnumerable<Caip25Address> AllAddresses(string @namespace)
+        {
+            ValidateNamespaceAndTopic(@namespace);
         
             var defaultNamespace = Namespaces[@namespace];
+            return defaultNamespace.Accounts.Length == 0
+                ? []
+                : defaultNamespace.Accounts.Select(CreateCaip25Address);
+        }
 
-            if (defaultNamespace.Accounts.Length == 0)
-                throw new Exception(
-                    $"SessionStruct.CurrentAddress: Given namespace {@namespace} has no connected addresses");
-
-            var fullAddress = defaultNamespace.Accounts[0];
+        public static Caip25Address CreateCaip25Address(string fullAddress)
+        {
             var addressParts = fullAddress.Split(":");
-
             var address = addressParts[2];
             var chainId = string.Join(':', addressParts.Take(2));
 
-            return new Caip25Address()
-            {
-                Address = address,
-                ChainId = chainId,
-            };
+            return new Caip25Address { Address = address, ChainId = chainId };
         }
-        
-        public Caip25Address[] AllAddresses(string @namespace)
+
+        private void ValidateNamespaceAndTopic(string @namespace)
         {
-            // double check
             if (@namespace == null)
-                throw new ArgumentException("SessionStruct.AllAddresses: @namespace is null");
-            if (string.IsNullOrWhiteSpace(Topic))
-                throw new ArgumentException("SessionStruct.AllAddresses: Session is undefined");
-        
-            var defaultNamespace = Namespaces[@namespace];
-
-            if (defaultNamespace.Accounts.Length == 0)
-                return null; //The namespace {@namespace} has no addresses connected")
-
-            return defaultNamespace.Accounts.Select(addr => new Caip25Address()
             {
-                Address = addr.Split(":")[2], ChainId = string.Join(":", addr.Split(":").Take(2))
-            }).ToArray();
+                throw new ArgumentException("@namespace is null");
+            }
+
+            if (string.IsNullOrWhiteSpace(Topic))
+            {
+                throw new ArgumentException("Session is undefined");
+            }
+        }
+
+        private void ValidateChainIdAndTopic(string chainId)
+        {
+            if (chainId == null)
+            {
+                throw new ArgumentException("chainId is null");
+            }
+
+            if (string.IsNullOrWhiteSpace(Topic))
+            {
+                throw new ArgumentException("Session is undefined");
+            }
         }
     }
 }

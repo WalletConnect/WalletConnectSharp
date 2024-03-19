@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using WalletConnectSharp.Common.Logging;
-using WalletConnectSharp.Sign.Interfaces;
+﻿using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine.Events;
 
@@ -8,6 +6,8 @@ namespace WalletConnectSharp.Sign.Controllers;
 
 public class AddressProvider : IAddressProvider
 {
+    private bool _disposed;
+    
     public struct DefaultData
     {
         public SessionStruct Session;
@@ -91,7 +91,7 @@ public class AddressProvider : IAddressProvider
         // set the first connected session to the default one
         client.SessionConnected += ClientOnSessionConnected;
         client.SessionDeleted += ClientOnSessionDeleted;
-        client.SessionUpdated += ClientOnSessionUpdated;
+        client.SessionUpdateRequest += ClientOnSessionUpdated;
         client.SessionApproved += ClientOnSessionConnected;
     }
 
@@ -119,6 +119,7 @@ public class AddressProvider : IAddressProvider
     {
         if (DefaultSession.Topic == e.Topic)
         {
+            DefaultSession = Sessions.Get(e.Topic);
             await UpdateDefaultChainIdAndNamespaceAsync();
         }
     }
@@ -180,20 +181,27 @@ public class AddressProvider : IAddressProvider
         }
     }
 
-    public Caip25Address CurrentAddress(string @namespace = null, SessionStruct session = default)
-    {
-        @namespace ??= DefaultNamespace;
-        if (string.IsNullOrWhiteSpace(session.Topic)) // default
-            session = DefaultSession;
-
-        return session.CurrentAddress(@namespace);
-    }
-
     public async Task InitAsync()
     {
         await this.LoadDefaults();
     }
 
+    public async Task SetDefaultNamespaceAsync(string @namespace)
+    {
+        if (string.IsNullOrWhiteSpace(@namespace))
+        {
+            throw new ArgumentNullException(nameof(@namespace));
+        }
+
+        if (!DefaultSession.Namespaces.ContainsKey(@namespace))
+        {
+            throw new InvalidOperationException($"Namespace {@namespace} is not available in the current session");
+        }
+
+        DefaultNamespace = @namespace;
+        await SaveDefaults();
+    }
+    
     public async Task SetDefaultChainIdAsync(string chainId)
     {
         if (string.IsNullOrWhiteSpace(chainId))
@@ -210,7 +218,18 @@ public class AddressProvider : IAddressProvider
         await SaveDefaults();
     }
 
-    public Caip25Address[] AllAddresses(string @namespace = null, SessionStruct session = default)
+    public Caip25Address CurrentAddress(string chainId = null, SessionStruct session = default)
+    {
+        chainId ??= DefaultChainId;
+        if (string.IsNullOrWhiteSpace(session.Topic))
+        {
+            session = DefaultSession;
+        }
+
+        return session.CurrentAddress(chainId);
+    }
+
+    public IEnumerable<Caip25Address> AllAddresses(string @namespace = null, SessionStruct session = default)
     {
         @namespace ??= DefaultNamespace;
         if (string.IsNullOrWhiteSpace(session.Topic)) // default
@@ -218,17 +237,33 @@ public class AddressProvider : IAddressProvider
 
         return session.AllAddresses(@namespace);
     }
-
+    
     public void Dispose()
     {
-        _client.SessionConnected -= ClientOnSessionConnected;
-        _client.SessionDeleted -= ClientOnSessionDeleted;
-        _client.SessionUpdated -= ClientOnSessionUpdated;
-        _client.SessionApproved -= ClientOnSessionConnected;
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        _client = null;
-        Sessions = null;
-        DefaultNamespace = null;
-        DefaultSession = default;
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            _client.SessionConnected -= ClientOnSessionConnected;
+            _client.SessionDeleted -= ClientOnSessionDeleted;
+            _client.SessionUpdateRequest -= ClientOnSessionUpdated;
+            _client.SessionApproved -= ClientOnSessionConnected;
+
+            _client = null;
+            Sessions = null;
+            DefaultNamespace = null;
+            DefaultSession = default;
+        }
+
+        _disposed = true;
     }
 }
