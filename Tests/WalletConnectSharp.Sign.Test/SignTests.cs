@@ -563,6 +563,11 @@ namespace WalletConnectSharp.Sign.Test
             Assert.Equal("eip155:1", address.ChainId);
             Assert.Equal("eip155:1", dappClient.AddressProvider.DefaultChainId);
             Assert.Equal("eip155", dappClient.AddressProvider.DefaultNamespace);
+
+            var allAddresses = dappClient.AddressProvider.AllAddresses("eip155").ToArray();
+            Assert.Single(allAddresses);
+            Assert.Equal(testAddress, allAddresses[0].Address);
+            Assert.Equal("eip155:1", allAddresses[0].ChainId);
         }
 
         [Fact, Trait("Category", "integration")]
