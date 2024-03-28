@@ -135,11 +135,8 @@ public class AddressProvider : IAddressProvider
 
     private async void ClientOnSessionConnected(object sender, SessionStruct e)
     {
-        if (!HasDefaultSession)
-        {
-            DefaultSession = e;
-            await UpdateDefaultChainIdAndNamespaceAsync();
-        }
+        DefaultSession = e;
+        await UpdateDefaultChainIdAndNamespaceAsync();
     }
 
     private async Task UpdateDefaultChainIdAndNamespaceAsync()
